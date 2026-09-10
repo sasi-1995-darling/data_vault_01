@@ -1,0 +1,9 @@
+version: 2
+models:
+- name: pb_order_install_resolved
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - SEQ_ID
+  columns: []

@@ -1,0 +1,128 @@
+---- SRC LAYER ----
+WITH
+SRC_P              as ( SELECT * FROM {{ ref('pit_quality_issue_current') }} as SRC  )
+
+/*
+SRC_P              as ( SELECT * FROM RAW_VAULT.PIT_QUALITY_ISSUE)
+*/
+---- LOGIC LAYER ----
+
+, LOGIC_P as (
+    SELECT
+      NOTIFICATION_BK
+      , ISSUE_BK      
+      , CATALOG_TYPE
+      , CODE_GROUP
+      , ACTIVITY_CODE
+      , ACTIVITY_CREATION_DATE__YYYYMMDD
+      , ACTIVITY_UPDATE_DATE__YYYYMMDD
+      , PARTS_CATALOG_TYPE
+      , PARTS_CODE_GROUP
+      , DEFECT_CLASS
+      , DEFECTIVE_QUANTITY
+      , ITEM_UOM
+      , NUMBER_OF_DEFECTS_FOUND
+      , DEFECT_VALUATION
+      , INSPECTION_TYPE
+      , INSPECTION_SAMPLE_NUMBER
+      , WORK_CENTER_OBJECT_ID
+      , PLANT_ID
+      , FAILURE_MODE
+      , INSTALL_DATE
+      , PERSONAL_ACTION_FORM_NO
+      , ITEM_CATEGORY_1
+      , ITEM_GROUP_1
+      , ITEM_CODE_1
+      , ITEM_CATEGORY_2
+      , ITEM_GROUP_2
+      , ITEM_CODE_2
+      , ISSUE_NOTIFICATION_BK
+      , BKCC
+      , REC_SRC
+      , IS_DELETED
+    FROM SRC_P
+)
+---- RENAME LAYER ----
+
+, RENAME_P as (
+    SELECT
+      NOTIFICATION_BK
+      , ISSUE_BK
+      , CATALOG_TYPE
+      , CODE_GROUP
+      , ACTIVITY_CODE
+      , ACTIVITY_CREATION_DATE__YYYYMMDD
+      , ACTIVITY_UPDATE_DATE__YYYYMMDD
+      , PARTS_CATALOG_TYPE
+      , PARTS_CODE_GROUP
+      , DEFECT_CLASS
+      , DEFECTIVE_QUANTITY
+      , ITEM_UOM
+      , NUMBER_OF_DEFECTS_FOUND
+      , DEFECT_VALUATION
+      , INSPECTION_TYPE
+      , INSPECTION_SAMPLE_NUMBER
+      , WORK_CENTER_OBJECT_ID
+      , PLANT_ID
+      , FAILURE_MODE
+      , INSTALL_DATE
+      , PERSONAL_ACTION_FORM_NO
+      , ITEM_CATEGORY_1
+      , ITEM_GROUP_1
+      , ITEM_CODE_1
+      , ITEM_CATEGORY_2
+      , ITEM_GROUP_2
+      , ITEM_CODE_2
+      , ISSUE_NOTIFICATION_BK
+      , BKCC
+      , REC_SRC
+      , IS_DELETED
+    FROM LOGIC_P
+)
+---- FILTER LAYER ----
+
+, FILTER_P as (
+    SELECT *
+    FROM RENAME_P
+)
+
+---- JOIN LAYER ----
+, JOIN_RESULT as (
+    SELECT *
+    FROM FILTER_P
+)
+
+---- FINAL LAYER ----
+SELECT
+        NOTIFICATION_BK
+        , ISSUE_BK
+        , CATALOG_TYPE
+        , CODE_GROUP
+        , ACTIVITY_CODE
+        , ACTIVITY_CREATION_DATE__YYYYMMDD
+        , ACTIVITY_UPDATE_DATE__YYYYMMDD
+        , PARTS_CATALOG_TYPE
+        , PARTS_CODE_GROUP
+        , DEFECT_CLASS
+        , DEFECTIVE_QUANTITY
+        , ITEM_UOM
+        , NUMBER_OF_DEFECTS_FOUND
+        , DEFECT_VALUATION
+        , INSPECTION_TYPE
+        , INSPECTION_SAMPLE_NUMBER
+        , WORK_CENTER_OBJECT_ID
+        , PLANT_ID
+        , FAILURE_MODE
+        , INSTALL_DATE
+        , PERSONAL_ACTION_FORM_NO
+        , ITEM_CATEGORY_1
+        , ITEM_GROUP_1
+        , ITEM_CODE_1
+        , ITEM_CATEGORY_2
+        , ITEM_GROUP_2
+        , ITEM_CODE_2
+        , ISSUE_NOTIFICATION_BK
+        , BKCC
+        , REC_SRC
+        , IS_DELETED
+FROM JOIN_RESULT

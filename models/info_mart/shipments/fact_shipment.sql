@@ -1,0 +1,40 @@
+select
+    shipment_id
+    , customer_id
+    , item_id
+    , posted_datekey
+    , location_id
+    , brand
+    , customer
+    , key_account_number
+    , customer_account_name
+    , sales_org
+    , channel
+    , invoiced_qty
+    , return_qty
+    , revenue_dollars
+    , actual_returns_dollars
+    , shipment_type
+    , sales_document
+    , sales_deal
+    , customer_purchase_order_type
+    , order_category
+    , copa_record_type
+    , invoice_hk
+    , invoice_bk
+    , order_header_hk
+    , order_header_bk
+    , order_line_hk
+    , order_line_bk
+    , sales_organization_hk
+    , sales_organization_bk
+    , distribution_channel_hk
+    , distribution_channel_bk
+    , division_hk
+    , division_bk
+    , plant_hk
+    , plant_bk
+    , customer_sales_attributes_key
+    , rec_src
+    , bkcc
+from {{ ref('fact_shipment_fbin') }}

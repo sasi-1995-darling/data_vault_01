@@ -1,0 +1,26 @@
+version: 2
+models:
+- name: lsat_supplier_purchasing_org_payment_terms__winn_sap
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - LNK_SUPPLIER_PURCHASING_ORG_PAYMENT_TERM_HK
+        - LOAD_DTS
+  - dbt_expectations.expect_table_row_count_to_be_between:
+      arguments:
+        min_value: 4
+      config:
+        severity: warn
+  columns:
+  - name: LNK_SUPPLIER_PURCHASING_ORG_PAYMENT_TERM_HK
+    data_tests:
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'lnk_supplier_purchasing_org_payment_terms' )
+          pk_column_name: LNK_SUPPLIER_PURCHASING_ORG_PAYMENT_TERM_HK
+  - name: LIFNR
+    data_tests:
+    - not_null:
+        config:
+          severity: warn

@@ -1,0 +1,10 @@
+version: 2
+
+models:
+  - name: stg_luxury_hardware__emtk_files
+    description: This is the staging model to union together the luxury_hardware files
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - part_number

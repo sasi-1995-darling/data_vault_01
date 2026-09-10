@@ -1,0 +1,83 @@
+version: 2
+models:
+  - name: v_psa_stg_profit_center_totals__winn_sap
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          config:
+            severity: warn
+          arguments:
+            combination_of_columns:
+              - RCLNT
+              - RLDNR
+              - RRCTY
+              - RVERS
+              - RYEAR
+              - ROBJNR
+              - COBJNR
+              - SOBJNR
+              - RTCUR
+              - RUNIT
+              - DRCRK
+              - RPMAX
+              - LOAD_DTS
+    columns:
+      - name: RCLNT
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: RLDNR
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: RRCTY
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: RVERS
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: RYEAR
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: ROBJNR
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: COBJNR
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: SOBJNR
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: RTCUR
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: RUNIT
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: DRCRK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: RPMAX
+        tests:
+          - not_null:
+              config:
+                severity: warn

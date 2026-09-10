@@ -1,0 +1,15 @@
+version: 2
+models:
+- name: pb_demand_pacing_invoice_lines_by_requested_delivery_week
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+          - DISTRIBUTION_CHANNEL_HK
+          - DIVISION_HK
+          - ITEM_HK
+          - PLANT_HK
+          - CUSTOMER_SOLDTO_HK
+          - SALES_ORGANIZATION_HK
+          - REQUESTED_SHIP_WEEK__YYYYWW
+  columns: []

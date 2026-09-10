@@ -1,0 +1,38 @@
+version: 2
+models:
+- name: v_psa_stg_store__homedepot_ft
+  data_tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - D_STORE_NBR
+        - HOME_DEPOT_ACCOUNT
+        - LOAD_DTS
+      config:
+        severity: warn
+  columns:
+  - name: STORE_HK
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+  - name: STORE_BK
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+  - name: D_STORE_NBR
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+  - name: HOME_DEPOT_ACCOUNT
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+  - name: LOAD_DTS
+    data_tests:
+    - not_null:
+        config:
+          severity: warn

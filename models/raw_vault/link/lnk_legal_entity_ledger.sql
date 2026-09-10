@@ -1,0 +1,70 @@
+---- SRC LAYER ----
+WITH
+SRC_LEL          as ( SELECT LEGAL_ENTITY_LEDGER_HK, LEGAL_ENTITY_HK, LEDGER_HK, LOAD_DTS, REC_SRC FROM {{ ref('v_psa_stg_legal_entity_ledger__winn_sap') }} as SRC 
+                        QUALIFY (ROW_NUMBER() OVER(PARTITION BY LEGAL_ENTITY_LEDGER_HK ORDER BY LOAD_DTS ))=1 )
+
+/*
+SRC_LEL              as ( SELECT * FROM sap_ecc_prd.V_PSA_STG_CONTROLLING_LEDGER_ENTRY__WINN_SAP )
+*/
+---- LOGIC LAYER ----
+
+, LOGIC_LEL as (
+    SELECT
+        LEGAL_ENTITY_LEDGER_HK
+      , LEGAL_ENTITY_HK
+      , LEDGER_HK
+      , LOAD_DTS
+      , REC_SRC
+    FROM SRC_LEL
+)
+---- RENAME LAYER ----
+
+, RENAME_LEL as (
+    SELECT
+        LEGAL_ENTITY_LEDGER_HK
+      , LEGAL_ENTITY_HK
+      , LEDGER_HK
+      , LOAD_DTS
+      , REC_SRC
+    FROM LOGIC_LEL
+)
+---- FILTER LAYER ----
+
+, FILTER_LEL as (
+    SELECT *
+    FROM RENAME_LEL
+)
+
+---- JOIN LAYER ----
+, JOIN_RESULT as (
+    SELECT *
+    FROM FILTER_LEL
+)
+
+---- FINAL LAYER ----
+SELECT
+          LEGAL_ENTITY_LEDGER_HK
+        , LEGAL_ENTITY_HK
+        , LEDGER_HK
+        , LOAD_DTS
+        , REC_SRC
+FROM JOIN_RESULT
+{% if is_incremental() %}
+WHERE NOT EXISTS (
+    SELECT 1 
+    FROM {{ this }} existing
+    WHERE existing.LEGAL_ENTITY_LEDGER_HK = JOIN_RESULT.LEGAL_ENTITY_LEDGER_HK
+)
+{% endif %}
+
+{% if not is_incremental() %}
+union all
+SELECT 
+MD5_BINARY(GR.VALUE) AS LEGAL_ENTITY_LEDGER_HK
+, MD5_BINARY(GR.VALUE) AS LEGAL_ENTITY_HK
+, MD5_BINARY(GR.VALUE) AS LEDGER_HK
+, CONVERT_TIMEZONE('UTC','1900-01-01')  AS LOAD_DTS
+, 'USAZET.SNOWFLAKE.FBIN.DERIVED' AS REC_SRC
+FROM
+TABLE(strtok_split_to_table('0|-1|-2', '|')) AS GR
+{% endif %}

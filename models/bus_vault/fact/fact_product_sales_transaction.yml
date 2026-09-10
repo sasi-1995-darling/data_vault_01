@@ -1,0 +1,6 @@
+version: 2
+models:
+- name: fact_product_sales_transaction
+  data_tests: []
+  columns: [] 
+

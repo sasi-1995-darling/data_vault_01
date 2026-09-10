@@ -1,0 +1,104 @@
+#!/usr/bin/env bash
+# entry-7 enforcement hook — artifact-ship + score-update same-commit rule
+#
+# Spec: docs/triage-agent/lessons-learned.md entry 7 (2026-06-09)
+# Tracking: docs/triage-agent/sprint-1-deferred.md #21
+#
+# Rule: if a commit stages a NEW file (or rename INTO) under a watched
+# ship-artifact path AND does NOT also stage phase-2-progress-log.md,
+# abort with a message citing entry 7.
+#
+# Watched paths (canonical list — grow per entry-7 principle when a new
+# ship-artifact class lands somewhere new; see sprint-1-deferred.md #21).
+# If updating this regex, also update the EXPECTED_HOOKS_PATH coupling
+# in scripts/automation/hooks/session_start_digest.sh (path-coupling
+# flag in #21 closure note).
+#   - scripts/automation/src/triage/**   (OBS-DDL-class, the original)
+#   - docs/triage-agent/fixtures/**      (corpus-class, the D1 finding)
+#
+# Filter: --diff-filter=AR (Additions + Renames-into-path). Pure A misses
+# `git mv` reorganizations; AR catches them. See #21 closure for rationale.
+
+set -euo pipefail
+
+CHECKLIST="docs/triage-agent/phase-2-progress-log.md"
+WATCHED_RE='^(scripts/automation/src/triage/|docs/triage-agent/fixtures/)'
+
+# Enumerate staged additions + renames. Separate git's status from grep's:
+# grep's exit-1-on-no-match is benign and absorbed by `|| true`; git failing
+# to read the index is NOT benign and must fail closed — refusing to pass
+# a commit when staged state cannot be determined.
+if ! STAGED_ALL=$(git diff --cached --diff-filter=AR -M --name-only 2>&1); then
+    cat >&2 <<EOF
+
+entry-7 hook: ERROR — could not enumerate staged files.
+git diff exit status non-zero. Output:
+$STAGED_ALL
+
+Failing CLOSED (rejecting the commit) because the hook cannot
+determine whether enforcement applies. Investigate and re-commit.
+EOF
+    exit 1
+fi
+STAGED_NEW=$(echo "$STAGED_ALL" | grep -E "$WATCHED_RE" || true)
+
+if [ -z "$STAGED_NEW" ]; then
+    exit 0  # no watched-path additions; nothing to enforce
+fi
+
+# Required-doc staged? Accept additions (A) and modifications (M) ONLY.
+# Explicitly reject the deletion case (D) — `git rm phase-2-progress-log.md`
+# would otherwise be matched by a bare `--name-only` check and silently
+# satisfy entry-7 while removing the scoring surface (DA finding F-6, orig M-6).
+if git diff --cached --diff-filter=AM --name-only | grep -qx "$CHECKLIST"; then
+    exit 0  # rule satisfied
+fi
+
+# Rule violated. Reject with entry-7 citation + bypass contract.
+cat >&2 <<EOF
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  ✗ Blocked by lessons-learned entry 7
+    (artifact-ship + score-update same-commit rule)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+This commit stages NEW file(s) under a watched ship-artifact path:
+
+$(echo "$STAGED_NEW" | sed 's/^/    /')
+
+...but does NOT stage the scoring surface:
+
+    $CHECKLIST
+
+Per entry 7, ship-class commits must update the scoring surface
+in the same commit. See: docs/triage-agent/lessons-learned.md
+(entry 7) and docs/triage-agent/sprint-1-deferred.md #21.
+
+──────────────────────────────────────────────────────────
+  How to proceed:
+──────────────────────────────────────────────────────────
+
+  1. If this commit MOVES the score (ships a tracked deliverable):
+     Stage the checklist row + §4 progress table + §7 entry
+     update in this same commit, then re-commit.
+
+  2. If this commit does NOT move the score (e.g., a refactor
+     that adds a new helper file under triage/ but ships no
+     deliverable): bypass with --no-verify AND add a
+     'bypass-rationale:' line to the commit body explaining
+     why this commit is score-neutral.
+
+  Bypass syntax:
+      git commit --no-verify -m "your message
+
+      bypass-rationale: <why this is score-neutral>"
+
+  Note: this hook CANNOT enforce the rationale text — it's an
+  honor-system audit-trail check verified at review time
+  (entry 6 reviewer-discipline backstop). Skipping the
+  rationale defeats the audit trail.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+EOF
+
+exit 1

@@ -1,0 +1,5 @@
+version: 2
+models:
+- name: pb_stg_device_telemetry_coverage_qty
+  data_tests: []
+  columns: []

@@ -1,0 +1,19 @@
+version: 2
+models:
+- name: v_psa_stg_supplier_site_phone__mdm
+  data_tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - SUPPLIER_SITE_HK
+        - PHONE_TYPE
+        - CONTACT_TYPE_SEQ_NO
+        - LOAD_DTS
+      config:
+        severity: warn
+  columns:
+  - name: PARENT_ID
+    data_tests:
+    - not_null:
+        config:
+          severity: warn

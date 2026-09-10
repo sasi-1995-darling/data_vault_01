@@ -1,0 +1,173 @@
+name: "Check DBT Job Status"
+
+# Required inputs for the action
+inputs:
+  environment:
+    description: "The DBT environment where the job will run (DEV, QA, PROD)"
+    required: true
+    type: string
+  dbt_svc_token:
+    description: "DBT Cloud service token"
+    required: true
+    type: string
+  job_type:
+    description: "The type of job to run (full or incremental)"
+    required: true
+  run_id:
+    description: "The ID of the DBT Cloud job run to check"
+    required: true
+    type: string
+  max_wait_time:
+    description: "Maximum poll wait time in seconds. DEV=3600 (1hr), QA/PROD=5400 (1.5hr)"
+    required: false
+    type: string
+    default: "3600"
+  github_token:
+    description: "GitHub token for API access"
+    required: false
+    type: string
+  github_repository:
+    description: "GitHub repository name"
+    required: false
+    type: string
+  pr_number:
+    description: "Pull request number"
+    required: false
+    type: string
+
+outputs:
+  status:
+    description: "The final status of the job run (success, error, cancelled)"
+    value: ${{ steps.dbt-job-status.outputs.status }}
+
+# Action implementation
+runs:
+  using: "composite"
+  steps:
+    - name: Check DBT Job Status
+      id: dbt-job-status
+      shell: bash
+      run: |
+        # Set variables from action inputs
+        DBT_SVC_TOKEN=${{ inputs.dbt_svc_token }}
+        JOB_TYPE=${{ inputs.job_type }}
+        RUN_ID=${{ inputs.run_id }}
+        ENVIRONMENT=${{ inputs.environment }}
+        MAX_WAIT_TIME_INPUT=${{ inputs.max_wait_time }}
+        # Validate max_wait_time is a positive integer; fallback to 3600 if invalid
+        if [[ "${MAX_WAIT_TIME_INPUT}" =~ ^[0-9]+$ ]] && [ "${MAX_WAIT_TIME_INPUT}" -gt 0 ]; then
+          MAX_WAIT_TIME=${MAX_WAIT_TIME_INPUT}
+        else
+          echo "⚠️  Invalid max_wait_time '${MAX_WAIT_TIME_INPUT}', using default 3600s"
+          MAX_WAIT_TIME=3600
+        fi
+        ELAPSED_TIME=0
+        SLEEP_SECONDS=60
+
+        echo "RUN_ID: $RUN_ID"
+        echo "MAX_WAIT_TIME: ${MAX_WAIT_TIME}s ($(($MAX_WAIT_TIME / 60)) minutes)"
+    
+        # ── Helper: extract and set env vars from API response ──────────
+        # Ensures GITHUB_ENV vars are populated regardless of whether the
+        # job finishes on the initial check or after polling.
+        # ──────────────────────────────────────────────────────────────────
+        set_env_vars_from_response() {
+          local resp="$1"
+          RUN_FINISHED_AT=$(echo "$resp" | jq -r '.data.finished_at // empty')
+          if [ -n "$RUN_FINISHED_AT" ]; then
+            FORMATTED_TIME=$(echo "$RUN_FINISHED_AT" | sed 's/T/ /' | sed 's/\.[0-9]*+00:00/ UTC/')
+          else
+            FORMATTED_TIME="N/A"
+          fi
+          echo "${ENVIRONMENT}_${JOB_TYPE}_RUN_FINISHED=${FORMATTED_TIME}" >> $GITHUB_ENV
+
+          JOB_STATUS=$(echo "$resp" | jq -r '.data.status_humanized')
+          echo "${ENVIRONMENT}_${JOB_TYPE}_JOB_STATUS=${JOB_STATUS}" >> $GITHUB_ENV
+        }
+
+        # ── Helper: validate STATUS_CODE is a valid integer ───────────────
+        # Protects against unexpected API responses where .data.status is
+        # null or non-numeric (e.g., auth errors, malformed JSON).
+        # ──────────────────────────────────────────────────────────────────
+        validate_status_code() {
+          local code="$1"
+          if ! [[ "$code" =~ ^[0-9]+$ ]]; then
+            echo "❌ Unable to parse status code from API response: '${code}'"
+            echo "Raw response:"
+            echo "$RESPONSE" | jq '.' 2>/dev/null || echo "$RESPONSE"
+            echo "status=ParseError" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+        }
+
+        # Initial API call to check job status
+        # Uses the dbt Cloud API to get the current status of the specified run
+        RESPONSE=$(curl -s --request GET \
+          --url "https://cloud.getdbt.com/api/v2/accounts/173296/runs/$RUN_ID/" \
+          --header "Authorization: Token $DBT_SVC_TOKEN" \
+          --header "Content-Type: application/json")
+
+        # Extract the status code from the response
+        # Status codes: 1=Queued, 2=Starting, 3=Running, 10=Success, 20=Error, 30=Cancelled
+        STATUS_CODE=$(echo "$RESPONSE" | jq -r '.data.status')
+        validate_status_code "$STATUS_CODE"
+
+        echo "Response:"
+        echo "$RESPONSE" | jq '.'
+
+        # Set env vars from initial response (covers already-terminal jobs)
+        set_env_vars_from_response "$RESPONSE"
+        
+        # Polling loop - continue until job reaches terminal state (success, error, cancelled)
+        while [[ $STATUS_CODE -ne 10 && $STATUS_CODE -ne 20 && $STATUS_CODE -ne 30 ]]; do
+          if [ $ELAPSED_TIME -ge $MAX_WAIT_TIME ]; then
+            echo "❌ Timeout reached after $(($ELAPSED_TIME / 60)) minutes (limit: $(($MAX_WAIT_TIME / 60)) minutes)"
+            echo "status=Timeout" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+
+          # Make API call to check updated job status
+          RESPONSE=$(curl -s --request GET \
+            --url "https://cloud.getdbt.com/api/v2/accounts/173296/runs/$RUN_ID/" \
+            --header "Authorization: Token $DBT_SVC_TOKEN" \
+            --header "Content-Type: application/json")
+
+          STATUS_CODE=$(echo "$RESPONSE" | jq -r '.data.status')
+          validate_status_code "$STATUS_CODE"
+
+          echo "Response:"
+          echo "$RESPONSE" | jq '.'
+
+          # Update env vars on every poll (keeps timestamps/status current)
+          set_env_vars_from_response "$RESPONSE"
+
+          # If job is still running, wait before checking again
+          if [[ $STATUS_CODE -ne 10 && $STATUS_CODE -ne 20 && $STATUS_CODE -ne 30 ]]; then
+            echo "Job still running ($(($ELAPSED_TIME / 60))m elapsed / $(($MAX_WAIT_TIME / 60))m limit), checking again in $SLEEP_SECONDS seconds..."
+            sleep $SLEEP_SECONDS
+            ELAPSED_TIME=$((ELAPSED_TIME + SLEEP_SECONDS))
+          fi
+        done
+
+        # ── Terminal state handling ─────────────────────────────────────────
+        # Map dbt Cloud status codes to a stable enum for the action output.
+        # Output values: success | error | cancelled (matches documented output).
+        # Downstream callers should check these normalized values, not
+        # the humanized strings from dbt Cloud which may vary.
+        # Status codes: 10=Success, 20=Error, 30=Cancelled
+        # ────────────────────────────────────────────────────────────────────
+        JOB_STATUS_HUMANIZED=$(echo "$RESPONSE" | jq -r '.data.status_humanized')
+
+        if [ $STATUS_CODE -eq 10 ]; then
+          echo "status=success" >> $GITHUB_OUTPUT
+          echo "✅ Job completed successfully: ${JOB_STATUS_HUMANIZED}"
+          exit 0
+        elif [ $STATUS_CODE -eq 20 ]; then
+          echo "status=error" >> $GITHUB_OUTPUT
+          echo "❌ Job failed: ${JOB_STATUS_HUMANIZED}"
+          exit 1
+        elif [ $STATUS_CODE -eq 30 ]; then
+          echo "status=cancelled" >> $GITHUB_OUTPUT
+          echo "⚠️  Job was cancelled: ${JOB_STATUS_HUMANIZED}"
+          exit 1
+        fi

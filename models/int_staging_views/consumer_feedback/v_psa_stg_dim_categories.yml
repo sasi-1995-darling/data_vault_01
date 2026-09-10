@@ -1,0 +1,15 @@
+version: 2
+models:
+  - name: v_psa_stg_dim_categories
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          config:
+            severity: warn
+          arguments:
+            combination_of_columns:
+              - CUSTOMER_PRODUCT_ID
+              - PRODUCT_ID
+              - RETAILER_ID
+              - BRAND
+              - PSA_LOAD_DTS
+    columns: []

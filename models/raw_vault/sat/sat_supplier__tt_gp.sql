@@ -1,0 +1,487 @@
+---- SRC LAYER ----
+WITH
+SRC_GP             as ( SELECT * FROM {{ ref('v_psa_stg_supplier__tt_gp') }} as SRC 
+                         {% if is_incremental() %}
+                         WHERE SRC.LOAD_DTS > (SELECT DATEADD('HOUR', '-1', MAX(LOAD_DTS)) FROM {{this}})
+                         {% endif %}  )
+
+/*
+SRC_GP             as ( SELECT * FROM STAGING.v_psa_stg_supplier__tt_gp )
+*/
+---- LOGIC LAYER ----
+
+, LOGIC_GP as (
+    SELECT
+        SUPPLIER_HK
+      , VENDORID
+      , VENDNAME
+      , VNDCHKNM
+      , VENDSHNM
+      , VADDCDPR
+      , VADCDPAD
+      , VADCDSFR
+      , VADCDTRO
+      , VNDCLSID
+      , VNDCNTCT
+      , ADDRESS1
+      , ADDRESS2
+      , ADDRESS3
+      , CITY
+      , STATE
+      , ZIPCODE
+      , COUNTRY
+      , PHNUMBR1
+      , PHNUMBR2
+      , PHONE3
+      , FAXNUMBR
+      , UPSZONE
+      , SHIPMTHD
+      , TAXSCHID
+      , ACNMVNDR
+      , TXIDNMBR
+      , VENDSTTS
+      , CURNCYID
+      , TXRGNNUM
+      , PARVENID
+      , TRDDISCT
+      , TEN99TYPE
+      , MINORDER
+      , PYMTRMID
+      , MINPYTYP
+      , MINPYPCT
+      , MINPYDLR
+      , MXIAFVND
+      , MAXINDLR
+      , COMMENT1
+      , COMMENT2
+      , USERDEF1
+      , USERDEF2
+      , CRLMTDLR
+      , PYMNTPRI
+      , KPCALHST
+      , KGLDSTHS
+      , KPERHIST
+      , KPTRXHST
+      , HOLD
+      , PTCSHACF
+      , CREDTLMT
+      , WRITEOFF
+      , MXWOFAMT
+      , SBPPSDED
+      , PPSTAXRT
+      , DXVARNUM
+      , CRTCOMDT
+      , CRTEXPDT
+      , RTOBUTKN
+      , XPDTOBLG
+      , PRSPAYEE
+      , PMAPINDX
+      , PMCSHIDX
+      , PMDAVIDX
+      , PMDTKIDX
+      , PMFINIDX
+      , PMMSCHIX
+      , PMFRTIDX
+      , PMTAXIDX
+      , PMWRTIDX
+      , PMPRCHIX
+      , PMRTNGIX
+      , PMTDSCIX
+      , ACPURIDX
+      , PURPVIDX
+      , NOTEINDX
+      , CHEKBKID
+      , MODIFDT
+      , CREATDDT
+      , RATETPID
+      , REVALUE_VENDOR
+      , POST_RESULTS_TO
+      , FREEONBOARD
+      , GOVCRPID
+      , GOVINDID
+      , DISGRPER
+      , DUEGRPER
+      , DOCFMTID
+      , TAXINVRECVD
+      , USERLANG
+      , WITHHOLDINGTYPE
+      , WITHHOLDINGFORMTYPE
+      , WITHHOLDINGENTITYTYPE
+      , TAXFILENUMMODE
+      , BRTHDATE
+      , LABORPMTTYPE
+      , CCODE
+      , DECLID
+      , CBVAT
+      , DEX_ROW_ID
+      , PSA_LOAD_DTS
+      , PSA_DELETE_IND
+      , LOAD_DTS
+      , REC_SRC
+      , BKCC
+      , HASHDIFF
+    FROM SRC_GP
+)
+---- RENAME LAYER ----
+
+, RENAME_GP as (
+    SELECT
+        SUPPLIER_HK
+      , VENDORID
+      , VENDNAME
+      , VNDCHKNM
+      , VENDSHNM
+      , VADDCDPR
+      , VADCDPAD
+      , VADCDSFR
+      , VADCDTRO
+      , VNDCLSID
+      , VNDCNTCT
+      , ADDRESS1
+      , ADDRESS2
+      , ADDRESS3
+      , CITY
+      , STATE
+      , ZIPCODE
+      , COUNTRY
+      , PHNUMBR1
+      , PHNUMBR2
+      , PHONE3
+      , FAXNUMBR
+      , UPSZONE
+      , SHIPMTHD
+      , TAXSCHID
+      , ACNMVNDR
+      , TXIDNMBR
+      , VENDSTTS
+      , CURNCYID
+      , TXRGNNUM
+      , PARVENID
+      , TRDDISCT
+      , TEN99TYPE
+      , MINORDER
+      , PYMTRMID
+      , MINPYTYP
+      , MINPYPCT
+      , MINPYDLR
+      , MXIAFVND
+      , MAXINDLR
+      , COMMENT1
+      , COMMENT2
+      , USERDEF1
+      , USERDEF2
+      , CRLMTDLR
+      , PYMNTPRI
+      , KPCALHST
+      , KGLDSTHS
+      , KPERHIST
+      , KPTRXHST
+      , HOLD
+      , PTCSHACF
+      , CREDTLMT
+      , WRITEOFF
+      , MXWOFAMT
+      , SBPPSDED
+      , PPSTAXRT
+      , DXVARNUM
+      , CRTCOMDT
+      , CRTEXPDT
+      , RTOBUTKN
+      , XPDTOBLG
+      , PRSPAYEE
+      , PMAPINDX
+      , PMCSHIDX
+      , PMDAVIDX
+      , PMDTKIDX
+      , PMFINIDX
+      , PMMSCHIX
+      , PMFRTIDX
+      , PMTAXIDX
+      , PMWRTIDX
+      , PMPRCHIX
+      , PMRTNGIX
+      , PMTDSCIX
+      , ACPURIDX
+      , PURPVIDX
+      , NOTEINDX
+      , CHEKBKID
+      , MODIFDT
+      , CREATDDT
+      , RATETPID
+      , REVALUE_VENDOR
+      , POST_RESULTS_TO
+      , FREEONBOARD
+      , GOVCRPID
+      , GOVINDID
+      , DISGRPER
+      , DUEGRPER
+      , DOCFMTID
+      , TAXINVRECVD
+      , USERLANG
+      , WITHHOLDINGTYPE
+      , WITHHOLDINGFORMTYPE
+      , WITHHOLDINGENTITYTYPE
+      , TAXFILENUMMODE
+      , BRTHDATE
+      , LABORPMTTYPE
+      , CCODE
+      , DECLID
+      , CBVAT
+      , DEX_ROW_ID
+      , PSA_LOAD_DTS
+      , PSA_DELETE_IND
+      , LOAD_DTS
+      , REC_SRC
+      , BKCC
+      , HASHDIFF
+    FROM LOGIC_GP
+)
+---- FILTER LAYER ----
+
+, FILTER_GP as (
+    SELECT *
+    FROM RENAME_GP
+)
+
+---- JOIN LAYER ----
+, JOIN_RESULT as (
+    SELECT *
+    FROM FILTER_GP
+)
+
+---- FINAL LAYER ----
+SELECT
+          SUPPLIER_HK
+        , VENDORID
+        , VENDNAME
+        , VNDCHKNM
+        , VENDSHNM
+        , VADDCDPR
+        , VADCDPAD
+        , VADCDSFR
+        , VADCDTRO
+        , VNDCLSID
+        , VNDCNTCT
+        , ADDRESS1
+        , ADDRESS2
+        , ADDRESS3
+        , CITY
+        , STATE
+        , ZIPCODE
+        , COUNTRY
+        , PHNUMBR1
+        , PHNUMBR2
+        , PHONE3
+        , FAXNUMBR
+        , UPSZONE
+        , SHIPMTHD
+        , TAXSCHID
+        , ACNMVNDR
+        , TXIDNMBR
+        , VENDSTTS
+        , CURNCYID
+        , TXRGNNUM
+        , PARVENID
+        , TRDDISCT
+        , TEN99TYPE
+        , MINORDER
+        , PYMTRMID
+        , MINPYTYP
+        , MINPYPCT
+        , MINPYDLR
+        , MXIAFVND
+        , MAXINDLR
+        , COMMENT1
+        , COMMENT2
+        , USERDEF1
+        , USERDEF2
+        , CRLMTDLR
+        , PYMNTPRI
+        , KPCALHST
+        , KGLDSTHS
+        , KPERHIST
+        , KPTRXHST
+        , HOLD
+        , PTCSHACF
+        , CREDTLMT
+        , WRITEOFF
+        , MXWOFAMT
+        , SBPPSDED
+        , PPSTAXRT
+        , DXVARNUM
+        , CRTCOMDT
+        , CRTEXPDT
+        , RTOBUTKN
+        , XPDTOBLG
+        , PRSPAYEE
+        , PMAPINDX
+        , PMCSHIDX
+        , PMDAVIDX
+        , PMDTKIDX
+        , PMFINIDX
+        , PMMSCHIX
+        , PMFRTIDX
+        , PMTAXIDX
+        , PMWRTIDX
+        , PMPRCHIX
+        , PMRTNGIX
+        , PMTDSCIX
+        , ACPURIDX
+        , PURPVIDX
+        , NOTEINDX
+        , CHEKBKID
+        , MODIFDT
+        , CREATDDT
+        , RATETPID
+        , REVALUE_VENDOR
+        , POST_RESULTS_TO
+        , FREEONBOARD
+        , GOVCRPID
+        , GOVINDID
+        , DISGRPER
+        , DUEGRPER
+        , DOCFMTID
+        , TAXINVRECVD
+        , USERLANG
+        , WITHHOLDINGTYPE
+        , WITHHOLDINGFORMTYPE
+        , WITHHOLDINGENTITYTYPE
+        , TAXFILENUMMODE
+        , BRTHDATE
+        , LABORPMTTYPE
+        , CCODE
+        , DECLID
+        , CBVAT
+        , DEX_ROW_ID
+        , PSA_LOAD_DTS
+        , PSA_DELETE_IND
+        , LOAD_DTS
+        , REC_SRC
+        , BKCC
+        , HASHDIFF
+FROM JOIN_RESULT
+{% if is_incremental() %}
+WHERE NOT EXISTS (
+    SELECT 1 
+    FROM {{ this }} existing
+    WHERE existing.SUPPLIER_HK = JOIN_RESULT.SUPPLIER_HK 
+    AND existing.HASHDIFF = JOIN_RESULT.HASHDIFF
+)
+{% endif %} 
+
+{% if not is_incremental() %}
+/* The following qualifier is implemented to prevent multiple loads of touched records during the initial build, such as multiple rows per HK and hashdiff. */
+qualify 1= row_number()over(partition by SUPPLIER_HK, HASHDIFF order by PSA_LOAD_DTS)
+
+union all
+    SELECT MD5_BINARY(GR.VALUE)  SUPPLIER_HK
+, GR.VALUE AS VENDORID
+, NULL AS VENDNAME
+, NULL AS VNDCHKNM
+, NULL AS VENDSHNM
+, NULL AS VADDCDPR
+, NULL AS VADCDPAD
+, NULL AS VADCDSFR
+, NULL AS VADCDTRO
+, NULL AS VNDCLSID
+, NULL AS VNDCNTCT
+, NULL AS ADDRESS1
+, NULL AS ADDRESS2
+, NULL AS ADDRESS3
+, NULL AS CITY
+, NULL AS STATE
+, NULL AS ZIPCODE
+, NULL AS COUNTRY
+, NULL AS PHNUMBR1
+, NULL AS PHNUMBR2
+, NULL AS PHONE3
+, NULL AS FAXNUMBR
+, NULL AS UPSZONE
+, NULL AS SHIPMTHD
+, NULL AS TAXSCHID
+, NULL AS ACNMVNDR
+, NULL AS TXIDNMBR
+, NULL AS VENDSTTS
+, NULL AS CURNCYID
+, NULL AS TXRGNNUM
+, NULL AS PARVENID
+, NULL AS TRDDISCT
+, NULL AS TEN99TYPE
+, NULL AS MINORDER
+, NULL AS PYMTRMID
+, NULL AS MINPYTYP
+, NULL AS MINPYPCT
+, NULL AS MINPYDLR
+, NULL AS MXIAFVND
+, NULL AS MAXINDLR
+, NULL AS COMMENT1
+, NULL AS COMMENT2
+, NULL AS USERDEF1
+, NULL AS USERDEF2
+, NULL AS CRLMTDLR
+, NULL AS PYMNTPRI
+, NULL AS KPCALHST
+, NULL AS KGLDSTHS
+, NULL AS KPERHIST
+, NULL AS KPTRXHST
+, NULL AS HOLD
+, NULL AS PTCSHACF
+, NULL AS CREDTLMT
+, NULL AS WRITEOFF
+, NULL AS MXWOFAMT
+, NULL AS SBPPSDED
+, NULL AS PPSTAXRT
+, NULL AS DXVARNUM
+, NULL AS CRTCOMDT
+, NULL AS CRTEXPDT
+, NULL AS RTOBUTKN
+, NULL AS XPDTOBLG
+, NULL AS PRSPAYEE
+, NULL AS PMAPINDX
+, NULL AS PMCSHIDX
+, NULL AS PMDAVIDX
+, NULL AS PMDTKIDX
+, NULL AS PMFINIDX
+, NULL AS PMMSCHIX
+, NULL AS PMFRTIDX
+, NULL AS PMTAXIDX
+, NULL AS PMWRTIDX
+, NULL AS PMPRCHIX
+, NULL AS PMRTNGIX
+, NULL AS PMTDSCIX
+, NULL AS ACPURIDX
+, NULL AS PURPVIDX
+, NULL AS NOTEINDX
+, NULL AS CHEKBKID
+, NULL AS MODIFDT
+, NULL AS CREATDDT
+, NULL AS RATETPID
+, NULL AS REVALUE_VENDOR
+, NULL AS POST_RESULTS_TO
+, NULL AS FREEONBOARD
+, NULL AS GOVCRPID
+, NULL AS GOVINDID
+, NULL AS DISGRPER
+, NULL AS DUEGRPER
+, NULL AS DOCFMTID
+, NULL AS TAXINVRECVD
+, NULL AS USERLANG
+, NULL AS WITHHOLDINGTYPE
+, NULL AS WITHHOLDINGFORMTYPE
+, NULL AS WITHHOLDINGENTITYTYPE
+, NULL AS TAXFILENUMMODE
+, NULL AS BRTHDATE
+, NULL AS LABORPMTTYPE
+, NULL AS CCODE
+, NULL AS DECLID
+, NULL AS CBVAT
+, NULL AS DEX_ROW_ID
+, '1900-01-01'::TIMESTAMP AS PSA_LOAD_DTS
+, 'N' AS PSA_DELETE_IND
+, CONVERT_TIMEZONE('UTC','1900-01-01'::TIMESTAMP)  AS LOAD_DTS
+, 'USAZET.SNOWFLAKE.FBIN.DERIVED' AS REC_SRC
+, DECODE(GR.VALUE, 0, 'GHOST RECORD-SYSTEM', -1, 'GHOST RECORD-nullkey-required', -2, 'GHOST RECORD-nullkey-optional')  AS BKCC
+, ''::BINARY as HASH_DIFF
+FROM
+TABLE(strtok_split_to_table('0|-1|-2', '|')) AS GR
+{% endif %}

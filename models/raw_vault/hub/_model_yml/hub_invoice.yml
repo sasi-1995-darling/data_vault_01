@@ -1,0 +1,13 @@
+version: 2
+
+models:
+  - name: hub_invoice
+    description: This is the raw vault hub model for invoices
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - invoice_hk
+    config:
+      tags:
+        - emtek

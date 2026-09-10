@@ -1,0 +1,65 @@
+version: 2
+models:
+  - name: v_psa_stg_price_availability__profitero_security
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          config:
+            severity: warn
+          arguments:
+            combination_of_columns:
+              - DATE
+              - RETAILER_ID
+              - PRODUCT_ID
+              - CUSTOMER_PRODUCT_ID
+              - LOAD_DTS
+    columns:
+      - name: RETAILER_BK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: PRODUCT_BK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: LOAD_DTS
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: DATE
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: CUSTOMER_PRODUCT_ID
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: RETAILER_ID
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: PRODUCT_ID
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: PRODUCT_RETAILER_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: PRODUCT_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: RETAILER_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn

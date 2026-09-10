@@ -1,0 +1,5 @@
+version: 2
+models:
+- name: im_fact_daily_location_counts
+  data_tests: []
+  columns: []

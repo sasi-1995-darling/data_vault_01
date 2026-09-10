@@ -1,0 +1,59 @@
+version: 2
+models:
+- name: hub_product_cost_estimate
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - PRODUCT_COST_ESTIMATE_HK
+  - dbt_expectations.expect_table_row_count_to_be_between:
+      arguments:
+        min_value: 4
+      config:
+        severity: warn
+  columns:
+  - name: PRODUCT_COST_ESTIMATE_HK
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+  - name: ITEM_BK
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+  - name: PLANT_BK
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+  - name: POPER
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+  - name: BDATJ
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+  - name: COSTING_VARIANT_BK
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+  - name: BKCC
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+  - name: REC_SRC
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+  - name: LOAD_DTS
+    data_tests:
+    - not_null:
+        config:
+          severity: warn

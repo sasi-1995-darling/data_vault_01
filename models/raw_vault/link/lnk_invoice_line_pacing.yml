@@ -1,0 +1,102 @@
+version: 2
+models:
+  - name: lnk_invoice_line_pacing
+    description: "Link table connecting invoice line pacing dimensions: invoice line, invoice header, customer, plant, division, sales organization, distribution channel, and item."
+    data_tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - INVOICE_LINE_PACING_LHK
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          config:
+            severity: warn
+          arguments:
+            min_value: 4
+    columns:
+      - name: INVOICE_LINE_PACING_LHK
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: CUSTOMER_HK
+        data_tests:
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'hub_customer_v1' )
+                pk_column_name: CUSTOMER_HK
+          - not_null:
+              config:
+                severity: warn
+      - name: PLANT_HK
+        data_tests:
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'hub_plant_v1' )
+                pk_column_name: PLANT_HK
+          - not_null:
+              config:
+                severity: warn
+      - name: DIVISION_HK
+        data_tests:
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'hub_division' )
+                pk_column_name: DIVISION_HK
+          - not_null:
+              config:
+                severity: warn
+      - name: SALES_ORGANIZATION_HK
+        data_tests:
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'hub_sales_organization' )
+                pk_column_name: SALES_ORGANIZATION_HK
+          - not_null:
+              config:
+                severity: warn
+      - name: DISTRIBUTION_CHANNEL_HK
+        data_tests:
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'hub_distribution_channel' )
+                pk_column_name: DISTRIBUTION_CHANNEL_HK
+          - not_null:
+              config:
+                severity: warn
+      - name: ITEM_HK
+        data_tests:
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'hub_item_v1' )
+                pk_column_name: ITEM_HK
+          - not_null:
+              config:
+                severity: warn
+      - name: INVOICE_HK
+        data_tests:
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'hub_invoice_header' )
+                pk_column_name: INVOICE_HK
+          - not_null:
+              config:
+                severity: warn
+      - name: INVOICE_LINE_HK
+        data_tests:
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'hub_invoice_line_v1' )
+                pk_column_name: INVOICE_LINE_HK
+          - not_null:
+              config:
+                severity: warn
+      - name: LOAD_DTS
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: REC_SRC
+        data_tests:
+          - not_null:
+              config:
+                severity: warn

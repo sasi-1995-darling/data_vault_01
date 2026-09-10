@@ -1,0 +1,11 @@
+version: 2
+models:
+- name: ref_factory_calendar__winn_sap
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - FACTORY_CALENDAR_CODE
+        - LANGUAGE_KEY
+        - LOAD_DTS
+  columns: []

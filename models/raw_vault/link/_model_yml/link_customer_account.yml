@@ -1,0 +1,25 @@
+version: 2
+
+models:
+  - name: link_customer_account
+    description: This is the raw vault link model between customer and customer account
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - account_hk
+              - customer_hk
+      - dbt_constraints.foreign_key:
+          arguments:
+            fk_column_names:
+              - account_hk
+            pk_table_name: ref('hub_customer_account')
+            pk_column_names:
+              - account_hk
+      - dbt_constraints.foreign_key:
+          arguments:
+            fk_column_names:
+              - customer_hk
+            pk_table_name: ref('hub_customer')
+            pk_column_names:
+              - customer_hk

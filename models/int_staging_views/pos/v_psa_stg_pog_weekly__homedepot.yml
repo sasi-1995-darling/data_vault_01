@@ -1,0 +1,18 @@
+version: 2
+models:
+  - name: v_psa_stg_pog_weekly__homedepot
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          config:
+            severity: warn
+          arguments:
+            combination_of_columns:
+              - D_STORE_NBR
+              - SKU_NBR
+              - WEEK
+              - HOME_DEPOT_ACCOUNT
+              - D_POG_2
+              - D_ACTIVE_SKU_2
+              - D_ASSORTMENT
+              - LOAD_DTS
+    columns: []

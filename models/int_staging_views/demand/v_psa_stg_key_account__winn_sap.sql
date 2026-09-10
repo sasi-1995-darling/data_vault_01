@@ -1,0 +1,120 @@
+---- SRC LAYER ----
+WITH
+SRC_a              as ( SELECT KVGR1, MANDT, SPRAS, GLREQUEST, BEZEI, GLDELFLAG, GLCHANGETIME, GLSOURCESYSTEM, PSA_LOAD_DTS, PSA_RECORD_SOURCE, PSA_DELETE_IND FROM {{ source('sap_ecc_prd', 'z_tvv1t') }} as SRC  ),
+SRC_bkcc           as ( SELECT REC_SRC, BKCC FROM {{ ref('ref_business_key_collision') }} as SRC  )
+
+/*
+SRC_a              as ( SELECT * FROM sap_ecc_prd.z_tvv1t )
+SRC_bkcc           as ( SELECT * FROM raw_vault.ref_business_key_collision )
+*/
+---- LOGIC LAYER ----
+
+, LOGIC_a as (
+    SELECT
+        KVGR1                                                        as                                     KEY_ACCOUNT_BK
+      , MANDT
+      , SPRAS
+      , KVGR1
+      , GLREQUEST
+      , BEZEI
+      , GLDELFLAG
+      , GLCHANGETIME
+      , GLSOURCESYSTEM
+      , PSA_LOAD_DTS
+      , PSA_RECORD_SOURCE
+      , PSA_DELETE_IND
+    FROM SRC_a
+)
+
+, LOGIC_bkcc as (
+    SELECT
+        REC_SRC
+      , BKCC
+    FROM SRC_bkcc
+)
+---- RENAME LAYER ----
+
+, RENAME_a as (
+    SELECT
+        KEY_ACCOUNT_BK
+      , MANDT
+      , SPRAS
+      , KVGR1
+      , GLREQUEST
+      , BEZEI
+      , GLDELFLAG
+      , GLCHANGETIME
+      , GLSOURCESYSTEM
+      , PSA_LOAD_DTS
+      , PSA_RECORD_SOURCE
+      , PSA_DELETE_IND
+    FROM LOGIC_a
+)
+
+, RENAME_bkcc as (
+    SELECT
+        REC_SRC
+      , BKCC
+    FROM LOGIC_bkcc
+)
+---- FILTER LAYER ----
+
+, FILTER_a as (
+    SELECT *
+    FROM RENAME_a
+)
+
+, FILTER_bkcc as (
+    SELECT *
+    FROM RENAME_bkcc
+    WHERE rec_src = 'USOHNO.SAP.ECCPRD.Z_TVV1T'
+)
+
+---- JOIN LAYER ----
+, JOIN_RESULT as (
+    SELECT *
+    FROM FILTER_a
+    INNER JOIN FILTER_bkcc
+        ON '1' = '1'
+)
+
+---- FINAL LAYER ----
+SELECT
+          KEY_ACCOUNT_BK
+        , MANDT
+        , SPRAS
+        , KVGR1
+        , GLREQUEST
+        , BEZEI
+        , GLDELFLAG
+        , GLCHANGETIME
+        , GLSOURCESYSTEM
+        , PSA_LOAD_DTS
+        , PSA_RECORD_SOURCE
+        , PSA_DELETE_IND
+        , CONVERT_TIMEZONE('UTC', IFF(
+        PSA_DELETE_IND = 'Y', 
+        PSA_LOAD_DTS,  
+        TO_TIMESTAMP(
+            SUBSTR(GLCHANGETIME, 1, 8) || ' ' ||
+            SUBSTR(GLCHANGETIME, 9, 2) || ':' ||
+            SUBSTR(GLCHANGETIME, 11, 2) || ':' ||
+            SUBSTR(GLCHANGETIME, 13, 2) || '.' ||
+            REGEXP_REPLACE(SUBSTR(GLCHANGETIME, 16), '^\\.', ''),
+            'YYYYMMDD HH24:MI:SS.FF9'
+          )
+      )) as LOAD_DTS
+        , REC_SRC
+        , BKCC
+        , MD5_BINARY(UPPER(CONCAT_WS('||',
+          COALESCE(NULLIF(TRIM(CAST(KVGR1 as VARCHAR)),''), '^^')
+        , COALESCE(NULLIF(TRIM(CAST(BKCC as VARCHAR)),''), '^^')
+        ))) as KEY_ACCOUNT_HK
+        , MD5_BINARY(UPPER(NULLIF(CONCAT(
+              IFNULL(TRIM(MANDT::text), '^^') 
+            , '||', IFNULL(TRIM(SPRAS::text), '^^') 
+            , '||', IFNULL(TRIM(KVGR1::text), '^^') 
+            , '||', IFNULL(TRIM(BEZEI::text), '^^') 
+            , '||', IFNULL(TRIM(PSA_DELETE_IND::text), '^^') 
+        ), '^^||^^')))  as HASHDIFF
+FROM JOIN_RESULT

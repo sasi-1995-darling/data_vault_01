@@ -1,0 +1,24 @@
+version: 2
+models:
+- name: v_psa_stg_prod_retailer_rating__security_profitero
+  data_tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - PRODUCT_RETAILER_HK
+        - DATE
+        - PRODUCT_ID
+        - LOAD_DTS
+      config:
+        severity: warn
+  columns:
+  - name: RETAILER_BK
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+  - name: PRODUCT_BK
+    data_tests:
+    - not_null:
+        config:
+          severity: warn

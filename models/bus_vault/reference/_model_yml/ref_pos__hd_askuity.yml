@@ -1,0 +1,10 @@
+version: 2
+
+models:
+  - name: ref_pos_fiscal_calendar__hd_askuity
+    description: This is the raw vault hub model for pos customer location
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - date

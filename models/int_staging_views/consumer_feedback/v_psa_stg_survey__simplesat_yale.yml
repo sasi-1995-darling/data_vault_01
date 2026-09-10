@@ -1,0 +1,17 @@
+version: 2
+models:
+  - name: v_psa_stg_survey__simplesat_yale
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          config:
+            severity: warn
+          arguments:
+            combination_of_columns:
+              - SURVEY_BK
+              - LOAD_DTS
+    columns:
+      - name: SURVEY_BK
+        data_tests:
+          - not_null:
+              config:
+                severity: warn

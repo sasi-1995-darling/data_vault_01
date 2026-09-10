@@ -1,0 +1,9 @@
+version: 2
+models:
+- name: fact_warranty_unit
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - LNK_COPA_SALES_HK
+  columns: []

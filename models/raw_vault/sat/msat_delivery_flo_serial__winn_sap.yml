@@ -1,0 +1,18 @@
+version: 2
+models:
+  - name: msat_delivery_flo_serial__winn_sap
+    data_tests:
+      - dbt_constraints.primary_key:          
+          arguments:
+            column_names:
+              - DELIVERY_HK
+              - SERIALNO
+              - LOAD_DTS
+          config:
+            severity: warn
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          arguments:
+            min_value: 4
+          config:
+            severity: warn
+    columns: []

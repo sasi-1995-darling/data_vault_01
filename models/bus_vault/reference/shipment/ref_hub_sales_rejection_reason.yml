@@ -1,0 +1,14 @@
+version: 2
+models:
+- name: ref_hub_sales_rejection_reason
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - SALES_REJECTION_REASON_BK
+  - dbt_expectations.expect_table_row_count_to_be_between:
+      arguments:
+        min_value: 4
+      config:
+        severity: warn
+  columns: []

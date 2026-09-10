@@ -1,0 +1,5 @@
+version: 2
+models:
+- name: im_dim_device_inventory
+  data_tests: []
+  columns: []

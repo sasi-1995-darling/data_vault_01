@@ -1,0 +1,146 @@
+version: 2
+
+models:
+  - name: stg_customer__emtk_ebs_sales
+    description: This is the hash staging model from Emtek for hub_customer
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - customer_hk
+
+  - name: stg_customer_bill_location__emtk_ebs_sales
+    description: This is the hash staging model from Emtek for hub_customer_bill_location
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - customer_bill_location_hk
+
+  - name: stg_customer_ship_location__emtk_ebs_sales
+    description: This is the hash staging model from Emtek for hub_customer_ship_location
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - customer_ship_location_hk
+
+  - name: stg_invoice__emtk_ebs_sales
+    description: This is the hash staging model from Emtek for hub_invoice
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - invoice_hk
+
+  - name: stg_invoice_adjustment__emtk_ebs_sales
+    description: This is the hash staging model from Emtek for hub_invoice_adjusment
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - invoice_adjustment_hk
+
+  - name: stg_invoice_adjustment_customer__emtk_ebs_sales
+    description: This is the hash staging model from Emtek for link_invoice_adjustment_customer
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - invoice_adjustment_customer_hk
+
+  - name: stg_invoice_customer__emtk_ebs_sales
+    description: This is the hash staging model from Emtek for link_invoice_customer
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - invoice_customer_hk
+
+  - name: stg_invoice_line__emtk_ebs_sales
+    description: This is the hash staging model from Emtek for hub_invoice_line
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - invoice_line_hk
+
+  - name: stg_invoice_adj_invoice_line__emtk_ebs_sales
+    description: This is the hash staging model from Emtek for link_invoice_adj_invoice_line
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - invoice_adj_invoice_line_hk
+
+  - name: stg_invoice_invoice_line__emtk_ebs_sales
+    description: This is the hash staging model from Emtek for link_invoice_invoice_line
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - invoice_invoice_line_hk
+
+  - name: stg_invoice_line_transaction__emtk_ebs_sales
+    description: This is the hash staging model from Emtek for link_invoice_line_transaction
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - invoice_line_transaction_hk
+
+  - name: stg_sales_agency__emtk_ebs_sales
+    description: This is the hash staging model from Emtek for hub_sales_agency
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - sales_agency_hk
+
+  - name: stg_sales_agency_groups__emtk_ebs_sales
+    description: This is the hash staging model from Emtek for link_sales_agency_groups
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - sales_agency_groups_hk
+
+  - name: stg_sales_region__emtk_ebs_sales
+    description: This is the hash staging model from Emtek for hub_sales_region
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - sales_region_hk
+
+  - name: stg_sales_territory__emtk_ebs_sales
+    description: This is the hash staging model from Emtek for hub_sales_territory
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - sales_territory_hk
+
+  - name: stg_delivery__emtk_ebs_sales
+    description: This is the hash staging model from Emtek for hub_delivery
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - delivery_hk
+
+  - name: stg_invoice_delivery__emtk_ebs_sales
+    description: This is the hash staging model from Emtek for link_invoice_delivery
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - invoice_delivery_hk
+
+  - name: stg_invoice_adj_sales_agency__emtk_ebs_sales
+    description: This is the hash staging model from Emtek for link_invoice_adj_sales_agency
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - invoice_adj_sales_agency_hk

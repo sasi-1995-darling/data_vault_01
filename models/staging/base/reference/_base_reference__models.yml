@@ -1,0 +1,26 @@
+version: 2
+
+models:
+  - name: base_brand__ref_appbot
+    description: This is the base staging model from Appbott for hub application
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - brand
+    columns:
+      - name: rec_src
+        tests:
+          - not_null
+
+  - name: base_brand__ref_file
+    description: This is the base staging model from Appbott for hub application
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - system_brand
+    columns:
+      - name: rec_src
+        tests:
+          - not_null

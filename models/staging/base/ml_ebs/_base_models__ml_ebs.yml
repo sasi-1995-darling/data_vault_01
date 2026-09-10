@@ -1,0 +1,134 @@
+version: 2
+
+models:
+
+  - name: base_categories_b__ml_ebs
+    description: This is the base staging model for TMLC EBS Catergories
+    tests:
+      - 'dbt_constraints.primary_key:':
+          arguments:
+            column_names:
+              - category_id
+  - name: base_category_sets_tl__ml_ebs
+    description: This is the base staging model for TMLC EBS Catergory Sets
+    tests:
+      - 'dbt_constraints.primary_key:':
+          arguments:
+            column_names:
+              - category_set_id
+  - name: base_hr_all_organization_units__ml_ebs
+    description: This is the base staging model for TMLC EBS Plants
+    tests:
+      - 'dbt_constraints.primary_key:':
+          arguments:
+            column_names:
+              - plant_id
+  - name: base_systems_items__ml_ebs
+    description: This is the base staging model for TMLC EBS Sytem Inventory
+    tests:
+      - 'dbt_constraints.primary_key:':
+          arguments:
+            column_names:
+              - inventory_item_id
+              - organization_id
+  - name: base_item_categories__ml_ebs
+    description: This is the base staging model for TMLC EBS Inventory Categories
+    tests:
+      - 'dbt_constraints.primary_key:':
+          arguments:
+            column_names:
+              - inventory_item_id
+              - organization_id
+              - category_set_id
+              - category_id
+              - last_update_date
+  - name: base_cust_account__ml_ebs
+    description: This is the base staging model for TMLC EBS Shipment customer account
+    tests:
+      - 'dbt_constraints.primary_key:':
+          arguments:
+            column_names:
+              - cust_account_id
+  - name: base_cust_acct_site__ml_ebs
+    description: This is the base staging model for TMLC EBS Shipment customer account site
+    tests:
+      - 'dbt_constraints.primary_key:':
+          arguments:
+            column_names:
+              - cust_acct_site_id
+  - name: base_cust_site_use__ml_ebs
+    description: This is the base staging model for TMLC EBS Shipment customer site use
+    tests:
+      - 'dbt_constraints.primary_key:':
+          arguments:
+            column_names:
+              - site_use_id
+  - name: base_invoice_header__ml_ebs
+    description: This is the base staging model for TMLC EBS Shipment invoice headers transactions
+    tests:
+      - 'dbt_constraints.primary_key:':
+          arguments:
+            column_names:
+              - customer_trx_id
+  - name: base_invoice_line__ml_ebs
+    description: This is the base staging model for TMLC EBS Shipment invoice line transactions
+    tests:
+      - 'dbt_constraints.primary_key:':
+          arguments:
+            column_names:
+              - customer_trx_line_id
+  - name: base_invoice_line_gl_dist__ml_ebs
+    description: This is the base staging model for TMLC EBS Shipment invoice line distribution and revenue
+    tests:
+      - 'dbt_constraints.primary_key:':
+          arguments:
+            column_names:
+              - customer_trx_line_id
+              - gl_date
+              - gl_posted_date
+  - name: base_location__ml_ebs
+    description: This is the base staging model for TMLC EBS Shipment locations
+    tests:
+      - 'dbt_constraints.primary_key:':
+          arguments:
+            column_names:
+              - location_id
+  - name: base_party__ml_ebs
+    description: This is the base staging model for TMLC EBS Shipment parties
+    tests:
+      - 'dbt_constraints.primary_key:':
+          arguments:
+            column_names:
+              - party_id
+  - name: base_party_site__ml_ebs
+    description: This is the base staging model for TMLC EBS Shipment parties
+    tests:
+      - 'dbt_constraints.primary_key:':
+          arguments:
+            column_names:
+              - party_site_id
+  - name: base_order_line__ml_ebs
+    description: This is the base staging model for TMLC EBS Shipment order line
+    tests:
+      - 'dbt_constraints.primary_key:':
+          arguments:
+            column_names:
+              - line_id
+  - name: base_payment_schedule__ml_ebs
+    description: This is the base staging model for TMLC EBS Shipment payment schedule
+    tests:
+      - 'dbt_constraints.primary_key:':
+          arguments:
+            column_names:
+              - customer_trx_id
+  - name: base_brand__ml_ebs
+    description: This is the base staging model for TMLC EBS brand
+    tests:
+      - 'dbt_constraints.primary_key:':
+          arguments:
+            column_names:
+              - registered_brand
+    columns:
+      - name: rec_src
+        tests:
+          - not_null

@@ -1,0 +1,28 @@
+version: 2
+models:
+- name: v_psa_stg_uom_conversions__emtk_ebs
+  data_tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - INVENTORY_ITEM_ID
+        - UOM_CODE
+        - LOAD_DTS
+      config:
+        severity: warn
+  columns:
+  - name: INVENTORY_ITEM_ID
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+  - name: UOM_CODE
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+  - name: LOAD_DTS
+    data_tests:
+    - not_null:
+        config:
+          severity: warn

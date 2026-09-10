@@ -1,0 +1,14 @@
+# Reduce context noise — exclude build artifacts and vendored packages
+target/
+dbt_packages/
+dbt_internal_packages/
+logs/
+.venv/
+node_modules/
+
+# Large binary/generated files
+*.gpickle
+*.csv
+
+# Seeds (reference data, not code patterns)
+seeds/

@@ -1,0 +1,12 @@
+version: 2
+models:
+  - name: fact_sales_invoice_line
+    columns:
+      - name: SALES_INVOICE_LINE_BK
+        tests:
+          - unique:
+              config:
+                severity: warn
+          - not_null:
+              config:
+                severity: warn

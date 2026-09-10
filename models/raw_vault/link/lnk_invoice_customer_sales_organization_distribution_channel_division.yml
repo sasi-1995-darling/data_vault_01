@@ -1,0 +1,83 @@
+version: 2
+models:
+- name: lnk_invoice_customer_sales_organization_distribution_channel_division
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - LNK_INVOICE_CUSTOMER_SALES_ORGANIZATION_DISTRIBUTION_CHANNEL_DIVISION_ITEM_HK
+  - dbt_expectations.expect_table_row_count_to_be_between:
+      arguments:
+        min_value: 4
+      config:
+        severity: warn
+  columns:
+  - name: LNK_INVOICE_CUSTOMER_SALES_ORGANIZATION_DISTRIBUTION_CHANNEL_DIVISION_ITEM_HK
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+  - name: INVOICE_HK
+    data_tests:
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'hub_invoice_header' )
+          pk_column_name: INVOICE_HK
+    - not_null:
+        config:
+          severity: warn
+  - name: CUSTOMER_HK
+    data_tests:
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'hub_customer_v1' )
+          pk_column_name: CUSTOMER_HK
+    - not_null:
+        config:
+          severity: warn
+  - name: SALES_ORGANIZATION_HK
+    data_tests:
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'hub_sales_organization' )
+          pk_column_name: SALES_ORGANIZATION_HK
+    - not_null:
+        config:
+          severity: warn
+  - name: DISTRIBUTION_CHANNEL_HK
+    data_tests:
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'hub_distribution_channel' )
+          pk_column_name: DISTRIBUTION_CHANNEL_HK
+    - not_null:
+        config:
+          severity: warn
+  - name: DIVISION_HK
+    data_tests:
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'hub_division' )
+          pk_column_name: DIVISION_HK
+    - not_null:
+        config:
+          severity: warn
+  - name: ITEM_HK
+    data_tests:
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'hub_item_v1' )
+          pk_column_name: ITEM_HK
+    - not_null:
+        config:
+          severity: warn
+  - name: LOAD_DTS
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+  - name: REC_SRC
+    data_tests:
+    - not_null:
+        config:
+          severity: warn

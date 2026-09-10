@@ -1,0 +1,22 @@
+version: 2
+
+models:
+  - name: sat_po_line_transaction_detail__emtk_ebs
+    description: This is the raw vault satellite model for po line transaction detail
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - po_line_transaction_link_hk
+              - load_dts
+      - dbt_constraints.foreign_key:
+          arguments:
+            fk_column_names:
+              - po_line_transaction_link_hk
+            pk_table_name: ref('tlink_po_line_transaction')
+            pk_column_names:
+              - po_line_transaction_link_hk
+    config:
+      tags:
+        - emtek
+        - ebs

@@ -1,0 +1,65 @@
+---- SRC LAYER ----
+WITH
+SRC_D              as ( SELECT BKCC, PAYMENT_METHOD, REC_SRC, VENDOR_ORDER_BK, VENDOR_ORDER_HK, VENDOR_PO_DATE__YYYYMMDD, VENDOR_PO_NUMBER, VENDOR_PO_STATE, VENDOR_PO_STATUS, VENDOR_PO_TYPE FROM {{ ref('pit_vendor_purchase_order') }} as SRC  )
+
+/*
+SRC_D              as ( SELECT * FROM BUS_VAULT.pit_vendor_order )
+*/
+---- LOGIC LAYER ----
+
+, LOGIC_D as (
+    SELECT
+        REC_SRC
+      , VENDOR_ORDER_BK
+      , VENDOR_ORDER_HK
+      , VENDOR_PO_STATE
+      , VENDOR_PO_NUMBER
+      , VENDOR_PO_TYPE
+      , PAYMENT_METHOD
+      , VENDOR_PO_DATE__YYYYMMDD
+      , VENDOR_PO_STATUS
+      , BKCC
+    FROM SRC_D
+)
+---- RENAME LAYER ----
+
+, RENAME_D as (
+    SELECT
+        REC_SRC
+      , VENDOR_ORDER_BK
+      , VENDOR_ORDER_HK
+      , VENDOR_PO_STATE
+      , VENDOR_PO_NUMBER
+      , VENDOR_PO_TYPE
+      , PAYMENT_METHOD
+      , VENDOR_PO_DATE__YYYYMMDD
+      , VENDOR_PO_STATUS
+      , BKCC
+    FROM LOGIC_D
+)
+---- FILTER LAYER ----
+
+, FILTER_D as (
+    SELECT *
+    FROM RENAME_D
+)
+
+---- JOIN LAYER ----
+, JOIN_RESULT as (
+    SELECT *
+    FROM FILTER_D
+)
+
+---- FINAL LAYER ----
+SELECT
+          REC_SRC
+        , VENDOR_ORDER_BK
+        , VENDOR_ORDER_HK
+        , VENDOR_PO_STATE
+        , VENDOR_PO_NUMBER
+        , VENDOR_PO_TYPE
+        , PAYMENT_METHOD
+        , VENDOR_PO_DATE__YYYYMMDD
+        , VENDOR_PO_STATUS
+        , BKCC
+FROM JOIN_RESULT

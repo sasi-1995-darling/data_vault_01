@@ -1,0 +1,8 @@
+version: 2
+models:
+- name: im_fact_critical_alert_device_event
+  description: >
+    Info mart view for the critical alert partner extract.
+    One row per critical alert showing shutoff, valve reopen, and feedback.
+  data_tests: []
+  columns: []

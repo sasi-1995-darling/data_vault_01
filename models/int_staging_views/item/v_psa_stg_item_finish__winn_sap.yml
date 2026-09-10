@@ -1,0 +1,11 @@
+version: 2
+models:
+- name: v_psa_stg_item_finish__winn_sap
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - ZZFIN
+        - SPRAS
+        - LOAD_DTS
+  columns: []

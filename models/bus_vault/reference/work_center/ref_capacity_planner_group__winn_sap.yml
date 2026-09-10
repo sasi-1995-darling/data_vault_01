@@ -1,0 +1,11 @@
+version: 2
+models:
+- name: ref_capacity_planner_group__winn_sap
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - CAPACITY_PLANNER_GROUP
+        - LANGUAGE_KEY
+        - LOAD_DTS
+  columns: []

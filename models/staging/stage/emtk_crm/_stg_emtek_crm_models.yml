@@ -1,0 +1,10 @@
+version: 2
+
+models:
+  - name: stg_sales_rep_territory_security_mapping
+    description: This is the staging model for the reporting table which will supply the relationship between sales_rep_email and territory_code
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - sales_rep_territory_security_mapping_pk

@@ -1,0 +1,62 @@
+-- =============================================================================
+-- triage_invocations_grants_bootstrap.sql — ONE-TIME ownership transfer.
+--
+-- DO NOT INCLUDE IN ANY AUTOMATED RE-APPLY PATH.
+--
+-- This file performs the ownership transfer for
+-- OPS_PROD.LOGS.TRIAGE_INVOCATIONS — applied ONCE at initial table
+-- creation, never re-run.
+--
+-- (a) Why this is split from triage_invocations.sql
+--     `GRANT OWNERSHIP TO ROLE X COPY CURRENT GRANTS` is conditionally
+--     non-idempotent in Snowflake:
+--       - Same-role re-run (executing role = current owner): returns a
+--         notice (not an error). Safe in isolation, but strict-mode
+--         tooling that treats Snowflake notices as failures will still
+--         error.
+--       - Different-role re-run (e.g., deploy-rotation where a
+--         different role attempts to re-take ownership): errors.
+--     The schema file (`triage_invocations.sql`) is unconditionally
+--     re-runnable. This file isn't. Keep them split so an automated
+--     re-apply path can run the schema file safely without ever
+--     touching ownership.
+--
+-- (b) COPY CURRENT GRANTS — what the clause does
+--     Preserves the existing INSERT, SELECT grants (applied by the
+--     schema file) through the ownership transfer. Without it, the
+--     ownership transfer would strip the privileges DATA_OPS already
+--     holds, requiring a re-grant immediately after. With it, the
+--     transfer is grant-preserving — the schema file's GRANT INSERT,
+--     SELECT stays in effect on the same role and does not need to be
+--     re-applied as part of the bootstrap.
+--
+-- (c) When to run this file
+--     ONCE, at initial table creation, immediately after the first
+--     apply of `triage_invocations.sql`. Do not run again.
+--
+--     If table ownership ever needs to be re-assigned (e.g., handoff
+--     from DATA_OPS to a dedicated TRIAGE_AGENT_WRITER service role
+--     per sprint-1-deferred #19), do it as an explicit one-time
+--     manual step, NOT by re-running this file.
+--
+-- (d) Required role
+--     Run as a role with the privilege to transfer ownership of the
+--     newly-created OPS_PROD.LOGS.TRIAGE_INVOCATIONS table to
+--     DATA_OPS — typically the deploying engineer's elevated role
+--     per FBIN deploy policy. (No repo precedent for which specific
+--     elevated role FBIN uses for table-ownership transfer; consult
+--     your shop's RBAC docs or the engineer who set up the OPS_PROD
+--     schema before running.)
+--
+-- (e) Initial-deploy sequence
+--     USE ROLE <elevated_role_per_FBIN_deploy_policy>;
+--     USE DATABASE OPS_PROD;
+--     USE SCHEMA LOGS;
+--     -- Step 1: create the table + apply re-runnable grants
+--     <paste triage_invocations.sql contents>
+--     -- Step 2: transfer ownership (THIS file — one-time only)
+--     <paste contents below>
+-- =============================================================================
+
+GRANT OWNERSHIP ON TABLE OPS_PROD.LOGS.TRIAGE_INVOCATIONS
+    TO ROLE DATA_OPS COPY CURRENT GRANTS;

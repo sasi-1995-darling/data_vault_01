@@ -1,0 +1,22 @@
+version: 2
+models:
+  - name: sat_po_item_schedule_lines__lrsn_psft
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - PO_ITEM_HK
+              - SCHED_NBR
+              - LOAD_DTS
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          config:
+            severity: warn
+          arguments:
+            min_value: 4
+    columns:
+      - name: PO_ITEM_HK
+        tests:
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'hub_po_item' )
+                pk_column_name: PO_ITEM_HK

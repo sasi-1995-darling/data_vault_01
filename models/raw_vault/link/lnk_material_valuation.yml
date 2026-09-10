@@ -1,0 +1,32 @@
+version: 2
+models:
+- name: lnk_material_valuation
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - LNK_MATERIAL_VALUATION_HK
+  - dbt_expectations.expect_table_row_count_to_be_between:
+      config: 
+        severity: warn
+      arguments:
+        min_value: 4
+  columns:
+  - name: PLANT_HK
+    data_tests:
+    - not_null:
+        config:
+            severity: warn
+    - dbt_utils.relationships_where:
+        arguments:
+            to: ref( 'hub_plant_v1' )
+            field: PLANT_HK
+  - name: ITEM_HK
+    data_tests:
+    - not_null:
+        config:
+            severity: warn
+    - dbt_utils.relationships_where:
+        arguments:
+            to: ref( 'hub_item_v1' )
+            field: ITEM_HK

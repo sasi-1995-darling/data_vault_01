@@ -1,0 +1,28 @@
+version: 2
+models:
+  - name: lsat_item_attribute__tt_e21
+    data_tests:
+      - dbt_constraints.primary_key:
+          name: pk_lsat_item_attribute__tt_e21
+          arguments:
+            column_names:
+              - PLANT_ITEM_HK
+              - LOAD_DTS
+          config:
+            severity: warn
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          name: rowcount_lsat_item_attribute__tt_e21
+          arguments:
+            min_value: 4
+          config:
+            severity: warn
+    columns:
+      - name: PLANT_ITEM_HK
+        data_tests:
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'link_plant_item_v1' )
+                pk_column_name: PLANT_ITEM_HK
+    config:
+      tags:
+        - lsat

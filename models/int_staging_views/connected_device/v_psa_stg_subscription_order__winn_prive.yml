@@ -1,0 +1,34 @@
+version: 2
+models:
+- name: v_psa_stg_subscription_order__winn_prive
+  data_tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - SUBSCRIPTION_ORDER_HK
+        - ORDER_HEADER_HK
+        - SUBSCRIBER_HK
+        - LOAD_DTS
+      config:
+        severity: warn
+  columns:
+  - name: SUBSCRIPTION_ORDER_HK
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+  - name: SUBSCRIBER_HK
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+  - name: ORDER_HEADER_HK
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+  - name: LNK_SUBSCRIPTION_ORDER_HK
+    data_tests:
+    - not_null:
+        config:
+          severity: warn

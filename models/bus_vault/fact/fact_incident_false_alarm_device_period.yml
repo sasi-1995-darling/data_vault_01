@@ -1,0 +1,11 @@
+version: 2
+models:
+- name: fact_incident_false_alarm_device_period
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - DEVICE_ID
+        - PERIOD_TYPE
+        - PERIOD_START_DATE_KEY
+

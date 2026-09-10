@@ -1,0 +1,11 @@
+version: 2
+models:
+- name: ref_item_architecture_detail__winn_sap
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - ARCHITECTURE_DETAIL_ID
+        - LANGUAGE_KEY
+        - LOAD_DTS
+  columns: []

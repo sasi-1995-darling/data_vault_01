@@ -1,0 +1,19 @@
+version: 2
+models:
+  - name: fact_purchase_requisition_spend_summary
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          config:
+            severity: warn
+          arguments:
+            combination_of_columns:
+              - SUPPLIER_NUMBER_PARENT
+              - SUPPLIER_NUMBER_CHILD
+              - DOCUMENT_TYPE
+              - COUNTRY_OF_ORIGIN
+              - ITEM_BK
+              - PLANT_BK
+              - UOM
+              - ITEM_DELIVERY_DATE_BK
+              - OPCO
+    columns: []

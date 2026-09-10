@@ -1,0 +1,20 @@
+version: 2
+
+models:
+  - name: tlink_invoice_line_transaction
+    description: This is the raw vault transactional link model between invoice line and transaction
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - invoice_line_transaction_hk
+      - dbt_constraints.foreign_key:
+          arguments:
+            fk_column_names:
+              - invoice_line_hk
+            pk_table_name: ref('hub_invoice_line')
+            pk_column_names:
+              - invoice_line_hk
+    config:
+      tags:
+        - emtek

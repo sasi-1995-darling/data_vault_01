@@ -1,0 +1,17 @@
+version: 2
+models:
+- name: v_psa_stg_installation_event__winn_sap
+  data_tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - INSTALLATION_HK
+        - LOAD_DTS
+      config:
+        severity: warn
+  columns:
+  - name: INSTALLATION_BK
+    data_tests:
+    - not_null:
+        config:
+          severity: warn

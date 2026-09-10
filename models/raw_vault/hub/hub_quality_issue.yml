@@ -1,0 +1,13 @@
+version: 2
+models:
+  - name: hub_quality_issue
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - QUALITY_ISSUE_HK
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          config:
+            severity: warn
+          arguments:
+            min_value: 4

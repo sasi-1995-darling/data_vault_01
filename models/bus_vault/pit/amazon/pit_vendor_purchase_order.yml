@@ -1,0 +1,9 @@
+version: 2
+models:
+- name: pit_vendor_purchase_order
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - VENDOR_ORDER_HK
+  columns: []

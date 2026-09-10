@@ -1,0 +1,11 @@
+version: 2
+models:
+- name: v_psa_stg_logistics_shipment_stage__winn_sap
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - TKNUM
+        - TSNUM
+        - LOAD_DTS
+  columns: []

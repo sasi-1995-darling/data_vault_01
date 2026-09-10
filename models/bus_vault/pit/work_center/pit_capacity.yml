@@ -1,0 +1,15 @@
+version: 2
+models:
+- name: pit_capacity
+  data_tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - CAPACITY_HK
+        - VALID_TO_DATE__YYYYMMDD
+        - AVAILABLE_CAPACITY_VERSION
+      config:
+        severity: warn
+  columns: []
+
+

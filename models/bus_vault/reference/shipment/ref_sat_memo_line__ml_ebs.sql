@@ -1,0 +1,318 @@
+---- SRC LAYER ----
+WITH
+SRC_SML            as ( SELECT * FROM {{ ref('v_psa_stg_memolines__ml_ebs') }} as SRC 
+                         {% if is_incremental() %}
+                         WHERE SRC.LOAD_DTS > (SELECT DATEADD('HOUR', '-1', MAX(LOAD_DTS)) FROM {{this}})
+                         {% endif %}  )
+
+/*
+SRC_SML            as ( SELECT * FROM STAGING.v_psa_stg_MEMOLINES__ML_EBS )
+*/
+---- LOGIC LAYER ----
+
+, LOGIC_SML as (
+    SELECT
+        MEMO_LINE_BK
+      , ORG_ID
+      , MEMO_LINE_ID
+      , TAX_PRODUCT_CATEGORY
+      , END_DATE
+      , GLOBAL_ATTRIBUTE10
+      , LAST_UPDATE_DATE
+      , GLOBAL_ATTRIBUTE5
+      , GLOBAL_ATTRIBUTE4
+      , GLOBAL_ATTRIBUTE7
+      , GLOBAL_ATTRIBUTE6
+      , GLOBAL_ATTRIBUTE1
+      , GLOBAL_ATTRIBUTE3
+      , GLOBAL_ATTRIBUTE2
+      , UNIT_STD_PRICE
+      , GLOBAL_ATTRIBUTE9
+      , GLOBAL_ATTRIBUTE8
+      , CREATED_BY
+      , ATTRIBUTE3
+      , LAST_UPDATED_BY
+      , ATTRIBUTE2
+      , ATTRIBUTE1
+      , CREATION_DATE
+      , INVOICING_RULE_ID
+      , ATTRIBUTE9
+      , ATTRIBUTE8
+      , ATTRIBUTE7
+      , ATTRIBUTE6
+      , ATTRIBUTE5
+      , NAME
+      , ATTRIBUTE4
+      , ATTRIBUTE_CATEGORY
+      , UOM_CODE
+      , GL_ID_REV
+      , ATTRIBUTE10
+      , ATTRIBUTE14
+      , ATTRIBUTE13
+      , ATTRIBUTE12
+      , ATTRIBUTE11
+      , SET_OF_BOOKS_ID
+      , DESCRIPTION
+      , LINE_TYPE
+      , GLOBAL_ATTRIBUTE20
+      , START_DATE
+      , LAST_UPDATE_LOGIN
+      , ACCOUNTING_RULE_ID
+      , GLOBAL_ATTRIBUTE_CATEGORY
+      , GLOBAL_ATTRIBUTE17
+      , GLOBAL_ATTRIBUTE18
+      , GLOBAL_ATTRIBUTE15
+      , GLOBAL_ATTRIBUTE16
+      , GLOBAL_ATTRIBUTE13
+      , GLOBAL_ATTRIBUTE14
+      , GLOBAL_ATTRIBUTE11
+      , GLOBAL_ATTRIBUTE12
+      , ATTRIBUTE15
+      , TAX_CODE
+      , GLOBAL_ATTRIBUTE19
+      , _FIVETRAN_DELETED
+      , _FIVETRAN_ID
+      , _FIVETRAN_SYNCED
+      , PSA_LOAD_DTS
+      , PSA_RECORD_SOURCE
+      , PSA_DELETE_IND
+      , LOAD_DTS
+      , REC_SRC
+      , HASHDIFF
+    FROM SRC_SML
+)
+---- RENAME LAYER ----
+
+, RENAME_SML as (
+    SELECT
+        MEMO_LINE_BK
+      , ORG_ID
+      , MEMO_LINE_ID
+      , TAX_PRODUCT_CATEGORY
+      , END_DATE
+      , GLOBAL_ATTRIBUTE10
+      , LAST_UPDATE_DATE
+      , GLOBAL_ATTRIBUTE5
+      , GLOBAL_ATTRIBUTE4
+      , GLOBAL_ATTRIBUTE7
+      , GLOBAL_ATTRIBUTE6
+      , GLOBAL_ATTRIBUTE1
+      , GLOBAL_ATTRIBUTE3
+      , GLOBAL_ATTRIBUTE2
+      , UNIT_STD_PRICE
+      , GLOBAL_ATTRIBUTE9
+      , GLOBAL_ATTRIBUTE8
+      , CREATED_BY
+      , ATTRIBUTE3
+      , LAST_UPDATED_BY
+      , ATTRIBUTE2
+      , ATTRIBUTE1
+      , CREATION_DATE
+      , INVOICING_RULE_ID
+      , ATTRIBUTE9
+      , ATTRIBUTE8
+      , ATTRIBUTE7
+      , ATTRIBUTE6
+      , ATTRIBUTE5
+      , NAME
+      , ATTRIBUTE4
+      , ATTRIBUTE_CATEGORY
+      , UOM_CODE
+      , GL_ID_REV
+      , ATTRIBUTE10
+      , ATTRIBUTE14
+      , ATTRIBUTE13
+      , ATTRIBUTE12
+      , ATTRIBUTE11
+      , SET_OF_BOOKS_ID
+      , DESCRIPTION
+      , LINE_TYPE
+      , GLOBAL_ATTRIBUTE20
+      , START_DATE
+      , LAST_UPDATE_LOGIN
+      , ACCOUNTING_RULE_ID
+      , GLOBAL_ATTRIBUTE_CATEGORY
+      , GLOBAL_ATTRIBUTE17
+      , GLOBAL_ATTRIBUTE18
+      , GLOBAL_ATTRIBUTE15
+      , GLOBAL_ATTRIBUTE16
+      , GLOBAL_ATTRIBUTE13
+      , GLOBAL_ATTRIBUTE14
+      , GLOBAL_ATTRIBUTE11
+      , GLOBAL_ATTRIBUTE12
+      , ATTRIBUTE15
+      , TAX_CODE
+      , GLOBAL_ATTRIBUTE19
+      , _FIVETRAN_DELETED
+      , _FIVETRAN_ID
+      , _FIVETRAN_SYNCED
+      , PSA_LOAD_DTS
+      , PSA_RECORD_SOURCE
+      , PSA_DELETE_IND
+      , LOAD_DTS
+      , REC_SRC
+      , HASHDIFF
+    FROM LOGIC_SML
+)
+---- FILTER LAYER ----
+
+, FILTER_SML as (
+    SELECT *
+    FROM RENAME_SML
+)
+
+---- JOIN LAYER ----
+, JOIN_RESULT as (
+    SELECT *
+    FROM FILTER_SML
+)
+
+---- FINAL LAYER ----
+SELECT
+          MEMO_LINE_BK
+        , ORG_ID
+        , MEMO_LINE_ID
+        , TAX_PRODUCT_CATEGORY
+        , END_DATE
+        , GLOBAL_ATTRIBUTE10
+        , LAST_UPDATE_DATE
+        , GLOBAL_ATTRIBUTE5
+        , GLOBAL_ATTRIBUTE4
+        , GLOBAL_ATTRIBUTE7
+        , GLOBAL_ATTRIBUTE6
+        , GLOBAL_ATTRIBUTE1
+        , GLOBAL_ATTRIBUTE3
+        , GLOBAL_ATTRIBUTE2
+        , UNIT_STD_PRICE
+        , GLOBAL_ATTRIBUTE9
+        , GLOBAL_ATTRIBUTE8
+        , CREATED_BY
+        , ATTRIBUTE3
+        , LAST_UPDATED_BY
+        , ATTRIBUTE2
+        , ATTRIBUTE1
+        , CREATION_DATE
+        , INVOICING_RULE_ID
+        , ATTRIBUTE9
+        , ATTRIBUTE8
+        , ATTRIBUTE7
+        , ATTRIBUTE6
+        , ATTRIBUTE5
+        , NAME
+        , ATTRIBUTE4
+        , ATTRIBUTE_CATEGORY
+        , UOM_CODE
+        , GL_ID_REV
+        , ATTRIBUTE10
+        , ATTRIBUTE14
+        , ATTRIBUTE13
+        , ATTRIBUTE12
+        , ATTRIBUTE11
+        , SET_OF_BOOKS_ID
+        , DESCRIPTION
+        , LINE_TYPE
+        , GLOBAL_ATTRIBUTE20
+        , START_DATE
+        , LAST_UPDATE_LOGIN
+        , ACCOUNTING_RULE_ID
+        , GLOBAL_ATTRIBUTE_CATEGORY
+        , GLOBAL_ATTRIBUTE17
+        , GLOBAL_ATTRIBUTE18
+        , GLOBAL_ATTRIBUTE15
+        , GLOBAL_ATTRIBUTE16
+        , GLOBAL_ATTRIBUTE13
+        , GLOBAL_ATTRIBUTE14
+        , GLOBAL_ATTRIBUTE11
+        , GLOBAL_ATTRIBUTE12
+        , ATTRIBUTE15
+        , TAX_CODE
+        , GLOBAL_ATTRIBUTE19
+        , _FIVETRAN_DELETED
+        , _FIVETRAN_ID
+        , _FIVETRAN_SYNCED
+        , PSA_LOAD_DTS
+        , PSA_RECORD_SOURCE
+        , PSA_DELETE_IND
+        , LOAD_DTS
+        , REC_SRC
+        , HASHDIFF
+FROM JOIN_RESULT
+{% if is_incremental() %}
+WHERE NOT EXISTS (
+    SELECT 1 
+    FROM {{ this }} existing
+    WHERE existing.MEMO_LINE_BK = JOIN_RESULT.MEMO_LINE_BK
+    AND existing.HASH_DIFF = JOIN_RESULT.HASH_DIFF
+)
+{% endif %} 
+{% if not is_incremental() %}
+union all
+    SELECT   GR.VALUE as MEMO_LINE_BK
+, GR.VALUE::NUMBER as ORG_ID
+, GR.VALUE::NUMBER as MEMO_LINE_ID
+    , null as TAX_PRODUCT_CATEGORY
+    , null as END_DATE
+    , null as GLOBAL_ATTRIBUTE10
+    , null as LAST_UPDATE_DATE
+    , null as GLOBAL_ATTRIBUTE5
+    , null as GLOBAL_ATTRIBUTE4
+    , null as GLOBAL_ATTRIBUTE7
+    , null as GLOBAL_ATTRIBUTE6
+    , null as GLOBAL_ATTRIBUTE1
+    , null as GLOBAL_ATTRIBUTE3
+    , null as GLOBAL_ATTRIBUTE2
+    , null as UNIT_STD_PRICE
+    , null as GLOBAL_ATTRIBUTE9
+    , null as GLOBAL_ATTRIBUTE8
+    , null as CREATED_BY
+    , null as ATTRIBUTE3
+    , null as LAST_UPDATED_BY
+    , null as ATTRIBUTE2
+    , null as ATTRIBUTE1
+    , null as CREATION_DATE
+    , null as INVOICING_RULE_ID
+    , null as ATTRIBUTE9
+    , null as ATTRIBUTE8
+    , null as ATTRIBUTE7
+    , null as ATTRIBUTE6
+    , null as ATTRIBUTE5
+    , null as NAME
+    , null as ATTRIBUTE4
+    , null as ATTRIBUTE_CATEGORY
+    , null as UOM_CODE
+    , null as GL_ID_REV
+    , null as ATTRIBUTE10
+    , null as ATTRIBUTE14
+    , null as ATTRIBUTE13
+    , null as ATTRIBUTE12
+    , null as ATTRIBUTE11
+    , null as SET_OF_BOOKS_ID
+    , null as DESCRIPTION
+    , null as LINE_TYPE
+    , null as GLOBAL_ATTRIBUTE20
+    , null as START_DATE
+    , null as LAST_UPDATE_LOGIN
+    , null as ACCOUNTING_RULE_ID
+    , null as GLOBAL_ATTRIBUTE_CATEGORY
+    , null as GLOBAL_ATTRIBUTE17
+    , null as GLOBAL_ATTRIBUTE18
+    , null as GLOBAL_ATTRIBUTE15
+    , null as GLOBAL_ATTRIBUTE16
+    , null as GLOBAL_ATTRIBUTE13
+    , null as GLOBAL_ATTRIBUTE14
+    , null as GLOBAL_ATTRIBUTE11
+    , null as GLOBAL_ATTRIBUTE12
+    , null as ATTRIBUTE15
+    , null as TAX_CODE
+    , null as GLOBAL_ATTRIBUTE19
+    , null as _FIVETRAN_DELETED
+    , null as _FIVETRAN_ID
+    , null as _FIVETRAN_SYNCED
+    , null as PSA_LOAD_DTS
+    , null as PSA_RECORD_SOURCE
+    , null as PSA_DELETE_IND, CONVERT_TIMEZONE('UTC','1900-01-01'::TIMESTAMP)::TIMESTAMP  as  LOAD_DTS
+	,'USAZET.SNOWFLAKE.FBIN.DERIVED' AS REC_SRC
+	,''::BINARY as HASH_DIFF
+        FROM
+        TABLE(strtok_split_to_table('0|-1|-2', '|')) AS GR
+{% endif %}

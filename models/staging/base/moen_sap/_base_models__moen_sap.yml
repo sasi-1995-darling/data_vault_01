@@ -1,0 +1,279 @@
+version: 2
+
+models:
+  - name: base_item_master__moen_sap
+    description: This is the base staging model from Moen for sat_item_master
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - item_id
+  - name: base_item_description__moen_sap
+    description: This is the base staging model from Moen for ref_item_description
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - matnr
+              - spras
+            quote_columns: false
+  - name: base_item_room_area__moen_sap
+    description: This is the base staging model from Moen for ref_item_room_area
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - zzrmarea
+  - name: base_item_group__moen_sap
+    description: This is the base staging model from Moen for ref_item_group
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - zzptgk
+              - spras
+            quote_columns: false
+    columns:
+      - name: txt30
+        tests:
+          - not_null
+  - name: base_item_platform__moen_sap
+    description: This is the base staging model from Moen for ref_item_platform
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - zzplt
+              - spras
+            quote_columns: false
+    columns:
+      - name: txt30
+        tests:
+          - not_null
+  - name: base_item_reporting_category__moen_sap
+    description: This is the base staging model from Moen for ref_item_reporting_category
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - zzrepcatg
+              - spras
+            quote_columns: false
+    columns:
+      - name: zzrepcatgd
+        tests:
+          - not_null
+  - name: base_item_finish__moen_sap
+    description: This is the base staging model from Moen for ref_item_finish
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - zzfin
+              - spras
+            quote_columns: false
+    columns:
+      - name: txt30
+        tests:
+          - not_null
+  - name: base_item_price_group__moen_sap
+    description: This is the base staging model from Moen for ref_item_price_group
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - zzptg
+              - spras
+            quote_columns: false
+    columns:
+      - name: txt30
+        tests:
+          - not_null
+  - name: base_ausp_brand__moen_sap
+    description: This is the base staging model from Moen for ref_ausp_brand
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - objek
+    columns:
+      - name: atwrt
+        tests:
+          - not_null
+  - name: base_shipment__moen_sap
+    description: This is the base staging model from Moen for sat_shipment
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - mandt
+              - paledger
+              - vrgar
+              - versi
+              - perio
+              - paobjnr
+              - pasubnr
+              - belnr
+              - posnr
+            quote_columns: false
+    columns:
+      - name: artnr
+        tests:
+          - not_null
+  - name: base_cust_sales_area__moen_sap
+    description: This is the base staging model from Moen for sat_cust_sales_area
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - kunnr
+              - vkorg
+              - vtweg
+              - spart
+            quote_columns: false
+    columns:
+      - name: adrnr
+        tests:
+          - not_null
+      - name: spras
+        tests:
+          - not_null
+  - name: base_location__moen_sap
+    description: This is the base staging model from Moen for sat_location
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - addrnumber
+              - nation
+            quote_columns: false
+    columns:
+      - name: langu
+        tests:
+          - not_null
+  - name: base_shipment_inputs__moen_sap
+    description: This is the base staging model from Moen for sat_shipment_inputs
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - mandt
+              - ssour
+              - vrsio
+              - spmon
+              - sptag
+              - spwoc
+              - spbup
+              - kunnr
+              - matnr
+              - werks
+              - wadat
+              - vbeln
+              - posnr
+              - auart
+              - stwae_01
+              - abgru
+            quote_columns: false
+    columns:
+      - name: matnr
+        tests:
+          - not_null
+  - name: base_inputs_plant__moen_sap
+    description: This is the base staging model from Moen for ref_plant
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - werks
+    columns:
+      - name: name1
+        tests:
+          - not_null
+  - name: base_inputs_sales_doc_type__moen_sap
+    description: This is the base staging model from Moen for ref_sales_doc_type
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - auart
+              - spras
+            quote_columns: false
+    columns:
+      - name: bezei
+        tests:
+          - not_null
+  - name: base_inputs_combined_reason__moen_sap
+    description: This is the base staging model from Moen for ref_combined_reason
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - wwrsn
+              - spras
+            quote_columns: false
+  - name: base_inputs_sale_type__moen_sap
+    description: This is the base staging model from Moen for ref_sale_type
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - wwstp
+              - spras
+            quote_columns: false
+    columns:
+      - name: bezek
+        tests:
+          - not_null
+  - name: base_item_bundle__moen_sap
+    description: This is the base staging model for moen bundle mapping
+    tests:
+      - 'dbt_constraints.primary_key:':
+          arguments:
+            column_names:
+              - customer
+              - parent_material_number
+              - child_material_number
+  - name: base_legacy_hofr_us_sales__hofr_ecl
+    description: This is the base staging model from HofR for Moen shipment and inputs
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - invoice_no
+              - unique_key
+            quote_columns: false
+    columns:
+      - name: customer_number
+        tests:
+          - not_null
+      - name: order_date
+        tests:
+          - not_null
+      - name: date
+        tests:
+          - not_null
+  - name: base_plant__moen_sap
+    description: This is the base staging model from hub_plant
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - werks
+    columns:
+      - name: mandt
+        tests:
+          - not_null
+      - name: name1
+        tests:
+          - not_null
+  - name: base_brand__moen_sap
+    description: This is the brand data from SAP
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - atwrt
+    columns:
+      - name: rec_src
+        tests:
+          - not_null

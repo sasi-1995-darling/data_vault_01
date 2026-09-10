@@ -1,0 +1,14 @@
+version: 2
+models:
+- name: v_psa_stg_dc_inventory_with_store__homedepot_ft
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - HOME_DEPOT_ACCOUNT
+        - DAY_1
+        - MANUF_PART_NUMBER
+        - SKU_NBR
+        - STORE_HK
+        - LOAD_DTS
+  columns: []

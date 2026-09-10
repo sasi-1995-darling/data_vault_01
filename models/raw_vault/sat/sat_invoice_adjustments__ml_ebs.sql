@@ -1,0 +1,472 @@
+---- SRC LAYER ----
+WITH
+SRC_SADJML         as ( SELECT * FROM {{ ref('v_psa_stg_adjustments__ml_ebs') }} as SRC 
+                         {% if is_incremental() %}
+                         WHERE SRC.LOAD_DTS > (SELECT DATEADD('HOUR', '-1', MAX(LOAD_DTS)) FROM {{this}})
+                         {% endif %}  )
+
+/*
+SRC_SADJML         as ( SELECT * FROM STAGING.v_psa_stg_adjustments__ML_EBS )
+*/
+---- LOGIC LAYER ----
+
+, LOGIC_SADJML as (
+    SELECT
+        INVOICE_HK
+      , CUSTOMER_TRX_ID
+      , ADJUSTMENT_ID
+      , CREATED_FROM
+      , USSGL_TRANSACTION_CODE_CONTEXT
+      , ORG_ID
+      , DISTRIBUTION_SET_ID
+      , LINE_ADJUSTED
+      , APPLY_DATE
+      , SUBSEQUENT_TRX_ID
+      , GLOBAL_ATTRIBUTE10
+      , ASSOCIATED_CASH_RECEIPT_ID
+      , PROGRAM_ID
+      , INTEREST_LINE_ID
+      , GLOBAL_ATTRIBUTE5
+      , GLOBAL_ATTRIBUTE4
+      , GLOBAL_ATTRIBUTE7
+      , STATUS
+      , GLOBAL_ATTRIBUTE6
+      , GLOBAL_ATTRIBUTE1
+      , AMOUNT
+      , GLOBAL_ATTRIBUTE3
+      , GLOBAL_ATTRIBUTE2
+      , AX_ACCOUNTED_FLAG
+      , CHARGEBACK_CUSTOMER_TRX_ID
+      , POSTING_CONTROL_ID
+      , GLOBAL_ATTRIBUTE9
+      , GLOBAL_ATTRIBUTE8
+      , TYPE
+      , APPROVED_BY
+      , CREATED_BY
+      , ATTRIBUTE3
+      , LAST_UPDATED_BY
+      , ATTRIBUTE2
+      , ATTRIBUTE1
+      , MRC_ACCTD_AMOUNT
+      , AUTOMATICALLY_GENERATED
+      , MRC_GL_POSTED_DATE
+      , ATTRIBUTE9
+      , ATTRIBUTE8
+      , ADJUSTMENT_TYPE
+      , ATTRIBUTE7
+      , USSGL_TRANSACTION_CODE
+      , GL_DATE
+      , ATTRIBUTE6
+      , RECEIVABLES_CHARGES_ADJUSTED
+      , ATTRIBUTE5
+      , GL_POSTED_DATE
+      , ATTRIBUTE4
+      , POSTABLE
+      , ATTRIBUTE_CATEGORY
+      , RECEIVABLES_TRX_ID
+      , PROGRAM_APPLICATION_ID
+      , LINK_TO_TRX_HIST_ID
+      , ADJUSTMENT_NUMBER
+      , EVENT_ID
+      , PAYMENT_SCHEDULE_ID
+      , ATTRIBUTE10
+      , CONS_INV_ID
+      , ATTRIBUTE14
+      , ATTRIBUTE13
+      , INTEREST_HEADER_ID
+      , ATTRIBUTE12
+      , ATTRIBUTE11
+      , SET_OF_BOOKS_ID
+      , COMMENTS
+      , REQUEST_ID
+      , BATCH_ID
+      , TAX_ADJUSTED
+      , ASSOCIATED_APPLICATION_ID
+      , CODE_COMBINATION_ID
+      , FREIGHT_ADJUSTED
+      , DOC_SEQUENCE_VALUE
+      , CUSTOMER_TRX_LINE_ID
+      , ADJ_TAX_ACCT_RULE
+      , REASON_CODE
+      , GLOBAL_ATTRIBUTE20
+      , ACCTD_AMOUNT
+      , LAST_UPDATE_LOGIN
+      , UPGRADE_METHOD
+      , GLOBAL_ATTRIBUTE_CATEGORY
+      , GLOBAL_ATTRIBUTE17
+      , GLOBAL_ATTRIBUTE18
+      , GLOBAL_ATTRIBUTE15
+      , GLOBAL_ATTRIBUTE16
+      , MRC_POSTING_CONTROL_ID
+      , GLOBAL_ATTRIBUTE13
+      , GLOBAL_ATTRIBUTE14
+      , GLOBAL_ATTRIBUTE11
+      , GLOBAL_ATTRIBUTE12
+      , DOC_SEQUENCE_ID
+      , ATTRIBUTE15
+      , GLOBAL_ATTRIBUTE19
+      , PROGRAM_UPDATE_DATE
+      , CREATION_DATE
+      , LAST_UPDATE_DATE
+      , _FIVETRAN_DELETED
+      , _FIVETRAN_ID
+      , _FIVETRAN_SYNCED
+      , PSA_LOAD_DTS
+      , PSA_RECORD_SOURCE
+      , PSA_DELETE_IND
+      , LOAD_DTS
+      , REC_SRC
+      , HASHDIFF
+    FROM SRC_SADJML
+)
+---- RENAME LAYER ----
+
+, RENAME_SADJML as (
+    SELECT
+        INVOICE_HK
+      , CUSTOMER_TRX_ID
+      , ADJUSTMENT_ID
+      , CREATED_FROM
+      , USSGL_TRANSACTION_CODE_CONTEXT
+      , ORG_ID
+      , DISTRIBUTION_SET_ID
+      , LINE_ADJUSTED
+      , APPLY_DATE
+      , SUBSEQUENT_TRX_ID
+      , GLOBAL_ATTRIBUTE10
+      , ASSOCIATED_CASH_RECEIPT_ID
+      , PROGRAM_ID
+      , INTEREST_LINE_ID
+      , GLOBAL_ATTRIBUTE5
+      , GLOBAL_ATTRIBUTE4
+      , GLOBAL_ATTRIBUTE7
+      , STATUS
+      , GLOBAL_ATTRIBUTE6
+      , GLOBAL_ATTRIBUTE1
+      , AMOUNT
+      , GLOBAL_ATTRIBUTE3
+      , GLOBAL_ATTRIBUTE2
+      , AX_ACCOUNTED_FLAG
+      , CHARGEBACK_CUSTOMER_TRX_ID
+      , POSTING_CONTROL_ID
+      , GLOBAL_ATTRIBUTE9
+      , GLOBAL_ATTRIBUTE8
+      , TYPE
+      , APPROVED_BY
+      , CREATED_BY
+      , ATTRIBUTE3
+      , LAST_UPDATED_BY
+      , ATTRIBUTE2
+      , ATTRIBUTE1
+      , MRC_ACCTD_AMOUNT
+      , AUTOMATICALLY_GENERATED
+      , MRC_GL_POSTED_DATE
+      , ATTRIBUTE9
+      , ATTRIBUTE8
+      , ADJUSTMENT_TYPE
+      , ATTRIBUTE7
+      , USSGL_TRANSACTION_CODE
+      , GL_DATE
+      , ATTRIBUTE6
+      , RECEIVABLES_CHARGES_ADJUSTED
+      , ATTRIBUTE5
+      , GL_POSTED_DATE
+      , ATTRIBUTE4
+      , POSTABLE
+      , ATTRIBUTE_CATEGORY
+      , RECEIVABLES_TRX_ID
+      , PROGRAM_APPLICATION_ID
+      , LINK_TO_TRX_HIST_ID
+      , ADJUSTMENT_NUMBER
+      , EVENT_ID
+      , PAYMENT_SCHEDULE_ID
+      , ATTRIBUTE10
+      , CONS_INV_ID
+      , ATTRIBUTE14
+      , ATTRIBUTE13
+      , INTEREST_HEADER_ID
+      , ATTRIBUTE12
+      , ATTRIBUTE11
+      , SET_OF_BOOKS_ID
+      , COMMENTS
+      , REQUEST_ID
+      , BATCH_ID
+      , TAX_ADJUSTED
+      , ASSOCIATED_APPLICATION_ID
+      , CODE_COMBINATION_ID
+      , FREIGHT_ADJUSTED
+      , DOC_SEQUENCE_VALUE
+      , CUSTOMER_TRX_LINE_ID
+      , ADJ_TAX_ACCT_RULE
+      , REASON_CODE
+      , GLOBAL_ATTRIBUTE20
+      , ACCTD_AMOUNT
+      , LAST_UPDATE_LOGIN
+      , UPGRADE_METHOD
+      , GLOBAL_ATTRIBUTE_CATEGORY
+      , GLOBAL_ATTRIBUTE17
+      , GLOBAL_ATTRIBUTE18
+      , GLOBAL_ATTRIBUTE15
+      , GLOBAL_ATTRIBUTE16
+      , MRC_POSTING_CONTROL_ID
+      , GLOBAL_ATTRIBUTE13
+      , GLOBAL_ATTRIBUTE14
+      , GLOBAL_ATTRIBUTE11
+      , GLOBAL_ATTRIBUTE12
+      , DOC_SEQUENCE_ID
+      , ATTRIBUTE15
+      , GLOBAL_ATTRIBUTE19
+      , PROGRAM_UPDATE_DATE
+      , CREATION_DATE
+      , LAST_UPDATE_DATE
+      , _FIVETRAN_DELETED
+      , _FIVETRAN_ID
+      , _FIVETRAN_SYNCED
+      , PSA_LOAD_DTS
+      , PSA_RECORD_SOURCE
+      , PSA_DELETE_IND
+      , LOAD_DTS
+      , REC_SRC
+      , HASHDIFF
+    FROM LOGIC_SADJML
+)
+---- FILTER LAYER ----
+
+, FILTER_SADJML as (
+    SELECT *
+    FROM RENAME_SADJML
+)
+
+---- JOIN LAYER ----
+, JOIN_RESULT as (
+    SELECT *
+    FROM FILTER_SADJML
+)
+
+---- FINAL LAYER ----
+SELECT
+          INVOICE_HK
+        , CUSTOMER_TRX_ID
+        , ADJUSTMENT_ID
+        , CREATED_FROM
+        , USSGL_TRANSACTION_CODE_CONTEXT
+        , ORG_ID
+        , DISTRIBUTION_SET_ID
+        , LINE_ADJUSTED
+        , APPLY_DATE
+        , SUBSEQUENT_TRX_ID
+        , GLOBAL_ATTRIBUTE10
+        , ASSOCIATED_CASH_RECEIPT_ID
+        , PROGRAM_ID
+        , INTEREST_LINE_ID
+        , GLOBAL_ATTRIBUTE5
+        , GLOBAL_ATTRIBUTE4
+        , GLOBAL_ATTRIBUTE7
+        , STATUS
+        , GLOBAL_ATTRIBUTE6
+        , GLOBAL_ATTRIBUTE1
+        , AMOUNT
+        , GLOBAL_ATTRIBUTE3
+        , GLOBAL_ATTRIBUTE2
+        , AX_ACCOUNTED_FLAG
+        , CHARGEBACK_CUSTOMER_TRX_ID
+        , POSTING_CONTROL_ID
+        , GLOBAL_ATTRIBUTE9
+        , GLOBAL_ATTRIBUTE8
+        , TYPE
+        , APPROVED_BY
+        , CREATED_BY
+        , ATTRIBUTE3
+        , LAST_UPDATED_BY
+        , ATTRIBUTE2
+        , ATTRIBUTE1
+        , MRC_ACCTD_AMOUNT
+        , AUTOMATICALLY_GENERATED
+        , MRC_GL_POSTED_DATE
+        , ATTRIBUTE9
+        , ATTRIBUTE8
+        , ADJUSTMENT_TYPE
+        , ATTRIBUTE7
+        , USSGL_TRANSACTION_CODE
+        , GL_DATE
+        , ATTRIBUTE6
+        , RECEIVABLES_CHARGES_ADJUSTED
+        , ATTRIBUTE5
+        , GL_POSTED_DATE
+        , ATTRIBUTE4
+        , POSTABLE
+        , ATTRIBUTE_CATEGORY
+        , RECEIVABLES_TRX_ID
+        , PROGRAM_APPLICATION_ID
+        , LINK_TO_TRX_HIST_ID
+        , ADJUSTMENT_NUMBER
+        , EVENT_ID
+        , PAYMENT_SCHEDULE_ID
+        , ATTRIBUTE10
+        , CONS_INV_ID
+        , ATTRIBUTE14
+        , ATTRIBUTE13
+        , INTEREST_HEADER_ID
+        , ATTRIBUTE12
+        , ATTRIBUTE11
+        , SET_OF_BOOKS_ID
+        , COMMENTS
+        , REQUEST_ID
+        , BATCH_ID
+        , TAX_ADJUSTED
+        , ASSOCIATED_APPLICATION_ID
+        , CODE_COMBINATION_ID
+        , FREIGHT_ADJUSTED
+        , DOC_SEQUENCE_VALUE
+        , CUSTOMER_TRX_LINE_ID
+        , ADJ_TAX_ACCT_RULE
+        , REASON_CODE
+        , GLOBAL_ATTRIBUTE20
+        , ACCTD_AMOUNT
+        , LAST_UPDATE_LOGIN
+        , UPGRADE_METHOD
+        , GLOBAL_ATTRIBUTE_CATEGORY
+        , GLOBAL_ATTRIBUTE17
+        , GLOBAL_ATTRIBUTE18
+        , GLOBAL_ATTRIBUTE15
+        , GLOBAL_ATTRIBUTE16
+        , MRC_POSTING_CONTROL_ID
+        , GLOBAL_ATTRIBUTE13
+        , GLOBAL_ATTRIBUTE14
+        , GLOBAL_ATTRIBUTE11
+        , GLOBAL_ATTRIBUTE12
+        , DOC_SEQUENCE_ID
+        , ATTRIBUTE15
+        , GLOBAL_ATTRIBUTE19
+        , PROGRAM_UPDATE_DATE
+        , CREATION_DATE
+        , LAST_UPDATE_DATE
+        , _FIVETRAN_DELETED
+        , _FIVETRAN_ID
+        , _FIVETRAN_SYNCED
+        , PSA_LOAD_DTS
+        , PSA_RECORD_SOURCE
+        , PSA_DELETE_IND
+        , LOAD_DTS
+        , REC_SRC
+        , HASHDIFF
+FROM JOIN_RESULT
+{% if is_incremental() %}
+WHERE NOT EXISTS (
+    SELECT 1 
+    FROM {{ this }} existing
+    WHERE existing.INVOICE_HK= JOIN_RESULT.INVOICE_HK
+    AND existing.HASHDIFF = JOIN_RESULT.HASHDIFF
+)
+{% endif %} 
+{% if not is_incremental() %}
+/*the following qualify is to restrict multiple loads of touched records during the initial build. Ex: multiple row per hk, hashdiff */
+qualify 1= row_number()over(partition by INVOICE_HK, HASHDIFF order by PSA_LOAD_DTS)
+union all
+    SELECT        
+    MD5_BINARY(GR.VALUE) AS INVOICE_HK
+, GR.VALUE::NUMBER as CUSTOMER_TRX_ID
+, GR.VALUE::NUMBER as ADJUSTMENT_ID
+    , null as CREATED_FROM
+    , null as USSGL_TRANSACTION_CODE_CONTEXT
+    , null as ORG_ID
+    , null as DISTRIBUTION_SET_ID
+    , null as LINE_ADJUSTED
+    , null as APPLY_DATE
+    , null as SUBSEQUENT_TRX_ID
+    , null as GLOBAL_ATTRIBUTE10
+    , null as ASSOCIATED_CASH_RECEIPT_ID
+    , null as PROGRAM_ID
+    , null as INTEREST_LINE_ID
+    , null as GLOBAL_ATTRIBUTE5
+    , null as GLOBAL_ATTRIBUTE4
+    , null as GLOBAL_ATTRIBUTE7
+    , null as STATUS
+    , null as GLOBAL_ATTRIBUTE6
+    , null as GLOBAL_ATTRIBUTE1
+    , null as AMOUNT
+    , null as GLOBAL_ATTRIBUTE3
+    , null as GLOBAL_ATTRIBUTE2
+    , null as AX_ACCOUNTED_FLAG
+    , null as CHARGEBACK_CUSTOMER_TRX_ID
+    , null as POSTING_CONTROL_ID
+    , null as GLOBAL_ATTRIBUTE9
+    , null as GLOBAL_ATTRIBUTE8
+    , null as TYPE
+    , null as APPROVED_BY
+    , null as CREATED_BY
+    , null as ATTRIBUTE3
+    , null as LAST_UPDATED_BY
+    , null as ATTRIBUTE2
+    , null as ATTRIBUTE1
+    , null as MRC_ACCTD_AMOUNT
+    , null as AUTOMATICALLY_GENERATED
+    , null as MRC_GL_POSTED_DATE
+    , null as ATTRIBUTE9
+    , null as ATTRIBUTE8
+    , null as ADJUSTMENT_TYPE
+    , null as ATTRIBUTE7
+    , null as USSGL_TRANSACTION_CODE
+    , null as GL_DATE
+    , null as ATTRIBUTE6
+    , null as RECEIVABLES_CHARGES_ADJUSTED
+    , null as ATTRIBUTE5
+    , null as GL_POSTED_DATE
+    , null as ATTRIBUTE4
+    , null as POSTABLE
+    , null as ATTRIBUTE_CATEGORY
+    , null as RECEIVABLES_TRX_ID
+    , null as PROGRAM_APPLICATION_ID
+    , null as LINK_TO_TRX_HIST_ID
+    , null as ADJUSTMENT_NUMBER
+    , null as EVENT_ID
+    , null as PAYMENT_SCHEDULE_ID
+    , null as ATTRIBUTE10
+    , null as CONS_INV_ID
+    , null as ATTRIBUTE14
+    , null as ATTRIBUTE13
+    , null as INTEREST_HEADER_ID
+    , null as ATTRIBUTE12
+    , null as ATTRIBUTE11
+    , null as SET_OF_BOOKS_ID
+    , null as COMMENTS
+    , null as REQUEST_ID
+    , null as BATCH_ID
+    , null as TAX_ADJUSTED
+    , null as ASSOCIATED_APPLICATION_ID
+    , null as CODE_COMBINATION_ID
+    , null as FREIGHT_ADJUSTED
+    , null as DOC_SEQUENCE_VALUE
+    , null as CUSTOMER_TRX_LINE_ID
+    , null as ADJ_TAX_ACCT_RULE
+    , null as REASON_CODE
+    , null as GLOBAL_ATTRIBUTE20
+    , null as ACCTD_AMOUNT
+    , null as LAST_UPDATE_LOGIN
+    , null as UPGRADE_METHOD
+    , null as GLOBAL_ATTRIBUTE_CATEGORY
+    , null as GLOBAL_ATTRIBUTE17
+    , null as GLOBAL_ATTRIBUTE18
+    , null as GLOBAL_ATTRIBUTE15
+    , null as GLOBAL_ATTRIBUTE16
+    , null as MRC_POSTING_CONTROL_ID
+    , null as GLOBAL_ATTRIBUTE13
+    , null as GLOBAL_ATTRIBUTE14
+    , null as GLOBAL_ATTRIBUTE11
+    , null as GLOBAL_ATTRIBUTE12
+    , null as DOC_SEQUENCE_ID
+    , null as ATTRIBUTE15
+    , null as GLOBAL_ATTRIBUTE19
+    , null as PROGRAM_UPDATE_DATE
+    , null as CREATION_DATE
+    , null as LAST_UPDATE_DATE
+    , null as _FIVETRAN_DELETED
+    , null as _FIVETRAN_ID
+    , null as _FIVETRAN_SYNCED
+    , null as PSA_LOAD_DTS
+    , null as PSA_RECORD_SOURCE
+    , null as PSA_DELETE_IND  , CONVERT_TIMEZONE('UTC','1900-01-01'::TIMESTAMP)::TIMESTAMP  as  LOAD_DTS
+,'USAZET.SNOWFLAKE.FBIN.DERIVED' AS REC_SRC
+, ''::BINARY as HASH_DIFF FROM
+        TABLE(strtok_split_to_table('0|-1|-2', '|')) AS GR
+{% endif %}

@@ -1,0 +1,18 @@
+version: 2
+models:
+- name: v_psa_stg_dispute__stripe_flosense
+  data_tests:
+  - dbt_utils.unique_combination_of_columns:
+      name: grain_v_psa_stg_dispute__stripe_flosense
+      arguments:
+        combination_of_columns:
+        - DISPUTE_BK
+        - LOAD_DTS
+      config:
+        severity: warn
+  columns:
+  - name: DISPUTE_BK
+    data_tests:
+    - not_null:
+        config:
+          severity: warn

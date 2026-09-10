@@ -1,0 +1,17 @@
+version: 2
+
+models:
+  - name: ref_product_master__profitero
+    description: This is the business vault reference model for profitero product master
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - ref_id
+  - name: ref_price_availability_history__profitero
+    description: This is business vault reference model for profitero price availability history
+    tests:
+      - 'dbt_constraints.primary_key:':
+          arguments:
+            column_names:
+              - ref_id

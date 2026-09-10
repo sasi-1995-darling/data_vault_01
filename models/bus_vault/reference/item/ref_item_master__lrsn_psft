@@ -1,0 +1,102 @@
+{{
+    config(
+        materialized='ephemeral'
+    )
+}}
+
+with cte_sat_prod_item__lrsn_psft as (select * from {{ ref('sat_prod_item__lrsn_psft') }})
+
+, cte_sat_prod_item__lrsn_psft_latest as (
+    {{ generate_cte_satellite_latest('cte_sat_prod_item__lrsn_psft','item_hk') }}
+)
+
+, cte_sat_prod_grp__lrsn_psft as (select * from {{ ref('sat_prod_grp__lrsn_psft') }})
+
+, cte_sat_prod_grp__lrsn_psft_latest as (
+    {{ generate_cte_satellite_latest('cte_sat_prod_grp__lrsn_psft','item_hk') }}
+)
+
+, cte_sat_master_item__lrsn_psft as (select * from {{ ref('sat_master_item__lrsn_psft') }})
+
+, cte_sat_master_item__lrsn_psft_latest as (
+    {{ generate_cte_satellite_latest('cte_sat_master_item__lrsn_psft','item_hk') }}
+)
+
+, cte_latest_inv_items as (
+    select
+        item_hk
+        , inv_item_length
+        , inv_item_width
+        , inv_item_height
+        , inv_item_color
+        , setid
+        , effdt
+    from {{ ref('msat_inv_items__lrsn_psft') }} where setid = 'LARSN'
+    qualify row_number() over (partition by item_hk order by effdt desc) = 1
+)
+
+, cte_latest_item_cat as (
+    select
+        category_id
+        , category_cd
+        , descr60
+        , setid
+        , effdt
+    from {{ ref('ref_item_cat__lrsn_psft') }} where setid = 'LARSN'
+    qualify row_number() over (partition by category_id order by effdt desc) = 1
+)
+
+select
+    hi.item_hk
+    , hi.item_bk as item_id
+    , spi.descr as item_title
+    , spi.product_id as base_material
+    , ref_xlat.xlatlongname as item_status
+    , smi.inv_item_group as item_type_code
+    , nvl(ref_pg_grp.descr, 'REPLACEMENT PARTS') as item_category
+    , nvl(ref_pg_cat.descr, 'REPLACEMENT PARTS') as item_sub_category
+    , ref_pg_ser.descr as item_class
+    , ref_pg_mod.descr as item_sub_class
+    , null as pricing
+    , ref_pg_ud14.descr as finish
+    , null as business_segment
+    , ref_pg_com.descr as brand
+    , smi.unit_measure_std as primary_unit_of_measure,
+{{
+        concatenate_fields(
+            [
+                'sii.inv_item_length',
+                'sii.inv_item_width',
+                'sii.inv_item_height'
+            ]
+        )
+    }} as size_attribute
+    , ref_cat.descr60 as item_area
+
+from {{ ref('hub_item') }} as hi
+    inner join cte_sat_prod_item__lrsn_psft_latest as spi
+        on hi.item_hk = spi.item_hk and spi.setid = 'LARSN'
+    left join cte_sat_prod_grp__lrsn_psft_latest as spg
+        on hi.item_hk = spg.item_hk and spi.setid = spg.setid
+    left join cte_sat_master_item__lrsn_psft_latest as smi
+        on hi.item_hk = smi.item_hk and spi.setid = smi.setid
+    left join cte_latest_inv_items as sii
+        on hi.item_hk = sii.item_hk
+    left join cte_latest_item_cat as ref_cat
+        on ref_cat.category_id = smi.category_id
+    left join {{ ref('ref_xlatitem__lrsn_psft') }} as ref_xlat
+        on ref_xlat.fieldname = 'EFF_STATUS' and spi.eff_status = ref_xlat.fieldvalue
+    left join {{ ref('ref_prod_grp_lu__lrsn_psft') }} as ref_pg_ud14
+        on ref_pg_ud14.l_grp_type = 'UD14' and spg.user_dim_14 = ref_pg_ud14.l_grp_code
+    left join {{ ref('ref_prod_grp_lu__lrsn_psft') }} as ref_pg_grp
+        on ref_pg_grp.l_grp_type = 'GRP' and ref_pg_grp.l_grp_code = spg.l_group
+    left join {{ ref('ref_prod_grp_lu__lrsn_psft') }} as ref_pg_cat
+        on ref_pg_cat.l_grp_type = 'CAT' and ref_pg_cat.l_grp_code = spg.l_category
+    left join {{ ref('ref_prod_grp_lu__lrsn_psft') }} as ref_pg_ser
+        on ref_pg_ser.l_grp_type = 'SER' and ref_pg_ser.l_grp_code = spg.l_series
+    left join {{ ref('ref_prod_grp_lu__lrsn_psft') }} as ref_pg_mod
+        on ref_pg_mod.l_grp_type = 'MOD' and ref_pg_mod.l_grp_code = spg.l_model
+    left join {{ ref('ref_prod_grp_lu__lrsn_psft') }} as ref_pg_com
+        on ref_pg_com.l_grp_type = 'CO' and ref_pg_com.l_grp_code = spg.l_company
+where 1 = 1
+    and hi.brand = 'LRSN' and spi.setid = 'LARSN'

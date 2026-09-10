@@ -1,0 +1,131 @@
+---- SRC LAYER ----
+WITH
+SRC_a              as ( SELECT ACCEPTED_QUANTITY_AMOUNT, ACCEPTED_QUANTITY_UNIT_OF_MEASURE, ACCEPTED_QUANTITY_UNIT_SIZE, ACKNOWLEDGEMENT_DATE, INDEX, ITEM_SEQUENCE_NUMBER, PSA_DELETE_IND, PSA_LOAD_DTS, PSA_RECORD_SOURCE, PURCHASE_ORDER_NUMBER, REJECTED_QUANTITY_AMOUNT, REJECTED_QUANTITY_UNIT_OF_MEASURE, REJECTED_QUANTITY_UNIT_SIZE, _FIVETRAN_SYNCED FROM {{ source('amazon_sp_ft_moen_inc', 'acknowledgement_status_details') }} as SRC  ),
+SRC_bkcc           as ( SELECT BKCC, REC_SRC FROM {{ ref('ref_business_key_collision') }} as SRC  )
+
+/*
+SRC_a              as ( SELECT * FROM amazon_sp_ft_moen_inc.acknowledgement_status_details )
+SRC_bkcc           as ( SELECT * FROM raw_vault.ref_business_key_collision )
+*/
+---- LOGIC LAYER ----
+
+, LOGIC_a as (
+    SELECT
+        ITEM_SEQUENCE_NUMBER
+      , PURCHASE_ORDER_NUMBER
+      , INDEX
+      , ACKNOWLEDGEMENT_DATE
+      , ACCEPTED_QUANTITY_AMOUNT
+      , ACCEPTED_QUANTITY_UNIT_OF_MEASURE
+      , ACCEPTED_QUANTITY_UNIT_SIZE
+      , REJECTED_QUANTITY_AMOUNT
+      , REJECTED_QUANTITY_UNIT_OF_MEASURE
+      , REJECTED_QUANTITY_UNIT_SIZE
+      , _FIVETRAN_SYNCED
+      , PSA_LOAD_DTS
+      , PSA_RECORD_SOURCE
+      , PSA_DELETE_IND
+      , COALESCE(NULLIF(UPPER(TRIM(PURCHASE_ORDER_NUMBER)), ''), '-1') as VENDOR_ORDER_BK
+      , COALESCE(NULLIF(UPPER(TRIM(ITEM_SEQUENCE_NUMBER)), ''), '-1') as VENDOR_ORDER_LINE_BK
+      , IFF(
+        PSA_DELETE_IND = 'Y',
+        PSA_LOAD_DTS, CONVERT_TIMEZONE('UTC',_FIVETRAN_SYNCED)) as LOAD_DTS
+    FROM SRC_a
+)
+
+, LOGIC_bkcc as (
+    SELECT
+        REC_SRC
+      , BKCC
+    FROM SRC_bkcc
+)
+---- RENAME LAYER ----
+
+, RENAME_a as (
+    SELECT
+        ITEM_SEQUENCE_NUMBER
+      , PURCHASE_ORDER_NUMBER
+      , INDEX
+      , ACKNOWLEDGEMENT_DATE
+      , ACCEPTED_QUANTITY_AMOUNT
+      , ACCEPTED_QUANTITY_UNIT_OF_MEASURE
+      , ACCEPTED_QUANTITY_UNIT_SIZE
+      , REJECTED_QUANTITY_AMOUNT
+      , REJECTED_QUANTITY_UNIT_OF_MEASURE
+      , REJECTED_QUANTITY_UNIT_SIZE
+      , _FIVETRAN_SYNCED
+      , PSA_LOAD_DTS
+      , PSA_RECORD_SOURCE
+      , PSA_DELETE_IND
+      , VENDOR_ORDER_BK
+      , VENDOR_ORDER_LINE_BK
+      , LOAD_DTS
+    FROM LOGIC_a
+)
+
+, RENAME_bkcc as (
+    SELECT
+        REC_SRC
+      , BKCC
+    FROM LOGIC_bkcc
+)
+---- FILTER LAYER ----
+
+, FILTER_a as (
+    SELECT *
+    FROM RENAME_a
+)
+
+, FILTER_bkcc as (
+    SELECT *
+    FROM RENAME_bkcc
+    WHERE rec_src = 'US.API_FT.AMAZON_VC.ACKNOWLEDGEMENT_STATUS_DETAILS'
+)
+
+---- JOIN LAYER ----
+, JOIN_RESULT as (
+    SELECT *
+    FROM FILTER_a
+    INNER JOIN FILTER_bkcc
+        ON '1' = '1'
+)
+
+---- FINAL LAYER ----
+SELECT
+          ITEM_SEQUENCE_NUMBER
+        , PURCHASE_ORDER_NUMBER
+        , INDEX
+        , ACKNOWLEDGEMENT_DATE
+        , ACCEPTED_QUANTITY_AMOUNT
+        , ACCEPTED_QUANTITY_UNIT_OF_MEASURE
+        , ACCEPTED_QUANTITY_UNIT_SIZE
+        , REJECTED_QUANTITY_AMOUNT
+        , REJECTED_QUANTITY_UNIT_OF_MEASURE
+        , REJECTED_QUANTITY_UNIT_SIZE
+        , _FIVETRAN_SYNCED
+        , PSA_LOAD_DTS
+        , PSA_RECORD_SOURCE
+        , PSA_DELETE_IND
+        , VENDOR_ORDER_BK              
+        , VENDOR_ORDER_LINE_BK
+        , LOAD_DTS
+        , REC_SRC
+        , BKCC
+        , MD5_BINARY(UPPER(CONCAT_WS('||',
+          COALESCE(NULLIF(TRIM(VENDOR_ORDER_BK), ''), '^^'),
+          COALESCE(NULLIF(TRIM(VENDOR_ORDER_LINE_BK), ''), '^^'),
+          COALESCE(NULLIF(TRIM(CAST(BKCC as VARCHAR)),''), '^^')
+        ))) as VENDOR_ORDER_ITEM_HK
+        
+      , MD5_BINARY(UPPER(NULLIF(CONCAT(
+            IFNULL(TRIM(ACKNOWLEDGEMENT_DATE::text), '^^') 
+          , '||', IFNULL(TRIM(ACCEPTED_QUANTITY_AMOUNT::text), '^^') 
+          , '||', IFNULL(TRIM(ACCEPTED_QUANTITY_UNIT_OF_MEASURE::text), '^^') 
+          , '||', IFNULL(TRIM(ACCEPTED_QUANTITY_UNIT_SIZE::text), '^^') 
+          , '||', IFNULL(TRIM(REJECTED_QUANTITY_AMOUNT::text), '^^') 
+          , '||', IFNULL(TRIM(REJECTED_QUANTITY_UNIT_OF_MEASURE::text), '^^') 
+          , '||', IFNULL(TRIM(REJECTED_QUANTITY_UNIT_SIZE::text), '^^') 
+          , '||', IFNULL(TRIM(PSA_LOAD_DTS::text), '^^') 
+          , '||', IFNULL(TRIM(PSA_DELETE_IND::text), '^^') 
+        ), '^^||^^')))  as HASHDIFF
+FROM JOIN_RESULT

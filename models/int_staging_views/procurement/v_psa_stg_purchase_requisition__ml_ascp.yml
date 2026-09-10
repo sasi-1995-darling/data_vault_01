@@ -1,0 +1,18 @@
+version: 2
+models:
+  - name: v_psa_stg_purchase_requisition__ml_ascp
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          config:
+            severity: warn
+          arguments:
+            combination_of_columns:
+              - ORDER_NUMBER
+              - PURCH_LINE_NUM
+              - LOAD_DTS
+    columns:
+      - name: PURCHASE_REQUISITION_BK
+        tests:
+          - not_null:
+              config:
+                severity: warn

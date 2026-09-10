@@ -1,0 +1,20 @@
+version: 2
+
+models:
+  - name: tlink_po_line_transaction
+    description: This is the raw vault transactional link model for po lines and transactions on those lines
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - po_line_transaction_link_hk
+      - dbt_constraints.foreign_key:
+          arguments:
+            fk_column_names:
+              - po_line_hk
+            pk_table_name: ref('hub_po_line')
+            pk_column_names:
+              - po_line_hk
+    config:
+      tags:
+        - emtek

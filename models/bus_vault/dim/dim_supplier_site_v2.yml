@@ -1,0 +1,11 @@
+version: 2
+models:
+- name: dim_supplier_site_v2
+  data_tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - SUPPLIER_SITE_KEY
+      config:
+        severity: warn
+  columns: []

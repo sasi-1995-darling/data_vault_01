@@ -1,0 +1,160 @@
+
+---- SRC LAYER ----
+WITH
+SRC_R          as ( SELECT BKCC, GOODS_STORAGE_LOCATION_BK, GOODS_STORAGE_LOCATION_HK, LOAD_DTS, REC_SRC FROM {{ ref('v_psa_stg_goods_movement_storage_location__winn_sap') }} as SRC
+                     QUALIFY (ROW_NUMBER() OVER(PARTITION BY GOODS_STORAGE_LOCATION_BK ORDER BY LOAD_DTS ))=1 ),
+SRC_ZSERVLEVEL     as ( SELECT BKCC, GOODS_STORAGE_LOCATION_BK, GOODS_STORAGE_LOCATION_HK, LOAD_DTS, REC_SRC FROM {{ ref('v_psa_stg_service_levels__winn_sap') }} as SRC 
+                        QUALIFY (ROW_NUMBER() OVER(PARTITION BY GOODS_STORAGE_LOCATION_BK ORDER BY GLCHANGETIME ))=1 ),
+SRC_RESERVATION     as ( SELECT BKCC, GOODS_STORAGE_LOCATION_BK, GOODS_STORAGE_LOCATION_HK, LOAD_DTS, REC_SRC FROM {{ ref('v_psa_stg_reservation_line__winn_sap') }} as SRC 
+                        QUALIFY (ROW_NUMBER() OVER(PARTITION BY GOODS_STORAGE_LOCATION_BK ORDER BY GLCHANGETIME ))=1 ),
+SRC_INVENTORY      as ( SELECT BKCC, GOODS_STORAGE_LOCATION_BK, GOODS_STORAGE_LOCATION_HK, LOAD_DTS, REC_SRC FROM {{ ref('v_psa_stg_goods_movement__winn_sap') }} as SRC 
+                        QUALIFY (ROW_NUMBER() OVER(PARTITION BY GOODS_STORAGE_LOCATION_HK ORDER BY LOAD_DTS ))=1 )
+
+/*
+SRC_R          as ( SELECT * FROM STAGING.v_psa_stg_goods_movement_storage_location__winn_sap )
+SRC_ZSERVLEVEL     as ( SELECT * FROM STAGING.v_psa_stg_service_levels__winn_sap )
+SRC_RESERVATION    as ( SELECT * FROM STAGING.v_psa_stg_reservation_line__winn_sap )
+SRC_INVENTORY      as ( SELECT * FROM STAGING.V_PSA_STG_GOODS_MOVEMENT__WINN_SAP )
+*/
+---- LOGIC LAYER ----
+
+, LOGIC_R as (
+    SELECT
+        GOODS_STORAGE_LOCATION_HK 
+      , GOODS_STORAGE_LOCATION_BK
+      , BKCC
+      , LOAD_DTS
+      , REC_SRC
+    FROM SRC_R
+)
+
+, LOGIC_ZSERVLEVEL as (
+    SELECT
+        GOODS_STORAGE_LOCATION_HK
+      , GOODS_STORAGE_LOCATION_BK
+      , BKCC
+      , LOAD_DTS
+      , REC_SRC
+    FROM SRC_ZSERVLEVEL
+)
+
+, LOGIC_RESERVATION as (
+    SELECT
+        GOODS_STORAGE_LOCATION_HK
+      , GOODS_STORAGE_LOCATION_BK
+      , BKCC
+      , LOAD_DTS
+      , REC_SRC
+    FROM SRC_RESERVATION
+)
+, LOGIC_INVENTORY as (
+    SELECT
+        GOODS_STORAGE_LOCATION_HK
+      , GOODS_STORAGE_LOCATION_BK
+      , BKCC
+      , LOAD_DTS
+      , REC_SRC
+    FROM SRC_INVENTORY
+)
+---- RENAME LAYER ----
+
+, RENAME_R as (
+    SELECT
+        GOODS_STORAGE_LOCATION_HK
+      , GOODS_STORAGE_LOCATION_BK
+      , BKCC
+      , LOAD_DTS
+      , REC_SRC
+    FROM LOGIC_R
+)
+
+, RENAME_ZSERVLEVEL as (
+    SELECT
+        GOODS_STORAGE_LOCATION_HK
+      , GOODS_STORAGE_LOCATION_BK
+      , BKCC
+      , LOAD_DTS
+      , REC_SRC
+    FROM LOGIC_ZSERVLEVEL
+)
+
+, RENAME_RESERVATION as (
+    SELECT
+        GOODS_STORAGE_LOCATION_HK
+      , GOODS_STORAGE_LOCATION_BK
+      , BKCC
+      , LOAD_DTS
+      , REC_SRC
+    FROM LOGIC_RESERVATION
+)
+, RENAME_INVENTORY as (
+    SELECT
+        GOODS_STORAGE_LOCATION_HK
+      , GOODS_STORAGE_LOCATION_BK
+      , BKCC
+      , LOAD_DTS
+      , REC_SRC
+    FROM LOGIC_INVENTORY
+)
+
+---- FILTER LAYER ----
+
+, FILTER_R as (
+    SELECT *
+    FROM RENAME_R
+)
+
+, FILTER_ZSERVLEVEL as (
+    SELECT *
+    FROM RENAME_ZSERVLEVEL
+)
+
+, FILTER_RESERVATION as (
+    SELECT *
+    FROM RENAME_RESERVATION
+)
+, FILTER_INVENTORY as (
+    SELECT *
+    FROM RENAME_INVENTORY
+)
+
+---- JOIN LAYER ----
+, JOIN_RESULT as (
+    SELECT * FROM FILTER_R
+    UNION ALL
+    SELECT * FROM FILTER_ZSERVLEVEL
+    UNION ALL
+    SELECT * FROM FILTER_RESERVATION
+    UNION ALL
+    SELECT * FROM FILTER_INVENTORY
+)
+
+---- FINAL LAYER ----
+SELECT
+          GOODS_STORAGE_LOCATION_HK
+        , GOODS_STORAGE_LOCATION_BK
+        , BKCC
+        , LOAD_DTS
+        , REC_SRC
+FROM JOIN_RESULT
+{% if is_incremental() %}
+WHERE NOT EXISTS (
+    SELECT 1 
+    FROM {{ this }} existing
+    WHERE existing.GOODS_STORAGE_LOCATION_HK = JOIN_RESULT.GOODS_STORAGE_LOCATION_HK
+)
+{% endif %}
+/* The following qualifier is implemented to prevent multiple loads of touched records during the initial build, such as multiple rows per BKs and BKCC. */
+qualify 1 = row_number() over (partition by GOODS_STORAGE_LOCATION_BK, BKCC order by LOAD_DTS)
+{% if not is_incremental() %}
+
+union all
+SELECT 
+MD5_BINARY(GR.VALUE) AS GOODS_STORAGE_LOCATION_HK,
+GR.VALUE::text AS GOODS_STORAGE_LOCATION_BK,
+DECODE(GR.VALUE, 0, 'GHOST RECORD-SYSTEM', -1, 'GHOST RECORD-nullkey-required', -2, 'GHOST RECORD-nullkey-optional') AS BKCC,
+CONVERT_TIMEZONE('UTC','1900-01-01'::TIMESTAMP) AS LOAD_DTS,
+'USAZET.SNOWFLAKE.FBIN.DERIVED' AS REC_SRC
+FROM
+TABLE(strtok_split_to_table('0|-1|-2', '|')) AS GR
+{% endif %}

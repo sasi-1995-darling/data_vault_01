@@ -1,0 +1,16 @@
+version: 2
+models:
+  - name: pb_competitive_share_weekly
+    description: |
+      Weekly competitive share data aggregated from Profitero and Datavations sources.
+      Incremental model that processes last 8 weeks on each run to handle late-arriving data.
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - DATE
+              - ASIN_KEY
+              - PLATFORM
+              - SOURCE
+              - BUSINESS_UNIT
+    columns: []

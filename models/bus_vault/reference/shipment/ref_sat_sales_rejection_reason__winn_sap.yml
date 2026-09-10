@@ -1,0 +1,22 @@
+version: 2
+models:
+- name: ref_sat_sales_rejection_reason__winn_sap
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - SALES_REJECTION_REASON_BK
+        - LANGUAGE_KEY
+        - LOAD_DTS
+  - dbt_expectations.expect_table_row_count_to_be_between:
+      arguments:
+        min_value: 4
+      config:
+        severity: warn
+  columns:
+  - name: SALES_REJECTION_REASON_BK
+    data_tests:
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'ref_hub_sales_rejection_reason' )
+          pk_column_name: SALES_REJECTION_REASON_BK

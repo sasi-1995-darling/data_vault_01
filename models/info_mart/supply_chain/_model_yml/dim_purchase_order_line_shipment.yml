@@ -1,0 +1,13 @@
+version: 2
+
+models:
+  - name: dim_purchase_order_line_shipment
+    description: Supply chain dimension for po line shipment schedules (detail fields)
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - dim_purchase_order_line_shipment_pk
+    config:
+      tags:
+        - emtek

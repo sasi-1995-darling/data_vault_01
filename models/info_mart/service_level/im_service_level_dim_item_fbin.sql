@@ -1,0 +1,111 @@
+{{ config(alias='dim_item_fbin' + ('_service_level' if target.name not in ['dev', 'qa', 'prod'] else '')) }}
+---- SRC LAYER ----
+WITH
+SRC_dim_item       as ( SELECT BASE_MATERIAL, BKCC, BRAND, FORECAST_BASE_MATERIAL, ITEM_ARCHITECTURE, ITEM_ARCHITECTURE_DETAIL, ITEM_BASE_UOM, ITEM_CATEGORY, ITEM_CLASS, ITEM_FINISH, ITEM_ID, ITEM_NUMBER, ITEM_PRICE_BAND, ITEM_PRODUCT_LINE, ITEM_PRODUCT_SEGMENT, ITEM_REPORTING_CATEGORY, ITEM_ROOM_AREA_DETAIL, ITEM_STATUS, ITEM_SUB_CATEGORY, ITEM_SUB_CLASS, ITEM_TITLE, ITEM_TYPE_CODE, PNS_PRICE_BAND, REC_SRC, ULTIMATE_ITEM_SUPPLY_SOURCE FROM {{ ref('dim_item_fbin') }} as SRC  )
+
+/*
+SRC_dim_item       as ( SELECT * FROM bus_vault.dim_item_fbin )
+*/
+---- LOGIC LAYER ----
+
+, LOGIC_dim_item as (
+    SELECT
+        ITEM_ID
+      , ITEM_NUMBER
+      , ITEM_TITLE
+      , BASE_MATERIAL
+      , ITEM_TYPE_CODE
+      , ITEM_STATUS
+      , BRAND
+      , ITEM_CATEGORY
+      , ITEM_SUB_CATEGORY
+      , ITEM_CLASS
+      , ITEM_SUB_CLASS
+      , FORECAST_BASE_MATERIAL
+      , ULTIMATE_ITEM_SUPPLY_SOURCE
+      , ITEM_BASE_UOM
+      , ITEM_ARCHITECTURE
+      , ITEM_ARCHITECTURE_DETAIL
+      , ITEM_FINISH
+      , ITEM_PRICE_BAND
+      , PNS_PRICE_BAND
+      , ITEM_PRODUCT_LINE
+      , ITEM_PRODUCT_SEGMENT
+      , ITEM_REPORTING_CATEGORY
+      , ITEM_ROOM_AREA_DETAIL
+      , REC_SRC
+      , BKCC
+    FROM SRC_dim_item
+)
+---- RENAME LAYER ----
+
+, RENAME_dim_item as (
+    SELECT
+        ITEM_ID
+      , ITEM_NUMBER
+      , ITEM_TITLE
+      , BASE_MATERIAL
+      , ITEM_TYPE_CODE
+      , ITEM_STATUS
+      , BRAND
+      , ITEM_CATEGORY
+      , ITEM_SUB_CATEGORY
+      , ITEM_CLASS
+      , ITEM_SUB_CLASS
+      , FORECAST_BASE_MATERIAL
+      , ULTIMATE_ITEM_SUPPLY_SOURCE
+      , ITEM_BASE_UOM
+      , ITEM_ARCHITECTURE
+      , ITEM_ARCHITECTURE_DETAIL
+      , ITEM_FINISH
+      , ITEM_PRICE_BAND
+      , PNS_PRICE_BAND
+      , ITEM_PRODUCT_LINE
+      , ITEM_PRODUCT_SEGMENT
+      , ITEM_REPORTING_CATEGORY
+      , ITEM_ROOM_AREA_DETAIL
+      , REC_SRC
+      , BKCC
+    FROM LOGIC_dim_item
+)
+---- FILTER LAYER ----
+
+, FILTER_dim_item as (
+    SELECT *
+    FROM RENAME_dim_item
+)
+
+---- JOIN LAYER ----
+, JOIN_RESULT as (
+    SELECT *
+    FROM FILTER_dim_item
+)
+
+---- FINAL LAYER ----
+SELECT
+          ITEM_ID
+        , ITEM_NUMBER
+        , ITEM_TITLE
+        , BASE_MATERIAL
+        , ITEM_TYPE_CODE
+        , ITEM_STATUS
+        , BRAND
+        , ITEM_CATEGORY
+        , ITEM_SUB_CATEGORY
+        , ITEM_CLASS
+        , ITEM_SUB_CLASS
+        , FORECAST_BASE_MATERIAL
+        , ULTIMATE_ITEM_SUPPLY_SOURCE
+        , ITEM_BASE_UOM
+        , ITEM_ARCHITECTURE
+        , ITEM_ARCHITECTURE_DETAIL
+        , ITEM_FINISH
+        , ITEM_PRICE_BAND
+        , PNS_PRICE_BAND
+        , ITEM_PRODUCT_LINE
+        , ITEM_PRODUCT_SEGMENT
+        , ITEM_REPORTING_CATEGORY
+        , ITEM_ROOM_AREA_DETAIL
+        , REC_SRC
+        , BKCC
+FROM JOIN_RESULT

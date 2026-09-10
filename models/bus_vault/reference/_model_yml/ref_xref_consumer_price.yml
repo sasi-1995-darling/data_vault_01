@@ -1,0 +1,10 @@
+version: 2
+
+models:
+  - name: ref_xref_consumer_price
+    description: This is business vault reference model for average daily consumer price for all brands customerwise.
+    tests:
+      - 'dbt_constraints.primary_key:':
+          arguments:
+            column_names:
+              - ref_id

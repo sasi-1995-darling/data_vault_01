@@ -1,0 +1,13 @@
+version: 2
+
+models:
+  - name: hub_customer_ship_location
+    description: This is the raw vault hub model for customer ship locations
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - customer_ship_location_hk
+    config:
+      tags:
+        - emtek

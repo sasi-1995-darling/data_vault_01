@@ -1,0 +1,5 @@
+version: 2
+models:
+- name: pb_stg_sns_products__profitero
+  tests: []
+  columns: []

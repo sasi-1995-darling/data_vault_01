@@ -1,0 +1,11 @@
+version: 2
+models:
+- name: ref_goods_movement_type__winn_sap
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - LANGUAGE_KEY
+        - MOVEMENT_TYPE_CODE
+        - LOAD_DTS
+  columns: []

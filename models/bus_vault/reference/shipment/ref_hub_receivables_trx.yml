@@ -1,0 +1,17 @@
+version: 2
+models:
+  - name: ref_hub_receivables_trx
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - RECEIVABLES_BK
+    columns:
+      - name: RECEIVABLES_BK
+        tests:
+          - unique:
+              config:
+                severity: warn
+          - not_null:
+              config:
+                severity: warn

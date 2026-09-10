@@ -1,0 +1,13 @@
+version: 2
+
+models:
+  - name: hub_plant_location
+    description: This is the raw vault hub model for plant locations
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - plant_location_hk
+    config:
+      tags:
+        - emtek

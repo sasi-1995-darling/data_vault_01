@@ -1,0 +1,17 @@
+version: 2
+models:
+  - name: hub_cbsa
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - CBSA_HK
+    columns:
+      - name: CBSA_HK
+        tests:
+          - unique:
+              config:
+                severity: warn
+          - not_null:
+              config:
+                severity: warn

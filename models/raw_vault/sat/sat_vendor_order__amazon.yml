@@ -1,0 +1,19 @@
+version: 2
+models:
+- name: sat_vendor_order__amazon
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - VENDOR_ORDER_HK
+        - LOAD_DTS
+  - dbt_expectations.expect_table_row_count_to_be_between:
+      arguments:
+        min_value: 4
+      config:
+        severity: warn
+  - dbt_constraints.foreign_key:
+      arguments:
+        column_name: VENDOR_ORDER_HK
+        to: ref('hub_vendor_order')
+        field: VENDOR_ORDER_HK

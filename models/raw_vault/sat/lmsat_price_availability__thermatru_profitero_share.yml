@@ -1,0 +1,20 @@
+version: 2
+models:
+- name: lmsat_price_availability__thermatru_profitero_share
+  # No FK test on PRODUCT_RETAILER_HK: competitive pricing does not feed
+  # lnk_product_retailer (that link serves ratings/reviews only).
+  # PRODUCT_RETAILER_HK is a composite grain key (product x retailer) used
+  # for incremental dedup only -- not a navigational key to any parent link.
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - PRODUCT_RETAILER_HK
+        - DATE
+        - RETAILER_ID
+        - LOAD_DTS
+  - dbt_expectations.expect_table_row_count_to_be_between:
+      arguments:
+        min_value: 4
+      config:
+        severity: warn

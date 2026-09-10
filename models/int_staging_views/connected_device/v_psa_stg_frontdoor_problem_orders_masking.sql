@@ -1,0 +1,27 @@
+---- SRC LAYER ----
+WITH
+SRC_src AS ( 
+    SELECT MOEN_ORDER_NK, PSA_RECORD_SOURCE, PSA_DELETE_IND, PSA_LOAD_DTS FROM {{ source('reference', 'frontdoor_problem_orders_masking') }} AS SRC
+    QUALIFY ROW_NUMBER() OVER (PARTITION BY MOEN_ORDER_NK ORDER BY PSA_LOAD_DTS DESC) = 1 
+)
+
+---- LOGIC LAYER ----
+
+, LOGIC_src AS (
+    SELECT
+        MOEN_ORDER_NK,
+        CONVERT_TIMEZONE('UTC', PSA_LOAD_DTS) AS LOAD_DTS,
+        PSA_RECORD_SOURCE,
+        PSA_DELETE_IND
+    FROM SRC_src
+)
+
+---- JOIN LAYER ----
+
+, JOIN_RESULT AS (
+    SELECT * FROM LOGIC_src
+)
+
+---- FINAL LAYER ----
+SELECT *
+FROM JOIN_RESULT

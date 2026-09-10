@@ -1,0 +1,38 @@
+version: 2
+
+models:
+  - name: stg_sat_consumer__delighted_edp
+    description: This is the staging model from Flo for hub application
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - id
+  - name: stg_product__delighted_edp
+    description: This is the staging model from Flo for hub application
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - product_hk
+  - name: stg_linkconsumer_product_review__delighted_edp
+    description: This is the staging model from Flo for hub application
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - link_consumer_product_review_hk
+  - name: stg_review__delighted_edp
+    description: This is the staging model from Flo for hub application
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - id
+  - name: stg_sentiment__delighted_edp
+    description: This is the staging model from Flo for hub application
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - sentiment_hk

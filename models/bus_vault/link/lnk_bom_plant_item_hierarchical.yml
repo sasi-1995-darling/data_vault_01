@@ -1,0 +1,32 @@
+version: 2
+models:
+  - name: lnk_bom_plant_item_hierarchical
+    data_tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - LNK_BOM_PLANT_ASSEMBLY_COMPONENT_HK
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          config:
+            severity: warn
+          arguments:
+            min_value: 4
+    columns:
+      - name: BOM_HK
+        data_tests:
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'hub_bom' )
+                pk_column_name: BOM_HK
+      - name: ASSEMBLY_ITEM_HK
+        data_tests:
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'hub_item_v1' )
+                pk_column_name: ITEM_HK
+      - name: PLANT_HK
+        data_tests:
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'hub_plant_v1' )
+                pk_column_name: PLANT_HK

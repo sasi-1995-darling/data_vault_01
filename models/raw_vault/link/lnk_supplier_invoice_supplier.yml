@@ -1,0 +1,21 @@
+version: 2
+models:
+- name: lnk_supplier_invoice_supplier
+  data_tests:
+  - dbt_constraints.primary_key:
+      name: pk_lnk_supplier_invoice_supplier
+      arguments:
+        column_names:
+        - LNK_SUPPLIER_INVOICE_SUPPLIER_HK
+      config:
+        severity: warn
+  - dbt_expectations.expect_table_row_count_to_be_between:
+      name: rowcount_lnk_supplier_invoice_supplier
+      arguments:
+        min_value: 4
+      config:
+        severity: warn
+  columns: []
+  config:
+    tags:
+    - lnk

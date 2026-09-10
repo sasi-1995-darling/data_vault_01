@@ -1,0 +1,246 @@
+name: QA Incremental Sync
+
+on:
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: "PR number to sync (e.g., 381)"
+        required: true
+        type: string
+
+jobs:
+  sync-qa-schema:
+    runs-on: ubuntu-latest
+    steps:
+      # NEW: Branch validation - must be the FIRST step
+      - name: Validate Workflow Branch
+        run: |
+          WORKFLOW_BRANCH="${{ github.ref_name }}"
+
+          if [ "$WORKFLOW_BRANCH" != "main" ]; then
+            echo "=========================================="
+            echo "❌ ERROR: Invalid Workflow Branch"
+            echo "=========================================="
+            echo ""
+            echo "This workflow must be run from: main"
+            echo "Current branch selected: $WORKFLOW_BRANCH"
+            echo ""
+            echo "ACTION REQUIRED:"
+            echo "1. Go back to the workflow page"
+            echo "2. Click 'Run workflow' again"
+            echo "3. Ensure 'Use workflow from' shows: main"
+            echo "4. Enter your PR number"
+            echo "5. Click 'Run workflow'"
+            echo ""
+            echo "Contact DataOps team if you need help"
+            echo "=========================================="
+            exit 1
+          fi
+
+          echo "✅ Workflow branch validation passed"
+          echo "Running from: $WORKFLOW_BRANCH"
+
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4
+        with:
+          fetch-depth: 0 # Fetch full history for merge-base calculation
+
+      - name: Validate PR exists
+        id: validate_pr
+        run: |
+          PR_NUMBER=${{ inputs.pr_number }}
+
+          PR_STATE=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            https://api.github.com/repos/${{ github.repository }}/pulls/${PR_NUMBER} \
+            | jq -r '.state')
+
+          if [ "$PR_STATE" != "open" ]; then
+            echo "PR #${PR_NUMBER} is not open or doesn't exist"
+            exit 1
+          fi
+
+          PR_INFO=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            https://api.github.com/repos/${{ github.repository }}/pulls/${PR_NUMBER})
+
+          PR_BRANCH=$(echo "$PR_INFO" | jq -r '.head.ref')
+          PR_TITLE=$(echo "$PR_INFO" | jq -r '.title')
+
+          echo "pr_branch=${PR_BRANCH}" >> $GITHUB_OUTPUT
+          echo "pr_title=${PR_TITLE}" >> $GITHUB_OUTPUT
+
+          echo "PR #${PR_NUMBER}: ${PR_TITLE}"
+          echo "Branch: ${PR_BRANCH}"
+
+      - name: Fetch PR to analyze changed files
+        run: |
+          git fetch origin "+refs/pull/${{ inputs.pr_number }}/head:refs/remotes/origin/pr/${{ inputs.pr_number }}/head"
+          git fetch origin main
+
+      - name: Generate dbt command from PR changes
+        id: dbt-command
+        run: |
+          PR_NUMBER=${{ inputs.pr_number }}
+
+
+          # Find the common ancestor between main and the PR branch
+          MERGE_BASE=$(git merge-base origin/main origin/pr/$PR_NUMBER/head)
+
+          echo "=========================================="
+          echo "Analyzing PR #${PR_NUMBER} changes"
+          echo "=========================================="
+          echo "Merge base commit: ${MERGE_BASE}"
+          echo "PR head: origin/pr/${PR_NUMBER}/head"
+          echo "=========================================="
+
+          # Get only the models changed in this PR (from merge-base to PR head)
+          MODEL_CHANGES=$(git diff ${MERGE_BASE} origin/pr/$PR_NUMBER/head --name-only --diff-filter=d | grep '^models/.*\.sql$' || echo "")
+
+          if [ -z "${MODEL_CHANGES}" ]; then
+            echo "No model changes found in PR #${PR_NUMBER}"
+            exit 1
+          fi
+
+          echo "Model changes detected in this PR:"
+          echo "${MODEL_CHANGES}"
+          echo ""
+
+          ALL_MODELS=""
+          for FILE in ${MODEL_CHANGES}; do
+            MODEL_NAME=$(basename "$FILE" .sql)
+            if [ -z "${ALL_MODELS}" ]; then
+              ALL_MODELS="${MODEL_NAME}+"
+            else
+              ALL_MODELS="${ALL_MODELS} ${MODEL_NAME}+"
+            fi
+          done
+
+          echo "Models to sync: ${ALL_MODELS}"
+
+          DBT_COMMAND="dbt build --select ${ALL_MODELS} --defer --exclude 'ref_business_key_collision'"
+
+          echo "dbt_command=${DBT_COMMAND}" >> $GITHUB_OUTPUT
+          echo "all_models=${ALL_MODELS}" >> $GITHUB_OUTPUT
+
+          echo "Generated command: ${DBT_COMMAND}"
+
+      # ==========================================================================
+      # Direct API call to dbt Cloud with correct git_branch from PR
+      #
+      # This direct API call uses the PR branch retrieved in the validate_pr step.
+      # ==========================================================================
+      - name: Trigger QA Incremental Sync
+        id: trigger_sync
+        run: |
+          PR_NUMBER=${{ inputs.pr_number }}
+          PR_BRANCH="${{ steps.validate_pr.outputs.pr_branch }}"
+          JOB_ID="786808"
+          DBT_COMMAND="${{ steps.dbt-command.outputs.dbt_command }}"
+          TARGET_SCHEMA="dbt_cloud_pr_${JOB_ID}_${PR_NUMBER}"
+
+          echo "=========================================="
+          echo "Triggering QA Incremental Sync"
+          echo "=========================================="
+          echo "PR Number: ${PR_NUMBER}"
+          echo "PR Branch: ${PR_BRANCH}"
+          echo "Target Schema: ${TARGET_SCHEMA}"
+          echo "dbt Command: ${DBT_COMMAND}"
+          echo "=========================================="
+
+          # Validate we have the branch - fail fast if not
+          if [ -z "${PR_BRANCH}" ]; then
+            echo "❌ ERROR: Could not determine PR branch"
+            echo "This may happen if the PR was closed or the API call failed"
+            exit 1
+          fi
+
+          # Build JSON payload using printf (same pattern as trigger_dbt_cloud_job action)
+          JSON_PAYLOAD=$(printf '{"cause": "%s", "git_branch": "%s", "steps_override": ["%s"], "execute_steps": ["%s"], "target_name_override": "qa", "target_name": "qa", "schema_override": "%s", "vars": {"force_pr_schema": true, "pr_schema_prefix": "%s"}}' \
+            "QA Incremental Sync - PR #${PR_NUMBER}" \
+            "${PR_BRANCH}" \
+            "${DBT_COMMAND}" \
+            "${DBT_COMMAND}" \
+            "${TARGET_SCHEMA}" \
+            "${TARGET_SCHEMA}")
+
+          echo "JSON Payload:"
+          echo "${JSON_PAYLOAD}" | jq '.'
+
+          # Make API call to dbt Cloud (same endpoint as trigger_dbt_cloud_job action)
+          RESPONSE=$(curl -s --request POST \
+            --url "https://cloud.getdbt.com/api/v2/accounts/173296/jobs/${JOB_ID}/run/" \
+            --header "Accept: application/json" \
+            --header "Authorization: Token ${{ secrets.DBT_SVC_TOKEN }}" \
+            --header "Content-Type: application/json" \
+            --data "${JSON_PAYLOAD}")
+
+          echo "API Response:"
+          echo "$RESPONSE" | jq '.'
+
+          # Check if successful (same validation as trigger_dbt_cloud_job action)
+          SUCCESS=$(echo "$RESPONSE" | jq -r '.status.is_success // false')
+          if [ "$SUCCESS" != "true" ]; then
+            echo "❌ Failed to trigger dbt Cloud job"
+            ERROR_MSG=$(echo "$RESPONSE" | jq -r '.status.user_message // "Unknown error"')
+            echo "Error: $ERROR_MSG"
+            exit 1
+          fi
+
+          # Extract run info (same as trigger_dbt_cloud_job action)
+          RUN_ID=$(echo "$RESPONSE" | jq -r '.data.id')
+          DBT_JOB_HREF=$(echo "$RESPONSE" | jq -r '.data.href')
+          JOB_CREATED_AT=$(echo "$RESPONSE" | jq -r '.data.created_at')
+          FORMATTED_TIME=$(echo "$JOB_CREATED_AT" | sed 's/T/ /' | sed 's/\.[0-9]*+00:00/ UTC/')
+
+          echo "✅ Job triggered successfully"
+          echo "Run ID: ${RUN_ID}"
+          echo "Job URL: ${DBT_JOB_HREF}"
+          echo "Created at: ${FORMATTED_TIME}"
+
+          # Set environment variables for subsequent steps (same naming convention)
+          echo "QA_INCREMENTAL-SYNC_RUN_ID=${RUN_ID}" >> $GITHUB_ENV
+          echo "QA_INCREMENTAL-SYNC_HREF=${DBT_JOB_HREF}" >> $GITHUB_ENV
+          echo "QA_INCREMENTAL-SYNC_JOB_CREATED_AT=${FORMATTED_TIME}" >> $GITHUB_ENV
+
+      - name: Poll DBT Job Status
+        id: poll_status
+        uses: ./.github/actions/poll_dbt_job_status
+        with:
+          dbt_svc_token: ${{ secrets.DBT_SVC_TOKEN }}
+          run_id: ${{ env.QA_INCREMENTAL-SYNC_RUN_ID }}
+          environment: "QA"
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_repository: ${{ github.repository }}
+          pr_number: ${{ inputs.pr_number }}
+          job_type: "INCREMENTAL-SYNC"
+
+      - name: Add comment to PR
+        if: always()
+        run: |
+          PR_NUMBER=${{ inputs.pr_number }}
+          PR_BRANCH="${{ steps.validate_pr.outputs.pr_branch }}"
+          JOB_STATUS="${{ env.QA_INCREMENTAL-SYNC_JOB_STATUS }}"
+          JOB_HREF="${{ env.QA_INCREMENTAL-SYNC_HREF }}"
+          JOB_FINISHED="${{ env.QA_INCREMENTAL-SYNC_RUN_FINISHED }}"
+
+          if [ "${{ job.status }}" = "success" ]; then
+            ICON="✅"
+            MESSAGE="QA Schema Incremental Sync Completed"
+          else
+            ICON="❌"
+            MESSAGE="QA Schema Incremental Sync Failed"
+          fi
+
+          curl -X POST \
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/repos/${{ github.repository }}/issues/${PR_NUMBER}/comments \
+            -d "$(jq -n \
+              --arg icon "$ICON" \
+              --arg msg "$MESSAGE" \
+              --arg actor "${{ github.actor }}" \
+              --arg branch "$PR_BRANCH" \
+              --arg models "${{ steps.dbt-command.outputs.all_models }}" \
+              --arg status "$JOB_STATUS" \
+              --arg finished "$JOB_FINISHED" \
+              --arg href "$JOB_HREF" \
+              '{body: "**\($icon) \($msg)**\n\n**Triggered by:** @\($actor)\n**Branch:** `\($branch)`\n**Models synced:** `\($models)`\n**Job status:** \($status)\n**Finished at:** \($finished)\n**Job link:** \($href)\n\n---\n💡 *This sync ran models from your PR branch with --defer to PROD.*"}')"

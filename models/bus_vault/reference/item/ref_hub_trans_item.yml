@@ -1,0 +1,17 @@
+version: 2
+models:
+  - name: ref_hub_trans_item
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - TRANS_ITEM_BK
+    columns:
+      - name: TRANS_ITEM_BK
+        tests:
+          - unique:
+              config:
+                severity: warn
+          - not_null:
+              config:
+                severity: warn

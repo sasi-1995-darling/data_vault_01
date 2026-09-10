@@ -1,0 +1,11 @@
+version: 2
+models:
+- name: im_fact_app_user_engagement_event
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - CONSUMER_BK
+        - EVENT_ACTION_TS
+        - EVENT
+  columns: []

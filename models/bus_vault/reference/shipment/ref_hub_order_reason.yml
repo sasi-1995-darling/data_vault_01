@@ -1,0 +1,15 @@
+version: 2
+models:
+  - name: ref_hub_order_reason
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - ORDER_REASON_BK
+              - LOAD_DTS
+    columns:
+      - name: ORDER_REASON_BK
+        tests:
+          - not_null:
+              config:
+                severity: warn

@@ -1,0 +1,23 @@
+version: 2
+models:
+- name: v_psa_stg_serial_number_assignment__winn_sap
+  data_tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - LNK_SERIAL_NUMBER_HU_ASSIGNMENT_HK
+        - LOAD_DTS
+        - HASHDIFF
+      config:
+        severity: warn
+  columns:
+  - name: OBJECT_LIST_HK
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+  - name: HANDLING_UNIT_HK
+    data_tests:
+    - not_null:
+        config:
+          severity: warn

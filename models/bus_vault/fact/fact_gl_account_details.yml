@@ -1,0 +1,12 @@
+version: 2
+models:
+  - name: fact_gl_account_details
+    columns:
+      - name: GL_ACCOUNT_DETAILS_HK
+        tests:
+          - unique:
+              config:
+                severity: warn
+          - not_null:
+              config:
+                severity: warn

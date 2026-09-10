@@ -1,0 +1,372 @@
+---- SRC LAYER ----
+WITH
+SRC_splr_lrsn      as ( SELECT * FROM {{ ref('v_psa_stg_supplier__lrsn_psft') }} as SRC 
+                         {% if is_incremental() %}
+                         WHERE SRC.LOAD_DTS > (SELECT DATEADD('HOUR', '-1', MAX(LOAD_DTS)) FROM {{this}})
+                         {% endif %}  )
+
+/*
+SRC_splr_lrsn      as ( SELECT * FROM STAGING.v_psa_stg_supplier__lrsn_psft )
+*/
+---- LOGIC LAYER ----
+
+, LOGIC_splr_lrsn as (
+    SELECT
+        SUPPLIER_HK
+      , VENDOR_ID
+      , LOAD_DTS
+      , SETID
+      , VENDOR_NAME_SHORT
+      , VNDR_NAME_SHRT_USR
+      , VNDR_NAME_SEQ_NUM
+      , NAME1
+      , NAME2
+      , VENDOR_STATUS
+      , VENDOR_CLASS
+      , VENDOR_PERSISTENCE
+      , REMIT_ADDR_SEQ_NUM
+      , PRIM_ADDR_SEQ_NUM
+      , ADDR_SEQ_NUM_ORDR
+      , REMIT_SETID
+      , REMIT_VENDOR
+      , CORPORATE_SETID
+      , CORPORATE_VENDOR
+      , CUST_SETID
+      , CUST_ID
+      , ENTERED_BY
+      , AR_NUM
+      , OLD_VENDOR_ID
+      , WTHD_SW
+      , VAT_SW
+      , VNDR_STATUS_PO
+      , REMIT_LOC
+      , DEFAULT_LOC
+      , NAME1_AC
+      , NAME2_AC
+      , PRIMARY_VENDOR
+      , LAST_ACTIVITY_DT
+      , WITHHOLD_LOC
+      , IN_PROCESS_FLG
+      , PROCESS_INSTANCE
+      , HUB_ZONE
+      , EEO_CERTIF_DT
+      , HRMS_CLASS
+      , INTERUNIT_VNDR_FLG
+      , VNDR_AFFILIATE
+      , BUSINESS_UNIT
+      , VNDR_TIN
+      , ARCHIVED_BY
+      , CREATED_DTTM
+      , CREATED_BY_USER
+      , LAST_MODIFIED_DATE
+      , VNDR_FIELD_C30_A
+      , VNDR_FIELD_C30_B
+      , VNDR_FIELD_C30_C
+      , VNDR_FIELD_C30_D
+      , VNDR_FIELD_C30_E
+      , VNDR_FIELD_C30_F
+      , VNDR_FIELD_C30_G
+      , VNDR_FIELD_C30_H
+      , VNDR_FIELD_C30_I
+      , VNDR_FIELD_C30_J
+      , VNDR_CCR_STATUS
+      , OFAC_STATUS
+      , OFAC_STATUS_DT
+      , OFAC_MOD_USER
+      , OFAC_LAG_DAYS
+      , OFAC_SKIP_VAL
+      , SDN_PUBLISH_DATE
+      , SES_LAST_DTTM
+      , SES_VN_ATTR_L_DTTM
+      , SUPPLIER_RATING
+      , SUPPAUDIT_FLG
+      , VNDR_AUDIT_FLG
+      , TEMPLATE_ID
+      , COMMENTS_2000
+      , _FIVETRAN_DELETED
+      , _FIVETRAN_ID
+      , _FIVETRAN_SYNCED
+      , PSA_LOAD_DTS
+      , PSA_DELETE_IND
+      , REC_SRC
+      , BKCC
+      , HASHDIFF
+    FROM SRC_splr_lrsn
+)
+---- RENAME LAYER ----
+
+, RENAME_splr_lrsn as (
+    SELECT
+        SUPPLIER_HK
+      , VENDOR_ID
+      , LOAD_DTS
+      , SETID
+      , VENDOR_NAME_SHORT
+      , VNDR_NAME_SHRT_USR
+      , VNDR_NAME_SEQ_NUM
+      , NAME1
+      , NAME2
+      , VENDOR_STATUS
+      , VENDOR_CLASS
+      , VENDOR_PERSISTENCE
+      , REMIT_ADDR_SEQ_NUM
+      , PRIM_ADDR_SEQ_NUM
+      , ADDR_SEQ_NUM_ORDR
+      , REMIT_SETID
+      , REMIT_VENDOR
+      , CORPORATE_SETID
+      , CORPORATE_VENDOR
+      , CUST_SETID
+      , CUST_ID
+      , ENTERED_BY
+      , AR_NUM
+      , OLD_VENDOR_ID
+      , WTHD_SW
+      , VAT_SW
+      , VNDR_STATUS_PO
+      , REMIT_LOC
+      , DEFAULT_LOC
+      , NAME1_AC
+      , NAME2_AC
+      , PRIMARY_VENDOR
+      , LAST_ACTIVITY_DT
+      , WITHHOLD_LOC
+      , IN_PROCESS_FLG
+      , PROCESS_INSTANCE
+      , HUB_ZONE
+      , EEO_CERTIF_DT
+      , HRMS_CLASS
+      , INTERUNIT_VNDR_FLG
+      , VNDR_AFFILIATE
+      , BUSINESS_UNIT
+      , VNDR_TIN
+      , ARCHIVED_BY
+      , CREATED_DTTM
+      , CREATED_BY_USER
+      , LAST_MODIFIED_DATE
+      , VNDR_FIELD_C30_A
+      , VNDR_FIELD_C30_B
+      , VNDR_FIELD_C30_C
+      , VNDR_FIELD_C30_D
+      , VNDR_FIELD_C30_E
+      , VNDR_FIELD_C30_F
+      , VNDR_FIELD_C30_G
+      , VNDR_FIELD_C30_H
+      , VNDR_FIELD_C30_I
+      , VNDR_FIELD_C30_J
+      , VNDR_CCR_STATUS
+      , OFAC_STATUS
+      , OFAC_STATUS_DT
+      , OFAC_MOD_USER
+      , OFAC_LAG_DAYS
+      , OFAC_SKIP_VAL
+      , SDN_PUBLISH_DATE
+      , SES_LAST_DTTM
+      , SES_VN_ATTR_L_DTTM
+      , SUPPLIER_RATING
+      , SUPPAUDIT_FLG
+      , VNDR_AUDIT_FLG
+      , TEMPLATE_ID
+      , COMMENTS_2000
+      , _FIVETRAN_DELETED
+      , _FIVETRAN_ID
+      , _FIVETRAN_SYNCED
+      , PSA_LOAD_DTS
+      , PSA_DELETE_IND
+      , REC_SRC
+      , BKCC
+      , HASHDIFF
+    FROM LOGIC_splr_lrsn
+)
+---- FILTER LAYER ----
+
+, FILTER_splr_lrsn as (
+    SELECT *
+    FROM RENAME_splr_lrsn
+)
+
+---- JOIN LAYER ----
+, JOIN_RESULT as (
+    SELECT *
+    FROM FILTER_splr_lrsn
+)
+
+---- FINAL LAYER ----
+SELECT
+          SUPPLIER_HK
+        , VENDOR_ID
+        , LOAD_DTS
+        , SETID
+        , VENDOR_NAME_SHORT
+        , VNDR_NAME_SHRT_USR
+        , VNDR_NAME_SEQ_NUM
+        , NAME1
+        , NAME2
+        , VENDOR_STATUS
+        , VENDOR_CLASS
+        , VENDOR_PERSISTENCE
+        , REMIT_ADDR_SEQ_NUM
+        , PRIM_ADDR_SEQ_NUM
+        , ADDR_SEQ_NUM_ORDR
+        , REMIT_SETID
+        , REMIT_VENDOR
+        , CORPORATE_SETID
+        , CORPORATE_VENDOR
+        , CUST_SETID
+        , CUST_ID
+        , ENTERED_BY
+        , AR_NUM
+        , OLD_VENDOR_ID
+        , WTHD_SW
+        , VAT_SW
+        , VNDR_STATUS_PO
+        , REMIT_LOC
+        , DEFAULT_LOC
+        , NAME1_AC
+        , NAME2_AC
+        , PRIMARY_VENDOR
+        , LAST_ACTIVITY_DT
+        , WITHHOLD_LOC
+        , IN_PROCESS_FLG
+        , PROCESS_INSTANCE
+        , HUB_ZONE
+        , EEO_CERTIF_DT
+        , HRMS_CLASS
+        , INTERUNIT_VNDR_FLG
+        , VNDR_AFFILIATE
+        , BUSINESS_UNIT
+        , VNDR_TIN
+        , ARCHIVED_BY
+        , CREATED_DTTM
+        , CREATED_BY_USER
+        , LAST_MODIFIED_DATE
+        , VNDR_FIELD_C30_A
+        , VNDR_FIELD_C30_B
+        , VNDR_FIELD_C30_C
+        , VNDR_FIELD_C30_D
+        , VNDR_FIELD_C30_E
+        , VNDR_FIELD_C30_F
+        , VNDR_FIELD_C30_G
+        , VNDR_FIELD_C30_H
+        , VNDR_FIELD_C30_I
+        , VNDR_FIELD_C30_J
+        , VNDR_CCR_STATUS
+        , OFAC_STATUS
+        , OFAC_STATUS_DT
+        , OFAC_MOD_USER
+        , OFAC_LAG_DAYS
+        , OFAC_SKIP_VAL
+        , SDN_PUBLISH_DATE
+        , SES_LAST_DTTM
+        , SES_VN_ATTR_L_DTTM
+        , SUPPLIER_RATING
+        , SUPPAUDIT_FLG
+        , VNDR_AUDIT_FLG
+        , TEMPLATE_ID
+        , COMMENTS_2000
+        , _FIVETRAN_DELETED
+        , _FIVETRAN_ID
+        , _FIVETRAN_SYNCED
+        , PSA_LOAD_DTS
+        , PSA_DELETE_IND
+        , REC_SRC
+        , BKCC
+        , HASHDIFF
+FROM JOIN_RESULT
+{% if is_incremental() %}
+WHERE NOT EXISTS (
+    SELECT 1 
+    FROM {{ this }} existing
+    WHERE existing.SUPPLIER_HK = JOIN_RESULT.SUPPLIER_HK 
+    AND existing.HASHDIFF = JOIN_RESULT.HASHDIFF
+)
+{% endif %}
+{% if not is_incremental() %}
+
+/* The following qualifier is implemented to prevent multiple loads of touched records during the initial build, such as multiple rows per HK and hashdiff. */
+qualify 1 = row_number() over (partition by SUPPLIER_HK, HASHDIFF order by PSA_LOAD_DTS)
+
+union all
+SELECT 
+MD5_BINARY(GR.VALUE) AS SUPPLIER_HK,
+GR.VALUE::text AS VENDOR_ID,
+CONVERT_TIMEZONE('UTC','1900-01-01'::TIMESTAMP) AS LOAD_DTS,
+NULL AS SETID,
+NULL AS VENDOR_NAME_SHORT,
+NULL AS VNDR_NAME_SHRT_USR,
+NULL AS VNDR_NAME_SEQ_NUM,
+NULL AS NAME1,
+NULL AS NAME2,
+NULL AS VENDOR_STATUS,
+NULL AS VENDOR_CLASS,
+NULL AS VENDOR_PERSISTENCE,
+NULL AS REMIT_ADDR_SEQ_NUM,
+NULL AS PRIM_ADDR_SEQ_NUM,
+NULL AS ADDR_SEQ_NUM_ORDR,
+NULL AS REMIT_SETID,
+NULL AS REMIT_VENDOR,
+NULL AS CORPORATE_SETID,
+NULL AS CORPORATE_VENDOR,
+NULL AS CUST_SETID,
+NULL AS CUST_ID,
+NULL AS ENTERED_BY,
+NULL AS AR_NUM,
+NULL AS OLD_VENDOR_ID,
+NULL AS WTHD_SW,
+NULL AS VAT_SW,
+NULL AS VNDR_STATUS_PO,
+NULL AS REMIT_LOC,
+NULL AS DEFAULT_LOC,
+NULL AS NAME1_AC,
+NULL AS NAME2_AC,
+NULL AS PRIMARY_VENDOR,
+NULL AS LAST_ACTIVITY_DT,
+NULL AS WITHHOLD_LOC,
+NULL AS IN_PROCESS_FLG,
+NULL AS PROCESS_INSTANCE,
+NULL AS HUB_ZONE,
+NULL AS EEO_CERTIF_DT,
+NULL AS HRMS_CLASS,
+NULL AS INTERUNIT_VNDR_FLG,
+NULL AS VNDR_AFFILIATE,
+NULL AS BUSINESS_UNIT,
+NULL AS VNDR_TIN,
+NULL AS ARCHIVED_BY,
+NULL AS CREATED_DTTM,
+NULL AS CREATED_BY_USER,
+NULL AS LAST_MODIFIED_DATE,
+NULL AS VNDR_FIELD_C30_A,
+NULL AS VNDR_FIELD_C30_B,
+NULL AS VNDR_FIELD_C30_C,
+NULL AS VNDR_FIELD_C30_D,
+NULL AS VNDR_FIELD_C30_E,
+NULL AS VNDR_FIELD_C30_F,
+NULL AS VNDR_FIELD_C30_G,
+NULL AS VNDR_FIELD_C30_H,
+NULL AS VNDR_FIELD_C30_I,
+NULL AS VNDR_FIELD_C30_J,
+NULL AS VNDR_CCR_STATUS,
+NULL AS OFAC_STATUS,
+NULL AS OFAC_STATUS_DT,
+NULL AS OFAC_MOD_USER,
+NULL AS OFAC_LAG_DAYS,
+NULL AS OFAC_SKIP_VAL,
+NULL AS SDN_PUBLISH_DATE,
+NULL AS SES_LAST_DTTM,
+NULL AS SES_VN_ATTR_L_DTTM,
+NULL AS SUPPLIER_RATING,
+NULL AS SUPPAUDIT_FLG,
+NULL AS VNDR_AUDIT_FLG,
+NULL AS TEMPLATE_ID,
+NULL AS COMMENTS_2000,
+NULL AS _FIVETRAN_DELETED,
+NULL AS _FIVETRAN_ID,
+NULL AS _FIVETRAN_SYNCED,
+'1900-01-01'::TIMESTAMP AS PSA_LOAD_DTS,
+'N' AS PSA_DELETE_IND,
+'USAZET.SNOWFLAKE.FBIN.DERIVED' AS REC_SRC,
+DECODE(GR.VALUE, 0, 'GHOST RECORD-SYSTEM', -1, 'GHOST RECORD-nullkey-required', -2, 'GHOST RECORD-nullkey-optional') AS BKCC,
+''::BINARY AS HASHDIFF
+FROM
+TABLE(strtok_split_to_table('0|-1|-2', '|')) AS GR
+{% endif %}

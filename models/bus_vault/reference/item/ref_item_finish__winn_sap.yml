@@ -1,0 +1,11 @@
+version: 2
+models:
+- name: ref_item_finish__winn_sap
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - FINISH_ID
+        - LANGUAGE_KEY
+        - LOAD_DTS
+  columns: []

@@ -1,0 +1,13 @@
+version: 2
+models:
+  - name: v_psa_stg_item_vendor_detail__amazon_vc
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          config:
+            severity: warn
+          arguments:
+            combination_of_columns:
+              - ASIN
+              - MARKETPLACE_ID
+              - LOAD_DTS
+    columns: []

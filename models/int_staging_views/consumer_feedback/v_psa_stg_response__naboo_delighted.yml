@@ -1,0 +1,28 @@
+version: 2
+models:
+  - name: v_psa_stg_response__naboo_delighted
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          config:
+            severity: warn
+          arguments:
+            combination_of_columns:
+              - ID
+              - LOAD_DTS
+              - PSA_LOAD_DTS
+    columns:
+      - name: PRODUCT_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: PRODUCT_BK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: LOAD_DTS
+        tests:
+          - not_null:
+              config:
+                severity: warn

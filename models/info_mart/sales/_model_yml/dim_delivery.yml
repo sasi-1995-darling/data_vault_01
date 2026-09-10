@@ -1,0 +1,13 @@
+version: 2
+
+models:
+  - name: dim_delivery
+    description: Sales dimension for deliveries
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - dim_delivery_pk
+    config:
+      tags:
+        - emtek

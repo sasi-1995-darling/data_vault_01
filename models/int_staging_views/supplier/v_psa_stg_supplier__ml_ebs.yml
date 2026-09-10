@@ -1,0 +1,22 @@
+version: 2
+models:
+  - name: v_psa_stg_supplier__ml_ebs
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          config:
+            severity: warn
+          arguments:
+            combination_of_columns:
+              - SEGMENT1
+              - LOAD_DTS
+    columns:
+      - name: SEGMENT1
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: VENDOR_ID
+        tests:
+          - not_null:
+              config:
+                severity: warn

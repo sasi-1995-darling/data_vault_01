@@ -1,0 +1,9 @@
+version: 2
+models:
+  - name: pb_purchase_requisition_spend_detail
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - PURCHASE_REQUISITION_HK
+    columns: []

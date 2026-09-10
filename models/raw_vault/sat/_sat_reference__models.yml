@@ -1,0 +1,11 @@
+version: 2
+
+models:
+  - name: sat_brand__ref_file
+    description: This is the descriptive Brand data from Confluence. This Sat is for Hub_brand
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - brand_hk
+              - load_dts

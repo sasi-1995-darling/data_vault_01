@@ -1,0 +1,13 @@
+version: 2
+
+models:
+  - name: dim_customer_bill_location
+    description: Sales dimension for customer bill-to locations
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - dim_customer_bill_location_pk
+    config:
+      tags:
+        - emtek

@@ -1,0 +1,27 @@
+version: 2
+
+models:
+  - name: link_po_line
+    description: This is the raw vault link model between purchase order and po line
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - po_line_link_hk
+      - dbt_constraints.foreign_key:
+          arguments:
+            fk_column_names:
+              - purchase_order_hk
+            pk_table_name: ref('hub_purchase_order')
+            pk_column_names:
+              - purchase_order_hk
+      - dbt_constraints.foreign_key:
+          arguments:
+            fk_column_names:
+              - po_line_hk
+            pk_table_name: ref('hub_po_line')
+            pk_column_names:
+              - po_line_hk
+    config:
+      tags:
+        - emtek

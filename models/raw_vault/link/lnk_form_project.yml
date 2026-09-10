@@ -1,0 +1,20 @@
+version: 2
+models:
+  - name: lnk_form_project
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - FORM_PROJECT_HK
+              - ORDINAL_POSITION
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          config:
+            severity: warn
+          arguments:
+            min_value: 4
+    columns:
+      - name: FORM_PROJECT_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn

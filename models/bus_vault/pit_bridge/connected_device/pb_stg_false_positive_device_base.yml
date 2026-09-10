@@ -1,0 +1,5 @@
+version: 2
+models:
+- name: pb_stg_false_positive_device_base
+  data_tests: []
+  columns: []

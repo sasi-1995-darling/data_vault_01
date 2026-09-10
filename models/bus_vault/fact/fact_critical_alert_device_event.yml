@@ -1,0 +1,12 @@
+version: 2
+models:
+- name: fact_critical_alert_device_event
+  description: >
+    Fact view wrapping pb_critical_alert_device_event.
+    One row per critical alert with shutoff, valve reopen, and feedback.
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - INCIDENT_ID
+  columns: []

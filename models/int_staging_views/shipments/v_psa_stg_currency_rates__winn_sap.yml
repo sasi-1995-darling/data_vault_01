@@ -1,0 +1,20 @@
+version: 2
+models:
+  - name: v_psa_stg_currency_rates__winn_sap
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          config:
+            severity: warn
+          arguments:
+            combination_of_columns:
+              - FCURR
+              - TCURR
+              - KURST
+              - CONVERSION_DATE
+              - LOAD_DTS
+    columns:
+      - name: CURR_RATES_BK
+        tests:
+          - not_null:
+              config:
+                severity: warn

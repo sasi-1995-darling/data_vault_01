@@ -1,0 +1,126 @@
+{{ config(alias='dim_date_gregorian') }}
+---- SRC LAYER ----
+WITH
+SRC_DDG            as ( SELECT * FROM {{ ref('dim_date_gregorian') }} as SRC  )
+
+/*
+SRC_DDG            as ( SELECT * FROM BUS_VAULT.DIM_DATE_GREGORIAN )
+*/
+---- LOGIC LAYER ----
+
+, LOGIC_DDG as (
+    SELECT
+        DATE_BK
+      , DATE_ACTUAL
+      , DAY_NAME
+      , MONTH_ACTUAL
+      , YEAR_ACTUAL
+      , QUARTER_ACTUAL
+      , DAY_OF_WEEK
+      , FIRST_DAY_OF_WEEK
+      , WEEK_OF_YEAR
+      , DAY_OF_MONTH
+      , DAY_OF_QUARTER
+      , DAY_OF_YEAR
+      , MONTH_NAME
+      , FIRST_DAY_OF_MONTH
+      , LAST_DAY_OF_MONTH
+      , FIRST_DAY_OF_YEAR
+      , LAST_DAY_OF_YEAR
+      , FIRST_DAY_OF_QUARTER
+      , LAST_DAY_OF_QUARTER
+      , LAST_DAY_OF_WEEK
+      , QUARTER_NAME
+      , HOLIDAY_DESC
+      , IS_HOLIDAY
+      , SNAPSHOT_DATE_FPA
+      , SNAPSHOT_DATE_BILLINGS
+      , DAYS_IN_MONTH_COUNT
+      , DAYS_UNTIL_LAST_DAY_OF_MONTH
+      , CURRENT_DATE_ACTUAL
+      , CURRENT_FIRST_DAY_OF_MONTH
+      , CURRENT_DAY_OF_MONTH
+    FROM SRC_DDG
+)
+---- RENAME LAYER ----
+
+, RENAME_DDG as (
+    SELECT
+        DATE_BK
+      , DATE_ACTUAL
+      , DAY_NAME
+      , MONTH_ACTUAL
+      , YEAR_ACTUAL
+      , QUARTER_ACTUAL
+      , DAY_OF_WEEK
+      , FIRST_DAY_OF_WEEK
+      , WEEK_OF_YEAR
+      , DAY_OF_MONTH
+      , DAY_OF_QUARTER
+      , DAY_OF_YEAR
+      , MONTH_NAME
+      , FIRST_DAY_OF_MONTH
+      , LAST_DAY_OF_MONTH
+      , FIRST_DAY_OF_YEAR
+      , LAST_DAY_OF_YEAR
+      , FIRST_DAY_OF_QUARTER
+      , LAST_DAY_OF_QUARTER
+      , LAST_DAY_OF_WEEK
+      , QUARTER_NAME
+      , HOLIDAY_DESC
+      , IS_HOLIDAY
+      , SNAPSHOT_DATE_FPA
+      , SNAPSHOT_DATE_BILLINGS
+      , DAYS_IN_MONTH_COUNT
+      , DAYS_UNTIL_LAST_DAY_OF_MONTH
+      , CURRENT_DATE_ACTUAL
+      , CURRENT_FIRST_DAY_OF_MONTH
+      , CURRENT_DAY_OF_MONTH
+    FROM LOGIC_DDG
+)
+---- FILTER LAYER ----
+
+, FILTER_DDG as (
+    SELECT *
+    FROM RENAME_DDG
+)
+
+---- JOIN LAYER ----
+, JOIN_RESULT as (
+    SELECT *
+    FROM FILTER_DDG
+)
+
+---- FINAL LAYER ----
+SELECT
+          DATE_BK
+        , DATE_ACTUAL
+        , DAY_NAME
+        , MONTH_ACTUAL
+        , YEAR_ACTUAL
+        , QUARTER_ACTUAL
+        , DAY_OF_WEEK
+        , FIRST_DAY_OF_WEEK
+        , WEEK_OF_YEAR
+        , DAY_OF_MONTH
+        , DAY_OF_QUARTER
+        , DAY_OF_YEAR
+        , MONTH_NAME
+        , FIRST_DAY_OF_MONTH
+        , LAST_DAY_OF_MONTH
+        , FIRST_DAY_OF_YEAR
+        , LAST_DAY_OF_YEAR
+        , FIRST_DAY_OF_QUARTER
+        , LAST_DAY_OF_QUARTER
+        , LAST_DAY_OF_WEEK
+        , QUARTER_NAME
+        , HOLIDAY_DESC
+        , IS_HOLIDAY
+        , SNAPSHOT_DATE_FPA
+        , SNAPSHOT_DATE_BILLINGS
+        , DAYS_IN_MONTH_COUNT
+        , DAYS_UNTIL_LAST_DAY_OF_MONTH
+        , CURRENT_DATE_ACTUAL
+        , CURRENT_FIRST_DAY_OF_MONTH
+        , CURRENT_DAY_OF_MONTH
+FROM JOIN_RESULT

@@ -1,0 +1,13 @@
+version: 2
+
+models:
+  - name: hub_customer_bill_location
+    description: This is the raw vault hub model for customer bill locations
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - customer_bill_location_hk
+    config:
+      tags:
+        - emtek

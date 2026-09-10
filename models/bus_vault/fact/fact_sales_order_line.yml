@@ -1,0 +1,22 @@
+version: 2
+models:
+  - name: fact_sales_order_line
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          config:
+            severity: warn
+          arguments:
+            combination_of_columns:
+              - SALES_ORDER_LINE_HK
+              - SALES_ORDER_NUMBER
+    columns:
+      - name: SALES_ORDER_NUMBER
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: SALES_ORDER_LINE_NUMBER
+        tests:
+          - not_null:
+              config:
+                severity: warn

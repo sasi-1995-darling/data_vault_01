@@ -1,0 +1,10 @@
+version: 2
+models:
+- name: im_dim_device_status
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - PAIRED_DEVICE_BK
+        - DEVICE_BK
+  columns: []

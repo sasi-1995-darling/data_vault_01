@@ -1,0 +1,26 @@
+version: 2
+models:
+- name: lnk_channel_item_inventory
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - CHANNEL_ITEM_INVENTORY_LHK
+  - dbt_expectations.expect_table_row_count_to_be_between:
+      arguments:
+        min_value: 4
+      config:
+        severity: warn
+  columns:
+  - name: ITEM_HK
+    data_tests:
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'hub_item_v1' )
+          pk_column_name: ITEM_HK
+  - name: STORE_HK
+    data_tests:
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'hub_store' )
+          pk_column_name: STORE_HK

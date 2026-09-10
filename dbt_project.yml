@@ -1,0 +1,265 @@
+# Name your project! Project names should contain only lowercase characters
+# and underscores. A good package name should reflect your organization's
+# name or the intended use of these models
+name: "dbt_datavault"
+version: "1.0.0"
+config-version: 2
+
+# dbt Cloud settings
+dbt-cloud:
+  project-id: 343806
+
+# This setting configures which "profile" dbt uses for this project.
+profile: "dbt-datavault"
+
+# These configurations specify where dbt should look for different types of files.
+# The `model-paths` config, for example, states that models in this project can be
+# found in the "models/" directory. You probably won't need to change these!
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+clean-targets: # directories to be removed by `dbt clean`
+  - "target"
+  - "dbt_packages"
+
+# Run an external command to execute custom SQL in metadata.external_sql before running dbt
+on-run-start:
+  - "{{ execute_external_sql() }}"
+  - "{% if env_var('DBT_ENVIRON')=='prod' %}{{ set_alation_active_tags() }}{% endif %}"
+on-run-end:
+  - "{% if target.name == 'prod' %}{{ apply_object_tags(results) }}{% endif %}"
+
+# Configuring models
+# Full documentation: https://docs.getdbt.com/docs/configuring-models
+
+# In dbt, the default materialization for a model is a view. This means, when you run
+# dbt run or dbt build, all of your models will be built as a view in your data platform.
+# The configuration below will override this setting for models in the example folder to
+# instead be materialized as tables. Any models you add to the root of the models folder will
+# continue to be built as views. These settings can be overridden in the individual model files
+# using the `{{ config(...) }}` macro.
+
+models:
+  dbt_datavault:
+    +static_analysis: strict
+    +query_tag: "dbt_{{ env_var('DBT_ENVIRON', 'dev') }}"
+    # Default warehouse using environment variable
+    +snowflake_warehouse: "{{ env_var('DBT_WAREHOUSE_DEFAULT', 'SA_DBT_WH') }}"
+    staging:
+      +snowflake_warehouse: "{{ env_var('DBT_WAREHOUSE_STAGING', 'SA_DBT_WH') }}"
+      +materialized: view
+      +database: "datavault_{{env_var('DBT_ENVIRON')}}"
+      +schema: "staging"
+      base:
+        emtk_ebs:
+          +tags:
+            - emtek
+            - ebs
+        emtk_crm:
+          +tags:
+            - emtek
+            - crm
+        emtk_files:
+          +tags:
+            - emtek
+            - files
+      stage:
+        emtk_ebs:
+          +tags:
+            - emtek
+            - ebs
+        emtk_crm:
+          +tags:
+            - emtek
+            - crm
+        emtk_files:
+          +tags:
+            - emtek
+            - files
+        reference:
+          +tags:
+            - reference
+    int_staging_views:
+      +snowflake_warehouse: "{{ env_var('DBT_WAREHOUSE_STAGING', 'SA_DBT_WH') }}"
+      +materialized: view
+      +schema: "int_staging"
+      +database: "datavault_{{env_var('DBT_ENVIRON')}}"
+      +tags: ["Level_1_staging"]
+      +query_tag: Level1_Staging_View
+
+    __dmf_code:
+      +snowflake_warehouse: "{{ env_var('DBT_WAREHOUSE_DEFAULT', 'SA_DBT_WH') }}"
+      +materialized: table
+      +schema: "snowflake_dmf"
+      +database: "datavault_{{env_var('DBT_ENVIRON')}}"
+
+    raw_vault:
+      +snowflake_warehouse: "{{ env_var('DBT_WAREHOUSE_RAW_VAULT', 'SA_DBT_WH') }}"
+      +materialized: incremental
+      +on_schema_change: "sync_all_columns"
+      +transient: false
+      +database: "datavault_{{env_var('DBT_ENVIRON')}}"
+      +schema: "raw_vault"
+      +query_tag: raw_vault
+    bus_vault:
+      +snowflake_warehouse: "{{ env_var('DBT_WAREHOUSE_BUS_VAULT', 'SA_DBT_WH') }}"
+      +copy_grants: true
+
+      pit:
+        +materialized: table
+        +on_schema_change: "sync_all_columns"
+        +transient: false
+        +database: "datavault_{{env_var('DBT_ENVIRON')}}"
+        +schema: "bus_vault"
+        +query_tag: business_vault_pit
+      reference:
+        +materialized: table
+        +database: "datavault_{{env_var('DBT_ENVIRON')}}"
+        +schema: "bus_vault"
+        +query_tag: business_vault_ref
+      flat_logic:
+        +materialized: view
+        +database: "datavault_{{env_var('DBT_ENVIRON')}}"
+        +schema: "bus_vault"
+      pit_bridge:
+        +materialized: table
+        +database: "datavault_{{env_var('DBT_ENVIRON')}}"
+        +schema: "bus_vault"
+        +query_tag: bus_vault_pit_bridge
+      fact:
+        +materialized: view
+        +database: "datavault_{{env_var('DBT_ENVIRON')}}"
+        +schema: "bus_vault"
+        +query_tag: bus_vault_fact
+      dim:
+        +materialized: view
+        +database: "datavault_{{env_var('DBT_ENVIRON')}}"
+        +schema: "bus_vault"
+        +query_tag: bus_vault_dim
+      link:
+        +materialized: table
+        +database: "datavault_{{env_var('DBT_ENVIRON')}}"
+        +schema: "bus_vault"
+        +query_tag: bus_vault_link
+    info_mart:
+      +snowflake_warehouse: "{{ env_var('DBT_WAREHOUSE_INFO_MART', 'SA_DBT_WH') }}"
+      +copy_grants: true
+
+      common:
+        +materialized: view
+        +database: "infomart_{{env_var('DBT_ENVIRON')}}"
+        +schema: "common"
+        +query_tag: infomart_Views
+      fbin:
+        +materialized: table
+        +database: "infomart_{{env_var('DBT_ENVIRON')}}"
+        +schema: "fbin"
+        +query_tag: infomart_fbin
+      planning:
+        +materialized: table
+        +database: "infomart_{{env_var('DBT_ENVIRON')}}"
+        +schema: "planning"
+        +query_tag: infomart_planning
+      sales:
+        +materialized: view
+        +database: "infomart_{{env_var('DBT_ENVIRON')}}"
+        +schema: "sales"
+        +query_tag: infomart_sales
+      supply_chain:
+        +materialized: view
+        +database: "infomart_{{env_var('DBT_ENVIRON')}}"
+        +schema: "supply_chain"
+        +query_tag: infomart_supply_chain
+      direct_spend:
+        +materialized: view
+        +database: "infomart_{{env_var('DBT_ENVIRON')}}"
+        +schema: "direct_spend"
+        +tags: ["InfoMart", "Infomart_Views"]
+        +query_tag: infomart_direct_spend
+      pos:
+        +materialized: view
+        +database: "infomart_{{env_var('DBT_ENVIRON')}}"
+        +schema: "pos"
+        +query_tag: infomart_pos
+      consumer_feedback:
+        +materialized: view
+        +database: "infomart_{{env_var('DBT_ENVIRON')}}"
+        +schema: "consumer_feedback"
+        +query_tag: infomart_consumer_feedback
+      shipments:
+        +materialized: view
+        +database: "infomart_{{env_var('DBT_ENVIRON')}}"
+        +schema: "shipments"
+        +query_tag: infomart_shipments
+      competitive_pricing:
+        +materialized: view
+        +database: "infomart_{{env_var('DBT_ENVIRON')}}"
+        +schema: "competitive_pricing"
+        +query_tag: infomart_competitive_pricing
+      competitive_share:
+        +materialized: view
+        +database: "infomart_{{env_var('DBT_ENVIRON')}}"
+        +schema: "competitive_share"
+        +query_tag: infomart_competitive_share
+      connected_device:
+        +materialized: view
+        +database: "infomart_{{env_var('DBT_ENVIRON')}}"
+        +schema: "connected_device"
+        +query_tag: infomart_connected_device
+      insurance_partnership:
+        +materialized: view
+        +database: "infomart_{{env_var('DBT_ENVIRON')}}"
+        +schema: "insurance_partnership"
+        +query_tag: infomart_insurance_partnership
+      service_level:
+        +materialized: view
+        +database: "infomart_{{env_var('DBT_ENVIRON')}}"
+        +schema: "service_level"
+        +query_tag: infomart_service_level
+      direct_to_consumer:
+        +materialized: view
+        +database: "infomart_{{env_var('DBT_ENVIRON')}}"
+        +schema: "direct_to_consumer"
+        +query_tag: infomart_direct_to_consumer
+      product_costs:
+        +materialized: view
+        +database: "infomart_{{env_var('DBT_ENVIRON')}}"
+        +schema: "product_costs"
+        +query_tag: infomart_project_costs
+
+# the following variable needed for dbt Expectations package
+vars:
+  "dbt_date:time_zone": "America/New_York"
+  # Master kill switch — only apply constraints (PK/UNIQUE/FK) in prod
+  dbt_constraints_enabled: "{{ target.name == 'prod' }}"
+  # FK-specific gate (redundant if master is off, but kept as safety net)
+  dbt_constraints_fk_enabled: "{{ target.name == 'prod' }}"
+
+data_tests:
+  +severity: warn
+  +snowflake_warehouse: "{{ env_var('DBT_WAREHOUSE_RAW_VAULT', 'SA_DBT_WH') }}"
+  dbt_datavault:
+    int_staging_views:
+      # OFF by default. Turn ON with --vars '{"enable_staging_tests": true}'
+      +enabled: "{{ var('enable_staging_tests', true if target.name == 'default' else false) }}"
+    raw_vault:
+      # ON in all environments except QA where it's always OFF
+      +enabled: "{{ false if target.name == 'qa' else true }}"
+    bus_vault:
+      # ON in all environments except QA where it's always OFF
+      +enabled: "{{ false if target.name == 'qa' else true }}"
+    info_mart:
+      # OFF by default. Turn ON with --vars '{"enable_info_mart_tests": true}'
+      +enabled: "{{ var('enable_info_mart_tests', false) }}"
+
+# Fusion configuration
+flags:
+  require_generic_test_arguments_property: true
+  # Enable dbt Fusion for improved performance and static analysis
+  # Set to 'false' to revert to legacy parser if needed
+  use_experimental_parser: true
+  # Enable static analysis (recommended with Fusion)
+  static_parser: true

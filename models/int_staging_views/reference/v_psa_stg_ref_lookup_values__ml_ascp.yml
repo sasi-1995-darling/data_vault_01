@@ -1,0 +1,32 @@
+version: 2
+models:
+  - name: v_psa_stg_ref_lookup_values__ml_ascp
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          config:
+            severity: warn
+          arguments:
+            combination_of_columns:
+              - LOOKUP_VALUE_HK
+              - LOAD_DTS
+    columns:
+      - name: LOOKUP_VALUE_BK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: LOOKUP_TYPE
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: LOOKUP_CODE
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: VIEW_APPLICATION_ID
+        tests:
+          - not_null:
+              config:
+                severity: warn

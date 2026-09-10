@@ -1,0 +1,51 @@
+version: 2
+models:
+  - name: sat_sales__amazon
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - REPORT_END_DATE
+              - ASIN
+              - VENDORCENTRAL_ACCOUNT
+              - CUSTOMER_RETURNS
+              - LOAD_DTS
+    columns:
+      - name: STORE_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+          - dbt_utils.relationships_where:
+              arguments:
+                to: ref( 'hub_store' )
+                field: STORE_HK
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'hub_store' )
+                pk_column_name: STORE_HK
+      - name: LOAD_DTS
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: REPORT_END_DATE
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: VENDORCENTRAL_ACCOUNT
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: ASIN
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: CUSTOMER_RETURNS
+        tests:
+          - not_null:
+              config:
+                severity: warn

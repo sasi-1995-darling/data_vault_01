@@ -1,0 +1,9 @@
+version: 2
+models:
+  - name: dim_survey_form
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - FORM_BK
+    columns: []

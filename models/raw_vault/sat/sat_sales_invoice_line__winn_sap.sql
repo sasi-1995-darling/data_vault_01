@@ -1,0 +1,1034 @@
+---- SRC LAYER ----
+WITH
+SRC_SWINN          as ( SELECT * FROM {{ ref('v_psa_stg_sales_invoice_line__winn_sap') }} as SRC 
+                        {% if is_incremental() %}
+                          WHERE SRC.LOAD_DTS > (SELECT DATEADD('HOUR', '-1', MAX(LOAD_DTS)) FROM {{this}})
+                          {% endif %} )
+
+/*
+SRC_SWINN          as ( SELECT * FROM STAGING.v_psa_stg_sales_invoice_line__winn_sap )
+*/
+---- LOGIC LAYER ----
+
+, LOGIC_SWINN as (
+    SELECT
+        SALES_INVOICE_LINE_HK
+      , MANDT
+      , VBELN
+      , POSNR
+      , GLREQUEST
+      , UEPOS
+      , FKIMG
+      , VRKME
+      , UMVKZ
+      , UMVKN
+      , MEINS
+      , SMENG
+      , FKLMG
+      , LMENG
+      , NTGEW
+      , BRGEW
+      , GEWEI
+      , VOLUM
+      , VOLEH
+      , GSBER
+      , PRSDT
+      , FBUDA
+      , KURSK
+      , NETWR
+      , VBELV
+      , POSNV
+      , VGBEL
+      , VGPOS
+      , VGTYP
+      , AUBEL
+      , AUPOS
+      , AUREF
+      , MATNR
+      , ARKTX
+      , PMATN
+      , CHARG
+      , MATKL
+      , PSTYV
+      , POSAR
+      , PRODH
+      , VSTEL
+      , ATPKZ
+      , SPART
+      , POSPA
+      , WERKS
+      , ALAND
+      , WKREG
+      , WKCOU
+      , WKCTY
+      , TAXM1
+      , TAXM2
+      , TAXM3
+      , TAXM4
+      , TAXM5
+      , TAXM6
+      , TAXM7
+      , TAXM8
+      , TAXM9
+      , KOWRR
+      , PRSFD
+      , SKTOF
+      , SKFBP
+      , KONDM
+      , KTGRM
+      , KOSTL
+      , BONUS
+      , PROVG
+      , EANNR
+      , VKGRP
+      , VKBUR
+      , SPARA
+      , SHKZG
+      , ERNAM
+      , ERDAT
+      , ERZET
+      , BWTAR
+      , LGORT
+      , STAFO
+      , WAVWR
+      , KZWI1
+      , KZWI2
+      , KZWI3
+      , KZWI4
+      , KZWI5
+      , KZWI6
+      , STCUR
+      , UVPRS
+      , UVALL
+      , EAN11
+      , PRCTR
+      , KVGR1
+      , KVGR2
+      , KVGR3
+      , KVGR4
+      , KVGR5
+      , MVGR1
+      , MVGR2
+      , MVGR3
+      , MVGR4
+      , MVGR5
+      , MATWA
+      , BONBA
+      , KOKRS
+      , PAOBJNR
+      , PS_PSP_PNR
+      , AUFNR
+      , TXJCD
+      , CMPRE
+      , CMPNT
+      , CUOBJ
+      , CUOBJ_CH
+      , KOUPD
+      , UECHA
+      , XCHAR
+      , ABRVW
+      , SERNR
+      , BZIRK_AUFT
+      , KDGRP_AUFT
+      , KONDA_AUFT
+      , LLAND_AUFT
+      , MPROK
+      , PLTYP_AUFT
+      , REGIO_AUFT
+      , VKORG_AUFT
+      , VTWEG_AUFT
+      , ABRBG
+      , PROSA
+      , UEPVW
+      , AUTYP
+      , STADAT
+      , FPLNR
+      , FPLTR
+      , AKTNR
+      , KNUMA_PI
+      , KNUMA_AG
+      , PREFE
+      , MWSBP
+      , AUGRU_AUFT
+      , FAREG
+      , UPMAT
+      , UKONM
+      , CMPRE_FLT
+      , ABFOR
+      , ABGES
+      , J_1ARFZ
+      , J_1AREGIO
+      , J_1AGICD
+      , J_1ADTYP
+      , J_1ATXREL
+      , J_1BCFOP
+      , J_1BTAXLW1
+      , J_1BTAXLW2
+      , J_1BTXSDC
+      , BRTWR
+      , WKTNR
+      , WKTPS
+      , RPLNR
+      , KURSK_DAT
+      , WGRU1
+      , WGRU2
+      , KDKG1
+      , KDKG2
+      , KDKG3
+      , KDKG4
+      , KDKG5
+      , VKAUS
+      , J_1AINDXP
+      , J_1AIDATEP
+      , KZFME
+      , MWSKZ
+      , VERTT
+      , VERTN
+      , SGTXT
+      , DELCO
+      , BEMOT
+      , RRREL
+      , AKKUR
+      , WMINR
+      , VGBEL_EX
+      , VGPOS_EX
+      , LOGSYS
+      , VGTYP_EX
+      , J_1BTAXLW3
+      , J_1BTAXLW4
+      , J_1BTAXLW5
+      , MSR_ID
+      , MSR_REFUND_CODE
+      , MSR_RET_REASON
+      , NRAB_KNUMH
+      , NRAB_VALUE
+      , DISPUTE_CASE
+      , FUND_USAGE_ITEM
+      , FARR_RELTYPE
+      , CLAIMS_TAXATION
+      , KURRF_DAT_ORIG
+      , VGTYP_EXT
+      , SGT_RCAT
+      , SGT_SCAT
+      , AUFPL
+      , APLZL
+      , DPCNR
+      , DCPNR
+      , DPNRB
+      , PEROP_BEG
+      , PEROP_END
+      , FMFGUS_KEY
+      , FSH_SEASON_YEAR
+      , FSH_SEASON
+      , FSH_COLLECTION
+      , FSH_THEME
+      , FONDS
+      , FISTL
+      , FKBER
+      , GRANT_NBR
+      , BUDGET_PD
+      , PRS_WORK_PERIOD
+      , PPRCTR
+      , PARGB
+      , AUFPL_OAA
+      , APLZL_OAA
+      , CAMPAIGN
+      , COMPREAS
+      , WRF_CHARSTC1
+      , WRF_CHARSTC2
+      , WRF_CHARSTC3
+      , ZZKZWI7
+      , ZZKZWI8
+      , ZZKZWI9
+      , ZZKZWI10
+      , ZZKZWI11
+      , ZZKZWI12
+      , ZZKZWI13
+      , ZZKZWI14
+      , ZZKZWI15
+      , ZZKZWI16
+      , ZZKZWI17
+      , GLDELFLAG
+      , GLCHANGETIME
+      , GLSOURCESYSTEM
+      , GLCHANGETIME_DTTM
+      , PSA_DELETE_IND
+      , LOAD_DTS
+      , REC_SRC
+      , BKCC
+      , HASHDIFF
+    FROM SRC_SWINN
+)
+---- RENAME LAYER ----
+
+, RENAME_SWINN as (
+    SELECT
+        SALES_INVOICE_LINE_HK
+      , MANDT
+      , VBELN
+      , POSNR
+      , GLREQUEST
+      , UEPOS
+      , FKIMG
+      , VRKME
+      , UMVKZ
+      , UMVKN
+      , MEINS
+      , SMENG
+      , FKLMG
+      , LMENG
+      , NTGEW
+      , BRGEW
+      , GEWEI
+      , VOLUM
+      , VOLEH
+      , GSBER
+      , PRSDT
+      , FBUDA
+      , KURSK
+      , NETWR
+      , VBELV
+      , POSNV
+      , VGBEL
+      , VGPOS
+      , VGTYP
+      , AUBEL
+      , AUPOS
+      , AUREF
+      , MATNR
+      , ARKTX
+      , PMATN
+      , CHARG
+      , MATKL
+      , PSTYV
+      , POSAR
+      , PRODH
+      , VSTEL
+      , ATPKZ
+      , SPART
+      , POSPA
+      , WERKS
+      , ALAND
+      , WKREG
+      , WKCOU
+      , WKCTY
+      , TAXM1
+      , TAXM2
+      , TAXM3
+      , TAXM4
+      , TAXM5
+      , TAXM6
+      , TAXM7
+      , TAXM8
+      , TAXM9
+      , KOWRR
+      , PRSFD
+      , SKTOF
+      , SKFBP
+      , KONDM
+      , KTGRM
+      , KOSTL
+      , BONUS
+      , PROVG
+      , EANNR
+      , VKGRP
+      , VKBUR
+      , SPARA
+      , SHKZG
+      , ERNAM
+      , ERDAT
+      , ERZET
+      , BWTAR
+      , LGORT
+      , STAFO
+      , WAVWR
+      , KZWI1
+      , KZWI2
+      , KZWI3
+      , KZWI4
+      , KZWI5
+      , KZWI6
+      , STCUR
+      , UVPRS
+      , UVALL
+      , EAN11
+      , PRCTR
+      , KVGR1
+      , KVGR2
+      , KVGR3
+      , KVGR4
+      , KVGR5
+      , MVGR1
+      , MVGR2
+      , MVGR3
+      , MVGR4
+      , MVGR5
+      , MATWA
+      , BONBA
+      , KOKRS
+      , PAOBJNR
+      , PS_PSP_PNR
+      , AUFNR
+      , TXJCD
+      , CMPRE
+      , CMPNT
+      , CUOBJ
+      , CUOBJ_CH
+      , KOUPD
+      , UECHA
+      , XCHAR
+      , ABRVW
+      , SERNR
+      , BZIRK_AUFT
+      , KDGRP_AUFT
+      , KONDA_AUFT
+      , LLAND_AUFT
+      , MPROK
+      , PLTYP_AUFT
+      , REGIO_AUFT
+      , VKORG_AUFT
+      , VTWEG_AUFT
+      , ABRBG
+      , PROSA
+      , UEPVW
+      , AUTYP
+      , STADAT
+      , FPLNR
+      , FPLTR
+      , AKTNR
+      , KNUMA_PI
+      , KNUMA_AG
+      , PREFE
+      , MWSBP
+      , AUGRU_AUFT
+      , FAREG
+      , UPMAT
+      , UKONM
+      , CMPRE_FLT
+      , ABFOR
+      , ABGES
+      , J_1ARFZ
+      , J_1AREGIO
+      , J_1AGICD
+      , J_1ADTYP
+      , J_1ATXREL
+      , J_1BCFOP
+      , J_1BTAXLW1
+      , J_1BTAXLW2
+      , J_1BTXSDC
+      , BRTWR
+      , WKTNR
+      , WKTPS
+      , RPLNR
+      , KURSK_DAT
+      , WGRU1
+      , WGRU2
+      , KDKG1
+      , KDKG2
+      , KDKG3
+      , KDKG4
+      , KDKG5
+      , VKAUS
+      , J_1AINDXP
+      , J_1AIDATEP
+      , KZFME
+      , MWSKZ
+      , VERTT
+      , VERTN
+      , SGTXT
+      , DELCO
+      , BEMOT
+      , RRREL
+      , AKKUR
+      , WMINR
+      , VGBEL_EX
+      , VGPOS_EX
+      , LOGSYS
+      , VGTYP_EX
+      , J_1BTAXLW3
+      , J_1BTAXLW4
+      , J_1BTAXLW5
+      , MSR_ID
+      , MSR_REFUND_CODE
+      , MSR_RET_REASON
+      , NRAB_KNUMH
+      , NRAB_VALUE
+      , DISPUTE_CASE
+      , FUND_USAGE_ITEM
+      , FARR_RELTYPE
+      , CLAIMS_TAXATION
+      , KURRF_DAT_ORIG
+      , VGTYP_EXT
+      , SGT_RCAT
+      , SGT_SCAT
+      , AUFPL
+      , APLZL
+      , DPCNR
+      , DCPNR
+      , DPNRB
+      , PEROP_BEG
+      , PEROP_END
+      , FMFGUS_KEY
+      , FSH_SEASON_YEAR
+      , FSH_SEASON
+      , FSH_COLLECTION
+      , FSH_THEME
+      , FONDS
+      , FISTL
+      , FKBER
+      , GRANT_NBR
+      , BUDGET_PD
+      , PRS_WORK_PERIOD
+      , PPRCTR
+      , PARGB
+      , AUFPL_OAA
+      , APLZL_OAA
+      , CAMPAIGN
+      , COMPREAS
+      , WRF_CHARSTC1
+      , WRF_CHARSTC2
+      , WRF_CHARSTC3
+      , ZZKZWI7
+      , ZZKZWI8
+      , ZZKZWI9
+      , ZZKZWI10
+      , ZZKZWI11
+      , ZZKZWI12
+      , ZZKZWI13
+      , ZZKZWI14
+      , ZZKZWI15
+      , ZZKZWI16
+      , ZZKZWI17
+      , GLDELFLAG
+      , GLCHANGETIME
+      , GLSOURCESYSTEM
+      , GLCHANGETIME_DTTM
+      , PSA_DELETE_IND
+      , LOAD_DTS
+      , REC_SRC
+      , BKCC
+      , HASHDIFF
+    FROM LOGIC_SWINN
+)
+---- FILTER LAYER ----
+
+, FILTER_SWINN as (
+    SELECT *
+    FROM RENAME_SWINN
+)
+
+---- JOIN LAYER ----
+, JOIN_RESULT as (
+    SELECT *
+    FROM FILTER_SWINN
+)
+
+---- FINAL LAYER ----
+SELECT
+          SALES_INVOICE_LINE_HK
+        , MANDT
+        , VBELN
+        , POSNR
+        , GLREQUEST
+        , UEPOS
+        , FKIMG
+        , VRKME
+        , UMVKZ
+        , UMVKN
+        , MEINS
+        , SMENG
+        , FKLMG
+        , LMENG
+        , NTGEW
+        , BRGEW
+        , GEWEI
+        , VOLUM
+        , VOLEH
+        , GSBER
+        , PRSDT
+        , FBUDA
+        , KURSK
+        , NETWR
+        , VBELV
+        , POSNV
+        , VGBEL
+        , VGPOS
+        , VGTYP
+        , AUBEL
+        , AUPOS
+        , AUREF
+        , MATNR
+        , ARKTX
+        , PMATN
+        , CHARG
+        , MATKL
+        , PSTYV
+        , POSAR
+        , PRODH
+        , VSTEL
+        , ATPKZ
+        , SPART
+        , POSPA
+        , WERKS
+        , ALAND
+        , WKREG
+        , WKCOU
+        , WKCTY
+        , TAXM1
+        , TAXM2
+        , TAXM3
+        , TAXM4
+        , TAXM5
+        , TAXM6
+        , TAXM7
+        , TAXM8
+        , TAXM9
+        , KOWRR
+        , PRSFD
+        , SKTOF
+        , SKFBP
+        , KONDM
+        , KTGRM
+        , KOSTL
+        , BONUS
+        , PROVG
+        , EANNR
+        , VKGRP
+        , VKBUR
+        , SPARA
+        , SHKZG
+        , ERNAM
+        , ERDAT
+        , ERZET
+        , BWTAR
+        , LGORT
+        , STAFO
+        , WAVWR
+        , KZWI1
+        , KZWI2
+        , KZWI3
+        , KZWI4
+        , KZWI5
+        , KZWI6
+        , STCUR
+        , UVPRS
+        , UVALL
+        , EAN11
+        , PRCTR
+        , KVGR1
+        , KVGR2
+        , KVGR3
+        , KVGR4
+        , KVGR5
+        , MVGR1
+        , MVGR2
+        , MVGR3
+        , MVGR4
+        , MVGR5
+        , MATWA
+        , BONBA
+        , KOKRS
+        , PAOBJNR
+        , PS_PSP_PNR
+        , AUFNR
+        , TXJCD
+        , CMPRE
+        , CMPNT
+        , CUOBJ
+        , CUOBJ_CH
+        , KOUPD
+        , UECHA
+        , XCHAR
+        , ABRVW
+        , SERNR
+        , BZIRK_AUFT
+        , KDGRP_AUFT
+        , KONDA_AUFT
+        , LLAND_AUFT
+        , MPROK
+        , PLTYP_AUFT
+        , REGIO_AUFT
+        , VKORG_AUFT
+        , VTWEG_AUFT
+        , ABRBG
+        , PROSA
+        , UEPVW
+        , AUTYP
+        , STADAT
+        , FPLNR
+        , FPLTR
+        , AKTNR
+        , KNUMA_PI
+        , KNUMA_AG
+        , PREFE
+        , MWSBP
+        , AUGRU_AUFT
+        , FAREG
+        , UPMAT
+        , UKONM
+        , CMPRE_FLT
+        , ABFOR
+        , ABGES
+        , J_1ARFZ
+        , J_1AREGIO
+        , J_1AGICD
+        , J_1ADTYP
+        , J_1ATXREL
+        , J_1BCFOP
+        , J_1BTAXLW1
+        , J_1BTAXLW2
+        , J_1BTXSDC
+        , BRTWR
+        , WKTNR
+        , WKTPS
+        , RPLNR
+        , KURSK_DAT
+        , WGRU1
+        , WGRU2
+        , KDKG1
+        , KDKG2
+        , KDKG3
+        , KDKG4
+        , KDKG5
+        , VKAUS
+        , J_1AINDXP
+        , J_1AIDATEP
+        , KZFME
+        , MWSKZ
+        , VERTT
+        , VERTN
+        , SGTXT
+        , DELCO
+        , BEMOT
+        , RRREL
+        , AKKUR
+        , WMINR
+        , VGBEL_EX
+        , VGPOS_EX
+        , LOGSYS
+        , VGTYP_EX
+        , J_1BTAXLW3
+        , J_1BTAXLW4
+        , J_1BTAXLW5
+        , MSR_ID
+        , MSR_REFUND_CODE
+        , MSR_RET_REASON
+        , NRAB_KNUMH
+        , NRAB_VALUE
+        , DISPUTE_CASE
+        , FUND_USAGE_ITEM
+        , FARR_RELTYPE
+        , CLAIMS_TAXATION
+        , KURRF_DAT_ORIG
+        , VGTYP_EXT
+        , SGT_RCAT
+        , SGT_SCAT
+        , AUFPL
+        , APLZL
+        , DPCNR
+        , DCPNR
+        , DPNRB
+        , PEROP_BEG
+        , PEROP_END
+        , FMFGUS_KEY
+        , FSH_SEASON_YEAR
+        , FSH_SEASON
+        , FSH_COLLECTION
+        , FSH_THEME
+        , FONDS
+        , FISTL
+        , FKBER
+        , GRANT_NBR
+        , BUDGET_PD
+        , PRS_WORK_PERIOD
+        , PPRCTR
+        , PARGB
+        , AUFPL_OAA
+        , APLZL_OAA
+        , CAMPAIGN
+        , COMPREAS
+        , WRF_CHARSTC1
+        , WRF_CHARSTC2
+        , WRF_CHARSTC3
+        , ZZKZWI7
+        , ZZKZWI8
+        , ZZKZWI9
+        , ZZKZWI10
+        , ZZKZWI11
+        , ZZKZWI12
+        , ZZKZWI13
+        , ZZKZWI14
+        , ZZKZWI15
+        , ZZKZWI16
+        , ZZKZWI17
+        , GLDELFLAG
+        , GLCHANGETIME
+        , GLSOURCESYSTEM
+        , GLCHANGETIME_DTTM
+        , PSA_DELETE_IND
+        , LOAD_DTS
+        , REC_SRC
+        , BKCC
+        , HASHDIFF
+FROM JOIN_RESULT
+{% if is_incremental() %}
+ WHERE NOT EXISTS (
+  SELECT 1 
+  FROM {{ this }} existing
+  WHERE existing.SALES_INVOICE_LINE_HK = JOIN_RESULT.SALES_INVOICE_LINE_HK 
+  AND existing.HASHDIFF = JOIN_RESULT.HASHDIFF
+ )
+ {% endif %} 
+ {% if not is_incremental() %}
+ /* The following qualifier is implemented to prevent multiple loads of touched records during the initial build, such as multiple rows per HK and hashdiff. */
+ qualify 1= row_number()over(partition by SALES_INVOICE_LINE_HK, HASHDIFF order by LOAD_DTS)
+ 
+ union all
+  SELECT MD5_BINARY(GR.VALUE) SALES_INVOICE_LINE_HK
+, CAST(NULL AS STRING) AS MANDT
+, CAST(NULL AS STRING) AS VBELN
+, CAST(NULL AS STRING) AS POSNR
+, CAST(NULL AS STRING) AS GLREQUEST
+, CAST(NULL AS STRING) AS UEPOS
+, CAST(NULL AS STRING) AS FKIMG
+, CAST(NULL AS STRING) AS VRKME
+, CAST(NULL AS STRING) AS UMVKZ
+, CAST(NULL AS STRING) AS UMVKN
+, CAST(NULL AS STRING) AS MEINS
+, CAST(NULL AS STRING) AS SMENG
+, CAST(NULL AS STRING) AS FKLMG
+, CAST(NULL AS STRING) AS LMENG
+, CAST(NULL AS STRING) AS NTGEW
+, CAST(NULL AS STRING) AS BRGEW
+, CAST(NULL AS STRING) AS GEWEI
+, CAST(NULL AS STRING) AS VOLUM
+, CAST(NULL AS STRING) AS VOLEH
+, CAST(NULL AS STRING) AS GSBER
+, CAST(NULL AS STRING) AS PRSDT
+, CAST(NULL AS STRING) AS FBUDA
+, CAST(NULL AS STRING) AS KURSK
+, CAST(NULL AS STRING) AS NETWR
+, CAST(NULL AS STRING) AS VBELV
+, CAST(NULL AS STRING) AS POSNV
+, CAST(NULL AS STRING) AS VGBEL
+, CAST(NULL AS STRING) AS VGPOS
+, CAST(NULL AS STRING) AS VGTYP
+, CAST(NULL AS STRING) AS AUBEL
+, CAST(NULL AS STRING) AS AUPOS
+, CAST(NULL AS STRING) AS AUREF
+, CAST(NULL AS STRING) AS MATNR
+, CAST(NULL AS STRING) AS ARKTX
+, CAST(NULL AS STRING) AS PMATN
+, CAST(NULL AS STRING) AS CHARG
+, CAST(NULL AS STRING) AS MATKL
+, CAST(NULL AS STRING) AS PSTYV
+, CAST(NULL AS STRING) AS POSAR
+, CAST(NULL AS STRING) AS PRODH
+, CAST(NULL AS STRING) AS VSTEL
+, CAST(NULL AS STRING) AS ATPKZ
+, CAST(NULL AS STRING) AS SPART
+, CAST(NULL AS STRING) AS POSPA
+, CAST(NULL AS STRING) AS WERKS
+, CAST(NULL AS STRING) AS ALAND
+, CAST(NULL AS STRING) AS WKREG
+, CAST(NULL AS STRING) AS WKCOU
+, CAST(NULL AS STRING) AS WKCTY
+, CAST(NULL AS STRING) AS TAXM1
+, CAST(NULL AS STRING) AS TAXM2
+, CAST(NULL AS STRING) AS TAXM3
+, CAST(NULL AS STRING) AS TAXM4
+, CAST(NULL AS STRING) AS TAXM5
+, CAST(NULL AS STRING) AS TAXM6
+, CAST(NULL AS STRING) AS TAXM7
+, CAST(NULL AS STRING) AS TAXM8
+, CAST(NULL AS STRING) AS TAXM9
+, CAST(NULL AS STRING) AS KOWRR
+, CAST(NULL AS STRING) AS PRSFD
+, CAST(NULL AS STRING) AS SKTOF
+, CAST(NULL AS STRING) AS SKFBP
+, CAST(NULL AS STRING) AS KONDM
+, CAST(NULL AS STRING) AS KTGRM
+, CAST(NULL AS STRING) AS KOSTL
+, CAST(NULL AS STRING) AS BONUS
+, CAST(NULL AS STRING) AS PROVG
+, CAST(NULL AS STRING) AS EANNR
+, CAST(NULL AS STRING) AS VKGRP
+, CAST(NULL AS STRING) AS VKBUR
+, CAST(NULL AS STRING) AS SPARA
+, CAST(NULL AS STRING) AS SHKZG
+, CAST(NULL AS STRING) AS ERNAM
+, CAST(NULL AS STRING) AS ERDAT
+, CAST(NULL AS STRING) AS ERZET
+, CAST(NULL AS STRING) AS BWTAR
+, CAST(NULL AS STRING) AS LGORT
+, CAST(NULL AS STRING) AS STAFO
+, CAST(NULL AS STRING) AS WAVWR
+, CAST(NULL AS STRING) AS KZWI1
+, CAST(NULL AS STRING) AS KZWI2
+, CAST(NULL AS STRING) AS KZWI3
+, CAST(NULL AS STRING) AS KZWI4
+, CAST(NULL AS STRING) AS KZWI5
+, CAST(NULL AS STRING) AS KZWI6
+, CAST(NULL AS STRING) AS STCUR
+, CAST(NULL AS STRING) AS UVPRS
+, CAST(NULL AS STRING) AS UVALL
+, CAST(NULL AS STRING) AS EAN11
+, CAST(NULL AS STRING) AS PRCTR
+, CAST(NULL AS STRING) AS KVGR1
+, CAST(NULL AS STRING) AS KVGR2
+, CAST(NULL AS STRING) AS KVGR3
+, CAST(NULL AS STRING) AS KVGR4
+, CAST(NULL AS STRING) AS KVGR5
+, CAST(NULL AS STRING) AS MVGR1
+, CAST(NULL AS STRING) AS MVGR2
+, CAST(NULL AS STRING) AS MVGR3
+, CAST(NULL AS STRING) AS MVGR4
+, CAST(NULL AS STRING) AS MVGR5
+, CAST(NULL AS STRING) AS MATWA
+, CAST(NULL AS STRING) AS BONBA
+, CAST(NULL AS STRING) AS KOKRS
+, CAST(NULL AS STRING) AS PAOBJNR
+, CAST(NULL AS STRING) AS PS_PSP_PNR
+, CAST(NULL AS STRING) AS AUFNR
+, CAST(NULL AS STRING) AS TXJCD
+, CAST(NULL AS STRING) AS CMPRE
+, CAST(NULL AS STRING) AS CMPNT
+, CAST(NULL AS STRING) AS CUOBJ
+, CAST(NULL AS STRING) AS CUOBJ_CH
+, CAST(NULL AS STRING) AS KOUPD
+, CAST(NULL AS STRING) AS UECHA
+, CAST(NULL AS STRING) AS XCHAR
+, CAST(NULL AS STRING) AS ABRVW
+, CAST(NULL AS STRING) AS SERNR
+, CAST(NULL AS STRING) AS BZIRK_AUFT
+, CAST(NULL AS STRING) AS KDGRP_AUFT
+, CAST(NULL AS STRING) AS KONDA_AUFT
+, CAST(NULL AS STRING) AS LLAND_AUFT
+, CAST(NULL AS STRING) AS MPROK
+, CAST(NULL AS STRING) AS PLTYP_AUFT
+, CAST(NULL AS STRING) AS REGIO_AUFT
+, CAST(NULL AS STRING) AS VKORG_AUFT
+, CAST(NULL AS STRING) AS VTWEG_AUFT
+, CAST(NULL AS STRING) AS ABRBG
+, CAST(NULL AS STRING) AS PROSA
+, CAST(NULL AS STRING) AS UEPVW
+, CAST(NULL AS STRING) AS AUTYP
+, CAST(NULL AS STRING) AS STADAT
+, CAST(NULL AS STRING) AS FPLNR
+, CAST(NULL AS STRING) AS FPLTR
+, CAST(NULL AS STRING) AS AKTNR
+, CAST(NULL AS STRING) AS KNUMA_PI
+, CAST(NULL AS STRING) AS KNUMA_AG
+, CAST(NULL AS STRING) AS PREFE
+, CAST(NULL AS STRING) AS MWSBP
+, CAST(NULL AS STRING) AS AUGRU_AUFT
+, CAST(NULL AS STRING) AS FAREG
+, CAST(NULL AS STRING) AS UPMAT
+, CAST(NULL AS STRING) AS UKONM
+, CAST(NULL AS STRING) AS CMPRE_FLT
+, CAST(NULL AS STRING) AS ABFOR
+, CAST(NULL AS STRING) AS ABGES
+, CAST(NULL AS STRING) AS J_1ARFZ
+, CAST(NULL AS STRING) AS J_1AREGIO
+, CAST(NULL AS STRING) AS J_1AGICD
+, CAST(NULL AS STRING) AS J_1ADTYP
+, CAST(NULL AS STRING) AS J_1ATXREL
+, CAST(NULL AS STRING) AS J_1BCFOP
+, CAST(NULL AS STRING) AS J_1BTAXLW1
+, CAST(NULL AS STRING) AS J_1BTAXLW2
+, CAST(NULL AS STRING) AS J_1BTXSDC
+, CAST(NULL AS STRING) AS BRTWR
+, CAST(NULL AS STRING) AS WKTNR
+, CAST(NULL AS STRING) AS WKTPS
+, CAST(NULL AS STRING) AS RPLNR
+, CAST(NULL AS STRING) AS KURSK_DAT
+, CAST(NULL AS STRING) AS WGRU1
+, CAST(NULL AS STRING) AS WGRU2
+, CAST(NULL AS STRING) AS KDKG1
+, CAST(NULL AS STRING) AS KDKG2
+, CAST(NULL AS STRING) AS KDKG3
+, CAST(NULL AS STRING) AS KDKG4
+, CAST(NULL AS STRING) AS KDKG5
+, CAST(NULL AS STRING) AS VKAUS
+, CAST(NULL AS STRING) AS J_1AINDXP
+, CAST(NULL AS STRING) AS J_1AIDATEP
+, CAST(NULL AS STRING) AS KZFME
+, CAST(NULL AS STRING) AS MWSKZ
+, CAST(NULL AS STRING) AS VERTT
+, CAST(NULL AS STRING) AS VERTN
+, CAST(NULL AS STRING) AS SGTXT
+, CAST(NULL AS STRING) AS DELCO
+, CAST(NULL AS STRING) AS BEMOT
+, CAST(NULL AS STRING) AS RRREL
+, CAST(NULL AS STRING) AS AKKUR
+, CAST(NULL AS STRING) AS WMINR
+, CAST(NULL AS STRING) AS VGBEL_EX
+, CAST(NULL AS STRING) AS VGPOS_EX
+, CAST(NULL AS STRING) AS LOGSYS
+, CAST(NULL AS STRING) AS VGTYP_EX
+, CAST(NULL AS STRING) AS J_1BTAXLW3
+, CAST(NULL AS STRING) AS J_1BTAXLW4
+, CAST(NULL AS STRING) AS J_1BTAXLW5
+, CAST(NULL AS STRING) AS MSR_ID
+, CAST(NULL AS STRING) AS MSR_REFUND_CODE
+, CAST(NULL AS STRING) AS MSR_RET_REASON
+, CAST(NULL AS STRING) AS NRAB_KNUMH
+, CAST(NULL AS STRING) AS NRAB_VALUE
+, CAST(NULL AS STRING) AS DISPUTE_CASE
+, CAST(NULL AS STRING) AS FUND_USAGE_ITEM
+, CAST(NULL AS STRING) AS FARR_RELTYPE
+, CAST(NULL AS STRING) AS CLAIMS_TAXATION
+, CAST(NULL AS STRING) AS KURRF_DAT_ORIG
+, CAST(NULL AS STRING) AS VGTYP_EXT
+, CAST(NULL AS STRING) AS SGT_RCAT
+, CAST(NULL AS STRING) AS SGT_SCAT
+, CAST(NULL AS STRING) AS AUFPL
+, CAST(NULL AS STRING) AS APLZL
+, CAST(NULL AS STRING) AS DPCNR
+, CAST(NULL AS STRING) AS DCPNR
+, CAST(NULL AS STRING) AS DPNRB
+, CAST(NULL AS STRING) AS PEROP_BEG
+, CAST(NULL AS STRING) AS PEROP_END
+, CAST(NULL AS STRING) AS FMFGUS_KEY
+, CAST(NULL AS STRING) AS FSH_SEASON_YEAR
+, CAST(NULL AS STRING) AS FSH_SEASON
+, CAST(NULL AS STRING) AS FSH_COLLECTION
+, CAST(NULL AS STRING) AS FSH_THEME
+, CAST(NULL AS STRING) AS FONDS
+, CAST(NULL AS STRING) AS FISTL
+, CAST(NULL AS STRING) AS FKBER
+, CAST(NULL AS STRING) AS GRANT_NBR
+, CAST(NULL AS STRING) AS BUDGET_PD
+, CAST(NULL AS STRING) AS PRS_WORK_PERIOD
+, CAST(NULL AS STRING) AS PPRCTR
+, CAST(NULL AS STRING) AS PARGB
+, CAST(NULL AS STRING) AS AUFPL_OAA
+, CAST(NULL AS STRING) AS APLZL_OAA
+, CAST(NULL AS STRING) AS CAMPAIGN
+, CAST(NULL AS STRING) AS COMPREAS
+, CAST(NULL AS STRING) AS WRF_CHARSTC1
+, CAST(NULL AS STRING) AS WRF_CHARSTC2
+, CAST(NULL AS STRING) AS WRF_CHARSTC3
+, CAST(NULL AS STRING) AS ZZKZWI7
+, CAST(NULL AS STRING) AS ZZKZWI8
+, CAST(NULL AS STRING) AS ZZKZWI9
+, CAST(NULL AS STRING) AS ZZKZWI10
+, CAST(NULL AS STRING) AS ZZKZWI11
+, CAST(NULL AS STRING) AS ZZKZWI12
+, CAST(NULL AS STRING) AS ZZKZWI13
+, CAST(NULL AS STRING) AS ZZKZWI14
+, CAST(NULL AS STRING) AS ZZKZWI15
+, CAST(NULL AS STRING) AS ZZKZWI16
+, CAST(NULL AS STRING) AS ZZKZWI17
+, CAST(NULL AS STRING) AS GLDELFLAG
+, CAST(NULL AS NUMBER) AS GLCHANGETIME
+, CAST(NULL AS STRING) AS GLSOURCESYSTEM
+, CAST(NULL AS TIMESTAMP) AS GLCHANGETIME_DTTM
+, CAST(NULL AS STRING) AS PSA_DELETE_IND
+, CONVERT_TIMEZONE('UTC','1900-01-01')  as  LOAD_DTS
+, 'USAZET.SNOWFLAKE.FBIN.DERIVED' AS REC_SRC
+, DECODE(GR.VALUE, 0, 'GHOST RECORD-SYSTEM', -1, 'GHOST RECORD-nullkey-required', -2, 'GHOST RECORD-nullkey-optional') AS BKCC
+, ''::BINARY as HASHDIFF
+ FROM
+ TABLE(strtok_split_to_table('0|-1|-2', '|')) AS GR
+ {% endif %}

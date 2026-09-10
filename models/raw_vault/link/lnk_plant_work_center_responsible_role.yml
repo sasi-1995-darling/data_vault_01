@@ -1,0 +1,16 @@
+
+version: 2
+models:
+- name: lnk_plant_work_center_responsible_role
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - LNK_PLANT_WORK_CENTER_RESPONSIBLE_ROLE_HK
+  columns:
+  - name: PLANT_HK
+    data_tests:
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'hub_plant_v1' )
+          pk_column_name: PLANT_HK

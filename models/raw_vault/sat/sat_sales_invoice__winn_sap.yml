@@ -1,0 +1,21 @@
+version: 2
+models:
+  - name: sat_sales_invoice__winn_sap
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - SALES_INVOICE_HK
+              - LOAD_DTS
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          config:
+            severity: warn
+          arguments:
+            min_value: 4
+    columns:
+      - name: SALES_INVOICE_HK
+        tests:
+          - dbt_utils.relationships_where:
+              arguments:
+                to: ref( 'hub_sales_invoice' )
+                field: SALES_INVOICE_HK

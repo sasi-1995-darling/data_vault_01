@@ -1,0 +1,13 @@
+version: 2
+
+models:
+  - name: hub_sales_agency
+    description: This is the raw vault hub model for sales agencies
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - sales_agency_hk
+    config:
+      tags:
+        - emtek

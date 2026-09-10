@@ -1,0 +1,5 @@
+version: 2
+models:
+- name: im_fact_app_active_user_period
+  data_tests: []
+  columns: []

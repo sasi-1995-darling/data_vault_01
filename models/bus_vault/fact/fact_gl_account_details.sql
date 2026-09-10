@@ -1,0 +1,100 @@
+{{
+  config(
+    materialized = 'incremental',
+    unique_key='GL_ACCOUNT_DETAILS_HK',
+    incremental_strategy= 'merge'
+  )
+}}
+---- SRC LAYER ----
+WITH
+SRC_P              as ( SELECT * FROM {{ ref('pit_gl_account_details') }} as SRC  )
+
+/*
+SRC_P              as ( SELECT * FROM RAW_VAULT.PIT_GL_ACCOUNT_DETAILS )
+*/
+---- LOGIC LAYER ----
+
+, LOGIC_P as (
+    SELECT
+        GL_ACCOUNT_DETAILS_HK
+      , COMPANY_CODE
+      , GL_ACCOUNT_NUMBER
+      , CREATE_DATE__YYYYMMDD
+      , PLANNING_LEVEL
+      , FINANCIAL_BUDGET_ITEM
+      , CURRENCY_CODE
+      , CASH_RECEIPT_ACCOUNT_IND
+      , AUTOMATICALLY_POSTED_ACCOUNT_IND
+      , LINE_ITEM_DISPLAY_IND
+      , MARKED_FOR_DELETION_IND
+      , OPEN_ITEM_MANAGEMENT_IND
+      , BLOCKED_FOR_POSTING_IND
+      , MANAGE_IN_LOCAL_CURRENCY_IND
+      , BKCC
+      , REC_SRC
+      , IS_DELETED
+    FROM SRC_P
+)
+---- RENAME LAYER ----
+
+, RENAME_P as (
+    SELECT
+        GL_ACCOUNT_DETAILS_HK
+      , COMPANY_CODE
+      , GL_ACCOUNT_NUMBER
+      , CREATE_DATE__YYYYMMDD
+      , PLANNING_LEVEL
+      , FINANCIAL_BUDGET_ITEM
+      , CURRENCY_CODE
+      , CASH_RECEIPT_ACCOUNT_IND
+      , AUTOMATICALLY_POSTED_ACCOUNT_IND
+      , LINE_ITEM_DISPLAY_IND
+      , MARKED_FOR_DELETION_IND
+      , OPEN_ITEM_MANAGEMENT_IND
+      , BLOCKED_FOR_POSTING_IND
+      , MANAGE_IN_LOCAL_CURRENCY_IND
+      , BKCC
+      , REC_SRC
+      , IS_DELETED
+    FROM LOGIC_P
+)
+---- FILTER LAYER ----
+
+, FILTER_P as (
+    SELECT *
+    FROM RENAME_P
+)
+
+---- JOIN LAYER ----
+, JOIN_RESULT as (
+    SELECT *
+    FROM FILTER_P
+)
+
+---- FINAL LAYER ----
+SELECT
+          GL_ACCOUNT_DETAILS_HK
+        , COMPANY_CODE
+        , GL_ACCOUNT_NUMBER
+        , CREATE_DATE__YYYYMMDD
+        , PLANNING_LEVEL
+        , FINANCIAL_BUDGET_ITEM
+        , CURRENCY_CODE
+        , CASH_RECEIPT_ACCOUNT_IND
+        , AUTOMATICALLY_POSTED_ACCOUNT_IND
+        , LINE_ITEM_DISPLAY_IND
+        , MARKED_FOR_DELETION_IND
+        , OPEN_ITEM_MANAGEMENT_IND
+        , BLOCKED_FOR_POSTING_IND
+        , MANAGE_IN_LOCAL_CURRENCY_IND
+        , BKCC
+        , REC_SRC
+        , IS_DELETED
+FROM JOIN_RESULT
+{% if is_incremental() %}
+    WHERE GL_ACCOUNT_DETAILS_HK NOT IN (
+        SELECT GL_ACCOUNT_DETAILS_HK 
+        FROM {{ this }}
+    )
+    AND DATE(CREATE_DATE__YYYYMMDD) >= DATE_TRUNC('day', CURRENT_DATE() - 60)
+{% endif %}

@@ -1,0 +1,46 @@
+version: 2
+models:
+  - name: lsat_county_zip__snfl_usps
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          config:
+            severity: warn
+          arguments:
+            combination_of_columns:
+              - LNK_ZIP_COUNTY_HK
+              - LOAD_DTS
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - LNK_ZIP_COUNTY_HK
+              - ZIP
+              - LOAD_DTS
+    columns:
+      - name: LNK_ZIP_COUNTY_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+          - dbt_utils.relationships_where:
+              arguments:
+                to: ref( 'lnk_zipcode_county' )
+                field: LNK_ZIP_COUNTY_HK
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'lnk_zipcode_county' )
+                pk_column_name: LNK_ZIP_COUNTY_HK
+      - name: COUNTY
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: ZIP
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: HASHDIFF
+        tests:
+          - not_null:
+              config:
+                severity: warn

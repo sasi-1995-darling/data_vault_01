@@ -1,0 +1,25 @@
+version: 2
+models:
+  - name: pb_installer_order
+    description: "Installation order PIT/Bridge — all INSTALLATION_FLAG=TRUE orders with installer classification, exclusion flags, and Zigpoll metadata. Branches from pb_insurance_order_device_matched (read-only)."
+    data_tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - ORDER_ID
+              - SKU
+              - ORDER_LINE_ID
+              - GRAIN_KEY
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          arguments:
+            min_value: 4
+    columns:
+      - name: GRAIN_KEY
+        description: "COALESCE(SERIAL_ID, '^^') — non-nullable surrogate for PK uniqueness"
+      - name: INSTALLER_NAME
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ['FrontDoor', 'ThumbTack', 'Beagle']
+              config:
+                where: "INSTALLER_NAME IS NOT NULL"

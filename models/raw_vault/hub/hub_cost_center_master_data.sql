@@ -1,0 +1,75 @@
+---- SRC LAYER ----
+WITH
+SRC_SWINN          as ( SELECT * FROM {{ ref('v_psa_stg_cost_center_master_data__winn_sap') }} as SRC 
+                        QUALIFY (ROW_NUMBER() OVER(PARTITION BY COST_CENTER_MASTER_DATA_HK ORDER BY LOAD_DTS ))=1 )
+
+/*
+SRC_SWINN          as ( SELECT * FROM STAGING.V_PSA_STG_COST_CENTER_MASTER_DATA__WINN_SAP )
+*/
+---- LOGIC LAYER ----
+
+, LOGIC_SWINN as (
+    SELECT
+        COST_CENTER_MASTER_DATA_HK
+      , CONTROLLING_AREA_BK
+      , COST_CENTER_BK
+      , VALID_DATE_TO_BK
+      , BKCC
+      , LOAD_DTS
+      , REC_SRC
+    FROM SRC_SWINN
+)
+---- RENAME LAYER ----
+
+, RENAME_SWINN as (
+    SELECT
+        COST_CENTER_MASTER_DATA_HK
+      , CONTROLLING_AREA_BK
+      , COST_CENTER_BK
+      , VALID_DATE_TO_BK
+      , BKCC
+      , LOAD_DTS
+      , REC_SRC
+    FROM LOGIC_SWINN
+)
+---- FILTER LAYER ----
+
+, FILTER_SWINN as (
+    SELECT *
+    FROM RENAME_SWINN
+)
+---- JOIN LAYER ----
+, JOIN_RESULT as (
+    SELECT * FROM FILTER_SWINN
+)
+
+---- FINAL LAYER ----
+SELECT
+          COST_CENTER_MASTER_DATA_HK
+        , CONTROLLING_AREA_BK
+        , COST_CENTER_BK
+        , VALID_DATE_TO_BK
+        , BKCC
+        , LOAD_DTS
+        , REC_SRC
+FROM JOIN_RESULT
+{% if is_incremental() %}
+WHERE NOT EXISTS (
+    SELECT 1 
+    FROM {{ this }} existing
+    WHERE existing.COST_CENTER_MASTER_DATA_HK= JOIN_RESULT.COST_CENTER_MASTER_DATA_HK
+)
+{% endif %}
+{% if not is_incremental() %}
+ union all
+ 
+ SELECT MD5_BINARY(GR.VALUE) COST_CENTER_MASTER_DATA_HK
+, GR.VALUE AS CONTROLLING_AREA_BK
+, GR.VALUE AS COST_CENTER_BK
+, GR.VALUE AS VALID_DATE_TO_BK
+ , DECODE(GR.VALUE, 0, 'GHOST RECORD-SYSTEM', -1, 'GHOST RECORD-nullkey-required', -2, 'GHOST RECORD-nullkey-optional') AS BKCC
+ , CONVERT_TIMEZONE('UTC','1900-01-01') AS LOAD_DTS
+ , 'USAZET.SNOWFLAKE.FBIN.DERIVED' AS REC_SRC
+ FROM
+ TABLE(strtok_split_to_table('0|-1|-2', '|')) AS GR
+ {% endif %}

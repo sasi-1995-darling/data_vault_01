@@ -1,0 +1,24 @@
+version: 2
+
+models:
+  - name: hub_product
+    description: This is the hub model for Delighted
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - product_hk
+  - name: hub_review
+    description: This is the hub model for Delighted
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - review_hk
+  - name: hub_sentiment
+    description: This is the hub model for Delighted
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - sentiment_hk

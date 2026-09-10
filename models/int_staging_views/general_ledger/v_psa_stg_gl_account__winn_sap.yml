@@ -1,0 +1,23 @@
+version: 2
+models:
+  - name: v_psa_stg_gl_account__winn_sap
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          config:
+            severity: warn
+          arguments:
+            combination_of_columns:
+              - KTOPL
+              - SAKNR
+              - LOAD_DTS
+    columns:
+      - name: KTOPL
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: SAKNR
+        tests:
+          - not_null:
+              config:
+                severity: warn

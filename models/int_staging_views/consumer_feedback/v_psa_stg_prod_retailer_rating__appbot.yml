@@ -1,0 +1,44 @@
+version: 2
+models:
+- name: v_psa_stg_prod_retailer_rating__appbot
+  data_tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - APP_ID
+        - CREATED_AT
+        - COUNTRY
+        - psa_LOAD_DTS
+      config:
+        severity: warn
+  columns:
+  - name: RETAILER_BK
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+  - name: PRODUCT_BK
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+  - name: LOAD_DTS
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+  - name: PRODUCT_RETAILER_HK
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+  - name: PRODUCT_HK
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+  - name: RETAILER_HK
+    data_tests:
+    - not_null:
+        config:
+          severity: warn

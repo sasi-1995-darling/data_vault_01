@@ -1,0 +1,78 @@
+---- SRC LAYER ----
+WITH
+SRC_a              as ( SELECT LNK_WORK_CENTER_CAPACITY_HK, PLANT_HK, WORK_CENTER_HK, WORK_CENTER_LOCATION_HK, CAPACITY_HK, LOAD_DTS, REC_SRC FROM {{ ref('v_psa_stg_work_center_capacity_allocation__winn_sap') }} as SRC 
+                        QUALIFY (ROW_NUMBER() OVER(PARTITION BY LNK_WORK_CENTER_CAPACITY_HK ORDER BY LOAD_DTS ))=1 )
+
+/*
+SRC_a              as ( SELECT * FROM STAGING.v_psa_stg_work_center_capacity_allocation__winn_sap )
+*/
+---- LOGIC LAYER ----
+
+, LOGIC_a as (
+    SELECT
+        LNK_WORK_CENTER_CAPACITY_HK
+      , PLANT_HK
+      , WORK_CENTER_HK
+      , WORK_CENTER_LOCATION_HK
+      , CAPACITY_HK
+      , LOAD_DTS
+      , REC_SRC
+    FROM SRC_a
+)
+---- RENAME LAYER ----
+
+, RENAME_a as (
+    SELECT
+        LNK_WORK_CENTER_CAPACITY_HK
+      , PLANT_HK
+      , WORK_CENTER_HK
+      , WORK_CENTER_LOCATION_HK
+      , CAPACITY_HK
+      , LOAD_DTS
+      , REC_SRC
+    FROM LOGIC_a
+)
+---- FILTER LAYER ----
+
+, FILTER_a as (
+    SELECT *
+    FROM RENAME_a
+)
+
+---- JOIN LAYER ----
+, JOIN_RESULT as (
+    SELECT *
+    FROM FILTER_a
+)
+
+---- FINAL LAYER ----
+SELECT
+          LNK_WORK_CENTER_CAPACITY_HK
+        , PLANT_HK
+        , WORK_CENTER_HK
+        , WORK_CENTER_LOCATION_HK
+        , CAPACITY_HK
+        , LOAD_DTS
+        , REC_SRC
+FROM JOIN_RESULT
+{% if is_incremental() %}
+WHERE NOT EXISTS (
+    SELECT 1 
+    FROM {{ this }} existing
+    WHERE existing.LNK_WORK_CENTER_CAPACITY_HK = JOIN_RESULT.LNK_WORK_CENTER_CAPACITY_HK
+)
+{% endif %}
+{% if not is_incremental() %}
+
+union all
+SELECT 
+MD5_BINARY(GR.VALUE) AS LNK_WORK_CENTER_CAPACITY_HK,
+MD5_BINARY(GR.VALUE) AS PLANT_HK,
+MD5_BINARY(GR.VALUE) AS WORK_CENTER_HK,
+MD5_BINARY(GR.VALUE) AS WORK_CENTER_LOCATION_HK,
+MD5_BINARY(GR.VALUE) AS CAPACITY_HK,
+CONVERT_TIMEZONE('UTC','1900-01-01'::TIMESTAMP) AS LOAD_DTS,
+'USAZET.SNOWFLAKE.FBIN.DERIVED' AS REC_SRC
+FROM
+TABLE(strtok_split_to_table('0|-1|-2', '|')) AS GR
+{% endif %}

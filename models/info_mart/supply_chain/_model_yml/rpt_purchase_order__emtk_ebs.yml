@@ -1,0 +1,10 @@
+version: 2
+
+models:
+  - name: rpt_purchase_order__emtk_ebs
+    description: Reporting table that mimics Emtek's Oracle Discoverer Purchase Orders report. Used by Tableau.
+    config:
+      materialized: table
+      tags:
+        - emtek
+        - ebs

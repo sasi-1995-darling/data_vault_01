@@ -1,0 +1,8 @@
+version: 2
+models:
+- name: pb_channel_traffic_items
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - CHANNEL_TRAFFIC_ITEM_LHK

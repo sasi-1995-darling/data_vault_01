@@ -1,0 +1,193 @@
+---- SRC LAYER ----
+WITH
+SRC_PBIT           as ( SELECT APP_SOURCE, BKCC, CONSUMER_BK, CONSUMER_HK, EVENT, EVENT_ACTION_TS, EVENT_DESCRIPTION, EVENT_TRACKING_ID, EVENT_TRAIT_ID, PLATFORM, REC_SRC FROM {{ ref('pb_stg_app_user_engagement_ios_track') }} as SRC  ),
+SRC_PBAT           as ( SELECT APP_SOURCE, BKCC, CONSUMER_BK, CONSUMER_HK, EVENT, EVENT_ACTION_TS, EVENT_DESCRIPTION, EVENT_TRACKING_ID, EVENT_TRAIT_ID, PLATFORM, REC_SRC FROM {{ ref('pb_stg_app_user_engagement_android_track') }} as SRC  ),
+SRC_PBAC           as ( SELECT APP_SOURCE, BKCC, CONSUMER_BK, CONSUMER_HK, EVENT, EVENT_ACTION_TS, EVENT_DESCRIPTION, EVENT_TRACKING_ID, EVENT_TRAIT_ID, PLATFORM, REC_SRC FROM {{ ref('pb_stg_app_user_engagement_ios_track_flo') }} as SRC  ),
+SRC_PBAD           as ( SELECT APP_SOURCE, BKCC, CONSUMER_BK, CONSUMER_HK, EVENT, EVENT_ACTION_TS, EVENT_DESCRIPTION, EVENT_TRACKING_ID, EVENT_TRAIT_ID, PLATFORM, REC_SRC FROM {{ ref('pb_stg_app_user_engagement_android_track_flo') }} as SRC  )
+
+/*
+SRC_PBIT           as ( SELECT * FROM BUS_VAULT.PB_STG_APP_USER_ENGAGEMENT_IOS_TRACK )
+SRC_PBAT           as ( SELECT * FROM BUS_VAULT.PB_STG_APP_USER_ENGAGEMENT_ANDROID_TRACK )
+SRC_PBAC           as ( SELECT * FROM BUS_VAULT.PB_STG_APP_USER_ENGAGEMENT_IOS_TRACK_FLO )
+SRC_PBAD           as ( SELECT * FROM BUS_VAULT.PB_STG_APP_USER_ENGAGEMENT_ANDROID_TRACK_FLO )
+*/
+---- LOGIC LAYER ----
+
+, LOGIC_PBIT as (
+    SELECT
+        CONSUMER_HK
+      , CONSUMER_BK
+      , BKCC
+      , REC_SRC
+      , EVENT_TRAIT_ID
+      , EVENT_TRACKING_ID
+      , EVENT_DESCRIPTION
+      , EVENT
+      , EVENT_ACTION_TS
+      , PLATFORM
+      , APP_SOURCE
+    FROM SRC_PBIT
+)
+
+, LOGIC_PBAT as (
+    SELECT
+        CONSUMER_HK
+      , CONSUMER_BK
+      , BKCC
+      , REC_SRC
+      , EVENT_TRAIT_ID
+      , EVENT_TRACKING_ID
+      , EVENT_DESCRIPTION
+      , EVENT
+      , EVENT_ACTION_TS
+      , PLATFORM
+      , APP_SOURCE
+    FROM SRC_PBAT
+)
+
+, LOGIC_PBAC as (
+    SELECT
+        CONSUMER_HK
+      , CONSUMER_BK
+      , BKCC
+      , REC_SRC
+      , EVENT_TRAIT_ID
+      , EVENT_TRACKING_ID
+      , EVENT_DESCRIPTION
+      , EVENT
+      , EVENT_ACTION_TS
+      , PLATFORM
+      , APP_SOURCE
+    FROM SRC_PBAC
+)
+
+, LOGIC_PBAD as (
+    SELECT
+        CONSUMER_HK
+      , CONSUMER_BK
+      , BKCC
+      , REC_SRC
+      , EVENT_TRAIT_ID
+      , EVENT_TRACKING_ID
+      , EVENT_DESCRIPTION
+      , EVENT
+      , EVENT_ACTION_TS
+      , PLATFORM
+      , APP_SOURCE
+    FROM SRC_PBAD
+)
+---- RENAME LAYER ----
+
+, RENAME_PBIT as (
+    SELECT
+        CONSUMER_HK
+      , CONSUMER_BK
+      , BKCC
+      , REC_SRC
+      , EVENT_TRAIT_ID
+      , EVENT_TRACKING_ID
+      , EVENT_DESCRIPTION
+      , EVENT
+      , EVENT_ACTION_TS
+      , PLATFORM
+      , APP_SOURCE
+    FROM LOGIC_PBIT
+)
+
+, RENAME_PBAT as (
+    SELECT
+        CONSUMER_HK
+      , CONSUMER_BK
+      , BKCC
+      , REC_SRC
+      , EVENT_TRAIT_ID
+      , EVENT_TRACKING_ID
+      , EVENT_DESCRIPTION
+      , EVENT
+      , EVENT_ACTION_TS
+      , PLATFORM
+      , APP_SOURCE
+    FROM LOGIC_PBAT
+)
+
+, RENAME_PBAC as (
+    SELECT
+        CONSUMER_HK
+      , CONSUMER_BK
+      , BKCC
+      , REC_SRC
+      , EVENT_TRAIT_ID
+      , EVENT_TRACKING_ID
+      , EVENT_DESCRIPTION
+      , EVENT
+      , EVENT_ACTION_TS
+      , PLATFORM
+      , APP_SOURCE
+    FROM LOGIC_PBAC
+)
+
+, RENAME_PBAD as (
+    SELECT
+        CONSUMER_HK
+      , CONSUMER_BK
+      , BKCC
+      , REC_SRC
+      , EVENT_TRAIT_ID
+      , EVENT_TRACKING_ID
+      , EVENT_DESCRIPTION
+      , EVENT
+      , EVENT_ACTION_TS
+      , PLATFORM
+      , APP_SOURCE
+    FROM LOGIC_PBAD
+)
+---- FILTER LAYER ----
+
+, FILTER_PBIT as (
+    SELECT *
+    FROM RENAME_PBIT
+)
+
+, FILTER_PBAT as (
+    SELECT *
+    FROM RENAME_PBAT
+)
+
+, FILTER_PBAC as (
+    SELECT *
+    FROM RENAME_PBAC
+)
+
+, FILTER_PBAD as (
+    SELECT *
+    FROM RENAME_PBAD
+)
+---- JOIN LAYER ----
+, JOIN_RESULT as (
+    SELECT * FROM FILTER_PBIT
+    UNION
+    SELECT * FROM FILTER_PBAT
+    UNION
+    SELECT * FROM FILTER_PBAC
+    UNION
+    SELECT * FROM FILTER_PBAD
+)
+
+---- FINAL LAYER ----
+SELECT
+              row_number() over(order by 1)                            as SEQ_ID
+        , CURRENT_DATE                                                 as SNAPSHOTDATE
+        , CONVERT_TIMEZONE('UTC', CURRENT_TIMESTAMP )                  as PB_LOAD_DTS
+        , CONSUMER_HK
+        , CONSUMER_BK
+        , BKCC
+        , REC_SRC
+        , EVENT_TRAIT_ID
+        , EVENT_TRACKING_ID
+        , EVENT_DESCRIPTION
+        , EVENT
+        , EVENT_ACTION_TS
+        , PLATFORM
+        , APP_SOURCE
+FROM JOIN_RESULT
+qualify 1= row_number() over(partition by CONSUMER_HK , EVENT, PLATFORM order by EVENT_ACTION_TS DESC, PB_LOAD_DTS DESC)

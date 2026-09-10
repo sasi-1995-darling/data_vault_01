@@ -1,0 +1,635 @@
+schema_version: '1.0'
+filename: v_psa_stg_payment_terms__tt_e21
+_pipeline_metadata:
+  bkcc_rec_src: USOHMA.ORCL.E21PRD.APVNDTERM
+  has_fivetran_deleted: true
+  has_psa_delete_ind: true
+  psa_delete_filter: false
+  null_bk_coalesced: false
+  large_volume: false
+  row_count: 118
+  volume_tier: normal
+  load_dts_derivation: CONVERT_TIMEZONE('UTC', _FIVETRAN_SYNCED)
+  grain_valid: true
+  hub_model_name: hub_payment_term
+  hub_use_watermark: false
+  hub_full_refresh: false
+  sat_model_names:
+  - sat_payment_term__tt_e21
+  sat_use_watermark: false
+  sat_full_refresh_false: false
+  sat_cluster_by: false
+models:
+- layer: STG
+  derived_name: v_psa_stg_payment_terms__tt_e21
+  short_name: payment_terms__tt_e21
+  sources:
+  - source_schema: tt_e21prd_e21trubis
+    source_table: apvndterm
+    alias: SRC
+  columns:
+  - source_table: SRC
+    source_column: TERMS_CODE
+    staging_column_name: TERMS_CODE
+    datatype: TEXT
+    hashdiff: ''
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: TERMS_CODE
+    datatype: TEXT
+    staging_column_name: PAYMENT_TERM_BK
+    hashdiff: ''
+    unique: 'COMPOSITE: PAYMENT_TERM_BK, LOAD_DTS'
+    not_null: 'yes'
+    manual_logic: ''
+  - source_table: SRC
+    source_column: (DERIVED)
+    staging_column_name: LOAD_DTS
+    datatype: TIMESTAMP
+    hashdiff: ''
+    not_null: ''
+    unique: ''
+    manual_logic: CONVERT_TIMEZONE('UTC', _FIVETRAN_SYNCED)
+  - source_table: SRC
+    source_column: END_DAY3
+    staging_column_name: END_DAY3
+    datatype: FLOAT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: DISC_PCT3
+    staging_column_name: DISC_PCT3
+    datatype: FLOAT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: END_DAY2
+    staging_column_name: END_DAY2
+    datatype: FLOAT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: DISC_DOM1
+    staging_column_name: DISC_DOM1
+    datatype: NUMBER
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: TERMS_DESC
+    staging_column_name: TERMS_DESC
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: END_DAY1
+    staging_column_name: END_DAY1
+    datatype: FLOAT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: DISC_DOM2
+    staging_column_name: DISC_DOM2
+    datatype: NUMBER
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: DISC_DOM3
+    staging_column_name: DISC_DOM3
+    datatype: FLOAT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: DISC_PCT2
+    staging_column_name: DISC_PCT2
+    datatype: FLOAT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: DISC_PCT1
+    staging_column_name: DISC_PCT1
+    datatype: FLOAT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: DISC_MO1
+    staging_column_name: DISC_MO1
+    datatype: FLOAT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: DISC_MO3
+    staging_column_name: DISC_MO3
+    datatype: FLOAT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: DISC_MO2
+    staging_column_name: DISC_MO2
+    datatype: FLOAT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: PROX_DATE
+    staging_column_name: PROX_DATE
+    datatype: NUMBER
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: DISC_DAY2
+    staging_column_name: DISC_DAY2
+    datatype: NUMBER
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: DUE_DAY3
+    staging_column_name: DUE_DAY3
+    datatype: NUMBER
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: DUE_DAY2
+    staging_column_name: DUE_DAY2
+    datatype: NUMBER
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: DISC_PCT
+    staging_column_name: DISC_PCT
+    datatype: FLOAT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: PROX_DISC_DAY
+    staging_column_name: PROX_DISC_DAY
+    datatype: NUMBER
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: NUMB_MTHS
+    staging_column_name: NUMB_MTHS
+    datatype: NUMBER
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: BEG_DAY3
+    staging_column_name: BEG_DAY3
+    datatype: FLOAT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: BEG_DAY1
+    staging_column_name: BEG_DAY1
+    datatype: FLOAT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: BEG_DAY2
+    staging_column_name: BEG_DAY2
+    datatype: FLOAT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: PROX_DOM2
+    staging_column_name: PROX_DOM2
+    datatype: NUMBER
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: DISC_DAYS
+    staging_column_name: DISC_DAYS
+    datatype: NUMBER
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: PROX_DOM1
+    staging_column_name: PROX_DOM1
+    datatype: NUMBER
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: DUE_DAYS
+    staging_column_name: DUE_DAYS
+    datatype: NUMBER
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: PROX_DISC
+    staging_column_name: PROX_DISC
+    datatype: FLOAT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: TERMS_TYPE
+    staging_column_name: TERMS_TYPE
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: _FIVETRAN_ID
+    staging_column_name: _FIVETRAN_ID
+    datatype: TEXT
+    hashdiff: ''
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: _FIVETRAN_DELETED
+    staging_column_name: _FIVETRAN_DELETED
+    datatype: BOOLEAN
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: _FIVETRAN_SYNCED
+    staging_column_name: _FIVETRAN_SYNCED
+    datatype: TIMESTAMP_TZ
+    hashdiff: ''
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: PSA_LOAD_DTS
+    staging_column_name: PSA_LOAD_DTS
+    datatype: TIMESTAMP_LTZ
+    hashdiff: ''
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: PSA_RECORD_SOURCE
+    staging_column_name: PSA_RECORD_SOURCE
+    datatype: TEXT
+    hashdiff: ''
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: PSA_DELETE_IND
+    staging_column_name: PSA_DELETE_IND
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC_BKCC
+    source_column: BKCC
+    staging_column_name: BKCC
+    datatype: TEXT
+    hashdiff: ''
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC_BKCC
+    source_column: REC_SRC
+    staging_column_name: REC_SRC
+    datatype: TEXT
+    hashdiff: ''
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: ''
+    source_column: (DERIVED)
+    staging_column_name: PAYMENT_TERM_HK
+    datatype: BINARY
+    hashdiff: ''
+    not_null: ''
+    unique: ''
+    manual_logic: 'HASH: TERMS_CODE, BKCC'
+  - source_table: ''
+    source_column: (DERIVED)
+    staging_column_name: HASHDIFF
+    datatype: BINARY
+    hashdiff: ''
+    not_null: ''
+    unique: ''
+    manual_logic: 'HASH: END_DAY3, DISC_PCT3, END_DAY2, DISC_DOM1, TERMS_DESC, END_DAY1,
+      DISC_DOM2, DISC_DOM3, DISC_PCT2, DISC_PCT1, DISC_MO1, DISC_MO3, DISC_MO2, PROX_DATE,
+      DISC_DAY2, DUE_DAY3, DUE_DAY2, DISC_PCT, PROX_DISC_DAY, NUMB_MTHS, BEG_DAY3,
+      BEG_DAY1, BEG_DAY2, PROX_DOM2, DISC_DAYS, PROX_DOM1, DUE_DAYS, PROX_DISC, TERMS_TYPE,
+      _FIVETRAN_DELETED, PSA_DELETE_IND'
+- layer: HUB
+  derived_name: hub_payment_term
+  short_name: PAYMENT_TERM
+  sources:
+  - source_schema: int_staging_views
+    source_table: v_psa_stg_payment_terms__tt_e21
+    alias: SRC
+    source_layer_filter: QUALIFY (ROW_NUMBER() OVER(PARTITION BY PAYMENT_TERM_HK ORDER
+      BY LOAD_DTS)) = 1
+    final_layer_filter: "{% if is_incremental() %}\nWHERE NOT EXISTS (\n    SELECT\
+      \ 1\n    FROM {{ this }} existing\n    WHERE existing.PAYMENT_TERM_HK = JOIN_RESULT.PAYMENT_TERM_HK\n\
+      )\n{% endif %}\n/* Safety dedup - matches production hub pattern */\nqualify\
+      \ 1 = row_number() over (partition by PAYMENT_TERM_BK, BKCC order by LOAD_DTS)"
+    target_schema: raw_vault
+    model_config: ''
+    qualify_order_by: ''
+  columns:
+  - source_table: SRC
+    source_column: PAYMENT_TERM_HK
+    staging_column_name: PAYMENT_TERM_HK
+    datatype: BINARY
+    pk: 'PK: PAYMENT_TERM_HK'
+    ghost_record: hash
+  - source_table: SRC
+    source_column: PAYMENT_TERM_BK
+    staging_column_name: PAYMENT_TERM_BK
+    datatype: TEXT
+    ghost_record: value_text
+  - source_table: SRC
+    source_column: LOAD_DTS
+    staging_column_name: LOAD_DTS
+    datatype: TIMESTAMP_NTZ
+    ghost_record: load_dts
+  - source_table: SRC
+    source_column: BKCC
+    staging_column_name: BKCC
+    datatype: TEXT
+    ghost_record: bkcc
+  - source_table: SRC
+    source_column: REC_SRC
+    staging_column_name: REC_SRC
+    datatype: TEXT
+    ghost_record: rec_src
+- layer: SAT
+  derived_name: sat_payment_term__tt_e21
+  short_name: payment_terms__tt_e21
+  sources:
+  - source_schema: int_staging_views
+    source_table: v_psa_stg_payment_terms__tt_e21
+    alias: SRC
+    source_layer_filter: ''
+    final_layer_filter: "{% if is_incremental() %}\nWHERE NOT EXISTS (\n    SELECT\
+      \ 1\n    FROM {{ this }} existing\n    WHERE existing.PAYMENT_TERM_HK = JOIN_RESULT.PAYMENT_TERM_HK\n\
+      \      AND existing.HASHDIFF = JOIN_RESULT.HASHDIFF\n)\n{% endif %}"
+    target_schema: raw_vault
+    model_config: ''
+    qualify_order_by: ''
+  columns:
+  - source_table: SRC
+    source_column: PAYMENT_TERM_HK
+    staging_column_name: PAYMENT_TERM_HK
+    datatype: BINARY
+    pk: 'PK: PAYMENT_TERM_HK, LOAD_DTS'
+    ghost_record: hash
+    relationship: HUB_PAYMENT_TERM.PAYMENT_TERM_HK
+  - source_table: SRC
+    source_column: TERMS_CODE
+    staging_column_name: TERMS_CODE
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: END_DAY3
+    staging_column_name: END_DAY3
+    datatype: FLOAT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: DISC_PCT3
+    staging_column_name: DISC_PCT3
+    datatype: FLOAT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: END_DAY2
+    staging_column_name: END_DAY2
+    datatype: FLOAT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: DISC_DOM1
+    staging_column_name: DISC_DOM1
+    datatype: NUMBER
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: TERMS_DESC
+    staging_column_name: TERMS_DESC
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: END_DAY1
+    staging_column_name: END_DAY1
+    datatype: FLOAT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: DISC_DOM2
+    staging_column_name: DISC_DOM2
+    datatype: NUMBER
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: DISC_DOM3
+    staging_column_name: DISC_DOM3
+    datatype: FLOAT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: DISC_PCT2
+    staging_column_name: DISC_PCT2
+    datatype: FLOAT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: DISC_PCT1
+    staging_column_name: DISC_PCT1
+    datatype: FLOAT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: DISC_MO1
+    staging_column_name: DISC_MO1
+    datatype: FLOAT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: DISC_MO3
+    staging_column_name: DISC_MO3
+    datatype: FLOAT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: DISC_MO2
+    staging_column_name: DISC_MO2
+    datatype: FLOAT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: PROX_DATE
+    staging_column_name: PROX_DATE
+    datatype: NUMBER
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: DISC_DAY2
+    staging_column_name: DISC_DAY2
+    datatype: NUMBER
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: DUE_DAY3
+    staging_column_name: DUE_DAY3
+    datatype: NUMBER
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: DUE_DAY2
+    staging_column_name: DUE_DAY2
+    datatype: NUMBER
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: DISC_PCT
+    staging_column_name: DISC_PCT
+    datatype: FLOAT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: PROX_DISC_DAY
+    staging_column_name: PROX_DISC_DAY
+    datatype: NUMBER
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: NUMB_MTHS
+    staging_column_name: NUMB_MTHS
+    datatype: NUMBER
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: BEG_DAY3
+    staging_column_name: BEG_DAY3
+    datatype: FLOAT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: BEG_DAY1
+    staging_column_name: BEG_DAY1
+    datatype: FLOAT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: BEG_DAY2
+    staging_column_name: BEG_DAY2
+    datatype: FLOAT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: PROX_DOM2
+    staging_column_name: PROX_DOM2
+    datatype: NUMBER
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: DISC_DAYS
+    staging_column_name: DISC_DAYS
+    datatype: NUMBER
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: PROX_DOM1
+    staging_column_name: PROX_DOM1
+    datatype: NUMBER
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: DUE_DAYS
+    staging_column_name: DUE_DAYS
+    datatype: NUMBER
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: PROX_DISC
+    staging_column_name: PROX_DISC
+    datatype: FLOAT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: TERMS_TYPE
+    staging_column_name: TERMS_TYPE
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: PSA_DELETE_IND
+    staging_column_name: PSA_DELETE_IND
+    datatype: TEXT
+    ghost_record: psa_delete_ind
+  - source_table: SRC
+    source_column: PSA_LOAD_DTS
+    staging_column_name: PSA_LOAD_DTS
+    datatype: TIMESTAMP
+    ghost_record: psa_load_dts
+  - source_table: SRC
+    source_column: PSA_RECORD_SOURCE
+    staging_column_name: PSA_RECORD_SOURCE
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: _FIVETRAN_SYNCED
+    staging_column_name: _FIVETRAN_SYNCED
+    datatype: TIMESTAMP_TZ
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: _FIVETRAN_ID
+    staging_column_name: _FIVETRAN_ID
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: _FIVETRAN_DELETED
+    staging_column_name: _FIVETRAN_DELETED
+    datatype: BOOLEAN
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: LOAD_DTS
+    staging_column_name: LOAD_DTS
+    datatype: TIMESTAMP_NTZ
+    ghost_record: load_dts
+  - source_table: SRC
+    source_column: REC_SRC
+    staging_column_name: REC_SRC
+    datatype: TEXT
+    ghost_record: rec_src
+  - source_table: SRC
+    source_column: BKCC
+    staging_column_name: BKCC
+    datatype: TEXT
+    ghost_record: bkcc
+  - source_table: SRC
+    source_column: HASHDIFF
+    staging_column_name: HASHDIFF
+    datatype: BINARY
+    ghost_record: hashdiff

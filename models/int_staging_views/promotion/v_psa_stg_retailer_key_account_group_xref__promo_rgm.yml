@@ -1,0 +1,29 @@
+version: 2
+models:
+- name: v_psa_stg_retailer_key_account_group_xref__promo_rgm
+  data_tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - RETAILER_KEY_ACCOUNT_GROUP_BK
+        - ERP_KEY_ACCOUNT_GROUP_BK
+        - ERP_REC_SRC
+        - LOAD_DTS
+      config:
+        severity: warn
+  columns:
+  - name: RETAILER_KEY_ACCOUNT_GROUP_BK
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+  - name: ERP_KEY_ACCOUNT_GROUP_BK
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+  - name: ERP_REC_SRC
+    data_tests:
+    - not_null:
+        config:
+          severity: warn

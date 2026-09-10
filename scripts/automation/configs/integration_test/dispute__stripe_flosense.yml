@@ -1,0 +1,901 @@
+# End-to-end integration test YAML config: v_psa_stg_dispute__stripe_flosense
+# TRUE end-to-end test: NEW model that does NOT exist in production.
+# Tests full pipeline: Stage 1 YAML → Stage 2 code gen → Stage 3 compile/run/test.
+#
+# Source: PSA_PROD.STRIPE_FLOSENSE.DISPUTE (45 columns, 176 rows)
+# BK: ID -> DISPUTE_BK
+# HASHDIFF: 38 data columns (all non-BK, non-metadata, non-technical)
+# BKCC REC_SRC: US.STRIPE_FLOSENSE.DISPUTE
+# Domain: connected_device (same domain as sibling balance_transaction model)
+#
+# NOTE: BKCC entry US.STRIPE_FLOSENSE.DISPUTE must be registered in Streamlit app.
+#       Without it, dbt run creates the view but returns 0 rows (INNER JOIN on BKCC returns nothing).
+#       This is expected — compile validates SQL correctness, tests run on 0 rows.
+
+schema_version: "1.0"
+
+filename: dispute__stripe_flosense
+
+models:
+  - layer: STG
+    derived_name: v_psa_stg_dispute__stripe_flosense
+    short_name: dispute__stripe_flosense
+    sources:
+      - source_schema: stripe_flosense
+        source_table: DISPUTE
+        alias: S
+        source_layer_filter: "WHERE psa_delete_ind = 'N'"
+        filter_conditions: ""
+        join_type: ""
+        parent_join_number: "1"
+        parent_table_join: ""
+        child_table_join: ""
+        target_schema: connected_device
+    columns:
+      # === BK column ===
+      - source_table: S
+        source_column: ID
+        staging_column_name: DISPUTE_BK
+        datatype: VARCHAR
+        hashdiff: ""
+        not_null: "yes"
+        unique: "COMPOSITE: DISPUTE_BK, LOAD_DTS"
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 1
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      # === LOAD_DTS (derived from PSA_LOAD_DTS) ===
+      - source_table: S
+        source_column: "(DERIVED)"
+        staging_column_name: LOAD_DTS
+        datatype: TIMESTAMP
+        hashdiff: ""
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: "CONVERT_TIMEZONE('UTC', PSA_LOAD_DTS)"
+        order: 2
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      # === Data columns (in HASHDIFF) ===
+      - source_table: S
+        source_column: CONNECTED_ACCOUNT_ID
+        staging_column_name: CONNECTED_ACCOUNT_ID
+        datatype: VARCHAR
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 3
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: AMOUNT
+        staging_column_name: AMOUNT
+        datatype: NUMBER
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 4
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: BALANCE_TRANSACTION
+        staging_column_name: BALANCE_TRANSACTION
+        datatype: VARCHAR
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 5
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: CREATED
+        staging_column_name: CREATED
+        datatype: TIMESTAMP
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 6
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: CURRENCY
+        staging_column_name: CURRENCY
+        datatype: VARCHAR
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 7
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: EVIDENCE_ACCESS_ACTIVITY_LOG
+        staging_column_name: EVIDENCE_ACCESS_ACTIVITY_LOG
+        datatype: VARCHAR
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 8
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: EVIDENCE_BILLING_ADDRESS
+        staging_column_name: EVIDENCE_BILLING_ADDRESS
+        datatype: VARCHAR
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 9
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: EVIDENCE_CANCELLATION_POLICY
+        staging_column_name: EVIDENCE_CANCELLATION_POLICY
+        datatype: VARCHAR
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 10
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: EVIDENCE_CANCELLATION_POLICY_DISCLOSURE
+        staging_column_name: EVIDENCE_CANCELLATION_POLICY_DISCLOSURE
+        datatype: VARCHAR
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 11
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: EVIDENCE_CANCELLATION_REBUTTAL
+        staging_column_name: EVIDENCE_CANCELLATION_REBUTTAL
+        datatype: VARCHAR
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 12
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: EVIDENCE_CUSTOMER_COMMUNICATION
+        staging_column_name: EVIDENCE_CUSTOMER_COMMUNICATION
+        datatype: VARCHAR
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 13
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: EVIDENCE_CUSTOMER_EMAIL_ADDRESS
+        staging_column_name: EVIDENCE_CUSTOMER_EMAIL_ADDRESS
+        datatype: VARCHAR
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 14
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: EVIDENCE_CUSTOMER_NAME
+        staging_column_name: EVIDENCE_CUSTOMER_NAME
+        datatype: VARCHAR
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 15
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: EVIDENCE_CUSTOMER_PURCHASE_IP
+        staging_column_name: EVIDENCE_CUSTOMER_PURCHASE_IP
+        datatype: VARCHAR
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 16
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: EVIDENCE_CUSTOMER_SIGNATURE
+        staging_column_name: EVIDENCE_CUSTOMER_SIGNATURE
+        datatype: VARCHAR
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 17
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: EVIDENCE_DUPLICATE_CHARGE_DOCUMENTATION
+        staging_column_name: EVIDENCE_DUPLICATE_CHARGE_DOCUMENTATION
+        datatype: VARCHAR
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 18
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: EVIDENCE_DUPLICATE_CHARGE_EXPLANATION
+        staging_column_name: EVIDENCE_DUPLICATE_CHARGE_EXPLANATION
+        datatype: VARCHAR
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 19
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: EVIDENCE_DUPLICATE_CHARGE_ID
+        staging_column_name: EVIDENCE_DUPLICATE_CHARGE_ID
+        datatype: VARCHAR
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 20
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: EVIDENCE_PRODUCT_DESCRIPTION
+        staging_column_name: EVIDENCE_PRODUCT_DESCRIPTION
+        datatype: VARCHAR
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 21
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: EVIDENCE_RECEIPT
+        staging_column_name: EVIDENCE_RECEIPT
+        datatype: VARCHAR
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 22
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: EVIDENCE_REFUND_POLICY
+        staging_column_name: EVIDENCE_REFUND_POLICY
+        datatype: VARCHAR
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 23
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: EVIDENCE_REFUND_POLICY_DISCLOSURE
+        staging_column_name: EVIDENCE_REFUND_POLICY_DISCLOSURE
+        datatype: VARCHAR
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 24
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: EVIDENCE_REFUND_REFUSAL_EXPLANATION
+        staging_column_name: EVIDENCE_REFUND_REFUSAL_EXPLANATION
+        datatype: VARCHAR
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 25
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: EVIDENCE_SERVICE_DATE
+        staging_column_name: EVIDENCE_SERVICE_DATE
+        datatype: VARCHAR
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 26
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: EVIDENCE_SERVICE_DOCUMENTATION
+        staging_column_name: EVIDENCE_SERVICE_DOCUMENTATION
+        datatype: VARCHAR
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 27
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: EVIDENCE_SHIPPING_ADDRESS
+        staging_column_name: EVIDENCE_SHIPPING_ADDRESS
+        datatype: VARCHAR
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 28
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: EVIDENCE_SHIPPING_CARRIER
+        staging_column_name: EVIDENCE_SHIPPING_CARRIER
+        datatype: VARCHAR
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 29
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: EVIDENCE_SHIPPING_DATE
+        staging_column_name: EVIDENCE_SHIPPING_DATE
+        datatype: VARCHAR
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 30
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: EVIDENCE_SHIPPING_DOCUMENTATION
+        staging_column_name: EVIDENCE_SHIPPING_DOCUMENTATION
+        datatype: VARCHAR
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 31
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: EVIDENCE_SHIPPING_TRACKING_NUMBER
+        staging_column_name: EVIDENCE_SHIPPING_TRACKING_NUMBER
+        datatype: VARCHAR
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 32
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: EVIDENCE_UNCATEGORIZED_FILE
+        staging_column_name: EVIDENCE_UNCATEGORIZED_FILE
+        datatype: VARCHAR
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 33
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: EVIDENCE_UNCATEGORIZED_TEXT
+        staging_column_name: EVIDENCE_UNCATEGORIZED_TEXT
+        datatype: VARCHAR
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 34
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: EVIDENCE_DETAILS_DUE_BY
+        staging_column_name: EVIDENCE_DETAILS_DUE_BY
+        datatype: TIMESTAMP
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 35
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: EVIDENCE_DETAILS_HAS_EVIDENCE
+        staging_column_name: EVIDENCE_DETAILS_HAS_EVIDENCE
+        datatype: BOOLEAN
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 36
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: EVIDENCE_DETAILS_PAST_DUE
+        staging_column_name: EVIDENCE_DETAILS_PAST_DUE
+        datatype: BOOLEAN
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 37
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: EVIDENCE_DETAILS_SUBMISSION_COUNT
+        staging_column_name: EVIDENCE_DETAILS_SUBMISSION_COUNT
+        datatype: NUMBER
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 38
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: IS_CHARGE_REFUNDABLE
+        staging_column_name: IS_CHARGE_REFUNDABLE
+        datatype: BOOLEAN
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 39
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: LIVEMODE
+        staging_column_name: LIVEMODE
+        datatype: BOOLEAN
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 40
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: REASON
+        staging_column_name: REASON
+        datatype: VARCHAR
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 41
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: STATUS
+        staging_column_name: STATUS
+        datatype: VARCHAR
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 42
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: CHARGE_ID
+        staging_column_name: CHARGE_ID
+        datatype: VARCHAR
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 43
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      # === Technical columns (NOT in HASHDIFF) ===
+      # _FIVETRAN_DELETED: data column per CLAUDE.md, included in HASHDIFF via flag
+      - source_table: S
+        source_column: _FIVETRAN_DELETED
+        staging_column_name: _FIVETRAN_DELETED
+        datatype: BOOLEAN
+        hashdiff: ""
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 44
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      # _FIVETRAN_SYNCED: excluded from HASHDIFF (metadata)
+      - source_table: S
+        source_column: _FIVETRAN_SYNCED
+        staging_column_name: FIVETRAN_SYNCED
+        datatype: TIMESTAMP
+        hashdiff: ""
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 45
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      # METADATA: VARIANT column — excluded from HASHDIFF (non-hashable)
+      - source_table: S
+        source_column: METADATA
+        staging_column_name: METADATA
+        datatype: VARIANT
+        hashdiff: ""
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 46
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      # === PSA metadata columns ===
+      - source_table: S
+        source_column: PSA_LOAD_DTS
+        staging_column_name: PSA_LOAD_DTS
+        datatype: TIMESTAMP
+        hashdiff: ""
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 47
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: PSA_RECORD_SOURCE
+        staging_column_name: PSA_RECORD_SOURCE
+        datatype: VARCHAR
+        hashdiff: ""
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 48
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: PSA_DELETE_IND
+        staging_column_name: PSA_DELETE_IND
+        datatype: VARCHAR
+        hashdiff: ""
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 49
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      # === BKCC columns (from cross join — no source_table) ===
+      - source_table: ""
+        source_column: REC_SRC
+        staging_column_name: REC_SRC
+        datatype: VARCHAR
+        hashdiff: ""
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 50
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: ""
+        source_column: BKCC
+        staging_column_name: BKCC
+        datatype: VARCHAR
+        hashdiff: ""
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 51
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      # === HK (deferred hash in FINAL layer) ===
+      - source_table: ""
+        source_column: "(DERIVED)"
+        staging_column_name: DISPUTE_HK
+        datatype: BINARY
+        hashdiff: ""
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: "HASH: DISPUTE_BK, BKCC"
+        order: 52
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      # === HASHDIFF placeholder ===
+      - source_table: ""
+        source_column: "(DERIVED)"
+        staging_column_name: HASHDIFF
+        datatype: BINARY
+        hashdiff: ""
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: "HASH: CONNECTED_ACCOUNT_ID, AMOUNT, BALANCE_TRANSACTION, CREATED, CURRENCY, EVIDENCE_ACCESS_ACTIVITY_LOG, EVIDENCE_BILLING_ADDRESS, EVIDENCE_CANCELLATION_POLICY, EVIDENCE_CANCELLATION_POLICY_DISCLOSURE, EVIDENCE_CANCELLATION_REBUTTAL, EVIDENCE_CUSTOMER_COMMUNICATION, EVIDENCE_CUSTOMER_EMAIL_ADDRESS, EVIDENCE_CUSTOMER_NAME, EVIDENCE_CUSTOMER_PURCHASE_IP, EVIDENCE_CUSTOMER_SIGNATURE, EVIDENCE_DUPLICATE_CHARGE_DOCUMENTATION, EVIDENCE_DUPLICATE_CHARGE_EXPLANATION, EVIDENCE_DUPLICATE_CHARGE_ID, EVIDENCE_PRODUCT_DESCRIPTION, EVIDENCE_RECEIPT, EVIDENCE_REFUND_POLICY, EVIDENCE_REFUND_POLICY_DISCLOSURE, EVIDENCE_REFUND_REFUSAL_EXPLANATION, EVIDENCE_SERVICE_DATE, EVIDENCE_SERVICE_DOCUMENTATION, EVIDENCE_SHIPPING_ADDRESS, EVIDENCE_SHIPPING_CARRIER, EVIDENCE_SHIPPING_DATE, EVIDENCE_SHIPPING_DOCUMENTATION, EVIDENCE_SHIPPING_TRACKING_NUMBER, EVIDENCE_UNCATEGORIZED_FILE, EVIDENCE_UNCATEGORIZED_TEXT, EVIDENCE_DETAILS_DUE_BY, EVIDENCE_DETAILS_HAS_EVIDENCE, EVIDENCE_DETAILS_PAST_DUE, EVIDENCE_DETAILS_SUBMISSION_COUNT, IS_CHARGE_REFUNDABLE, LIVEMODE, REASON, STATUS, CHARGE_ID"
+        order: 53
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+_pipeline_metadata:
+  bkcc_rec_src: "US.STRIPE_FLOSENSE.DISPUTE"
+  has_fivetran_deleted: true
+  has_psa_delete_ind: false
+  psa_delete_filter: false
+  null_bk_coalesced: false
+  large_volume: false
+  row_count: 176

@@ -1,0 +1,21 @@
+version: 2
+models:
+- name: fact_open_po_spend_summary
+  data_tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - SUPPLIER_NUMBER_PARENT
+        - SUPPLIER_NUMBER_CHILD
+        - DOCUMENT_TYPE
+        - COUNTRY_OF_ORIGIN
+        - ITEM_BK
+        - PLANT_BK
+        - LEGAL_ENTITY_BK
+        - PO_ITEM_UOM
+        - SCHEDULE_LINE_DELIVERY_DATE_KEY
+        - PAYMENT_TERMS
+        - OPCO
+      config:
+        severity: warn
+  columns: []

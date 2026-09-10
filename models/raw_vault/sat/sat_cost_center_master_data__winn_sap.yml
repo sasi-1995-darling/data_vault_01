@@ -1,0 +1,21 @@
+version: 2
+models:
+  - name: sat_cost_center_master_data__winn_sap
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - COST_CENTER_MASTER_DATA_HK
+              - LOAD_DTS
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          config:
+            severity: warn
+          arguments:
+            min_value: 4
+    columns:
+      - name: COST_CENTER_MASTER_DATA_HK
+        tests:
+          - dbt_utils.relationships_where:
+              arguments:
+                to: ref( 'hub_cost_center_master_data' )
+                field: COST_CENTER_MASTER_DATA_HK

@@ -1,0 +1,464 @@
+schema_version: '1.0'
+filename: v_psa_stg_payment_terms__tt_gp
+_pipeline_metadata:
+  bkcc_rec_src: USOHMA.MSSQL.GPPRD.DBO_SY03300
+  has_fivetran_deleted: false
+  has_psa_delete_ind: true
+  psa_delete_filter: false
+  null_bk_coalesced: false
+  large_volume: false
+  row_count: 91
+  volume_tier: normal
+  load_dts_derivation: CONVERT_TIMEZONE('UTC', PSA_LOAD_DTS)
+  grain_valid: true
+  hub_model_name: hub_payment_term
+  hub_use_watermark: false
+  hub_full_refresh: false
+  sat_model_names:
+  - sat_payment_term__tt_gp
+  sat_use_watermark: false
+  sat_full_refresh_false: false
+  sat_cluster_by: false
+models:
+- layer: STG
+  derived_name: v_psa_stg_payment_terms__tt_gp
+  short_name: payment_terms__tt_gp
+  sources:
+  - source_schema: tt_gpd
+    source_table: dbo_sy03300
+    alias: SRC
+  columns:
+  - source_table: SRC
+    source_column: PYMTRMID
+    staging_column_name: PYMTRMID
+    datatype: TEXT
+    hashdiff: ''
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: PYMTRMID
+    datatype: TEXT
+    staging_column_name: PAYMENT_TERM_BK
+    hashdiff: ''
+    unique: 'COMPOSITE: PAYMENT_TERM_BK, LOAD_DTS'
+    not_null: 'yes'
+    manual_logic: ''
+  - source_table: SRC
+    source_column: (DERIVED)
+    staging_column_name: LOAD_DTS
+    datatype: TIMESTAMP
+    hashdiff: ''
+    not_null: ''
+    unique: ''
+    manual_logic: CONVERT_TIMEZONE('UTC', PSA_LOAD_DTS)
+  - source_table: SRC
+    source_column: DUETYPE
+    staging_column_name: DUETYPE
+    datatype: NUMBER
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: DUEDTDS
+    staging_column_name: DUEDTDS
+    datatype: NUMBER
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: DISCTYPE
+    staging_column_name: DISCTYPE
+    datatype: NUMBER
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: DISCDTDS
+    staging_column_name: DISCDTDS
+    datatype: NUMBER
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: DSCLCTYP
+    staging_column_name: DSCLCTYP
+    datatype: NUMBER
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: DSCDLRAM
+    staging_column_name: DSCDLRAM
+    datatype: NUMBER
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: DSCPCTAM
+    staging_column_name: DSCPCTAM
+    datatype: NUMBER
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: SALPURCH
+    staging_column_name: SALPURCH
+    datatype: NUMBER
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: DISCNTCB
+    staging_column_name: DISCNTCB
+    datatype: NUMBER
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: FREIGHT
+    staging_column_name: FREIGHT
+    datatype: NUMBER
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: MISC
+    staging_column_name: MISC
+    datatype: NUMBER
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: TAX
+    staging_column_name: TAX
+    datatype: NUMBER
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: NOTEINDX
+    staging_column_name: NOTEINDX
+    datatype: NUMBER
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: CBUVATMD
+    staging_column_name: CBUVATMD
+    datatype: NUMBER
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: LSTUSRED
+    staging_column_name: LSTUSRED
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: MODIFDT
+    staging_column_name: MODIFDT
+    datatype: TIMESTAMP_NTZ
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: CREATDDT
+    staging_column_name: CREATDDT
+    datatype: TIMESTAMP_NTZ
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: USEGRPER
+    staging_column_name: USEGRPER
+    datatype: NUMBER
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: DEX_ROW_ID
+    staging_column_name: DEX_ROW_ID
+    datatype: NUMBER
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: PSA_LOAD_DTS
+    staging_column_name: PSA_LOAD_DTS
+    datatype: TIMESTAMP_LTZ
+    hashdiff: ''
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: PSA_RECORD_SOURCE
+    staging_column_name: PSA_RECORD_SOURCE
+    datatype: TEXT
+    hashdiff: ''
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: PSA_DELETE_IND
+    staging_column_name: PSA_DELETE_IND
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC_BKCC
+    source_column: BKCC
+    staging_column_name: BKCC
+    datatype: TEXT
+    hashdiff: ''
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC_BKCC
+    source_column: REC_SRC
+    staging_column_name: REC_SRC
+    datatype: TEXT
+    hashdiff: ''
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: ''
+    source_column: (DERIVED)
+    staging_column_name: PAYMENT_TERM_HK
+    datatype: BINARY
+    hashdiff: ''
+    not_null: ''
+    unique: ''
+    manual_logic: 'HASH: PYMTRMID, BKCC'
+  - source_table: ''
+    source_column: (DERIVED)
+    staging_column_name: HASHDIFF
+    datatype: BINARY
+    hashdiff: ''
+    not_null: ''
+    unique: ''
+    manual_logic: 'HASH: DUETYPE, DUEDTDS, DISCTYPE, DISCDTDS, DSCLCTYP, DSCDLRAM,
+      DSCPCTAM, SALPURCH, DISCNTCB, FREIGHT, MISC, TAX, NOTEINDX, CBUVATMD, LSTUSRED,
+      MODIFDT, CREATDDT, USEGRPER, DEX_ROW_ID, PSA_DELETE_IND'
+- layer: HUB
+  derived_name: hub_payment_term
+  short_name: PAYMENT_TERM
+  sources:
+  - source_schema: int_staging_views
+    source_table: v_psa_stg_payment_terms__tt_gp
+    alias: SRC
+    source_layer_filter: QUALIFY (ROW_NUMBER() OVER(PARTITION BY PAYMENT_TERM_HK ORDER
+      BY LOAD_DTS)) = 1
+    final_layer_filter: "{% if is_incremental() %}\nWHERE NOT EXISTS (\n    SELECT\
+      \ 1\n    FROM {{ this }} existing\n    WHERE existing.PAYMENT_TERM_HK = JOIN_RESULT.PAYMENT_TERM_HK\n\
+      )\n{% endif %}\n/* Safety dedup — matches production hub pattern */\nqualify\
+      \ 1 = row_number() over (partition by PAYMENT_TERM_BK, BKCC order by LOAD_DTS)"
+    target_schema: raw_vault
+    model_config: ''
+    qualify_order_by: ''
+  columns:
+  - source_table: SRC
+    source_column: PAYMENT_TERM_HK
+    staging_column_name: PAYMENT_TERM_HK
+    datatype: BINARY
+    pk: 'PK: PAYMENT_TERM_HK'
+    ghost_record: hash
+  - source_table: SRC
+    source_column: PAYMENT_TERM_BK
+    staging_column_name: PAYMENT_TERM_BK
+    datatype: TEXT
+    ghost_record: value_text
+  - source_table: SRC
+    source_column: LOAD_DTS
+    staging_column_name: LOAD_DTS
+    datatype: TIMESTAMP_NTZ
+    ghost_record: load_dts
+  - source_table: SRC
+    source_column: BKCC
+    staging_column_name: BKCC
+    datatype: TEXT
+    ghost_record: bkcc
+  - source_table: SRC
+    source_column: REC_SRC
+    staging_column_name: REC_SRC
+    datatype: TEXT
+    ghost_record: rec_src
+- layer: SAT
+  derived_name: sat_payment_term__tt_gp
+  short_name: payment_terms__tt_gp
+  sources:
+  - source_schema: int_staging_views
+    source_table: v_psa_stg_payment_terms__tt_gp
+    alias: SRC
+    source_layer_filter: ''
+    final_layer_filter: "{% if is_incremental() %}\nWHERE NOT EXISTS (\n    SELECT\
+      \ 1\n    FROM {{ this }} existing\n    WHERE existing.PAYMENT_TERM_HK = JOIN_RESULT.PAYMENT_TERM_HK\n\
+      \      AND existing.HASHDIFF = JOIN_RESULT.HASHDIFF\n)\n{% endif %}"
+    target_schema: raw_vault
+    model_config: ''
+    qualify_order_by: ''
+  columns:
+  - source_table: SRC
+    source_column: PAYMENT_TERM_HK
+    staging_column_name: PAYMENT_TERM_HK
+    datatype: BINARY
+    pk: 'PK: PAYMENT_TERM_HK, LOAD_DTS'
+    ghost_record: hash
+    relationship: HUB_PAYMENT_TERM.PAYMENT_TERM_HK
+  - source_table: SRC
+    source_column: PYMTRMID
+    staging_column_name: PYMTRMID
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: DUETYPE
+    staging_column_name: DUETYPE
+    datatype: NUMBER
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: DUEDTDS
+    staging_column_name: DUEDTDS
+    datatype: NUMBER
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: DISCTYPE
+    staging_column_name: DISCTYPE
+    datatype: NUMBER
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: DISCDTDS
+    staging_column_name: DISCDTDS
+    datatype: NUMBER
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: DSCLCTYP
+    staging_column_name: DSCLCTYP
+    datatype: NUMBER
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: DSCDLRAM
+    staging_column_name: DSCDLRAM
+    datatype: NUMBER
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: DSCPCTAM
+    staging_column_name: DSCPCTAM
+    datatype: NUMBER
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: SALPURCH
+    staging_column_name: SALPURCH
+    datatype: NUMBER
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: DISCNTCB
+    staging_column_name: DISCNTCB
+    datatype: NUMBER
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: FREIGHT
+    staging_column_name: FREIGHT
+    datatype: NUMBER
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: MISC
+    staging_column_name: MISC
+    datatype: NUMBER
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: TAX
+    staging_column_name: TAX
+    datatype: NUMBER
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: NOTEINDX
+    staging_column_name: NOTEINDX
+    datatype: NUMBER
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: CBUVATMD
+    staging_column_name: CBUVATMD
+    datatype: NUMBER
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: LSTUSRED
+    staging_column_name: LSTUSRED
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: MODIFDT
+    staging_column_name: MODIFDT
+    datatype: TIMESTAMP_NTZ
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: CREATDDT
+    staging_column_name: CREATDDT
+    datatype: TIMESTAMP_NTZ
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: USEGRPER
+    staging_column_name: USEGRPER
+    datatype: NUMBER
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: DEX_ROW_ID
+    staging_column_name: DEX_ROW_ID
+    datatype: NUMBER
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: PSA_DELETE_IND
+    staging_column_name: PSA_DELETE_IND
+    datatype: TEXT
+    ghost_record: psa_delete_ind
+  - source_table: SRC
+    source_column: PSA_LOAD_DTS
+    staging_column_name: PSA_LOAD_DTS
+    datatype: TIMESTAMP
+    ghost_record: psa_load_dts
+  - source_table: SRC
+    source_column: PSA_RECORD_SOURCE
+    staging_column_name: PSA_RECORD_SOURCE
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: LOAD_DTS
+    staging_column_name: LOAD_DTS
+    datatype: TIMESTAMP_NTZ
+    ghost_record: load_dts
+  - source_table: SRC
+    source_column: REC_SRC
+    staging_column_name: REC_SRC
+    datatype: TEXT
+    ghost_record: rec_src
+  - source_table: SRC
+    source_column: BKCC
+    staging_column_name: BKCC
+    datatype: TEXT
+    ghost_record: bkcc
+  - source_table: SRC
+    source_column: HASHDIFF
+    staging_column_name: HASHDIFF
+    datatype: BINARY
+    ghost_record: hashdiff

@@ -1,0 +1,17 @@
+version: 2
+models:
+  - name: lnk_po_item
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - LNK_PO_ITEM_HK
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          config:
+            severity: warn
+          arguments:
+            min_value: 4
+    columns:
+      - name: LOAD_DTS
+        tests:
+          - not_null

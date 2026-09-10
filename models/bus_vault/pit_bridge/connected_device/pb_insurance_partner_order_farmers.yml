@@ -1,0 +1,16 @@
+version: 2
+models:
+  - name: pb_insurance_partner_order_farmers
+    description: "Farmers-specific insurance partner order PIT bridge preserving legacy Farmers row-level high-risk behavior while reusing the common insurance order/device matching and status logic."
+    data_tests:
+    - dbt_utils.unique_combination_of_columns:
+        arguments:
+          combination_of_columns:
+          - ORDER_ID
+          - SKU
+          - ORDER_LINE_ID
+          - SERIAL_ID
+          - DEVICE_ID
+        config:
+          severity: warn
+    columns: []

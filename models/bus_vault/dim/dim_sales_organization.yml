@@ -1,0 +1,9 @@
+version: 2
+models:
+  - name: dim_sales_organization
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - SALES_ORGANIZATION_HK
+              - LANGUAGE_KEY

@@ -1,0 +1,74 @@
+version: 2
+models:
+  - name: lnk_delivery_line_item_detail
+    data_tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - DELIVERY_LINE_DETAIL_LHK
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          arguments:
+            min_value: 4
+          config:
+            severity: warn
+    columns:
+      - name: DELIVERY_HK
+        data_tests:
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'hub_delivery_v1' )
+                pk_column_name: DELIVERY_HK
+      - name: DELIVERY_LINE_HK
+        data_tests:
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'hub_delivery_line' )
+                pk_column_name: DELIVERY_LINE_HK
+      - name: ITEM_HK
+        data_tests:
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'hub_item_v1' )
+                pk_column_name: ITEM_HK
+      - name: ORDER_HEADER_HK
+        data_tests:
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'hub_order_header' )
+                pk_column_name: ORDER_HEADER_HK
+      - name: ORDER_LINE_HK
+        data_tests:
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'hub_order_line' )
+                pk_column_name: ORDER_LINE_HK
+      - name: PLANT_HK
+        data_tests:
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'hub_plant_v1' )
+                pk_column_name: PLANT_HK
+      - name: GOODS_STORAGE_LOCATION_HK
+        data_tests:
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'hub_storage_location' )
+                pk_column_name: GOODS_STORAGE_LOCATION_HK
+      - name: DISTRIBUTION_CHANNEL_HK
+        data_tests:
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'hub_distribution_channel' )
+                pk_column_name: DISTRIBUTION_CHANNEL_HK
+      - name: DIVISION_HK
+        data_tests:
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'hub_division' )
+                pk_column_name: DIVISION_HK
+      - name: COST_CENTER_HK
+        data_tests:
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'hub_cost_center' )
+                pk_column_name: COST_CENTER_HK

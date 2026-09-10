@@ -1,0 +1,9 @@
+version: 2
+models:
+  - name: dim_uom_details
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - UOM_BK
+    columns: []

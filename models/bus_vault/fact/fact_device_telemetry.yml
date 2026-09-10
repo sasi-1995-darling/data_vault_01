@@ -1,0 +1,13 @@
+version: 2
+models:
+  - name: fact_device_telemetry
+    data_tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - PAIRED_DEVICE_BK
+              - AGGREGATE_DATE
+              - DEVICE_BK
+              - REC_SRC
+              - BKCC
+    columns: []

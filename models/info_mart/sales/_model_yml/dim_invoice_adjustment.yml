@@ -1,0 +1,13 @@
+version: 2
+
+models:
+  - name: dim_invoice_adjustment
+    description: Sales dimension for invoice adjustments
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - dim_invoice_adjustment_pk
+    config:
+      tags:
+        - emtek

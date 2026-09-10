@@ -1,0 +1,68 @@
+version: 2
+models:
+  - name: lnk_invoice_customer
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - INVOICE_CUSTOMER_HK
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          config:
+            severity: warn
+          arguments:
+            min_value: 4
+    columns:
+      - name: INVOICE_CUSTOMER_HK
+        tests:
+          - unique:
+              config:
+                severity: warn
+          - not_null:
+              config:
+                severity: warn
+      - name: INVOICE_HK
+        tests:
+          - dbt_utils.relationships_where:
+              arguments:
+                to: ref( 'hub_invoice_header' )
+                field: INVOICE_HK
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'hub_invoice_header' )
+                pk_column_name: INVOICE_HK
+          - not_null:
+              config:
+                severity: warn
+      - name: CUSTOMER_SOLDTO_HK
+        tests:
+          - dbt_utils.relationships_where:
+              arguments:
+                to: ref( 'hub_customer_v1' )
+                field: CUSTOMER_HK
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'hub_customer_v1' )
+                pk_column_name: CUSTOMER_HK
+          - not_null:
+              config:
+                severity: warn
+      - name: CUSTOMER_SHIPTO_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: CUSTOMER_BILLTO_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: LOAD_DTS
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: REC_SRC
+        tests:
+          - not_null:
+              config:
+                severity: warn

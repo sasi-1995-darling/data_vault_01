@@ -1,0 +1,10 @@
+version: 2
+models:
+  - name: ref_item_categories__ml_ebs
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - INVENTORY_ITEM_ID
+              - CATEGORY_SET_ID
+    columns: []

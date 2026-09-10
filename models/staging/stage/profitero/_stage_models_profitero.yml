@@ -1,0 +1,24 @@
+version: 2
+
+models:
+  - name: stg_product_master__profitero_edp
+    description: This is the stage product master for profitero across all brands
+    tests:
+      - 'dbt_constraints.primary_key:':
+          arguments:
+            column_names:
+              - model
+              - base_product_id
+              - source
+  - name: stg_price_availability_history__profitero_edp
+    description: This is the stage profitero price availability history
+    tests:
+      - 'dbt_constraints.primary_key:':
+          arguments:
+            column_names:
+              - date
+              - customer_product_id
+              - product_id
+              - retailer_id
+              - source
+              - first_party_won_buy_box

@@ -1,0 +1,13 @@
+version: 2
+
+models:
+  - name: dim_contact
+    description: Common dimension for holding emails and phone numbers for any connected entity
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - dim_contact_pk
+    config:
+      tags:
+        - emtek

@@ -1,0 +1,9 @@
+version: 2
+models:
+  - name: pit_statistical_key_figure_totals_current
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - STATISTICAL_KEY_FIGURE_TOTALS_HK
+    columns: []

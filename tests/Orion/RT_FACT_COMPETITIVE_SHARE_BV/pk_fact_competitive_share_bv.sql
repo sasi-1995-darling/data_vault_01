@@ -1,0 +1,1 @@
+select * from ({{ primary_key_check('fact_competitive_share_weekly',['DATE','ASIN','PLATFORM','CATEGORY_NAME','CATEGORY_TYPE','PRODUCT_NAME','UPC','MODEL','BRAND_ID','BRAND_BK','BRAND_KEY','REGION','STATE','HOMEDEPOT_REGION','LOWES_REGION','RETAILER','BUSINESS_UNIT','SOURCE']) }})

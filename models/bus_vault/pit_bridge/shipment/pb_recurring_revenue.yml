@@ -1,0 +1,14 @@
+version: 2
+models:
+  - name: pb_recurring_revenue
+    data_tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - RECURRING_REVENUE_BK
+    columns:
+      - name: RECURRING_REVENUE_BK
+        data_tests:
+          - not_null:
+              config:
+                severity: warn

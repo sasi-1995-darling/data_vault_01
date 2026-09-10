@@ -1,0 +1,340 @@
+---- SRC LAYER ----
+WITH
+SRC_SPLTTE         as ( SELECT * FROM {{ ref('v_psa_stg_plant__tt_e21') }} as SRC 
+                         {% if is_incremental() %}
+                         WHERE SRC.LOAD_DTS > (SELECT DATEADD('HOUR', '-1', MAX(LOAD_DTS)) FROM {{this}})
+                         {% endif %}  )
+
+/*
+SRC_SPLTTE         as ( SELECT * FROM STAGING.v_psa_stg_plant__tt_e21 )
+*/
+---- LOGIC LAYER ----
+
+, LOGIC_SPLTTE as (
+    SELECT
+        PLANT_HK
+      , COST_CTR
+      , ZIP
+      , CONTACT
+      , DELIVERY_PROMPT
+      , ALT_DEL_GEO
+      , SLOB_IGNORE_DAYS
+      , CITY_EXID
+      , TAX_TYPE1_EXID
+      , STATE_EXID
+      , BUS_NAME
+      , ALOC_WINDOW
+      , DEF_BOL_PRNTR
+      , FAC_TYPE
+      , LOCK_BOX_CODE
+      , CNTRY_CODE
+      , GEO_CODE
+      , ALLOC_XFER
+      , ACCT_PREFIX
+      , ALLOW_CONS_PICK
+      , TAX_EXEMPT_ID
+      , RF_COUNT_TYPE
+      , INCOME_MASK
+      , COUNTRY_EXID
+      , TAX_TYPE2_EXID
+      , VMI_CUST_CODE
+      , TAX_TYPE3_EXID
+      , ALT_DEL_ADDER1
+      , DEF_PICK_PRNTR
+      , ALT_DEL_ADDER3
+      , WO_SCHED_DATE
+      , ALT_DEL_COUNTRY
+      , ALT_DEL_ADDER2
+      , MANAGER_ID
+      , VMI_SHIPTO_CODE
+      , DEF_LABEL_PRNTR
+      , ALT_DEL_STATE
+      , TAX_TYPE4_EXID
+      , PHONE
+      , STATE
+      , DEF_PRO_PRNTR
+      , BAL_LEDGER
+      , ALT_DEL_CITY
+      , ALT_DEL_ZIP
+      , ADDRESS1
+      , PRINT_BORD_TALLY
+      , ADDRESS3
+      , AUTO_MTO_ICT
+      , ADDRESS2
+      , MFG_OFFSET
+      , SHIP_FUDGE
+      , PARENT_LOC
+      , DEF_CST_SRV_ID
+      , BAL_MASK
+      , INT_COMP
+      , CITY
+      , DEF_PACK_PRNTR
+      , BUS_NAME2
+      , COUNTY_EXID
+      , FAX
+      , TAX_CODE
+      , DEF_BUYER_ID
+      , AUTOCALC_FRT
+      , _FIVETRAN_DELETED
+      , _FIVETRAN_SYNCED
+      , PSA_DELETE_IND
+      , PSA_LOAD_DTS
+      , PSA_RECORD_SOURCE
+      , LOAD_DTS
+      , REC_SRC
+      , HASHDIFF
+    FROM SRC_SPLTTE
+)
+---- RENAME LAYER ----
+
+, RENAME_SPLTTE as (
+    SELECT
+        PLANT_HK
+      , COST_CTR
+      , ZIP
+      , CONTACT
+      , DELIVERY_PROMPT
+      , ALT_DEL_GEO
+      , SLOB_IGNORE_DAYS
+      , CITY_EXID
+      , TAX_TYPE1_EXID
+      , STATE_EXID
+      , BUS_NAME
+      , ALOC_WINDOW
+      , DEF_BOL_PRNTR
+      , FAC_TYPE
+      , LOCK_BOX_CODE
+      , CNTRY_CODE
+      , GEO_CODE
+      , ALLOC_XFER
+      , ACCT_PREFIX
+      , ALLOW_CONS_PICK
+      , TAX_EXEMPT_ID
+      , RF_COUNT_TYPE
+      , INCOME_MASK
+      , COUNTRY_EXID
+      , TAX_TYPE2_EXID
+      , VMI_CUST_CODE
+      , TAX_TYPE3_EXID
+      , ALT_DEL_ADDER1
+      , DEF_PICK_PRNTR
+      , ALT_DEL_ADDER3
+      , WO_SCHED_DATE
+      , ALT_DEL_COUNTRY
+      , ALT_DEL_ADDER2
+      , MANAGER_ID
+      , VMI_SHIPTO_CODE
+      , DEF_LABEL_PRNTR
+      , ALT_DEL_STATE
+      , TAX_TYPE4_EXID
+      , PHONE
+      , STATE
+      , DEF_PRO_PRNTR
+      , BAL_LEDGER
+      , ALT_DEL_CITY
+      , ALT_DEL_ZIP
+      , ADDRESS1
+      , PRINT_BORD_TALLY
+      , ADDRESS3
+      , AUTO_MTO_ICT
+      , ADDRESS2
+      , MFG_OFFSET
+      , SHIP_FUDGE
+      , PARENT_LOC
+      , DEF_CST_SRV_ID
+      , BAL_MASK
+      , INT_COMP
+      , CITY
+      , DEF_PACK_PRNTR
+      , BUS_NAME2
+      , COUNTY_EXID
+      , FAX
+      , TAX_CODE
+      , DEF_BUYER_ID
+      , AUTOCALC_FRT
+      , _FIVETRAN_DELETED
+      , _FIVETRAN_SYNCED
+      , PSA_DELETE_IND
+      , PSA_LOAD_DTS
+      , PSA_RECORD_SOURCE
+      , LOAD_DTS
+      , REC_SRC
+      , HASHDIFF
+    FROM LOGIC_SPLTTE
+)
+---- FILTER LAYER ----
+
+, FILTER_SPLTTE as (
+    SELECT *
+    FROM RENAME_SPLTTE
+)
+
+---- JOIN LAYER ----
+, JOIN_RESULT as (
+    SELECT *
+    FROM FILTER_SPLTTE
+)
+
+---- FINAL LAYER ----
+SELECT
+          PLANT_HK
+        , COST_CTR
+        , ZIP
+        , CONTACT
+        , DELIVERY_PROMPT
+        , ALT_DEL_GEO
+        , SLOB_IGNORE_DAYS
+        , CITY_EXID
+        , TAX_TYPE1_EXID
+        , STATE_EXID
+        , BUS_NAME
+        , ALOC_WINDOW
+        , DEF_BOL_PRNTR
+        , FAC_TYPE
+        , LOCK_BOX_CODE
+        , CNTRY_CODE
+        , GEO_CODE
+        , ALLOC_XFER
+        , ACCT_PREFIX
+        , ALLOW_CONS_PICK
+        , TAX_EXEMPT_ID
+        , RF_COUNT_TYPE
+        , INCOME_MASK
+        , COUNTRY_EXID
+        , TAX_TYPE2_EXID
+        , VMI_CUST_CODE
+        , TAX_TYPE3_EXID
+        , ALT_DEL_ADDER1
+        , DEF_PICK_PRNTR
+        , ALT_DEL_ADDER3
+        , WO_SCHED_DATE
+        , ALT_DEL_COUNTRY
+        , ALT_DEL_ADDER2
+        , MANAGER_ID
+        , VMI_SHIPTO_CODE
+        , DEF_LABEL_PRNTR
+        , ALT_DEL_STATE
+        , TAX_TYPE4_EXID
+        , PHONE
+        , STATE
+        , DEF_PRO_PRNTR
+        , BAL_LEDGER
+        , ALT_DEL_CITY
+        , ALT_DEL_ZIP
+        , ADDRESS1
+        , PRINT_BORD_TALLY
+        , ADDRESS3
+        , AUTO_MTO_ICT
+        , ADDRESS2
+        , MFG_OFFSET
+        , SHIP_FUDGE
+        , PARENT_LOC
+        , DEF_CST_SRV_ID
+        , BAL_MASK
+        , INT_COMP
+        , CITY
+        , DEF_PACK_PRNTR
+        , BUS_NAME2
+        , COUNTY_EXID
+        , FAX
+        , TAX_CODE
+        , DEF_BUYER_ID
+        , AUTOCALC_FRT
+        , _FIVETRAN_DELETED
+        , _FIVETRAN_SYNCED
+        , PSA_DELETE_IND
+        , PSA_LOAD_DTS
+        , PSA_RECORD_SOURCE
+        , LOAD_DTS
+        , REC_SRC
+        , HASHDIFF
+FROM JOIN_RESULT
+{% if is_incremental() %}
+WHERE NOT EXISTS (
+    SELECT 1 
+    FROM {{ this }} existing
+    WHERE existing.PLANT_HK= JOIN_RESULT.PLANT_HK
+    AND existing.HASHDIFF = JOIN_RESULT.HASHDIFF
+)
+{% endif %}
+{% if not is_incremental() %}
+
+/* The following qualifier is implemented to prevent multiple loads of touched records during the initial build, such as multiple rows per HK and hashdiff. */
+qualify 1 = row_number() over (partition by PLANT_HK, HASHDIFF order by PSA_LOAD_DTS)
+
+union all
+SELECT 
+MD5_BINARY(GR.VALUE) AS PLANT_HK,
+GR.VALUE::text AS COST_CTR,
+NULL AS ZIP,
+NULL AS CONTACT,
+NULL AS DELIVERY_PROMPT,
+NULL AS ALT_DEL_GEO,
+NULL AS SLOB_IGNORE_DAYS,
+NULL AS CITY_EXID,
+NULL AS TAX_TYPE1_EXID,
+NULL AS STATE_EXID,
+NULL AS BUS_NAME,
+NULL AS ALOC_WINDOW,
+NULL AS DEF_BOL_PRNTR,
+NULL AS FAC_TYPE,
+NULL AS LOCK_BOX_CODE,
+NULL AS CNTRY_CODE,
+NULL AS GEO_CODE,
+NULL AS ALLOC_XFER,
+NULL AS ACCT_PREFIX,
+NULL AS ALLOW_CONS_PICK,
+NULL AS TAX_EXEMPT_ID,
+NULL AS RF_COUNT_TYPE,
+NULL AS INCOME_MASK,
+NULL AS COUNTRY_EXID,
+NULL AS TAX_TYPE2_EXID,
+NULL AS VMI_CUST_CODE,
+NULL AS TAX_TYPE3_EXID,
+NULL AS ALT_DEL_ADDER1,
+NULL AS DEF_PICK_PRNTR,
+NULL AS ALT_DEL_ADDER3,
+NULL AS WO_SCHED_DATE,
+NULL AS ALT_DEL_COUNTRY,
+NULL AS ALT_DEL_ADDER2,
+NULL AS MANAGER_ID,
+NULL AS VMI_SHIPTO_CODE,
+NULL AS DEF_LABEL_PRNTR,
+NULL AS ALT_DEL_STATE,
+NULL AS TAX_TYPE4_EXID,
+NULL AS PHONE,
+NULL AS STATE,
+NULL AS DEF_PRO_PRNTR,
+NULL AS BAL_LEDGER,
+NULL AS ALT_DEL_CITY,
+NULL AS ALT_DEL_ZIP,
+NULL AS ADDRESS1,
+NULL AS PRINT_BORD_TALLY,
+NULL AS ADDRESS3,
+NULL AS AUTO_MTO_ICT,
+NULL AS ADDRESS2,
+NULL AS MFG_OFFSET,
+NULL AS SHIP_FUDGE,
+NULL AS PARENT_LOC,
+NULL AS DEF_CST_SRV_ID,
+NULL AS BAL_MASK,
+NULL AS INT_COMP,
+NULL AS CITY,
+NULL AS DEF_PACK_PRNTR,
+NULL AS BUS_NAME2,
+NULL AS COUNTY_EXID,
+NULL AS FAX,
+NULL AS TAX_CODE,
+NULL AS DEF_BUYER_ID,
+NULL AS AUTOCALC_FRT,
+NULL AS _FIVETRAN_DELETED,
+NULL AS _FIVETRAN_SYNCED,
+'N' AS PSA_DELETE_IND,
+'1900-01-01'::TIMESTAMP AS PSA_LOAD_DTS,
+NULL AS PSA_RECORD_SOURCE,
+CONVERT_TIMEZONE('UTC','1900-01-01'::TIMESTAMP) AS LOAD_DTS,
+'USAZET.SNOWFLAKE.FBIN.DERIVED' AS REC_SRC,
+''::BINARY AS HASHDIFF
+FROM
+TABLE(strtok_split_to_table('0|-1|-2', '|')) AS GR
+{% endif %}

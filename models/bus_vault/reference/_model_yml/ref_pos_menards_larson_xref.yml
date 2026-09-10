@@ -1,0 +1,11 @@
+version: 2
+models:
+  - name: ref_pos_menards_larson_xref
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - CUSTOMER_SKU_HK
+              - BASE_MATERIAL_HK
+              - LOAD_DTS
+    columns: []

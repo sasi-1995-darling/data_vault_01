@@ -1,0 +1,10 @@
+version: 2
+models:
+  - name: ref_pos_amazon_tmlc_ss_xref_v1
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - CUSTOMER_SKU_HK
+              - BASE_MATERIAL_HK
+    columns: []

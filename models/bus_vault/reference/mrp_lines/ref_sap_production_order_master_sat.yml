@@ -1,0 +1,16 @@
+version: 2
+models:
+  - name: ref_sap_production_order_master_sat
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - PRODUCTION_ORDER_BK
+              - LOAD_DTS
+    columns:
+      - name: PRODUCTION_ORDER_BK
+        tests:
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'ref_sap_production_order_master_hub' )
+                pk_column_name: PRODUCTION_ORDER_BK

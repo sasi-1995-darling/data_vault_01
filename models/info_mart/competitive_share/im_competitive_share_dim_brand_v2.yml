@@ -1,0 +1,5 @@
+version: 2
+models:
+- name: im_competitive_share_dim_brand_v2
+  tests: []
+  columns: []

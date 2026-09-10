@@ -1,0 +1,12 @@
+version: 2
+models:
+  - name: fact_recurring_revenue
+    columns:
+      - name: RECURRING_REVENUE_BK
+        data_tests:
+          - unique:
+              config:
+                severity: warn
+          - not_null:
+              config:
+                severity: warn

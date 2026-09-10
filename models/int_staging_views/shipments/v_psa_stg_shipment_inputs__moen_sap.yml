@@ -1,0 +1,52 @@
+version: 2
+models:
+  - name: v_psa_stg_shipment_inputs__moen_sap
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          config:
+            severity: warn
+          arguments:
+            combination_of_columns:
+              - MANDT
+              - SSOUR
+              - VRSIO
+              - SPMON
+              - SPTAG
+              - SPWOC
+              - SPBUP
+              - KUNNR
+              - MATNR
+              - WERKS
+              - WADAT
+              - VBELN
+              - POSNR
+              - AUART
+              - STWAE_01
+              - ABGRU
+              - LOAD_DTS
+    columns:
+      - name: SHIPMENT_INPUTS_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: SHIPMENT_INPUTS_BK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: LOAD_DTS
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: REC_SRC
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: HASHDIFF
+        tests:
+          - not_null:
+              config:
+                severity: warn

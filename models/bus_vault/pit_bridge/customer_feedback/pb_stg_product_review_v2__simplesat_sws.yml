@@ -1,0 +1,5 @@
+version: 2
+models:
+- name: pb_stg_product_review_v2__simplesat_sws
+  data_tests: []
+  columns: []

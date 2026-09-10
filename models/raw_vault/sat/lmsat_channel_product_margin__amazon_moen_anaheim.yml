@@ -1,0 +1,25 @@
+version: 2
+models:
+- name: lmsat_channel_product_margin__amazon_moen_anaheim
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - CHANNEL_PRODUCT_MARGIN_LHK
+        - ASIN
+        - END_DATE
+        - MARKETPLACE_ID
+        - START_DATE
+        - LOAD_DTS
+  - dbt_expectations.expect_table_row_count_to_be_between:
+      arguments:
+        min_value: 4
+      config:
+        severity: warn
+  columns:
+  - name: CHANNEL_PRODUCT_MARGIN_LHK
+    data_tests:
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'lnk_channel_product_margin' )
+          pk_column_name: CHANNEL_PRODUCT_MARGIN_LHK

@@ -1,0 +1,80 @@
+---- SRC LAYER ----
+WITH
+SRC_D              as ( SELECT SEQ_ID , ASIN, BKCC, FORECAST_GENERATION_DATE__YYYYMMDD, ITEM_BK, ITEM_HK, MARKETPLACE_ID, MEAN_FORECAST_UNITS, P_70_FORECAST_UNITS, P_80_FORECAST_UNITS, P_90_FORECAST_UNITS, REC_SRC, STORE_BK, STORE_HK, CHANNEL_FORECAST_ITEMS_LHK FROM {{ ref('pb_channel_forecast_items') }} as SRC  )
+
+/*
+SRC_D              as ( SELECT * FROM BUS_VAULT.pb_channel_forecast_items )
+*/
+---- LOGIC LAYER ----
+
+, LOGIC_D as (
+    SELECT
+        SEQ_ID 
+      , REC_SRC
+      , STORE_HK
+      , ITEM_HK
+      , CHANNEL_FORECAST_ITEMS_LHK
+      , STORE_BK
+      , ITEM_BK
+      , ASIN
+      , FORECAST_GENERATION_DATE__YYYYMMDD
+      , MEAN_FORECAST_UNITS
+      , MARKETPLACE_ID
+      , P_70_FORECAST_UNITS
+      , P_80_FORECAST_UNITS
+      , P_90_FORECAST_UNITS
+      , BKCC
+    FROM SRC_D
+)
+---- RENAME LAYER ----
+
+, RENAME_D as (
+    SELECT
+        REC_SRC
+      , SEQ_ID 
+      , STORE_HK
+      , ITEM_HK
+      , CHANNEL_FORECAST_ITEMS_LHK
+      , STORE_BK
+      , ITEM_BK
+      , ASIN
+      , FORECAST_GENERATION_DATE__YYYYMMDD
+      , MEAN_FORECAST_UNITS
+      , MARKETPLACE_ID
+      , P_70_FORECAST_UNITS
+      , P_80_FORECAST_UNITS
+      , P_90_FORECAST_UNITS
+      , BKCC
+    FROM LOGIC_D
+)
+---- FILTER LAYER ----
+
+, FILTER_D as (
+    SELECT *
+    FROM RENAME_D
+)
+
+---- JOIN LAYER ----
+, JOIN_RESULT as (
+    SELECT *
+    FROM FILTER_D
+)
+
+---- FINAL LAYER ----
+SELECT
+          REC_SRC
+        , SEQ_ID 
+        , STORE_HK
+        , ITEM_HK
+        , CHANNEL_FORECAST_ITEMS_LHK
+        , STORE_BK
+        , ITEM_BK
+        , ASIN
+        , FORECAST_GENERATION_DATE__YYYYMMDD
+        , MEAN_FORECAST_UNITS
+        , MARKETPLACE_ID
+        , P_70_FORECAST_UNITS
+        , P_80_FORECAST_UNITS
+        , P_90_FORECAST_UNITS
+        , BKCC
+FROM JOIN_RESULT

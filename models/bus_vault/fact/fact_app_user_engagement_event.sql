@@ -1,0 +1,68 @@
+---- SRC LAYER ----
+WITH
+SRC_PB             as ( SELECT APP_SOURCE, BKCC, CONSUMER_BK, CONSUMER_HK, EVENT, EVENT_ACTION_TS, EVENT_DESCRIPTION, EVENT_TRACKING_ID, EVENT_TRAIT_ID, PLATFORM, REC_SRC FROM {{ ref('pb_app_user_engagement_event') }} as SRC  )
+
+/*
+SRC_PB             as ( SELECT * FROM BUS_VAULT.PB_APP_USER_ENGAGEMENT_EVENT )
+*/
+---- LOGIC LAYER ----
+
+, LOGIC_PB as (
+    SELECT
+        CONSUMER_BK
+      , BKCC
+      , REC_SRC
+      , CONSUMER_HK
+      , EVENT_TRAIT_ID
+      , EVENT_TRACKING_ID
+      , EVENT_DESCRIPTION
+      , EVENT
+      , EVENT_ACTION_TS
+      , PLATFORM
+      , APP_SOURCE
+    FROM SRC_PB
+)
+---- RENAME LAYER ----
+
+, RENAME_PB as (
+    SELECT
+        CONSUMER_BK
+      , BKCC
+      , REC_SRC
+      , CONSUMER_HK
+      , EVENT_TRAIT_ID
+      , EVENT_TRACKING_ID
+      , EVENT_DESCRIPTION
+      , EVENT
+      , EVENT_ACTION_TS
+      , PLATFORM
+      , APP_SOURCE
+    FROM LOGIC_PB
+)
+---- FILTER LAYER ----
+
+, FILTER_PB as (
+    SELECT *
+    FROM RENAME_PB
+)
+
+---- JOIN LAYER ----
+, JOIN_RESULT as (
+    SELECT *
+    FROM FILTER_PB
+)
+
+---- FINAL LAYER ----
+SELECT
+          CONSUMER_BK
+        , BKCC
+        , REC_SRC
+        , CONSUMER_HK
+        , EVENT_TRAIT_ID
+        , EVENT_TRACKING_ID
+        , EVENT_DESCRIPTION
+        , EVENT
+        , EVENT_ACTION_TS
+        , PLATFORM
+        , APP_SOURCE
+FROM JOIN_RESULT

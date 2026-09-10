@@ -1,0 +1,60 @@
+{{ config(alias='fact_daily_location_counts') }}
+---- SRC LAYER ----
+WITH
+SRC_LC             as ( SELECT BKCC, DATE_KEY_YYYYMMDD, FLO_PROTECT_LOCATIONS, LOCATIONS_TO_DATE, REC_SRC, SWD_ONLY_LOCATIONS, SWS_AND_SWD_LOCATIONS, SWS_ONLY_LOCATIONS FROM {{ ref('fact_daily_location_counts') }} as SRC  )
+
+/*
+SRC_LC             as ( SELECT * FROM BUS_VAULT.FACT_DAILY_LOCATION_COUNTS )
+*/
+---- LOGIC LAYER ----
+
+, LOGIC_LC as (
+    SELECT
+        BKCC
+      , REC_SRC
+      , DATE_KEY_YYYYMMDD
+      , LOCATIONS_TO_DATE
+      , SWS_ONLY_LOCATIONS
+      , SWD_ONLY_LOCATIONS
+      , SWS_AND_SWD_LOCATIONS
+      , FLO_PROTECT_LOCATIONS
+    FROM SRC_LC
+)
+---- RENAME LAYER ----
+
+, RENAME_LC as (
+    SELECT
+        BKCC
+      , REC_SRC
+      , DATE_KEY_YYYYMMDD
+      , LOCATIONS_TO_DATE
+      , SWS_ONLY_LOCATIONS
+      , SWD_ONLY_LOCATIONS
+      , SWS_AND_SWD_LOCATIONS
+      , FLO_PROTECT_LOCATIONS
+    FROM LOGIC_LC
+)
+---- FILTER LAYER ----
+
+, FILTER_LC as (
+    SELECT *
+    FROM RENAME_LC
+)
+
+---- JOIN LAYER ----
+, JOIN_RESULT as (
+    SELECT *
+    FROM FILTER_LC
+)
+
+---- FINAL LAYER ----
+SELECT
+          BKCC
+        , REC_SRC
+        , DATE_KEY_YYYYMMDD
+        , LOCATIONS_TO_DATE
+        , SWS_ONLY_LOCATIONS
+        , SWD_ONLY_LOCATIONS
+        , SWS_AND_SWD_LOCATIONS
+        , FLO_PROTECT_LOCATIONS
+FROM JOIN_RESULT

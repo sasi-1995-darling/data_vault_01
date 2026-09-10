@@ -1,0 +1,28 @@
+version: 2
+models:
+  - name: ref_sat_memo_line__ml_ebs
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - MEMO_LINE_BK
+              - LOAD_DTS
+    columns:
+      - name: MEMO_LINE_BK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+          - dbt_utils.relationships_where:
+              arguments:
+                to: ref( 'ref_hub_memo_line' )
+                field: MEMO_LINE_BK
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'ref_hub_memo_line' )
+                pk_column_name: MEMO_LINE_BK
+      - name: LOAD_DTS
+        tests:
+          - not_null:
+              config:
+                severity: warn

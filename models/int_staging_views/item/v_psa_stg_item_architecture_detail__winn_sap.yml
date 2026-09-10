@@ -1,0 +1,11 @@
+version: 2
+models:
+- name: v_psa_stg_item_architecture_detail__winn_sap
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - ZZARCHDET
+        - SPRAS
+        - LOAD_DTS
+  columns: []

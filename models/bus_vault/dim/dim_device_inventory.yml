@@ -1,0 +1,13 @@
+
+version: 2
+models:
+- name: dim_device_inventory
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - PAIRED_DEVICE_BK
+        - DEVICE_BK
+        - BKCC
+        - REC_SRC
+  columns: []

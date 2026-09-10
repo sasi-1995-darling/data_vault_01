@@ -1,0 +1,12 @@
+{
+  "recommendations": [
+    "innoverio.vscode-dbt-power-user",
+    "henriblancke.vscode-dbt-formatter",
+    "esbenp.prettier-vscode",
+    "github.copilot",
+    "github.copilot-chat",
+    "dorzey.vscode-sqlfluff",
+    "ms-python.python",
+    "ms-python.vscode-pylance"
+  ]
+}

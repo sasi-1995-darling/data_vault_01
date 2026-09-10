@@ -1,0 +1,22 @@
+version: 2
+models:
+- name: hub_payment_term
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - PAYMENT_TERM_HK
+  - dbt_expectations.expect_table_row_count_to_be_between:
+      arguments:
+        min_value: 4
+      config:
+        severity: warn
+  columns:
+  - name: PAYMENT_TERM_HK
+    data_tests:
+    - unique:
+        config:
+          severity: warn
+    - not_null:
+        config:
+          severity: warn

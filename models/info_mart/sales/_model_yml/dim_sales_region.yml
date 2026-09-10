@@ -1,0 +1,13 @@
+version: 2
+
+models:
+  - name: dim_sales_region
+    description: Sales dimension for sales region
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - dim_sales_region_pk
+    config:
+      tags:
+        - emtek

@@ -1,0 +1,9 @@
+version: 2
+models:
+  - name: pit_retailer
+    data_tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - RETAILER_HK
+              - BKCC

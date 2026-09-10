@@ -1,0 +1,9 @@
+version: 2
+models:
+- name: pb_reservation
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - LNK_DEPENDENCY_RESERVATION_HK
+  columns: []

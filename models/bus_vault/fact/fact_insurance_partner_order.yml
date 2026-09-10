@@ -1,0 +1,17 @@
+version: 2
+models:
+  - name: fact_insurance_partner_order
+    description: "Fact view: thin wrapper on pb_insurance_partner_order. Exposes the final insurance partner order dataset with Frontdoor/Moen status, device/serial resolution, and delivery classification for reporting."
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          config:
+            severity: warn
+          arguments:
+            combination_of_columns:
+              - ORDER_ID
+              - SKU
+              - ORDER_LINE_ID
+              - ORIG_ORDER_TAG
+    columns:
+      - name: SERIAL_ID
+        description: "Serial number of the matched Flo device, sourced from pb_sap_kit_order_serial via pb_insurance_order_device_matched."

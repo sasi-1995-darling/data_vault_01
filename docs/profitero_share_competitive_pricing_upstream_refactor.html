@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Profitero Share Competitive Pricing Upstream Refactor</title>
+  <style>
+    body { font-family: Segoe UI, Arial, sans-serif; margin: 0; padding: 20px; background: #f5f7fa; color: #1f2937; }
+    h1 { color: #0f3d68; border-bottom: 3px solid #0f3d68; padding-bottom: 8px; }
+    h2 { color: #0f3d68; margin-top: 30px; border-left: 4px solid #2d6ea3; padding-left: 10px; }
+    h3 { color: #1f4f78; margin-top: 20px; }
+    .card { background: #ffffff; border-radius: 8px; padding: 18px 20px; margin: 16px 0; box-shadow: 0 1px 6px rgba(0,0,0,0.08); }
+    .meta { background: #e7eff8; }
+    .warn { background: #fff4e5; border-left: 4px solid #f59e0b; }
+    .blocker { background: #fdecec; border-left: 4px solid #dc2626; }
+    .ok { background: #e8f7ee; border-left: 4px solid #16a34a; }
+    table { border-collapse: collapse; width: 100%; margin: 10px 0 18px 0; background: #fff; }
+    th { background: #0f3d68; color: #fff; text-align: left; font-size: 13px; padding: 8px 10px; }
+    td { border-bottom: 1px solid #e5e7eb; padding: 8px 10px; font-size: 13px; vertical-align: top; }
+    tr:last-child td { border-bottom: none; }
+    code { background: #eef2f7; padding: 1px 5px; border-radius: 3px; font-size: 12px; }
+    ul { margin: 8px 0 8px 18px; }
+    .badge { border-radius: 4px; padding: 2px 7px; font-size: 12px; color: #fff; display: inline-block; }
+    .p0 { background: #dc2626; }
+    .p1 { background: #d97706; }
+    .p2 { background: #2563eb; }
+    .p3 { background: #4b5563; }
+  </style>
+</head>
+<body>
+  <h1>Profitero Share Competitive Pricing Upstream Refactor</h1>
+
+  <div class="card meta">
+    <strong>Generated:</strong> May 14, 2026<br />
+    <strong>Target model:</strong> <code>models/info_mart/competitive_pricing/im_rep_pricing_competitive_weekly.sql</code><br />
+    <strong>Objective:</strong> Identify all upstream components, isolate components that contribute final columns, define end-to-end refactor mapping to <code>profitero_share_*</code>, and list unknown/verify items.
+  </div>
+
+  <div class="card">
+    <h2>1) All Upstream Components for im_rep_pricing_competitive_weekly</h2>
+
+    <h3>Direct parents</h3>
+    <ul>
+      <li><code>im_fact_pricing_competitive_weekly</code></li>
+      <li><code>im_pricing_competitive_dim_brand_v2</code></li>
+      <li><code>im_pricing_competitive_dim_retailer</code></li>
+      <li><code>im_pricing_competitive_dim_product_v2</code></li>
+      <li><code>im_dim_competitive_product</code></li>
+    </ul>
+
+    <h3>Pricing fact branch (recursive)</h3>
+    <ul>
+      <li><code>pb_pricing_competitive_weekly</code></li>
+      <li><code>stg_pricing_competitive_profitero_weekly_agg</code></li>
+      <li><code>stg_pricing_competitive_profitero_weekly</code></li>
+      <li><code>stg_pricing_competitive_profitero</code></li>
+      <li><code>lsat_price_availability__profitero</code></li>
+      <li><code>hub_product_v2</code>, <code>hub_retailer</code>, <code>lnk_product_brand</code>, <code>hub_brand_v2</code></li>
+      <li>Pricing staging models:<br />
+        <code>v_psa_stg_price_availability__profitero_fiberon</code>,
+        <code>v_psa_stg_price_availability__profitero_fypon</code>,
+        <code>v_psa_stg_price_availability__profitero_larson</code>,
+        <code>v_psa_stg_price_availability__profitero_security</code>,
+        <code>v_psa_stg_price_availability__profitero_thermatru</code>,
+        <code>v_psa_stg_price_availability__profitero_winn</code>
+      </li>
+    </ul>
+
+    <h3>Competitive product dimension branch (recursive)</h3>
+    <ul>
+      <li><code>pb_competitive_product</code></li>
+      <li><code>pb_stg_competitive_product__profitero</code></li>
+      <li><code>lnk_competitive_product_retailer</code>, <code>hub_competitive_product</code>, <code>hub_retailer</code>, <code>sat_competitive_products__profitero</code></li>
+      <li>Competitive staging models:<br />
+        <code>v_psa_stg_competitive_products__profitero_fiberon</code>,
+        <code>v_psa_stg_competitive_products__profitero_fypon</code>,
+        <code>v_psa_stg_competitive_products__profitero_larson</code>,
+        <code>v_psa_stg_competitive_products__profitero_security</code>,
+        <code>v_psa_stg_competitive_products__profitero_thermatru</code>,
+        <code>v_psa_stg_competitive_products__profitero_winn</code>
+      </li>
+    </ul>
+
+    <h3>Business dimensions branch (recursive)</h3>
+    <ul>
+      <li>Brand path: <code>dim_brand_v2</code> → <code>pit_brand_v2</code> → <code>pit_stg_brand__profitero</code> → <code>sat_brand__profitero</code> → <code>v_psa_stg_brands__*__profitero</code></li>
+      <li>Retailer path: <code>dim_retailer</code> → <code>pit_retailer</code> → <code>pit_stg_retailer__profitero</code> → <code>sat_retailer__profitero</code> → <code>v_psa_stg_retailers__*__profitero</code></li>
+      <li>Product path: <code>dim_product_v2</code> → <code>pit_product_v2</code> → <code>pit_stg_product__profitero</code> → <code>sat_customer_product__profitero</code> → <code>v_psa_stg_customer_products__*__profitero</code></li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>2) Components Whose Columns Contribute to Final Output Columns</h2>
+
+    <table>
+      <tr>
+        <th>Final output columns</th>
+        <th>Immediate provider</th>
+        <th>True upstream contributors</th>
+      </tr>
+      <tr>
+        <td><code>customer_product_id</code>, <code>product_id</code>, <code>source</code>, <code>date</code>, week and all price/availability metrics</td>
+        <td><code>im_fact_pricing_competitive_weekly</code></td>
+        <td><code>pb_pricing_competitive_weekly</code> → <code>stg_pricing_competitive_profitero_weekly_agg</code> → <code>stg_pricing_competitive_profitero_weekly</code> → <code>stg_pricing_competitive_profitero</code> → <code>lsat_price_availability__profitero</code> → <code>v_psa_stg_price_availability__profitero_*</code></td>
+      </tr>
+      <tr>
+        <td><code>brand_name</code>, <code>subbrand</code>, <code>subsubbrand</code></td>
+        <td><code>im_pricing_competitive_dim_brand_v2</code></td>
+        <td><code>dim_brand_v2</code> → <code>pit_brand_v2</code> → <code>pit_stg_brand__profitero</code> → <code>sat_brand__profitero</code> → <code>v_psa_stg_brands__*__profitero</code></td>
+      </tr>
+      <tr>
+        <td><code>retailer_name</code>, <code>country</code>, <code>alias</code></td>
+        <td><code>im_pricing_competitive_dim_retailer</code></td>
+        <td><code>dim_retailer</code> → <code>pit_retailer</code> → <code>pit_stg_retailer__profitero</code> → <code>sat_retailer__profitero</code> → <code>v_psa_stg_retailers__*__profitero</code></td>
+      </tr>
+      <tr>
+        <td><code>product_name</code>, <code>map_price</code>, <code>brand_id</code></td>
+        <td><code>im_pricing_competitive_dim_product_v2</code></td>
+        <td><code>dim_product_v2</code> → <code>pit_product_v2</code> → <code>pit_stg_product__profitero</code> → <code>sat_customer_product__profitero</code> → <code>v_psa_stg_customer_products__*__profitero</code></td>
+      </tr>
+      <tr>
+        <td><code>ranking_product_id</code>, <code>url</code>, plus fallback part of <code>rpc/ean/upc/model</code></td>
+        <td><code>im_dim_competitive_product</code></td>
+        <td><code>pb_competitive_product</code> → <code>pb_stg_competitive_product__profitero</code> → <code>sat_competitive_products__profitero</code> + hubs/links → <code>v_psa_stg_competitive_products__profitero_*</code></td>
+      </tr>
+      <tr>
+        <td><code>rpc/ean/upc/model</code> (coalesce priority)</td>
+        <td><code>coalesce(p.*, cp.*)</code> in final model</td>
+        <td>Primary from product branch (<code>im_pricing_competitive_dim_product_v2</code>), fallback from competitive branch (<code>im_dim_competitive_product</code>)</td>
+      </tr>
+    </table>
+
+    <div class="ok">
+      <strong>Scope note:</strong> Category and category-product pricing staging models are not direct contributors to this report's final selected columns.
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>3) End-to-End Refactor Mapping for Contributing Components</h2>
+
+    <h3>3.1 Brand source mapping for all Profitero contributing branches</h3>
+    <table>
+      <tr><th>Current source</th><th>Target source</th><th>Notes</th></tr>
+      <tr><td><code>profitero_fiberon</code></td><td><code>profitero_share_fiberon</code></td><td>Direct brand rename pattern</td></tr>
+      <tr><td><code>profitero_fypon</code></td><td><code>profitero_share_fypon</code></td><td>Direct brand rename pattern</td></tr>
+      <tr><td><code>profitero_larson</code></td><td><code>profitero_share_larson</code></td><td>Direct brand rename pattern</td></tr>
+      <tr><td><code>profitero_security</code></td><td><code>profitero_share_master_lock</code></td><td>Security renamed to Master Lock</td></tr>
+      <tr><td><code>profitero_thermatru</code></td><td><code>profitero_share_thermatru</code></td><td>Direct brand rename pattern</td></tr>
+      <tr><td><code>profitero</code> (winn)</td><td><code>profitero_share_moen</code></td><td>Winn account now represented as Moen schema</td></tr>
+    </table>
+
+    <h3>3.2 Refactor map by contributing staging component type</h3>
+    <table>
+      <tr>
+        <th>Contributing staging component</th>
+        <th>Current core table(s)</th>
+        <th>Target share table(s)</th>
+        <th>Required refactor action</th>
+      </tr>
+      <tr>
+        <td><code>v_psa_stg_price_availability__profitero_*</code></td>
+        <td><code>price_availability_history</code> + <code>retailers</code></td>
+        <td><code>DIM_PRODUCT_HISTORY</code> + <code>DIM_RETAILER</code> + <code>DIM_ACCOUNT_PRODUCT</code> + <code>DIM_DATE</code></td>
+        <td>Replace direct IDs with surrogate joins; derive <code>PRODUCT_BK</code> from <code>DIM_ACCOUNT_PRODUCT.ACCOUNT_PRODUCT_ID</code>; derive date from <code>DIM_DATE</code>; update REC_SRC filter literals in both stage and downstream incremental filters.</td>
+      </tr>
+      <tr>
+        <td><code>v_psa_stg_competitive_products__profitero_*</code></td>
+        <td><code>products</code> + <code>price_availability_history</code> + <code>retailers</code></td>
+        <td><code>DIM_RETAILER_PRODUCT</code> + <code>DIM_RETAILER</code> (+ bridge tables as needed)</td>
+        <td>Rebuild BK logic for competitive products; map MODEL/URL rename; rework old join path that used <code>price_availability_history.PRODUCT_ID</code>; handle missing <code>RANKING_PRODUCT_ID</code>.</td>
+      </tr>
+      <tr>
+        <td><code>v_psa_stg_customer_products__*__profitero</code></td>
+        <td><code>customer_products</code></td>
+        <td><code>DIM_ACCOUNT_PRODUCT</code></td>
+        <td>Map <code>NAME→ACCOUNT_PRODUCT_NAME</code>, <code>MODEL→PRODUCT_MODEL</code>, <code>RPC→PROVIDED_RPC</code>, and keep MAP_PRICE continuity for product dimension branch.</td>
+      </tr>
+      <tr>
+        <td><code>v_psa_stg_brands__*__profitero</code></td>
+        <td><code>brands</code></td>
+        <td><code>DIM_BRAND</code></td>
+        <td>Map brand descriptive attributes for <code>subbrand/subsubbrand</code> continuity in report.</td>
+      </tr>
+      <tr>
+        <td><code>v_psa_stg_retailers__*__profitero</code></td>
+        <td><code>retailers</code></td>
+        <td><code>DIM_RETAILER</code></td>
+        <td>Map <code>NAME→RETAILER_NAME</code>, <code>ALIAS→RETAILER_ALIAS</code>, preserve retailer BK derivation stability.</td>
+      </tr>
+    </table>
+
+    <h3>3.3 Downstream components to update after staging refactor</h3>
+    <ul>
+      <li><code>lsat_price_availability__profitero</code>: all hardcoded REC_SRC incremental predicates must switch to new share values.</li>
+      <li><code>stg_pricing_competitive_profitero</code> branch: verify latest-key logic still valid when <code>PRODUCT_ID</code> semantics change.</li>
+      <li><code>sat_competitive_products__profitero</code>: adjust expected columns if <code>RANKING_PRODUCT_ID</code> unavailable in share schema.</li>
+      <li><code>pb_stg_competitive_product__profitero</code> and <code>pb_competitive_product</code>: revalidate joins and fallback values used by report.</li>
+      <li><code>pb_profitero_avg_consumer_price_monthly</code> and <code>pb_avg_gross_to_consumer_markup_rate_monthly</code>: update hardcoded old REC_SRC literals.</li>
+      <li><code>hub_product_v2</code>, <code>hub_retailer</code>, <code>hub_competitive_product</code>, <code>lnk_competitive_product_retailer</code>, <code>lnk_product_brand</code>: revalidate BK/HK continuity after stage changes.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>4) Unknown / Need-to-Verify Items</h2>
+    <table>
+      <tr><th>Item</th><th>Priority</th><th>Why it matters for this report</th><th>Verification needed</th></tr>
+      <tr>
+        <td>DIM_PRODUCT_HISTORY has no old-style PRODUCT_ID</td>
+        <td><span class="badge p0">P0</span></td>
+        <td><code>product_id</code> is selected in the report and used in joins to competitive product branch.</td>
+        <td>Define canonical replacement derivation for product_id in pricing branch.</td>
+      </tr>
+      <tr>
+        <td>RANKING_PRODUCT_ID not present on DIM_RETAILER_PRODUCT</td>
+        <td><span class="badge p0">P0</span></td>
+        <td>Report selects <code>cp.ranking_product_id</code> directly.</td>
+        <td>Choose null/default policy or alternate source and update sat/pb branch.</td>
+      </tr>
+      <tr>
+        <td>COMPETITIVE_PRODUCT_BK continuity</td>
+        <td><span class="badge p0">P0</span></td>
+        <td>Report joins fact.product_id to competitive product BK chain; continuity break can create mismatches/duplication.</td>
+        <td>Validate whether RPC or another natural key can preserve existing BK identity.</td>
+      </tr>
+      <tr>
+        <td>MATCH_TYPE and ADD_ON_ITEM missing in share pricing core table</td>
+        <td><span class="badge p1">P1</span></td>
+        <td>These attributes are in current hashdiff and satellite payload; loss can alter change-detection behavior.</td>
+        <td>Confirm nulling strategy vs alternate recovery source and downstream impact.</td>
+      </tr>
+      <tr>
+        <td>REC_SRC literal changes across incrementals and filters</td>
+        <td><span class="badge p0">P0</span></td>
+        <td>Incorrect literals can silently produce zero-row increments.</td>
+        <td>Update and validate all old <code>US.PROFITERO_*</code> literals to <code>US.PROFITERO_SHARE_*.DIM_*</code>.</td>
+      </tr>
+      <tr>
+        <td>BKCC registration for new REC_SRC combinations</td>
+        <td><span class="badge p0">P0</span></td>
+        <td>BK/HK generation and joins rely on BKCC + REC_SRC consistency.</td>
+        <td>Register all new combinations before build/cutover.</td>
+      </tr>
+      <tr>
+        <td>Winn to Moen mapping correctness</td>
+        <td><span class="badge p1">P1</span></td>
+        <td>Wrong mapping affects one full brand stream in report.</td>
+        <td>Validate with vendor/source owner that winn lineage is fully represented in <code>profitero_share_moen</code>.</td>
+      </tr>
+    </table>
+
+    <div class="blocker">
+      <strong>Cutover blocker summary:</strong> Do not cut over report lineage until product_id replacement, competitive product BK continuity, and REC_SRC/BKCC updates are finalized and validated in incremental runs.
+    </div>
+  </div>
+
+  <div class="card warn">
+    <strong>Practical execution order for refactor:</strong>
+    <ol>
+      <li>Refactor contributing staging models to share schema tables (price, competitive, customer product, brand, retailer).</li>
+      <li>Update raw-vault satellites and link/hub dependencies for new column semantics and REC_SRC literals.</li>
+      <li>Rebuild pit/pit_bridge models that feed fact and dimensions for the report.</li>
+      <li>Validate final report output parity on key columns and metric aggregates before cutover.</li>
+    </ol>
+  </div>
+</body>
+</html>

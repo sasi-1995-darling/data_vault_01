@@ -1,0 +1,21 @@
+version: 2
+models:
+  - name: sat_quality_issue__winn_sap
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - QUALITY_ISSUE_HK
+              - LOAD_DTS
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          config:
+            severity: warn
+          arguments:
+            min_value: 4
+    columns:
+      - name: QUALITY_ISSUE_HK
+        tests:
+          - dbt_utils.relationships_where:
+              arguments:
+                to: ref( 'hub_quality_issue' )
+                field: QUALITY_ISSUE_HK

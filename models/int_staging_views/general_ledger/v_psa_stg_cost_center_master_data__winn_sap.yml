@@ -1,0 +1,34 @@
+version: 2
+models:
+  - name: v_psa_stg_cost_center_master_data__winn_sap
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          config:
+            severity: warn
+          arguments:
+            combination_of_columns:
+              - KOKRS
+              - KOSTL
+              - DATBI
+              - LOAD_DTS
+    columns:
+      - name: KOKRS
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: KOSTL
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: DATBI
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: LOAD_DTS
+        tests:
+          - not_null:
+              config:
+                severity: warn

@@ -1,0 +1,30 @@
+version: 2
+models:
+  - name: sat_pog_weekly__homedepot
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - STORE_HK
+              - SKU_NBR
+              - WEEK
+              - HOME_DEPOT_ACCOUNT
+              - D_POG_2
+              - D_ACTIVE_SKU_2
+              - D_ASSORTMENT
+              - LOAD_DTS
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          config:
+            severity: warn
+          arguments:
+            min_value: 4
+    columns:
+      - name: STORE_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'hub_store' )
+                pk_column_name: STORE_HK

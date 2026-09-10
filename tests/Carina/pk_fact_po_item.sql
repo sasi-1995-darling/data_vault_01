@@ -1,0 +1,1 @@
+select * from ({{ primary_key_check('fact_po_item',['po_header_id','po_line_number','item_bk']) }})

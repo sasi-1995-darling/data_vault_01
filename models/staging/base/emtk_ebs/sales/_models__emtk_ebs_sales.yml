@@ -1,0 +1,180 @@
+version: 2
+
+models:
+  - name: base_customer__emtk_ebs_sales
+    description: This is the base staging model from Emtek for hub_customer
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - account_number
+
+  - name: base_customer_bill_location__emtk_ebs_sales
+    description: This is the base staging model from Emtek for hub_customer_bill_location
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - location_id
+
+  - name: base_customer_ship_location__emtk_ebs_sales
+    description: This is the base staging model from Emtek for hub_customer_ship_location
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - location_id
+
+  - name: base_invoice__emtk_ebs_sales
+    description: This is the base staging model from Emtek for hub_invoice
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - org_id
+              - trx_number
+              - interface_header_attribute1
+
+  - name: base_invoice_adjustment__emtk_ebs_sales
+    description: This is the base staging model from Emtek for hub_invoice_adjusment
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - org_id
+              - trx_number
+              - interface_header_attribute1
+              - trx_date
+
+  - name: base_invoice_adjustment_customer__emtk_ebs_sales
+    description: This is the base staging model from Emtek for link_invoice_adjustment_customer
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - org_id
+              - trx_number
+              - interface_header_attribute1
+              - account_number
+              - bill_location_id
+              - trx_date
+
+  - name: base_invoice_customer__emtk_ebs_sales
+    description: This is the base staging model from Emtek for link_invoice_customer
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - org_id
+              - trx_number
+              - interface_header_attribute1
+              - account_number
+              - bill_location_id
+              - ship_location_id
+
+  - name: base_invoice_line__emtk_ebs_sales
+    description: This is the base staging model from Emtek for hub_invoice_line
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - customer_trx_line_id
+
+  - name: base_invoice_invoice_line__emtk_ebs_sales
+    description: This is the base staging model from Emtek for link_invoice_invoice_line
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - customer_trx_line_id
+              - org_id
+              - trx_number
+              - interface_header_attribute1
+
+  - name: base_invoice_adj_invoice_line__emtk_ebs_sales
+    description: This is the base staging model from Emtek for link_invoice_adj_invoice_line
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - customer_trx_line_id
+              - org_id
+              - trx_number
+              - interface_header_attribute1
+
+  - name: base_invoice_line_transaction__emtk_ebs_sales
+    description: This is the base staging model from Emtek for link_invoice_line_transaction
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - customer_trx_line_id
+              - transaction_id
+
+  - name: base_sales_agency__emtk_ebs_sales
+    description: This is the base staging model from Emtek for hub_sales_agency
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - org_id
+              - salesrep_id
+
+  - name: base_sales_agency_groups__emtk_ebs_sales
+    description: This is the base staging model from Emtek for link_sales_agency_groups
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - org_id
+              - salesrep_number
+              - group_name
+              - segment1
+
+  - name: base_sales_region__emtk_ebs_sales
+    description: This is the base staging model from Emtek for hub_sales_region
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - group_name
+
+  - name: base_sales_territory__emtk_ebs_sales
+    description: This is the base staging model from Emtek for hub_sales_territory
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - segment1
+
+  - name: base_delivery__emtk_ebs_sales
+    description: This is the base staging model from Emtek for hub_delivery
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - delivery_detail_id
+
+  - name: base_invoice_delivery__emtk_ebs_sales
+    description: This is the base staging model from Emtek for link_invoice_delivery
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - org_id
+              - trx_number
+              - interface_header_attribute1
+              - delivery_detail_id
+
+  - name: base_invoice_adj_sales_agency__emtk_ebs_sales
+    description: This is the base staging model from Emtek for link_invoice_adj_sales_agency
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - inva_org_id
+              - trx_number
+              - interface_header_attribute1
+              - trx_date
+              - salea_org_id
+              - salesrep_number

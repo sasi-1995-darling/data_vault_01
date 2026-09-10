@@ -1,0 +1,29 @@
+version: 2
+models:
+- name: msat_payment_term_net__lrsn_psft
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - PAYMENT_TERM_HK
+        - SETID
+        - EFFDT
+        - NET_TRMS_SEQ_NBR
+        - LOAD_DTS
+      config:
+        severity: warn
+  - dbt_expectations.expect_table_row_count_to_be_between:
+      arguments:
+        min_value: 4
+      config:
+        severity: warn
+  columns:
+  - name: PAYMENT_TERM_HK
+    data_tests:
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'hub_payment_term' )
+          pk_column_name: PAYMENT_TERM_HK
+  config:
+    tags:
+    - msat

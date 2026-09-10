@@ -1,0 +1,48 @@
+version: 2
+models:
+  - name: v_psa_stg_bi_line__lrsn_psft
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          config:
+            severity: warn
+          arguments:
+            combination_of_columns:
+              - INVOICE
+              - LINE_SEQ_NUM
+              - LOAD_DTS
+    columns:
+      - name: INVOICE_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: INVOICE_BK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: LINE_SEQ_NUM
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: LOAD_DTS
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: REC_SRC
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: ITEM_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: HASHDIFF
+        tests:
+          - not_null:
+              config:
+                severity: warn

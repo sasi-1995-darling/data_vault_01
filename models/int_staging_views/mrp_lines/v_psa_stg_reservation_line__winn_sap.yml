@@ -1,0 +1,29 @@
+version: 2
+models:
+  - name: v_psa_stg_reservation_line__winn_sap
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          config:
+            severity: warn
+          arguments:
+            combination_of_columns:
+              - RSNUM
+              - RSPOS
+              - RSART
+              - LOAD_DTS
+    columns:
+      - name: RSNUM
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: RSPOS
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: LOAD_DTS
+        tests:
+          - not_null:
+              config:
+                severity: warn

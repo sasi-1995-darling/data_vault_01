@@ -1,0 +1,10 @@
+version: 2
+models:
+- name: dim_work_center
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - WORK_CENTER_HK
+        - PLANT_BK
+  columns: []

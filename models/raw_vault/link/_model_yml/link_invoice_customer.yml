@@ -1,0 +1,41 @@
+version: 2
+
+models:
+  - name: link_invoice_customer
+    description: This is the 4-way raw vault link model between invoice, customer, customer bill location and customer ship location
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - invoice_customer_hk
+      - dbt_constraints.foreign_key:
+          arguments:
+            fk_column_names:
+              - customer_hk
+            pk_table_name: ref('hub_customer')
+            pk_column_names:
+              - customer_hk
+      - dbt_constraints.foreign_key:
+          arguments:
+            fk_column_names:
+              - customer_bill_location_hk
+            pk_table_name: ref('hub_customer_bill_location')
+            pk_column_names:
+              - customer_bill_location_hk
+      - dbt_constraints.foreign_key:
+          arguments:
+            fk_column_names:
+              - customer_ship_location_hk
+            pk_table_name: ref('hub_customer_ship_location')
+            pk_column_names:
+              - customer_ship_location_hk
+      - dbt_constraints.foreign_key:
+          arguments:
+            fk_column_names:
+              - invoice_hk
+            pk_table_name: ref('hub_invoice')
+            pk_column_names:
+              - invoice_hk
+    config:
+      tags:
+        - emtek

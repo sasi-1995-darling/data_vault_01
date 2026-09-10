@@ -1,0 +1,8 @@
+version: 2
+models:
+  - name: hub_origin_group
+    data_tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - ORIGIN_GROUP_HK

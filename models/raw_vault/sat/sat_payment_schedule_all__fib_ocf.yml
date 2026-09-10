@@ -1,0 +1,39 @@
+version: 2
+models:
+  - name: sat_payment_schedule_all__fib_ocf
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - PAYMENT_SCHEDULE_HK
+              - LOAD_DTS
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          config:
+            severity: warn
+          arguments:
+            min_value: 4
+    columns:
+      - name: PAYMENT_SCHEDULE_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'hub_payment_schedule' )
+                pk_column_name: PAYMENT_SCHEDULE_HK
+      - name: LOAD_DTS
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: REC_SRC
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: HASHDIFF
+        tests:
+          - not_null:
+              config:
+                severity: warn

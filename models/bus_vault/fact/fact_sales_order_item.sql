@@ -1,0 +1,189 @@
+---- SRC LAYER ----
+WITH
+SRC_BV as (
+    SELECT
+          PSA_DELETE_IND
+        , SEQ_ID
+        , REC_SRC
+        , SO_ITEM_LHK
+        , CUSTOMER_BILLTO_HK
+        , CUSTOMER_BILLTO_BK
+        , BKCC
+        , CUSTOMER_PAYER_HK
+        , CUSTOMER_PAYER_BK
+        , CUSTOMER_SHIPTO_HK
+        , CUSTOMER_SHIPTO_BK
+        , CUSTOMER_SOLDTO_HK
+        , CUSTOMER_SOLDTO_BK
+        , DISTRIBUTION_CHANNEL_HK
+        , DISTRIBUTION_CHANNEL_BK
+        , DIVISION_HK
+        , DIVISION_BK
+        , ITEM_HK
+        , ITEM_BK
+        , ORDER_HEADER_HK
+        , ORDER_HEADER_BK
+        , ORDER_LINE_HK
+        , ORDER_LINE_BK
+        , PLANT_HK
+        , PLANT_BK
+        , SALES_ORGANIZATION_HK
+        , SALES_ORGANIZATION_BK
+        , ORDER_TYPE
+        , QUANTITY_ORDERED
+        , SOLD_UNIT_OF_MEASURE
+        , NET_VALUE_AMOUNT
+        , TAX_AMOUNT
+        , CANCELLED_REASON
+        , ORDER_DATE__YYYYMMDD
+        , CREATION_DATE__YYYYMMDD
+        , REQUESTED_SHIP_DATE__YYYYMMDD
+        , MATERIAL_GROUP
+    FROM {{ ref('pb_sales_order_item') }}
+)
+
+/*
+SRC_BV             as ( SELECT * FROM BUS_VAULT.PB_SALES_ORDER_LINE )
+*/
+
+---- LOGIC LAYER ----
+
+, LOGIC_BV as (
+    SELECT
+          PSA_DELETE_IND
+        , SEQ_ID
+        , REC_SRC
+        , SO_ITEM_LHK
+        , CUSTOMER_BILLTO_HK
+        , CUSTOMER_BILLTO_BK
+        , BKCC
+        , CUSTOMER_PAYER_HK
+        , CUSTOMER_PAYER_BK
+        , CUSTOMER_SHIPTO_HK
+        , CUSTOMER_SHIPTO_BK
+        , CUSTOMER_SOLDTO_HK
+        , CUSTOMER_SOLDTO_BK
+        , DISTRIBUTION_CHANNEL_HK
+        , DISTRIBUTION_CHANNEL_BK
+        , DIVISION_HK
+        , DIVISION_BK
+        , ITEM_HK
+        , ITEM_BK
+        , ORDER_HEADER_HK
+        , ORDER_HEADER_BK
+        , ORDER_LINE_HK
+        , ORDER_LINE_BK
+        , PLANT_HK
+        , PLANT_BK
+        , SALES_ORGANIZATION_HK
+        , SALES_ORGANIZATION_BK
+        , ORDER_TYPE
+        , QUANTITY_ORDERED
+        , SOLD_UNIT_OF_MEASURE
+        , NET_VALUE_AMOUNT
+        , TAX_AMOUNT
+        , CANCELLED_REASON
+        , ORDER_DATE__YYYYMMDD
+        , CREATION_DATE__YYYYMMDD
+        , REQUESTED_SHIP_DATE__YYYYMMDD
+        , MATERIAL_GROUP
+    FROM SRC_BV
+)
+
+---- RENAME LAYER ----
+
+, RENAME_BV as (
+    SELECT
+          PSA_DELETE_IND
+        , SEQ_ID
+        , REC_SRC
+        , SO_ITEM_LHK
+        , CUSTOMER_BILLTO_HK
+        , CUSTOMER_BILLTO_BK
+        , BKCC
+        , CUSTOMER_PAYER_HK
+        , CUSTOMER_PAYER_BK
+        , CUSTOMER_SHIPTO_HK
+        , CUSTOMER_SHIPTO_BK
+        , CUSTOMER_SOLDTO_HK
+        , CUSTOMER_SOLDTO_BK
+        , DISTRIBUTION_CHANNEL_HK
+        , DISTRIBUTION_CHANNEL_BK
+        , DIVISION_HK
+        , DIVISION_BK
+        , ITEM_HK
+        , ITEM_BK
+        , ORDER_HEADER_HK
+        , ORDER_HEADER_BK
+        , ORDER_LINE_HK
+        , ORDER_LINE_BK
+        , PLANT_HK
+        , PLANT_BK
+        , SALES_ORGANIZATION_HK
+        , SALES_ORGANIZATION_BK
+        , ORDER_TYPE
+        , QUANTITY_ORDERED
+        , SOLD_UNIT_OF_MEASURE
+        , NET_VALUE_AMOUNT
+        , TAX_AMOUNT
+        , CANCELLED_REASON
+        , ORDER_DATE__YYYYMMDD
+        , CREATION_DATE__YYYYMMDD
+        , REQUESTED_SHIP_DATE__YYYYMMDD
+        , MATERIAL_GROUP
+    FROM LOGIC_BV
+)
+
+---- FILTER LAYER ----
+
+, FILTER_BV as (
+    SELECT *
+    FROM RENAME_BV
+)
+
+---- JOIN LAYER ----
+, JOIN_RESULT as (
+    SELECT *
+    FROM FILTER_BV
+)
+
+---- FINAL LAYER ----
+SELECT
+          PSA_DELETE_IND
+        , SEQ_ID
+        , REC_SRC
+        , SO_ITEM_LHK
+        , CUSTOMER_BILLTO_HK
+        , CUSTOMER_BILLTO_BK
+        , BKCC
+        , CUSTOMER_PAYER_HK
+        , CUSTOMER_PAYER_BK
+        , CUSTOMER_SHIPTO_HK
+        , CUSTOMER_SHIPTO_BK
+        , CUSTOMER_SOLDTO_HK
+        , CUSTOMER_SOLDTO_BK
+        , DISTRIBUTION_CHANNEL_HK
+        , DISTRIBUTION_CHANNEL_BK
+        , DIVISION_HK
+        , DIVISION_BK
+        , ITEM_HK
+        , ITEM_BK
+        , ORDER_HEADER_HK
+        , ORDER_HEADER_BK
+        , ORDER_LINE_HK
+        , ORDER_LINE_BK
+        , PLANT_HK
+        , PLANT_BK
+        , SALES_ORGANIZATION_HK
+        , SALES_ORGANIZATION_BK
+        , ORDER_TYPE
+        , QUANTITY_ORDERED
+        , SOLD_UNIT_OF_MEASURE
+        , NET_VALUE_AMOUNT
+        , TAX_AMOUNT
+        , CANCELLED_REASON
+        , ORDER_DATE__YYYYMMDD
+        , CREATION_DATE__YYYYMMDD
+        , REQUESTED_SHIP_DATE__YYYYMMDD
+        , MATERIAL_GROUP
+FROM JOIN_RESULT

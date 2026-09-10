@@ -1,0 +1,54 @@
+version: 2
+models:
+  - name: sat_cbsa__snfl_usps
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          config:
+            severity: warn
+          arguments:
+            combination_of_columns:
+              - CBSA_CODE
+              - FIPS_STATE_CODE
+              - FIPS_COUNTY_CODE
+              - LOAD_DTS
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - CBSA_CODE
+              - FIPS_STATE_CODE
+              - FIPS_COUNTY_CODE
+              - LOAD_DTS
+    columns:
+      - name: CBSA_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+          - dbt_utils.relationships_where:
+              arguments:
+                to: ref( 'hub_cbsa' )
+                field: CBSA_HK
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'hub_cbsa' )
+                pk_column_name: CBSA_HK
+      - name: CBSA_CODE
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: FIPS_STATE_CODE
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: FIPS_COUNTY_CODE
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: LOAD_DTS
+        tests:
+          - not_null:
+              config:
+                severity: warn

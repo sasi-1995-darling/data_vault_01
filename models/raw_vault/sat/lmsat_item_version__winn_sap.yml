@@ -1,0 +1,26 @@
+version: 2
+models:
+  - name: lmsat_item_version__winn_sap
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - PLANT_ITEM_HK
+              - STLAN
+              - STLAL
+              - VERID
+              - LOAD_DTS
+    columns:
+      - name: PLANT_ITEM_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+          - dbt_utils.relationships_where:
+              arguments:
+                to: ref( 'link_plant_item_v1' )
+                field: PLANT_ITEM_HK
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'link_plant_item_v1' )
+                pk_column_name: PLANT_ITEM_HK

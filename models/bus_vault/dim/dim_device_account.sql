@@ -1,0 +1,68 @@
+---- SRC LAYER ----
+WITH
+SRC_PDA            as ( SELECT ACCOUNT_ID, ACCOUNT_NAME, ACCOUNT_TYPE, ACCOUNT_TYPE_V2, BKCC, DEVICE_ACCOUNT_BK, FIVETRAN_DELETED, FIVETRAN_SYNCED, GROUP_ID, OWNER_USER_ID, REC_SRC FROM {{ ref('pit_device_account') }} as SRC  )
+
+/*
+SRC_PDA            as ( SELECT * FROM BUS_VAULT.PIT_DEVICE_ACCOUNT )
+*/
+---- LOGIC LAYER ----
+
+, LOGIC_PDA as (
+    SELECT
+        DEVICE_ACCOUNT_BK
+      , BKCC
+      , REC_SRC
+      , ACCOUNT_ID
+      , FIVETRAN_SYNCED
+      , OWNER_USER_ID
+      , FIVETRAN_DELETED
+      , GROUP_ID
+      , ACCOUNT_TYPE
+      , ACCOUNT_TYPE_V2
+      , ACCOUNT_NAME
+    FROM SRC_PDA
+)
+---- RENAME LAYER ----
+
+, RENAME_PDA as (
+    SELECT
+        DEVICE_ACCOUNT_BK
+      , BKCC
+      , REC_SRC
+      , ACCOUNT_ID
+      , FIVETRAN_SYNCED
+      , OWNER_USER_ID
+      , FIVETRAN_DELETED
+      , GROUP_ID
+      , ACCOUNT_TYPE
+      , ACCOUNT_TYPE_V2
+      , ACCOUNT_NAME
+    FROM LOGIC_PDA
+)
+---- FILTER LAYER ----
+
+, FILTER_PDA as (
+    SELECT *
+    FROM RENAME_PDA
+)
+
+---- JOIN LAYER ----
+, JOIN_RESULT as (
+    SELECT *
+    FROM FILTER_PDA
+)
+
+---- FINAL LAYER ----
+SELECT
+          DEVICE_ACCOUNT_BK
+        , BKCC
+        , REC_SRC
+        , ACCOUNT_ID
+        , FIVETRAN_SYNCED
+        , OWNER_USER_ID
+        , FIVETRAN_DELETED
+        , GROUP_ID
+        , ACCOUNT_TYPE
+        , ACCOUNT_TYPE_V2
+        , ACCOUNT_NAME
+FROM JOIN_RESULT

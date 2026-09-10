@@ -1,0 +1,155 @@
+name: PR Schema Cleanup
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [main]
+
+concurrency:
+  group: pr-cleanup-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+jobs:
+  cleanup-qa-schemas:
+    # ── Only run cleanup if the PR reached the QA step ──────────────────
+    # The deploy-to-qa job adds a 'qa' label to the PR. If the PR never
+    # reached QA (test-only, config-only, CI/CD changes), no QA PR schema
+    # was created, so there's nothing to clean up. This avoids wasting a
+    # dbt Cloud job run on PRs that were merged directly after review.
+    # Note: This workflow only triggers on pull_request types: [closed],
+    # so the state is always 'closed' — no need to check it explicitly.
+    # ────────────────────────────────────────────────────────────────────
+    if: contains(github.event.pull_request.labels.*.name, 'qa')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Log PR Closure
+        env:
+          # untrusted input — via env to prevent script injection (CWE-78)
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_MERGED: ${{ github.event.pull_request.merged }}
+          PR_CLOSED_AT: ${{ github.event.pull_request.closed_at }}
+        run: |
+          echo "=========================================="
+          echo "PR Schema Cleanup Triggered"
+          echo "=========================================="
+          echo "PR #${PR_NUMBER}"
+          echo "Title: ${PR_TITLE}"
+          echo "Merged: ${PR_MERGED}"
+          echo "Closed at: ${PR_CLOSED_AT}"
+          echo "=========================================="
+
+      - name: Cleanup PR Schemas via dbt Cloud
+        env:
+          # untrusted input + secret — via env to keep them out of the rendered shell (CWE-78)
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          DBT_SVC_TOKEN: ${{ secrets.DBT_SVC_TOKEN }}
+        run: |
+          JOB_ID="786808"
+
+          echo "Starting cleanup for PR #${PR_NUMBER}"
+          echo "Schema pattern: dbt_cloud_pr_${JOB_ID}_${PR_NUMBER}%"
+          echo ""
+
+          # Trigger cleanup job
+          RESPONSE=$(curl -s --request POST \
+            --url "https://cloud.getdbt.com/api/v2/accounts/173296/jobs/${JOB_ID}/run/" \
+            --header "Accept: application/json" \
+            --header "Authorization: Token ${DBT_SVC_TOKEN}" \
+            --header "Content-Type: application/json" \
+            --data "{
+              \"cause\": \"Cleanup PR ${PR_NUMBER} schemas\",
+              \"steps_override\": [\"dbt run-operation cleanup_pr_schemas --args '{\\\"job_id\\\": \\\"${JOB_ID}\\\", \\\"pr_number\\\": \\\"${PR_NUMBER}\\\", \\\"dry_run\\\": false}'\"],
+              \"target_name\": \"qa\"
+            }")
+
+          echo "API Response:"
+          echo "$RESPONSE" | jq '.'
+          echo ""
+
+          # Check if job was triggered successfully
+          SUCCESS=$(echo "$RESPONSE" | jq -r '.status.is_success // false')
+          if [ "$SUCCESS" != "true" ]; then
+            echo "❌ Failed to trigger cleanup job"
+            ERROR_MSG=$(echo "$RESPONSE" | jq -r '.status.user_message // "Unknown error"')
+            echo "Error: $ERROR_MSG"
+            exit 1
+          fi
+
+          RUN_ID=$(echo "$RESPONSE" | jq -r '.data.id')
+          echo "✅ Cleanup job triggered"
+          echo "Run ID: $RUN_ID"
+          echo "URL: https://kl673.us1.dbt.com/deploy/173296/projects/343806/runs/$RUN_ID/"
+          echo ""
+
+          # ========================================
+          # CRITICAL: Poll for completion
+          # ========================================
+          echo "Polling for job completion..."
+          MAX_WAIT=300  # 5 minutes
+          ELAPSED=0
+          SLEEP=10
+
+          while [ $ELAPSED -lt $MAX_WAIT ]; do
+            sleep $SLEEP
+            ELAPSED=$((ELAPSED + SLEEP))
+            
+            # Check job status
+            STATUS_RESPONSE=$(curl -s --request GET \
+              --url "https://cloud.getdbt.com/api/v2/accounts/173296/runs/$RUN_ID/" \
+              --header "Authorization: Token ${DBT_SVC_TOKEN}" \
+              --header "Content-Type: application/json")
+            
+            STATUS_CODE=$(echo "$STATUS_RESPONSE" | jq -r '.data.status')
+            STATUS_HUMANIZED=$(echo "$STATUS_RESPONSE" | jq -r '.data.status_humanized')
+            
+            echo "[${ELAPSED}s] Status: $STATUS_HUMANIZED (code: $STATUS_CODE)"
+            
+            # Check for terminal states
+            if [ "$STATUS_CODE" = "10" ]; then
+              # Success
+              echo ""
+              echo "=========================================="
+              echo "✅ Cleanup completed successfully"
+              echo "=========================================="
+              echo "Duration: ${ELAPSED} seconds"
+              echo "Run URL: https://kl673.us1.dbt.com/deploy/173296/projects/343806/runs/$RUN_ID/"
+              echo ""
+              echo "Check dbt Cloud logs to verify schemas were dropped."
+              exit 0
+            elif [ "$STATUS_CODE" = "20" ]; then
+              # Error
+              echo ""
+              echo "=========================================="
+              echo "❌ Cleanup job FAILED"
+              echo "=========================================="
+              echo "Status: $STATUS_HUMANIZED"
+              echo "Run URL: https://kl673.us1.dbt.com/deploy/173296/projects/343806/runs/$RUN_ID/"
+              echo ""
+              echo "⚠️  MANUAL CLEANUP REQUIRED for PR #${PR_NUMBER}"
+              echo "Schema pattern: dbt_cloud_pr_${JOB_ID}_${PR_NUMBER}%"
+              exit 1
+            elif [ "$STATUS_CODE" = "30" ]; then
+              # Cancelled
+              echo ""
+              echo "=========================================="
+              echo "⚠️  Cleanup job was CANCELLED"
+              echo "=========================================="
+              echo "Run URL: https://kl673.us1.dbt.com/deploy/173296/projects/343806/runs/$RUN_ID/"
+              echo ""
+              echo "⚠️  MANUAL CLEANUP REQUIRED for PR #${PR_NUMBER}"
+              exit 1
+            fi
+          done
+
+          # Timeout
+          echo ""
+          echo "=========================================="
+          echo "⏱️  Timeout after ${MAX_WAIT} seconds"
+          echo "=========================================="
+          echo "Job may still be running. Check status:"
+          echo "https://kl673.us1.dbt.com/deploy/173296/projects/343806/runs/$RUN_ID/"
+          echo ""
+          echo "If job completes successfully, schemas will be cleaned."
+          echo "Otherwise, manual cleanup may be required."
+          exit 1

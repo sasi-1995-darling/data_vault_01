@@ -1,0 +1,13 @@
+version: 2
+
+models:
+  - name: dim_customer
+    description: Sales dimension for customers
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - dim_customer_pk
+    config:
+      tags:
+        - emtek

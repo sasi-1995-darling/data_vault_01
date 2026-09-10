@@ -1,0 +1,11 @@
+version: 2
+models:
+- name: ref_special_stock_indicator__winn_sap
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - LANGUAGE_KEY
+        - SPECIAL_STOCK_INDICATOR_CODE
+        - LOAD_DTS
+  columns: []

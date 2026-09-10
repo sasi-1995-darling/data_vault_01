@@ -1,0 +1,14 @@
+version: 2
+
+models:
+  - name: ref_luxury_hardware__emtk_files
+    description: This is the reference table for Emtek luxury hardware products - additional attributes for sales forcasting
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - part_number
+    config:
+      tags:
+        - emtek
+        - files

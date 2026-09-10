@@ -1,0 +1,16 @@
+version: 2
+models:
+  - name: sat_brand__profitero
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - BRAND_HK
+              - ID
+              - LOAD_DTS
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          config:
+            severity: warn
+          arguments:
+            min_value: 4
+    columns: []

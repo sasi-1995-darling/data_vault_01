@@ -1,0 +1,19 @@
+version: 2
+models:
+  - name: lnk_supplier_purchasing_item
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - SUPPLIER_PURCHASING_ITEM_HK
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          config:
+            severity: warn
+          arguments:
+            min_value: 4
+    columns:
+      - name: SUPPLIER_PURCHASING_ITEM_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn

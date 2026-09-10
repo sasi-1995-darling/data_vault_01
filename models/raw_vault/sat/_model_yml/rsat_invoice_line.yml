@@ -1,0 +1,9 @@
+version: 2
+
+models:
+  - name: rsat_invoice_line
+    description: This table tracks deletes and updates for the business key per record source in hub invoice line. It currently only tracks emtk_ebs
+    config:
+      tags:
+        - emtek
+        - ebs

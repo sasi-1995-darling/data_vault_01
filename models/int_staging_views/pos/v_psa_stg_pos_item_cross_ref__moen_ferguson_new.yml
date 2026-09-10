@@ -1,0 +1,31 @@
+version: 2
+models:
+  - name: v_psa_stg_pos_item_cross_ref__moen_ferguson_new
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          config:
+            severity: warn
+          arguments:
+            combination_of_columns:
+              - _FILE
+              - _LINE
+              - FEI_PRODUCT_CODE
+              - SAP_MATERIAL_NUMBER
+              - SAP_ACCOUNT_NUMBER
+              - LOAD_DTS
+    columns:
+      - name: _FILE
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: FEI_PRODUCT_CODE
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: LOAD_DTS
+        tests:
+          - not_null:
+              config:
+                severity: warn

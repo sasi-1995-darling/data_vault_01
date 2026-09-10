@@ -1,0 +1,21 @@
+version: 2
+models:
+  - name: pb_pos_main_weekly__datavations
+    description: >
+      PIT Bridge table (materialized as table) for Datavations weekly POS data.
+      Grain: COMPETITIVE_PRODUCT_HK + RETAILER_HK + REPORTING_PERIOD + REGION + STATE + LOWES_REGION + HOMEDEPOT_REGION.
+      Deduplicated to the latest LOAD_DTS per grain using QUALIFY.
+      Numeric measures are cast to NUMBER in the LOGIC layer.
+    data_tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - COMPETITIVE_PRODUCT_HK
+              - RETAILER_HK
+              - REPORTING_PERIOD
+              - REGION
+              - STATE
+              - LOWES_REGION
+              - HOMEDEPOT_REGION
+    columns: []
+

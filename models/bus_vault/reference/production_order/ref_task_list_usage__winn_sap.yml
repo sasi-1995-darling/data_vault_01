@@ -1,0 +1,11 @@
+version: 2
+models:
+- name: ref_task_list_usage__winn_sap
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - TASK_LIST_USAGE
+        - LANGUAGE_KEY
+        - LOAD_DTS
+  columns: []

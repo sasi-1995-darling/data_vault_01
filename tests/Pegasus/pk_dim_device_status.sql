@@ -1,0 +1,1 @@
+select * from ({{ primary_key_check('dim_device_status',['PAIRED_DEVICE_BK','DEVICE_BK','BKCC','REC_SRC']) }}) 

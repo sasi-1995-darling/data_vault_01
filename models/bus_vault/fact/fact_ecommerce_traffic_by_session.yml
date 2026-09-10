@@ -1,0 +1,12 @@
+version: 2
+models:
+- name: fact_ecommerce_traffic_by_session
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - ECOMMERCE_ACCOUNT_HK
+        - ECOMMERCE_PROPERTY_HK
+        - SESSION_CHANNEL_GROUP
+        - SESSION_DATE__YYYYMMDD
+  columns: []

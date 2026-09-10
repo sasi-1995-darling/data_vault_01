@@ -1,0 +1,13 @@
+version: 2
+models:
+  - name: v_psa_stg_pos_cross_ref__amazon_tmlc_ss_latest
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          config:
+            severity: warn
+          arguments:
+            combination_of_columns:
+              - CUSTOMER_SKU_HK
+              - BASE_MATERIAL_HK
+              - LOAD_DTS
+    columns: []

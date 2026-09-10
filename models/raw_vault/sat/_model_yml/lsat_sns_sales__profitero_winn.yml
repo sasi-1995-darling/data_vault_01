@@ -1,0 +1,46 @@
+version: 2
+models:
+  - name: lsat_sns_sales__profitero_winn
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - ASIN_HK
+              - SNS_CATEGORY_HK
+              - DATE
+              - LOAD_DTS
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          config:
+            severity: warn
+          arguments:
+            min_value: 4
+    columns:
+      - name: ASIN_SNS_CATEGORY_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'lnk_asin_sns_categories' )
+                pk_column_name: ASIN_SNS_CATEGORY_HK
+      - name: SNS_CATEGORY_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: ASIN_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: DATE
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: LOAD_DTS
+        tests:
+          - not_null:
+              config:
+                severity: warn

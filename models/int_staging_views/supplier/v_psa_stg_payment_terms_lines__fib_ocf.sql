@@ -1,0 +1,273 @@
+---- SRC LAYER ----
+WITH
+SRC_S              as ( SELECT ATTRIBUTE_1, ATTRIBUTE_10, ATTRIBUTE_11, ATTRIBUTE_12, ATTRIBUTE_13, ATTRIBUTE_14, ATTRIBUTE_15, ATTRIBUTE_2, ATTRIBUTE_3, ATTRIBUTE_4, ATTRIBUTE_5, ATTRIBUTE_6, ATTRIBUTE_7, ATTRIBUTE_8, ATTRIBUTE_9, ATTRIBUTE_CATEGORY, CALENDAR, CREATED_BY, CREATION_DATE, DISCOUNT_DAYS, DISCOUNT_DAYS_2, DISCOUNT_DAYS_3, DISCOUNT_DAY_OF_MONTH, DISCOUNT_DAY_OF_MONTH_2, DISCOUNT_DAY_OF_MONTH_3, DISCOUNT_MONTHS_FORWARD, DISCOUNT_MONTHS_FORWARD_2, DISCOUNT_MONTHS_FORWARD_3, DISCOUNT_PERCENT, DISCOUNT_PERCENT_2, DISCOUNT_PERCENT_3, DUE_AMOUNT, DUE_DAYS, DUE_DAY_OF_MONTH, DUE_MONTHS_FORWARD, DUE_PERCENT, FIXED_DATE, LAST_UPDATED_BY, LAST_UPDATE_DATE, LAST_UPDATE_LOGIN, OBJECT_VERSION_NUMBER, ORA_SEED_SET_1, ORA_SEED_SET_2, PSA_DELETE_IND, PSA_LOAD_DTS, PSA_RECORD_SOURCE, SEED_DATA_SOURCE, SEQUENCE_NUM, TERM_ID, _FIVETRAN_DELETED, _FIVETRAN_SYNCED FROM {{ source('outd_ocf_ap', 'ap_terms_lines') }} as SRC  ),
+SRC_A              as ( SELECT BKCC, REC_SRC FROM {{ ref('ref_business_key_collision') }} as SRC  )
+
+/*
+SRC_S              as ( SELECT * FROM outd_ocf_ap.AP_TERMS_LINES )
+SRC_A              as ( SELECT * FROM raw_vault.ref_business_key_collision )
+*/
+---- LOGIC LAYER ----
+
+, LOGIC_S as (
+    SELECT
+        TERM_ID::TEXT                                                as                                    PAYMENT_TERM_BK
+      , TERM_ID
+      , SEQUENCE_NUM
+      , LAST_UPDATE_DATE
+      , LAST_UPDATED_BY
+      , CREATION_DATE
+      , DISCOUNT_DAYS_3
+      , DISCOUNT_DAY_OF_MONTH_3
+      , DISCOUNT_MONTHS_FORWARD_3
+      , ATTRIBUTE_CATEGORY
+      , DISCOUNT_PERCENT_3
+      , ATTRIBUTE_12
+      , ATTRIBUTE_13
+      , ATTRIBUTE_14
+      , ATTRIBUTE_7
+      , ATTRIBUTE_8
+      , ATTRIBUTE_9
+      , ATTRIBUTE_10
+      , ATTRIBUTE_11
+      , DISCOUNT_DAYS
+      , DISCOUNT_DAY_OF_MONTH
+      , DISCOUNT_MONTHS_FORWARD
+      , DUE_DAY_OF_MONTH
+      , DISCOUNT_PERCENT
+      , DUE_MONTHS_FORWARD
+      , DUE_AMOUNT
+      , DUE_DAYS
+      , DISCOUNT_PERCENT_2
+      , DISCOUNT_DAYS_2
+      , DISCOUNT_DAY_OF_MONTH_2
+      , ORA_SEED_SET_1
+      , ORA_SEED_SET_2
+      , ATTRIBUTE_1
+      , ATTRIBUTE_2
+      , CREATED_BY
+      , LAST_UPDATE_LOGIN
+      , DUE_PERCENT
+      , DISCOUNT_MONTHS_FORWARD_2
+      , ATTRIBUTE_3
+      , ATTRIBUTE_4
+      , ATTRIBUTE_5
+      , ATTRIBUTE_6
+      , SEED_DATA_SOURCE
+      , FIXED_DATE
+      , CALENDAR
+      , OBJECT_VERSION_NUMBER
+      , ATTRIBUTE_15
+      , _FIVETRAN_DELETED
+      , _FIVETRAN_SYNCED
+      , PSA_LOAD_DTS
+      , PSA_RECORD_SOURCE
+      , PSA_DELETE_IND
+      , CONVERT_TIMEZONE('UTC', _FIVETRAN_SYNCED)                    as                                           LOAD_DTS
+    FROM SRC_S
+)
+
+, LOGIC_A as (
+    SELECT
+        BKCC
+      , REC_SRC
+    FROM SRC_A
+)
+---- RENAME LAYER ----
+
+, RENAME_S as (
+    SELECT
+        PAYMENT_TERM_BK
+      , TERM_ID
+      , SEQUENCE_NUM
+      , LAST_UPDATE_DATE
+      , LAST_UPDATED_BY
+      , CREATION_DATE
+      , DISCOUNT_DAYS_3
+      , DISCOUNT_DAY_OF_MONTH_3
+      , DISCOUNT_MONTHS_FORWARD_3
+      , ATTRIBUTE_CATEGORY
+      , DISCOUNT_PERCENT_3
+      , ATTRIBUTE_12
+      , ATTRIBUTE_13
+      , ATTRIBUTE_14
+      , ATTRIBUTE_7
+      , ATTRIBUTE_8
+      , ATTRIBUTE_9
+      , ATTRIBUTE_10
+      , ATTRIBUTE_11
+      , DISCOUNT_DAYS
+      , DISCOUNT_DAY_OF_MONTH
+      , DISCOUNT_MONTHS_FORWARD
+      , DUE_DAY_OF_MONTH
+      , DISCOUNT_PERCENT
+      , DUE_MONTHS_FORWARD
+      , DUE_AMOUNT
+      , DUE_DAYS
+      , DISCOUNT_PERCENT_2
+      , DISCOUNT_DAYS_2
+      , DISCOUNT_DAY_OF_MONTH_2
+      , ORA_SEED_SET_1
+      , ORA_SEED_SET_2
+      , ATTRIBUTE_1
+      , ATTRIBUTE_2
+      , CREATED_BY
+      , LAST_UPDATE_LOGIN
+      , DUE_PERCENT
+      , DISCOUNT_MONTHS_FORWARD_2
+      , ATTRIBUTE_3
+      , ATTRIBUTE_4
+      , ATTRIBUTE_5
+      , ATTRIBUTE_6
+      , SEED_DATA_SOURCE
+      , FIXED_DATE
+      , CALENDAR
+      , OBJECT_VERSION_NUMBER
+      , ATTRIBUTE_15
+      , _FIVETRAN_DELETED
+      , _FIVETRAN_SYNCED
+      , PSA_LOAD_DTS
+      , PSA_RECORD_SOURCE
+      , PSA_DELETE_IND
+      , LOAD_DTS
+    FROM LOGIC_S
+)
+
+, RENAME_A as (
+    SELECT
+        BKCC
+      , REC_SRC
+    FROM LOGIC_A
+)
+---- FILTER LAYER ----
+
+, FILTER_S as (
+    SELECT *
+    FROM RENAME_S
+)
+
+, FILTER_A as (
+    SELECT *
+    FROM RENAME_A
+    WHERE rec_src = 'USCLOUD.ORCL.OCFPRD.AP_TERMS_LINES'
+)
+
+---- JOIN LAYER ----
+, JOIN_RESULT as (
+    SELECT *
+    FROM FILTER_S
+    INNER JOIN FILTER_A
+        ON '1' = '1'
+)
+
+---- FINAL LAYER ----
+SELECT
+          PAYMENT_TERM_BK
+        , TERM_ID
+        , SEQUENCE_NUM
+        , LAST_UPDATE_DATE
+        , LAST_UPDATED_BY
+        , CREATION_DATE
+        , DISCOUNT_DAYS_3
+        , DISCOUNT_DAY_OF_MONTH_3
+        , DISCOUNT_MONTHS_FORWARD_3
+        , ATTRIBUTE_CATEGORY
+        , DISCOUNT_PERCENT_3
+        , ATTRIBUTE_12
+        , ATTRIBUTE_13
+        , ATTRIBUTE_14
+        , ATTRIBUTE_7
+        , ATTRIBUTE_8
+        , ATTRIBUTE_9
+        , ATTRIBUTE_10
+        , ATTRIBUTE_11
+        , DISCOUNT_DAYS
+        , DISCOUNT_DAY_OF_MONTH
+        , DISCOUNT_MONTHS_FORWARD
+        , DUE_DAY_OF_MONTH
+        , DISCOUNT_PERCENT
+        , DUE_MONTHS_FORWARD
+        , DUE_AMOUNT
+        , DUE_DAYS
+        , DISCOUNT_PERCENT_2
+        , DISCOUNT_DAYS_2
+        , DISCOUNT_DAY_OF_MONTH_2
+        , ORA_SEED_SET_1
+        , ORA_SEED_SET_2
+        , ATTRIBUTE_1
+        , ATTRIBUTE_2
+        , CREATED_BY
+        , LAST_UPDATE_LOGIN
+        , DUE_PERCENT
+        , DISCOUNT_MONTHS_FORWARD_2
+        , ATTRIBUTE_3
+        , ATTRIBUTE_4
+        , ATTRIBUTE_5
+        , ATTRIBUTE_6
+        , SEED_DATA_SOURCE
+        , FIXED_DATE
+        , CALENDAR
+        , OBJECT_VERSION_NUMBER
+        , ATTRIBUTE_15
+        , _FIVETRAN_DELETED
+        , _FIVETRAN_SYNCED
+        , PSA_LOAD_DTS
+        , PSA_RECORD_SOURCE
+        , PSA_DELETE_IND
+        , LOAD_DTS
+        , BKCC
+        , REC_SRC
+        , MD5_BINARY(UPPER(CONCAT_WS('||',
+          COALESCE(NULLIF(TRIM(CAST(TERM_ID as VARCHAR)),''), '^^')
+        , COALESCE(NULLIF(TRIM(CAST(BKCC as VARCHAR)),''), '^^')
+        ))) as PAYMENT_TERM_HK
+        , MD5_BINARY(UPPER(NULLIF(CONCAT(
+              IFNULL(TRIM(SEQUENCE_NUM::text), '^^') 
+            , '||', IFNULL(TRIM(LAST_UPDATE_DATE::text), '^^') 
+            , '||', IFNULL(TRIM(LAST_UPDATED_BY::text), '^^') 
+            , '||', IFNULL(TRIM(CREATION_DATE::text), '^^') 
+            , '||', IFNULL(TRIM(DISCOUNT_DAYS_3::text), '^^') 
+            , '||', IFNULL(TRIM(DISCOUNT_DAY_OF_MONTH_3::text), '^^') 
+            , '||', IFNULL(TRIM(DISCOUNT_MONTHS_FORWARD_3::text), '^^') 
+            , '||', IFNULL(TRIM(ATTRIBUTE_CATEGORY::text), '^^') 
+            , '||', IFNULL(TRIM(DISCOUNT_PERCENT_3::text), '^^') 
+            , '||', IFNULL(TRIM(ATTRIBUTE_12::text), '^^') 
+            , '||', IFNULL(TRIM(ATTRIBUTE_13::text), '^^') 
+            , '||', IFNULL(TRIM(ATTRIBUTE_14::text), '^^') 
+            , '||', IFNULL(TRIM(ATTRIBUTE_7::text), '^^') 
+            , '||', IFNULL(TRIM(ATTRIBUTE_8::text), '^^') 
+            , '||', IFNULL(TRIM(ATTRIBUTE_9::text), '^^') 
+            , '||', IFNULL(TRIM(ATTRIBUTE_10::text), '^^') 
+            , '||', IFNULL(TRIM(ATTRIBUTE_11::text), '^^') 
+            , '||', IFNULL(TRIM(DISCOUNT_DAYS::text), '^^') 
+            , '||', IFNULL(TRIM(DISCOUNT_DAY_OF_MONTH::text), '^^') 
+            , '||', IFNULL(TRIM(DISCOUNT_MONTHS_FORWARD::text), '^^') 
+            , '||', IFNULL(TRIM(DUE_DAY_OF_MONTH::text), '^^') 
+            , '||', IFNULL(TRIM(DISCOUNT_PERCENT::text), '^^') 
+            , '||', IFNULL(TRIM(DUE_MONTHS_FORWARD::text), '^^') 
+            , '||', IFNULL(TRIM(DUE_AMOUNT::text), '^^') 
+            , '||', IFNULL(TRIM(DUE_DAYS::text), '^^') 
+            , '||', IFNULL(TRIM(DISCOUNT_PERCENT_2::text), '^^') 
+            , '||', IFNULL(TRIM(DISCOUNT_DAYS_2::text), '^^') 
+            , '||', IFNULL(TRIM(DISCOUNT_DAY_OF_MONTH_2::text), '^^') 
+            , '||', IFNULL(TRIM(ORA_SEED_SET_1::text), '^^') 
+            , '||', IFNULL(TRIM(ORA_SEED_SET_2::text), '^^') 
+            , '||', IFNULL(TRIM(ATTRIBUTE_1::text), '^^') 
+            , '||', IFNULL(TRIM(ATTRIBUTE_2::text), '^^') 
+            , '||', IFNULL(TRIM(CREATED_BY::text), '^^') 
+            , '||', IFNULL(TRIM(LAST_UPDATE_LOGIN::text), '^^') 
+            , '||', IFNULL(TRIM(DUE_PERCENT::text), '^^') 
+            , '||', IFNULL(TRIM(DISCOUNT_MONTHS_FORWARD_2::text), '^^') 
+            , '||', IFNULL(TRIM(ATTRIBUTE_3::text), '^^') 
+            , '||', IFNULL(TRIM(ATTRIBUTE_4::text), '^^') 
+            , '||', IFNULL(TRIM(ATTRIBUTE_5::text), '^^') 
+            , '||', IFNULL(TRIM(ATTRIBUTE_6::text), '^^') 
+            , '||', IFNULL(TRIM(SEED_DATA_SOURCE::text), '^^') 
+            , '||', IFNULL(TRIM(FIXED_DATE::text), '^^') 
+            , '||', IFNULL(TRIM(CALENDAR::text), '^^') 
+            , '||', IFNULL(TRIM(OBJECT_VERSION_NUMBER::text), '^^') 
+            , '||', IFNULL(TRIM(ATTRIBUTE_15::text), '^^') 
+            , '||', IFNULL(TRIM(_FIVETRAN_DELETED::text), '^^') 
+            , '||', IFNULL(TRIM(PSA_DELETE_IND::text), '^^') 
+        ), '^^||^^')))  as HASHDIFF
+FROM JOIN_RESULT

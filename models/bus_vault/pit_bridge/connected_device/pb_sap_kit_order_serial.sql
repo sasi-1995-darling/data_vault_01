@@ -1,0 +1,127 @@
+WITH
+oh AS (
+    SELECT MANDT, VBELN, BSTKD, BKCC, REC_SRC
+    FROM {{ ref('sat_order_header_business_data__winn_sap') }}
+    WHERE COALESCE(GLDELFLAG,'') <> 'X'
+      AND COALESCE(PSA_DELETE_IND,'N') = 'N'
+      AND BSTKD IS NOT NULL
+    QUALIFY ROW_NUMBER() OVER (PARTITION BY ORDER_HEADER_HK ORDER BY LOAD_DTS DESC) = 1
+
+    UNION
+
+    SELECT MANDT, VBELN, BSTNK AS BSTKD, BKCC, REC_SRC
+    FROM {{ ref('sat_order_header__winn_sap') }}
+    WHERE COALESCE(GLDELFLAG,'') <> 'X'
+      AND COALESCE(PSA_DELETE_IND,'N') = 'N'
+      AND BSTNK IS NOT NULL
+    QUALIFY ROW_NUMBER() OVER (PARTITION BY ORDER_HEADER_HK ORDER BY LOAD_DTS DESC) = 1
+),
+dl AS (
+    SELECT MANDT, VBELN AS DEL_VBELN, POSNR AS DEL_POSNR, MATNR, VGBEL, VGPOS
+    FROM {{ ref('lsat_delivery_line_detail__winn_sap') }}
+    WHERE COALESCE(GLDELFLAG,'') <> 'X'
+      AND COALESCE(PSA_DELETE_IND,'N') = 'N'
+      AND VGBEL IS NOT NULL
+      AND MATNR IN ('900-002-KIT1','900-006-KIT1')
+    QUALIFY ROW_NUMBER() OVER (PARTITION BY DELIVERY_LINE_DETAIL_LHK ORDER BY LOAD_DTS DESC) = 1
+),
+huc AS (
+    SELECT MANDT, VENUM, VEPOS, VBELN AS DEL_VBELN, POSNR AS DEL_POSNR, MATNR
+    FROM {{ ref('lsat_handling_unit_content__winn_sap') }}
+    WHERE COALESCE(GLDELFLAG,'') <> 'X'
+      AND COALESCE(PSA_DELETE_IND,'N') = 'N'
+    QUALIFY ROW_NUMBER() OVER (PARTITION BY LNK_HANDLING_UNIT_CONTENT_HK ORDER BY LOAD_DTS DESC) = 1
+),
+sa AS (
+    SELECT MANDT, OBKNR, VENUM, VEPOS
+    FROM {{ ref('lsat_serial_number_assignment__winn_sap') }}
+    WHERE COALESCE(GLDELFLAG,'') <> 'X'
+      AND COALESCE(PSA_DELETE_IND,'N') = 'N'
+    QUALIFY ROW_NUMBER() OVER (PARTITION BY LNK_SERIAL_NUMBER_HU_ASSIGNMENT_HK ORDER BY LOAD_DTS DESC) = 1
+),
+ol AS (
+    SELECT MANDT, OBKNR, SERNR, MATNR, EQUNR
+    FROM {{ ref('lsat_object_list_detail__winn_sap') }}
+    WHERE COALESCE(GLDELFLAG,'') <> 'X'
+      AND COALESCE(PSA_DELETE_IND,'N') = 'N'
+      AND TASER = 'SER06'
+      AND SERNR IS NOT NULL
+    QUALIFY ROW_NUMBER() OVER (PARTITION BY LNK_OBJECT_LIST_DETAIL_HK ORDER BY LOAD_DTS DESC) = 1
+),
+msat_zflo AS (
+    SELECT MANDT, VBELN AS DEL_VBELN, SERIALNO AS ZFLO_SERIAL
+    FROM {{ ref('msat_delivery_flo_serial__winn_sap') }}
+    WHERE COALESCE(GLDELFLAG,'') <> 'X'
+      AND COALESCE(PSA_DELETE_IND,'N') = 'N'
+      AND SERIALNO IS NOT NULL
+    QUALIFY ROW_NUMBER() OVER (PARTITION BY DELIVERY_HK, SERIALNO ORDER BY LOAD_DTS DESC) = 1
+),
+serial_lasn AS (
+    SELECT
+        oh.BSTKD,
+        COALESCE(huc.MATNR, dl.MATNR) AS MATNR,
+        ol.SERNR AS SERIALNO,
+        dl.DEL_VBELN AS VBELN,
+        dl.DEL_POSNR AS POSNR,
+        ol.EQUNR,
+        oh.BKCC,
+        oh.REC_SRC,
+        'LASN_OBJK' AS SERIAL_SOURCE_PATH
+    FROM oh
+    JOIN dl
+      ON dl.VGBEL = oh.VBELN
+     AND dl.MANDT = oh.MANDT
+    JOIN huc
+      ON huc.DEL_VBELN = dl.DEL_VBELN
+     AND huc.DEL_POSNR = dl.DEL_POSNR
+     AND huc.MANDT = dl.MANDT
+    JOIN sa
+      ON sa.VENUM = huc.VENUM
+     AND sa.VEPOS = huc.VEPOS
+     AND sa.MANDT = huc.MANDT
+    JOIN ol
+      ON ol.OBKNR = sa.OBKNR
+     AND ol.MANDT = sa.MANDT
+),
+serial_zflo AS (
+    SELECT
+        oh.BSTKD,
+        dl.MATNR,
+        z.ZFLO_SERIAL AS SERIALNO,
+        dl.DEL_VBELN AS VBELN,
+        dl.DEL_POSNR AS POSNR,
+        CAST(NULL AS VARCHAR) AS EQUNR,
+        oh.BKCC,
+        oh.REC_SRC,
+        'ZFLO' AS SERIAL_SOURCE_PATH
+    FROM oh
+    JOIN dl
+      ON dl.VGBEL = oh.VBELN
+     AND dl.MANDT = oh.MANDT
+    JOIN msat_zflo z
+      ON z.DEL_VBELN = dl.DEL_VBELN
+     AND z.MANDT = dl.MANDT
+),
+unioned AS (
+    SELECT * FROM serial_lasn
+    UNION ALL
+    SELECT * FROM serial_zflo
+)
+
+SELECT
+    ROW_NUMBER() OVER (ORDER BY 1)             AS SEQ_ID,
+    CURRENT_DATE                               AS SNAPSHOTDATE,
+    CONVERT_TIMEZONE('UTC', CURRENT_TIMESTAMP) AS PB_LOAD_DTS,
+    BSTKD, MATNR, SERIALNO,
+    BKCC, REC_SRC,
+    VBELN, POSNR, EQUNR,
+    SERIAL_SOURCE_PATH
+FROM unioned
+QUALIFY ROW_NUMBER() OVER (
+    PARTITION BY BSTKD, MATNR, SERIALNO
+    ORDER BY CASE SERIAL_SOURCE_PATH
+        WHEN 'LASN_OBJK' THEN 1
+        WHEN 'ZFLO' THEN 2
+        ELSE 9
+    END
+) = 1

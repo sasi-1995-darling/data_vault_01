@@ -1,0 +1,24 @@
+models:
+  - name: lsat_purchasing_record_details__winn_sap
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - PURCHASING_RECORD_DETAILS_HK
+              - LOAD_DTS
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          config:
+            severity: warn
+          arguments:
+            min_value: 4
+    columns:
+      - name: PURCHASING_RECORD_DETAILS_HK
+        tests:
+          - dbt_utils.relationships_where:
+              arguments:
+                to: ref( 'lnk_purchasing_record_details' )
+                field: PURCHASING_RECORD_DETAILS_HK
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'lnk_purchasing_record_details' )
+                pk_column_name: PURCHASING_RECORD_DETAILS_HK

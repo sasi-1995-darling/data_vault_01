@@ -1,0 +1,410 @@
+WITH
+o AS (
+    SELECT
+        ORDER_TAG,
+        SHOPIFY_NUMERIC_ID,
+        ORDER_ID,
+        ORDER_DATE,
+        ORDER_FIRST_NAME,
+        ORDER_LAST_NAME,
+        ORDER_EMAIL,
+        ORDER_PHONE,
+        ORDER_ADDRESS_1,
+        ORDER_ADDRESS_2,
+        ORDER_CITY,
+        ORDER_STATE,
+        ORDER_POSTCODE,
+        ORDER_POSTCODE_ADD_ON,
+        ORDER_STATUS,
+        ORDER_QUANTITY,
+        RETURN_QUANTITY,
+        ORDER_VALUE,
+        DISCOUNT_VALUE,
+        DISCOUNT_CODE,
+        ACTUAL_DELIVERY_DATE,
+        SKU,
+        VALVE_SIZE,
+        LASTMODIFIED,
+        INSTALLATION_FLAG,
+        SUBSCRIPTION_FLAG,
+        AFFIRM_FLAG,
+        PARTNER_CODE,
+        PARTNER_NUMBER,
+        UTILITY_ACCOUNT_NUMBER,
+        INSTALLATION_ADDRESS_LINE1,
+        INSTALLATION_ADDRESS_LINE2,
+        INSTALLATION_CITY,
+        INSTALLATION_STATE,
+        INSTALLATION_ZIP,
+        ORDER_LINE_ID,
+        BKCC,
+        REC_SRC
+    FROM {{ ref('pb_insurance_candidate_orders') }}
+),
+sap_serial AS (
+    SELECT
+        BSTKD,
+        MATNR,
+        SERIALNO,
+        VBELN AS SAP_DELIVERY_VBELN,
+        EQUNR
+    FROM {{ ref('pb_sap_kit_order_serial') }}
+),
+flo_dev AS (
+    SELECT
+        DEVICE_ID,
+        SERIAL_NUMBER,
+        USER_ID,
+        FIRSTNAME,
+        LASTNAME,
+        EMAIL,
+        PHONE_MOBILE,
+        ADDRESS,
+        CITY,
+        STATE,
+        POSTALCODE,
+        MOEN_INSTALL_ACTIVE_DATE,
+        PAIRED_DATE,
+        IS_PAIRED,
+        LAST_ONLINE_DATE,
+        WATER_USAGE_LAST_MONTH
+    FROM {{ ref('pit_flo_device') }}
+),
+install AS (
+    SELECT
+        ORDER_ID,
+        PRODUCT_INSTALLED,
+        INSTALL_DATE,
+        VENDOR_ID,
+        VENDOR_NAME,
+        INSTALL_SOURCE_PATH
+    FROM {{ ref('pb_order_install_resolved') }}
+),
+email_map AS (
+    SELECT
+        ORDER_ID,
+        ORDER_EMAIL,
+        MAC_ID,
+        SERIAL_ID
+    FROM {{ source('reference', 'flo_shopify_email_serial_device_id_map') }}
+    QUALIFY ROW_NUMBER() OVER (PARTITION BY ORDER_ID, COALESCE(ORDER_EMAIL, '') ORDER BY _MODIFIED DESC) = 1
+),
+
+frontdoor_override AS (
+    SELECT
+        ORDER_ID,
+        MAX(CASE WHEN INSTALL_SOURCE_PATH = 'FRONTDOOR_CROSSREF' THEN INSTALL_DATE END) AS FRONTDOOR_INSTALL_DATE,
+        BOOLOR_AGG(INSTALL_SOURCE_PATH = 'FRONTDOOR_NULL') AS HAS_FRONTDOOR_NULL_FLAG
+    FROM install
+    WHERE INSTALL_SOURCE_PATH IN ('FRONTDOOR_CROSSREF', 'FRONTDOOR_NULL')
+    GROUP BY ORDER_ID
+),
+sap_installer AS (
+    SELECT
+        ORDER_ID,
+        PRODUCT_INSTALLED,
+        MAX(INSTALL_DATE) AS SAP_INSTALL_DATE,
+        MAX(VENDOR_ID) AS VENDOR_ID,
+        MAX(VENDOR_NAME) AS VENDOR_NAME
+    FROM install
+    WHERE INSTALL_SOURCE_PATH = 'SAP_INSTALLER'
+    GROUP BY ORDER_ID, PRODUCT_INSTALLED
+),
+xref_installer AS (
+    SELECT
+        ORDER_ID,
+        MAX(SAP_INSTALL_DATE) AS SAP_INSTALL_DATE,
+        MAX(VENDOR_ID) AS VENDOR_ID,
+        MAX(VENDOR_NAME) AS VENDOR_NAME
+    FROM sap_installer
+    GROUP BY ORDER_ID
+),
+sap_path AS (
+    SELECT
+        o.*,
+        s.SERIALNO AS SERIAL_ID,
+        f.DEVICE_ID,
+        f.USER_ID,
+        f.FIRSTNAME,
+        f.LASTNAME,
+        f.EMAIL,
+        f.PHONE_MOBILE,
+        f.ADDRESS,
+        f.CITY,
+        f.STATE,
+        f.POSTALCODE,
+        f.MOEN_INSTALL_ACTIVE_DATE,
+        f.PAIRED_DATE,
+        f.IS_PAIRED,
+        f.LAST_ONLINE_DATE,
+        f.WATER_USAGE_LAST_MONTH,
+        si.VENDOR_ID,
+        si.VENDOR_NAME,
+        COALESCE(fo.FRONTDOOR_INSTALL_DATE, si.SAP_INSTALL_DATE) AS VENDOR_INSTALL_DATE,
+        'SAP ECC' AS SRC
+    FROM o
+    LEFT JOIN sap_serial s
+        ON s.BSTKD = o.ORDER_ID
+       AND s.MATNR = o.SKU
+    LEFT JOIN flo_dev f
+        ON UPPER(f.SERIAL_NUMBER) = UPPER(s.SERIALNO)
+    LEFT JOIN sap_installer si
+        ON si.ORDER_ID = o.ORDER_ID
+       AND si.PRODUCT_INSTALLED = o.SKU
+    LEFT JOIN frontdoor_override fo
+        ON fo.ORDER_ID = o.ORDER_ID
+    WHERE NOT EXISTS (
+        SELECT 1 FROM email_map m
+        WHERE m.ORDER_ID = o.ORDER_ID
+          AND COALESCE(m.ORDER_EMAIL, '') = COALESCE(o.ORDER_EMAIL, '')
+    )
+),
+xref_path AS (
+    SELECT
+        o.*,
+        m.SERIAL_ID,
+        f.DEVICE_ID,
+        f.USER_ID,
+        f.FIRSTNAME,
+        f.LASTNAME,
+        f.EMAIL,
+        f.PHONE_MOBILE,
+        f.ADDRESS,
+        f.CITY,
+        f.STATE,
+        f.POSTALCODE,
+        f.MOEN_INSTALL_ACTIVE_DATE,
+        f.PAIRED_DATE,
+        f.IS_PAIRED,
+        f.LAST_ONLINE_DATE,
+        f.WATER_USAGE_LAST_MONTH,
+        sv.VENDOR_ID,
+        sv.VENDOR_NAME,
+        COALESCE(ipo.FRONTDOOR_INSTALL_DATE, sv.SAP_INSTALL_DATE) AS VENDOR_INSTALL_DATE,
+        'cross-ref' AS SRC
+    FROM o
+    JOIN email_map m
+        ON m.ORDER_ID = o.ORDER_ID
+       AND COALESCE(m.ORDER_EMAIL, '') = COALESCE(o.ORDER_EMAIL, '')
+    LEFT JOIN flo_dev f
+        ON UPPER(f.DEVICE_ID) = UPPER(m.MAC_ID)
+    LEFT JOIN frontdoor_override ipo
+        ON ipo.ORDER_ID = o.ORDER_ID
+    LEFT JOIN xref_installer sv
+        ON sv.ORDER_ID = o.ORDER_ID
+),
+unioned AS (
+    SELECT * FROM sap_path
+    UNION ALL
+    SELECT * FROM xref_path
+),
+
+-- LEGACY-EXACT cancelled/returned-fix
+fixed AS (
+    SELECT
+        ORDER_TAG,
+        SHOPIFY_NUMERIC_ID,
+        ORDER_ID,
+        ORDER_DATE,
+        ORDER_FIRST_NAME,
+        ORDER_LAST_NAME,
+        ORDER_EMAIL,
+        ORDER_PHONE,
+        ORDER_ADDRESS_1,
+        ORDER_ADDRESS_2,
+        ORDER_CITY,
+        ORDER_STATE,
+        ORDER_POSTCODE,
+        ORDER_POSTCODE_ADD_ON,
+        ORDER_STATUS,
+        ORDER_QUANTITY,
+        RETURN_QUANTITY,
+        ORDER_VALUE,
+        DISCOUNT_VALUE,
+        DISCOUNT_CODE,
+        ACTUAL_DELIVERY_DATE,
+        SKU,
+        VALVE_SIZE,
+        LASTMODIFIED,
+        INSTALLATION_FLAG,
+        SUBSCRIPTION_FLAG,
+        AFFIRM_FLAG,
+        PARTNER_CODE,
+        PARTNER_NUMBER,
+        UTILITY_ACCOUNT_NUMBER,
+        INSTALLATION_ADDRESS_LINE1,
+        INSTALLATION_ADDRESS_LINE2,
+        INSTALLATION_CITY,
+        INSTALLATION_STATE,
+        INSTALLATION_ZIP,
+        ORDER_LINE_ID,
+        BKCC,
+        REC_SRC,
+        SERIAL_ID,
+        CAST(NULL AS VARCHAR) AS DEVICE_ID,
+        CAST(NULL AS VARCHAR) AS USER_ID,
+        CAST(NULL AS VARCHAR) AS FIRSTNAME,
+        CAST(NULL AS VARCHAR) AS LASTNAME,
+        CAST(NULL AS VARCHAR) AS EMAIL,
+        CAST(NULL AS VARCHAR) AS PHONE_MOBILE,
+        CAST(NULL AS VARCHAR) AS ADDRESS,
+        CAST(NULL AS VARCHAR) AS CITY,
+        CAST(NULL AS VARCHAR) AS STATE,
+        CAST(NULL AS VARCHAR) AS POSTALCODE,
+        CAST(NULL AS DATE) AS MOEN_INSTALL_ACTIVE_DATE,
+        CAST(NULL AS DATE) AS PAIRED_DATE,
+        CAST(NULL AS BOOLEAN) AS IS_PAIRED,
+        CAST(NULL AS DATE) AS LAST_ONLINE_DATE,
+        CAST(NULL AS BOOLEAN) AS WATER_USAGE_LAST_MONTH,
+        CAST(NULL AS VARCHAR) AS VENDOR_ID,
+        CAST(NULL AS VARCHAR) AS VENDOR_NAME,
+        CAST(NULL AS DATE) AS VENDOR_INSTALL_DATE,
+        SRC
+    FROM unioned
+    WHERE ORDER_STATUS = 'cancelled/returned'
+      AND MOEN_INSTALL_ACTIVE_DATE IS NOT NULL
+      AND TRIM(LOWER(ORDER_EMAIL)) <> TRIM(LOWER(EMAIL))
+),
+fixed_orderids AS (
+    SELECT ORDER_ID
+    FROM fixed
+    GROUP BY ORDER_ID
+),
+all_orders AS (
+    SELECT * FROM fixed
+    UNION ALL
+    SELECT
+        ORDER_TAG,
+        SHOPIFY_NUMERIC_ID,
+        ORDER_ID,
+        ORDER_DATE,
+        ORDER_FIRST_NAME,
+        ORDER_LAST_NAME,
+        ORDER_EMAIL,
+        ORDER_PHONE,
+        ORDER_ADDRESS_1,
+        ORDER_ADDRESS_2,
+        ORDER_CITY,
+        ORDER_STATE,
+        ORDER_POSTCODE,
+        ORDER_POSTCODE_ADD_ON,
+        ORDER_STATUS,
+        ORDER_QUANTITY,
+        RETURN_QUANTITY,
+        ORDER_VALUE,
+        DISCOUNT_VALUE,
+        DISCOUNT_CODE,
+        ACTUAL_DELIVERY_DATE,
+        SKU,
+        VALVE_SIZE,
+        LASTMODIFIED,
+        INSTALLATION_FLAG,
+        SUBSCRIPTION_FLAG,
+        AFFIRM_FLAG,
+        PARTNER_CODE,
+        PARTNER_NUMBER,
+        UTILITY_ACCOUNT_NUMBER,
+        INSTALLATION_ADDRESS_LINE1,
+        INSTALLATION_ADDRESS_LINE2,
+        INSTALLATION_CITY,
+        INSTALLATION_STATE,
+        INSTALLATION_ZIP,
+        ORDER_LINE_ID,
+        BKCC,
+        REC_SRC,
+        SERIAL_ID,
+        DEVICE_ID,
+        USER_ID,
+        FIRSTNAME,
+        LASTNAME,
+        EMAIL,
+        PHONE_MOBILE,
+        ADDRESS,
+        CITY,
+        STATE,
+        POSTALCODE,
+        MOEN_INSTALL_ACTIVE_DATE,
+        PAIRED_DATE,
+        IS_PAIRED,
+        LAST_ONLINE_DATE,
+        WATER_USAGE_LAST_MONTH,
+        VENDOR_ID,
+        VENDOR_NAME,
+        VENDOR_INSTALL_DATE,
+        SRC
+    FROM unioned
+    WHERE ORDER_ID NOT IN (SELECT ORDER_ID FROM fixed_orderids)
+)
+
+SELECT
+    ROW_NUMBER() OVER (ORDER BY 1) AS SEQ_ID,
+    CURRENT_DATE AS SNAPSHOTDATE,
+    CONVERT_TIMEZONE('UTC', CURRENT_TIMESTAMP) AS PB_LOAD_DTS,
+    ORDER_TAG,
+    SHOPIFY_NUMERIC_ID,
+    ORDER_ID,
+    ORDER_DATE,
+    ORDER_FIRST_NAME,
+    ORDER_LAST_NAME,
+    ORDER_EMAIL,
+    ORDER_PHONE,
+    ORDER_ADDRESS_1,
+    ORDER_ADDRESS_2,
+    ORDER_CITY,
+    ORDER_STATE,
+    ORDER_POSTCODE,
+    ORDER_POSTCODE_ADD_ON,
+    ORDER_STATUS,
+    ORDER_QUANTITY,
+    RETURN_QUANTITY,
+    ORDER_VALUE,
+    DISCOUNT_VALUE,
+    DISCOUNT_CODE,
+    ACTUAL_DELIVERY_DATE,
+    SKU,
+    VALVE_SIZE,
+    LASTMODIFIED,
+    INSTALLATION_FLAG,
+    SUBSCRIPTION_FLAG,
+    AFFIRM_FLAG,
+    PARTNER_CODE,
+    PARTNER_NUMBER,
+    UTILITY_ACCOUNT_NUMBER,
+    INSTALLATION_ADDRESS_LINE1,
+    INSTALLATION_ADDRESS_LINE2,
+    INSTALLATION_CITY,
+    INSTALLATION_STATE,
+    INSTALLATION_ZIP,
+    ORDER_LINE_ID,
+    BKCC,
+    REC_SRC,
+    SERIAL_ID,
+    DEVICE_ID,
+    USER_ID,
+    FIRSTNAME,
+    LASTNAME,
+    EMAIL,
+    PHONE_MOBILE,
+    ADDRESS,
+    CITY,
+    STATE,
+    POSTALCODE,
+    MOEN_INSTALL_ACTIVE_DATE,
+    PAIRED_DATE,
+    IS_PAIRED,
+    LAST_ONLINE_DATE,
+    WATER_USAGE_LAST_MONTH,
+    VENDOR_ID,
+    VENDOR_NAME,
+    VENDOR_INSTALL_DATE,
+    SRC
+FROM all_orders
+QUALIFY ROW_NUMBER() OVER (
+    PARTITION BY ORDER_ID, SKU, ORDER_LINE_ID, COALESCE(ORDER_TAG, '_no_tag_')
+    ORDER BY
+        VENDOR_INSTALL_DATE DESC NULLS LAST,
+        MOEN_INSTALL_ACTIVE_DATE DESC NULLS LAST,
+        LAST_ONLINE_DATE DESC NULLS LAST,
+        SERIAL_ID DESC NULLS LAST,
+        SRC ASC NULLS LAST
+) = 1

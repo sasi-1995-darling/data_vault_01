@@ -1,0 +1,2 @@
+select * from ({{ primary_key_check('fact_global_spend_detail',['PO_HEADER_ID','PO_LINE_NUMBER','ZEROIFNULL(TRANSACTION_ID)',
+    "coalesce(MATERIAL_DOCUMENT_NUMBER, '-1')",'ZEROIFNULL(MATERIAL_DOCUMENT_ITEM)', 'ZEROIFNULL(RELEASE_NUMBER)']) }})

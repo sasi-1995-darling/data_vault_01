@@ -1,0 +1,32 @@
+{
+  "_comment": "Pipeline guard hook — blocks direct v_psa_stg file creation without orchestrator approval.",
+  "_comment_compat": "Dual-protocol: VS Code Copilot (version 1 / preToolUse / bash / exit codes) + Claude Code (PreToolUse / command / JSON stdout).",
+  "_comment_python": "Uses system python3 (not .venv/bin/python3) because pre_tool_guard.py only uses stdlib (json, os, re, sys, pathlib).",
+  "_comment_mode": "Set FBIN_HOOK_MODE=enforce to block. Default is 'audit' (log only, never blocks).",
+  "version": 1,
+  "hooks": {
+    "preToolUse": [
+      {
+        "type": "command",
+        "bash": "python3 scripts/automation/hooks/pre_tool_guard.py",
+        "cwd": ".",
+        "env": {
+          "FBIN_HOOK_MODE": "audit"
+        },
+        "timeoutSec": 10
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit|Bash|Read",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 scripts/automation/hooks/pre_tool_guard.py",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

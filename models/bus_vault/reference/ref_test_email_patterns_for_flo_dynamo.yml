@@ -1,0 +1,9 @@
+version: 2
+models:
+- name: ref_test_email_patterns_for_flo_dynamo
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - PATTERN
+  columns: []

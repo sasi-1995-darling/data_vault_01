@@ -1,0 +1,23 @@
+version: 2
+models:
+- name: lsat_shipment_line__winn_sap
+  tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - DELIVERIES_IN_SHIPMENT_LHK
+        - LOAD_DTS
+  - dbt_expectations.expect_table_row_count_to_be_between:
+      arguments:
+        min_value: 4
+      config:
+        severity: warn
+  columns:
+  - name: DELIVERIES_IN_SHIPMENT_LHK
+    description: "Hash key for Shipment Link - Foreign key to LINK_SHIPMENT"
+    tests:
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref('lnk_deliveries_in_shipment')
+          pk_column_name: DELIVERIES_IN_SHIPMENT_LHK
+

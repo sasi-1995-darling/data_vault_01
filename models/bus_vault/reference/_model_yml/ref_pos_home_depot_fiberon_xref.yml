@@ -1,0 +1,11 @@
+version: 2
+models:
+  - name: ref_pos_home_depot_fiberon_xref
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - MANUF_PART_NUMBER
+              - SKU
+              - LOAD_DTS
+    columns: []

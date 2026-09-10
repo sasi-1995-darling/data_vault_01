@@ -1,0 +1,74 @@
+version: 2
+models:
+- name: v_psa_stg_sales__homedepot_ft
+  data_tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - DAY
+        - SKU_NBR
+        - D_STORE_NBR
+        - MERCH_VENDOR
+        - MANUF_PART_NUMBER
+        - FULFILLMENT_CHANNEL
+        - HOME_DEPOT_ACCOUNT
+        - SKU_STATUS
+        - LOAD_DTS
+      config:
+        severity: warn
+  columns:
+  - name: STORE_HK
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+  - name: STORE_BK
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+  - name: D_STORE_NBR
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+  - name: MANUF_PART_NUMBER
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+  - name: DAY
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+  - name: LOAD_DTS
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+  - name: FULFILLMENT_CHANNEL
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+  - name: MERCH_VENDOR
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+  - name: SKU_NBR
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+  - name: SKU_STATUS
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+  - name: HOME_DEPOT_ACCOUNT
+    data_tests:
+    - not_null:
+        config:
+          severity: warn

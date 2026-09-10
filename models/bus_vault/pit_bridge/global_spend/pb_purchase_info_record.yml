@@ -1,0 +1,12 @@
+version: 2
+models:
+- name: pb_purchase_info_record
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - PURCHASING_INFO_RECORD_BK
+        - PURCHASING_ORG_BK
+        - PLANT_BK
+        - PURCHASING_INFO_RECORD_CATEGORY
+  columns: []

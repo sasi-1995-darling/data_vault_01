@@ -1,0 +1,13 @@
+version: 2
+
+models:
+  - name: hub_contact
+    description: This is the raw vault hub model for contacts
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - contact_hk
+    config:
+      tags:
+        - emtek

@@ -1,0 +1,17 @@
+version: 2
+models:
+  - name: hub_fiscal_period
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - FISCAL_PERIOD_HK
+    columns:
+      - name: FISCAL_PERIOD_HK
+        tests:
+          - unique:
+              config:
+                severity: warn
+          - not_null:
+              config:
+                severity: warn

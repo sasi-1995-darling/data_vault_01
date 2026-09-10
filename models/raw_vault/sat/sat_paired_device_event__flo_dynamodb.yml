@@ -1,0 +1,22 @@
+version: 2
+models:
+- name: sat_paired_device_event__flo_dynamodb
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - PAIRED_DEVICE_EVENT_HK
+        - CREATED_AT
+        - EVENT
+        - _FIVETRAN_DELETED
+  - dbt_expectations.expect_table_row_count_to_be_between:
+      arguments:
+        min_value: 4
+      config:
+        severity: warn
+  columns:
+  - name: PAIRED_DEVICE_EVENT_HK
+    data_tests:
+    - not_null:
+        config:
+          severity: warn

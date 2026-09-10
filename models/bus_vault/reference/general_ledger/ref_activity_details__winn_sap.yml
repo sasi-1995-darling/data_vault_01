@@ -1,0 +1,11 @@
+version: 2
+models:
+  - name: ref_activity_details__winn_sap
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - LANGUAGE_KEY
+              - ACTIVITY_TYPE
+              - VALID_TO_DATE__YYYYMMDD
+              - CONTROLLING_AREA

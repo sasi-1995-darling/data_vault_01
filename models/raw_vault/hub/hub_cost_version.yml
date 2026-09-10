@@ -1,0 +1,17 @@
+version: 2
+models:
+  - name: hub_cost_version
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - COST_VERSION_HK
+    columns:
+      - name: COST_VERSION_HK
+        tests:
+          - unique:
+              config:
+                severity: warn
+          - not_null:
+              config:
+                severity: warn

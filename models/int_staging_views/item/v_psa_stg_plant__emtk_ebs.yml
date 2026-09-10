@@ -1,0 +1,37 @@
+version: 2
+models:
+- name: v_psa_stg_plant__emtk_ebs
+  data_tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - ORGANIZATION_ID
+        - LOAD_DTS
+      config:
+        severity: warn
+  columns:
+  - name: PLANT_HK
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+  - name: PLANT_BK
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+  - name: LOAD_DTS
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+  - name: REC_SRC
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+  - name: HASHDIFF
+    data_tests:
+    - not_null:
+        config:
+          severity: warn

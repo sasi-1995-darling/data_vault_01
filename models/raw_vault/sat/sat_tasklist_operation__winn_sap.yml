@@ -1,0 +1,25 @@
+version: 2
+models:
+- name: sat_tasklist_operation__winn_sap
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - TASKLIST_OPERATION_HK
+        - ZAEHL
+        - LOAD_DTS
+  - dbt_expectations.expect_table_row_count_to_be_between:
+      arguments:
+        min_value: 4
+      config:
+        severity: warn
+  columns:
+      - name: TASKLIST_OPERATION_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'hub_tasklist_operation' )
+                pk_column_name: TASKLIST_OPERATION_HK

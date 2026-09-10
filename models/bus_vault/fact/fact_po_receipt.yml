@@ -1,0 +1,45 @@
+version: 2
+models:
+  - name: fact_po_receipt
+    description: >
+      PO receipt mart fact (1:1 wrapper over pit_po_receipt_current), one row per
+      goods receipt across all source systems. Column documentation here covers
+      the Supplier OTD foundational promised/need-by date fields, with per-field
+      coverage rates surfaced for consumers. Grain and other tests are owned
+      upstream (pit_po_receipt_current) and by the QA singular-test suite.
+    columns:
+      - name: PROMISED_DATE_LATEST__YYYYMMDD
+        description: >
+          Supplier's promised delivery date (latest across the PO line's
+          schedule lines), YYYYMMDD integer. Combines E21 POITEM.DATE_PROMISED
+          and Oracle EBS / Fusion schedule-line PROMISED_DATE. Schedule lines
+          are Fivetran-sourced, so true deletes are excluded via
+          _FIVETRAN_DELETED (within 500 days of the detecting sync) while
+          aged-out/archived rows are retained. Attached at PO-line level
+          (aggregated) because receipts
+          do not carry the schedule key; NULL for other sources. Coverage: ~26%.
+      - name: PROMISED_DATE_EARLIEST__YYYYMMDD
+        description: >
+          Supplier's promised delivery date (earliest across the PO line's
+          schedule lines), YYYYMMDD integer. Same sourcing/caveats as
+          PROMISED_DATE_LATEST__YYYYMMDD. Coverage: ~26%.
+      - name: NEED_BY_DATE_LATEST__YYYYMMDD
+        description: >
+          MRP-driven in-house need-by date (latest across the PO line's schedule
+          lines), YYYYMMDD integer, from Oracle EBS / Fusion
+          schedule-line NEED_BY_DATE. Schedule lines are Fivetran-sourced, so
+          true deletes are excluded via _FIVETRAN_DELETED (within 500 days of
+          the detecting sync); PO-line-level aggregate; NULL for other sources.
+          Coverage: ~4%.
+      - name: NEED_BY_DATE_EARLIEST__YYYYMMDD
+        description: >
+          MRP-driven in-house need-by date (earliest across the PO line's
+          schedule lines), YYYYMMDD integer. Same sourcing/caveats as
+          NEED_BY_DATE_LATEST__YYYYMMDD. Coverage: ~4%.
+      - name: ORIGINAL_PROMISED_DATE__YYYYMMDD
+        description: >
+          Supplier's first committed delivery date before any changes, YYYYMMDD
+          integer, for the supplier commit-accuracy metric. Sourced from
+          Therma-Tru E21 (POITEM.ORIG_DATE_PROMISED); NULL for other sources.
+          Same definition as the FACT_PO_ITEM column of the same name.
+          Coverage: ~10%.

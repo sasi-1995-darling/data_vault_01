@@ -1,0 +1,13 @@
+version: 2
+
+models:
+  - name: hub_item
+    description: This is the raw vault hub model for items (including materials, parts, and products)
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - item_hk
+    config:
+      tags:
+        - emtek

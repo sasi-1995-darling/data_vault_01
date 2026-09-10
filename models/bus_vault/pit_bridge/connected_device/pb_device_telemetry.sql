@@ -1,0 +1,105 @@
+---- SRC LAYER ----
+WITH
+SRC_PBDT           as ( SELECT AGGREGATE_DATE, AVG_NIGHT_TEMPERATURE, AVG_PRESSURE, AVG_TEMPERATURE, BKCC, CREATED_AT, DEVICE_BK, DEVICE_HK, FLOW_RECORDS, GALLONS, ICD_DEVICE_HK, MAX_GPM, MAX_PRESSURE, MAX_TEMPERATURE, MEDIAN_GPS, MIN_PRESSURE, MIN_TEMPERATURE, PAIRED_DEVICE_BK, PAIRED_DEVICE_HK, P_STATIC, RECORDS, REC_SRC, UPDATED_AT FROM {{ ref('pb_stg_device_telemetry') }} as SRC  )
+
+/*
+SRC_PBDT           as ( SELECT * FROM BUS_VAULT.PB_STG_DEVICE_TELEMETRY )
+*/
+---- LOGIC LAYER ----
+
+, LOGIC_PBDT as (
+    SELECT
+        ICD_DEVICE_HK
+      , PAIRED_DEVICE_HK
+      , DEVICE_HK
+      , PAIRED_DEVICE_BK
+      , DEVICE_BK
+      , BKCC
+      , REC_SRC
+      , AGGREGATE_DATE
+      , GALLONS
+      , MAX_GPM
+      , MIN_PRESSURE
+      , MAX_PRESSURE
+      , AVG_PRESSURE
+      , MIN_TEMPERATURE
+      , MAX_TEMPERATURE
+      , AVG_TEMPERATURE
+      , RECORDS
+      , FLOW_RECORDS
+      , AVG_NIGHT_TEMPERATURE
+      , CREATED_AT
+      , UPDATED_AT
+      , MEDIAN_GPS
+      , P_STATIC
+    FROM SRC_PBDT
+)
+---- RENAME LAYER ----
+
+, RENAME_PBDT as (
+    SELECT
+        ICD_DEVICE_HK
+      , PAIRED_DEVICE_HK
+      , DEVICE_HK
+      , PAIRED_DEVICE_BK
+      , DEVICE_BK
+      , BKCC
+      , REC_SRC
+      , AGGREGATE_DATE
+      , GALLONS
+      , MAX_GPM
+      , MIN_PRESSURE
+      , MAX_PRESSURE
+      , AVG_PRESSURE
+      , MIN_TEMPERATURE
+      , MAX_TEMPERATURE
+      , AVG_TEMPERATURE
+      , RECORDS
+      , FLOW_RECORDS
+      , AVG_NIGHT_TEMPERATURE
+      , CREATED_AT
+      , UPDATED_AT
+      , MEDIAN_GPS
+      , P_STATIC
+    FROM LOGIC_PBDT
+)
+---- FILTER LAYER ----
+
+, FILTER_PBDT as (
+    SELECT *
+    FROM RENAME_PBDT
+)
+---- JOIN LAYER ----
+, JOIN_RESULT as (
+    SELECT * FROM FILTER_PBDT
+)
+
+---- FINAL LAYER ----
+SELECT
+              row_number() over(order by 1)                            as SEQ_ID
+        , CURRENT_DATE                                                 as SNAPSHOTDATE
+        , CONVERT_TIMEZONE('UTC', CURRENT_TIMESTAMP )                  as PB_LOAD_DTS
+        , ICD_DEVICE_HK
+        , PAIRED_DEVICE_HK
+        , DEVICE_HK
+        , PAIRED_DEVICE_BK
+        , DEVICE_BK
+        , BKCC
+        , REC_SRC
+        , AGGREGATE_DATE
+        , GALLONS
+        , MAX_GPM
+        , MIN_PRESSURE
+        , MAX_PRESSURE
+        , AVG_PRESSURE
+        , MIN_TEMPERATURE
+        , MAX_TEMPERATURE
+        , AVG_TEMPERATURE
+        , RECORDS
+        , FLOW_RECORDS
+        , AVG_NIGHT_TEMPERATURE
+        , CREATED_AT
+        , UPDATED_AT
+        , MEDIAN_GPS
+        , P_STATIC
+FROM JOIN_RESULT

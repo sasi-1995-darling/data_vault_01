@@ -1,0 +1,12 @@
+version: 2
+models:
+  - name: v_psa_stg_planned_order__ml_ascp
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          config:
+            severity: warn
+          arguments:
+            combination_of_columns:
+              - TRANSACTION_ID
+              - LOAD_DTS
+    columns: []

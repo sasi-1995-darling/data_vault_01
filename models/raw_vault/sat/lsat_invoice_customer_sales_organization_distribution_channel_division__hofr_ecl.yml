@@ -1,0 +1,22 @@
+version: 2
+models:
+- name: lsat_invoice_customer_sales_organization_distribution_channel_division__hofr_ecl
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - LNK_INVOICE_CUSTOMER_SALES_ORGANIZATION_DISTRIBUTION_CHANNEL_DIVISION_ITEM_HK
+        - LOAD_DTS
+  - dbt_expectations.expect_table_row_count_to_be_between:
+      arguments:
+        min_value: 4
+      config:
+        severity: warn
+  columns:
+  - name: LNK_INVOICE_CUSTOMER_SALES_ORGANIZATION_DISTRIBUTION_CHANNEL_DIVISION_ITEM_HK
+    data_tests:
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'lnk_invoice_customer_sales_organization_distribution_channel_division'
+            )
+          pk_column_name: LNK_INVOICE_CUSTOMER_SALES_ORGANIZATION_DISTRIBUTION_CHANNEL_DIVISION_ITEM_HK

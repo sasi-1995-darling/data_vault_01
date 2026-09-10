@@ -1,0 +1,33 @@
+version: 2
+models:
+  - name: lsat_po_receipt__lrsn_psft
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - LNK_PO_RECEIPT_HK
+              - LOAD_DTS
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          config:
+            severity: warn
+          arguments:
+            min_value: 4
+    columns:
+      - name: LNK_PO_RECEIPT_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'lnk_po_receipt' )
+                pk_column_name: LNK_PO_RECEIPT_HK
+      - name: BKCC
+        tests:
+          - not_null
+      - name: REC_SRC
+        tests:
+          - not_null
+      - name: LOAD_DTS
+        tests:
+          - not_null

@@ -1,0 +1,13 @@
+version: 2
+
+models:
+  - name: dim_invoice_line
+    description: Sales dimension for invoice lines
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - dim_invoice_line_pk
+    config:
+      tags:
+        - emtek

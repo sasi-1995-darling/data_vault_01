@@ -1,0 +1,18 @@
+version: 2
+models:
+- name: v_psa_stg_subscription__winn_prive
+  data_tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - SUBSCRIPTION_HK
+        - LOAD_DTS
+        - HASHDIFF
+      config:
+        severity: warn
+  columns:
+  - name: SUBSCRIPTION_HK
+    data_tests:
+    - not_null:
+        config:
+          severity: warn

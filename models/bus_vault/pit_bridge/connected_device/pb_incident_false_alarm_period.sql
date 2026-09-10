@@ -1,0 +1,151 @@
+---- SRC LAYER ----
+WITH
+SRC_MTH            as ( SELECT BKCC, DEVICE_ID, INCIDENT_CREATED_AT, INCIDENT_ID, IS_FALSE_ALARM, MONTH_NUM, PERIOD_START_DATE_KEY, PERIOD_TYPE, QUARTER_NUM, REC_SRC, YEAR_NUM FROM {{ ref('pb_stg_incident_false_alarm_mth') }} as SRC  ),
+SRC_QTY            as ( SELECT BKCC, DEVICE_ID, INCIDENT_CREATED_AT, INCIDENT_ID, IS_FALSE_ALARM, MONTH_NUM, PERIOD_START_DATE_KEY, PERIOD_TYPE, QUARTER_NUM, REC_SRC, YEAR_NUM FROM {{ ref('pb_stg_incident_false_alarm_qty') }} as SRC  ),
+SRC_YLY            as ( SELECT BKCC, DEVICE_ID, INCIDENT_CREATED_AT, INCIDENT_ID, IS_FALSE_ALARM, MONTH_NUM, PERIOD_START_DATE_KEY, PERIOD_TYPE, QUARTER_NUM, REC_SRC, YEAR_NUM FROM {{ ref('pb_stg_incident_false_alarm_yly') }} as SRC  )
+
+/*
+SRC_MTH            as ( SELECT * FROM BUS_VAULT.PB_STG_INCIDENT_FALSE_ALARM_MTH )
+SRC_QTY            as ( SELECT * FROM BUS_VAULT.PB_STG_INCIDENT_FALSE_ALARM_QTY )
+SRC_YLY            as ( SELECT * FROM BUS_VAULT.PB_STG_INCIDENT_FALSE_ALARM_YLY )
+*/
+---- LOGIC LAYER ----
+
+, LOGIC_MTH as (
+    SELECT
+        INCIDENT_ID
+      , DEVICE_ID
+      , INCIDENT_CREATED_AT
+      , IS_FALSE_ALARM
+      , PERIOD_TYPE
+      , PERIOD_START_DATE_KEY
+      , YEAR_NUM
+      , QUARTER_NUM
+      , MONTH_NUM
+      , BKCC
+      , REC_SRC
+    FROM SRC_MTH
+)
+
+, LOGIC_QTY as (
+    SELECT
+        INCIDENT_ID
+      , DEVICE_ID
+      , INCIDENT_CREATED_AT
+      , IS_FALSE_ALARM
+      , PERIOD_TYPE
+      , PERIOD_START_DATE_KEY
+      , YEAR_NUM
+      , QUARTER_NUM
+      , MONTH_NUM
+      , BKCC
+      , REC_SRC
+    FROM SRC_QTY
+)
+
+, LOGIC_YLY as (
+    SELECT
+        INCIDENT_ID
+      , DEVICE_ID
+      , INCIDENT_CREATED_AT
+      , IS_FALSE_ALARM
+      , PERIOD_TYPE
+      , PERIOD_START_DATE_KEY
+      , YEAR_NUM
+      , QUARTER_NUM
+      , MONTH_NUM
+      , BKCC
+      , REC_SRC
+    FROM SRC_YLY
+)
+---- RENAME LAYER ----
+
+, RENAME_MTH as (
+    SELECT
+        INCIDENT_ID
+      , DEVICE_ID
+      , INCIDENT_CREATED_AT
+      , IS_FALSE_ALARM
+      , PERIOD_TYPE
+      , PERIOD_START_DATE_KEY
+      , YEAR_NUM
+      , QUARTER_NUM
+      , MONTH_NUM
+      , BKCC
+      , REC_SRC
+    FROM LOGIC_MTH
+)
+
+, RENAME_QTY as (
+    SELECT
+        INCIDENT_ID
+      , DEVICE_ID
+      , INCIDENT_CREATED_AT
+      , IS_FALSE_ALARM
+      , PERIOD_TYPE
+      , PERIOD_START_DATE_KEY
+      , YEAR_NUM
+      , QUARTER_NUM
+      , MONTH_NUM
+      , BKCC
+      , REC_SRC
+    FROM LOGIC_QTY
+)
+
+, RENAME_YLY as (
+    SELECT
+        INCIDENT_ID
+      , DEVICE_ID
+      , INCIDENT_CREATED_AT
+      , IS_FALSE_ALARM
+      , PERIOD_TYPE
+      , PERIOD_START_DATE_KEY
+      , YEAR_NUM
+      , QUARTER_NUM
+      , MONTH_NUM
+      , BKCC
+      , REC_SRC
+    FROM LOGIC_YLY
+)
+---- FILTER LAYER ----
+
+, FILTER_MTH as (
+    SELECT *
+    FROM RENAME_MTH
+)
+
+, FILTER_QTY as (
+    SELECT *
+    FROM RENAME_QTY
+)
+
+, FILTER_YLY as (
+    SELECT *
+    FROM RENAME_YLY
+)
+---- JOIN LAYER ----
+, JOIN_RESULT as (
+    SELECT * FROM FILTER_MTH
+    UNION ALL
+    SELECT * FROM FILTER_QTY
+    UNION ALL
+    SELECT * FROM FILTER_YLY
+)
+
+---- FINAL LAYER ----
+SELECT
+              row_number() over(order by 1)                            as SEQ_ID
+        , CURRENT_DATE                                                 as SNAPSHOTDATE
+        , CONVERT_TIMEZONE('UTC', CURRENT_TIMESTAMP )                  as PB_LOAD_DTS
+        , INCIDENT_ID
+        , DEVICE_ID
+        , INCIDENT_CREATED_AT
+        , IS_FALSE_ALARM
+        , PERIOD_TYPE
+        , PERIOD_START_DATE_KEY
+        , YEAR_NUM
+        , QUARTER_NUM
+        , MONTH_NUM
+        , BKCC
+        , REC_SRC
+FROM JOIN_RESULT

@@ -1,0 +1,81 @@
+version: 2
+models:
+  - name: sat_sales__homedepot
+    tests:
+      - dbt_constraints.primary_key:
+          config:
+            severity: warn
+          arguments:
+            column_names:
+              - DAY
+              - SKU_NBR
+              - D_STORE_NBR
+              - MERCH_VENDOR
+              - MANUF_PART_NUMBER
+              - FULFILLMENT_CHANNEL
+              - HOME_DEPOT_ACCOUNT
+              - SKU_STATUS
+              - LOAD_DTS
+    columns:
+      - name: STORE_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+          - dbt_utils.relationships_where:
+              config:
+                severity: warn
+              arguments:
+                to: ref( 'hub_store' )
+                field: STORE_HK
+          - dbt_constraints.foreign_key:
+              config:
+                severity: warn
+              arguments:
+                pk_table_name: ref( 'hub_store' )
+                pk_column_name: STORE_HK
+      - name: D_STORE_NBR
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: MANUF_PART_NUMBER
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: DAY
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: LOAD_DTS
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: FULFILLMENT_CHANNEL
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: MERCH_VENDOR
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: SKU_NBR
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: SKU_STATUS
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: HOME_DEPOT_ACCOUNT
+        tests:
+          - not_null:
+              config:
+                severity: warn

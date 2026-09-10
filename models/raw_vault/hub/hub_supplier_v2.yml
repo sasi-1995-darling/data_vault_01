@@ -1,0 +1,26 @@
+version: 2
+models:
+  - name: hub_supplier_v2
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - SUPPLIER_HK
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          config:
+            severity: warn
+          arguments:
+            min_value: 4
+    columns:
+      - name: SUPPLIER_BK
+        tests:
+          - not_null
+      - name: BKCC
+        tests:
+          - not_null
+      - name: REC_SRC
+        tests:
+          - not_null
+      - name: LOAD_DTS
+        tests:
+          - not_null

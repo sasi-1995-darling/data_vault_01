@@ -1,0 +1,22 @@
+version: 2
+models:
+- name: v_psa_stg_gl_user__winn_sap
+  data_tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - BNAME
+        - LOAD_DTS
+      config:
+        severity: warn
+  columns:
+  - name: MANDT
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+  - name: BNAME
+    data_tests:
+    - not_null:
+        config:
+          severity: warn

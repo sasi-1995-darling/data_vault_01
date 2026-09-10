@@ -1,0 +1,28 @@
+version: 2
+models:
+- name: v_psa_stg_capacity_planner_group__winn_sap
+  data_tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - PLANR
+        - SPRAS
+        - LOAD_DTS
+      config:
+        severity: warn
+  columns:
+  - name: SPRAS
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+  - name: PLANR
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+  - name: LOAD_DTS
+    data_tests:
+    - not_null:
+        config:
+          severity: warn

@@ -1,0 +1,13 @@
+version: 2
+
+models:
+  - name: hub_purchase_order
+    description: This is the raw vault hub model for purchase orders
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - purchase_order_hk
+    config:
+      tags:
+        - emtek

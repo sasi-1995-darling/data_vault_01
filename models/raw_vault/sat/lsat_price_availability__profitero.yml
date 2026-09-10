@@ -1,0 +1,58 @@
+version: 2
+models:
+  - name: lsat_price_availability__profitero
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - DATE
+              - RETAILER_ID
+              - PRODUCT_ID
+              - CUSTOMER_PRODUCT_ID
+              - LOAD_DTS
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          config:
+            severity: warn
+          arguments:
+            min_value: 4
+    columns:
+      - name: PRODUCT_RETAILER_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: LOAD_DTS
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: DATE
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: CUSTOMER_PRODUCT_ID
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: RETAILER_ID
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: PRODUCT_ID
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: PRODUCT_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: RETAILER_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn

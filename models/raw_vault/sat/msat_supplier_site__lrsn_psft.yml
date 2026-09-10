@@ -1,0 +1,28 @@
+version: 2
+models:
+- name: msat_supplier_site__lrsn_psft
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - SUPPLIER_SITE_HK
+        - SETID
+        - EFFDT
+        - LOAD_DTS
+      config:
+        severity: warn
+  - dbt_expectations.expect_table_row_count_to_be_between:
+      arguments:
+        min_value: 4
+      config:
+        severity: warn
+  columns:
+  - name: SUPPLIER_SITE_HK
+    data_tests:
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'hub_supplier_site_v2' )
+          pk_column_name: SUPPLIER_SITE_HK
+  config:
+    tags:
+    - msat

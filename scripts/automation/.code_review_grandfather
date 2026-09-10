@@ -1,0 +1,320 @@
+# .code_review_grandfather — FROZEN pre-existing-debt allowlist
+#
+# Lists exact (check_id, file_path) pairs that were already violating I2 / I4
+# at the time these checks landed (2026-06-22). Listed findings are
+# downgraded FAIL → WARN at review time with a `[GRANDFATHERED]` prefix —
+# they remain visible (so reviewers can opportunistically clean up) but do
+# NOT block PRs.
+#
+# ─── BURN-DOWN-ONLY POLICY ───
+# Entries on this list are ONLY EVER REMOVED, never added. Adding a new
+# violation requires fixing the violation OR explicit DataOps lead waiver
+# (which would be a hand edit to this file). The reviewer's
+# `--validate-grandfather` mode reports entries whose underlying file no
+# longer violates — those entries can be deleted from this list.
+#
+# ─── NOT FOR PERMANENT EXEMPTIONS ───
+# `models/raw_vault/reference_table/ref_business_key_collision.sql` is the
+# BKCC source-of-truth and legitimately MUST use source(). It is exempt
+# from I4 at the CODE level (see check_non_staging_uses_ref_only), NOT via
+# this list. Correct-by-design exemptions belong in code; only debt belongs here.
+#
+# ─── FORMAT ───
+#   <check_id> <repo-relative file path>
+# One pair per line. Blank lines and # comments allowed.
+# Forward slashes only. Trailing whitespace ignored.
+
+# ── I2: staging models that ref() other RAW-SOURCE v_psa_stg models (1 file) ──
+# These are staging models chaining off other raw-source staging models —
+# the canonical anti-pattern I2 exists to catch. Real debt.
+#
+# Burn-down path: refactor general_ledger_entries to source its own raw
+# inputs (e.g. SAP GL header/line tables) instead of ref()'ing the
+# gl_account and legal_entity staging models. This breaks the stg→stg
+# chain at the source.
+#
+# Note (2026-06-22): the previously-listed 18 v_psa_stg_*_amazon* and
+# *_appbot* entries (which ref'd the Talend migration cutoff-date models)
+# were REMOVED from this list because the cutoff-date models are now
+# named-exempted via `staging_ref_exemptions` in governance_allowlist.yml.
+# That was a misclassification — those were legitimate shared-reference
+# joins, not debt. See the governance_allowlist.yml header for the
+# expected-temporary scope of those named exemptions.
+
+I2 models/int_staging_views/general_ledger/v_psa_stg_general_ledger_entries__winn_sap.sql
+
+# ── I4: bus_vault models using source() (5 files, CONFIRMED DEBT) ──
+# All 5 are in bus_vault/pit_bridge/connected_device/. Classified as
+# confirmed I4 debt (2026-06-22): BV is reaching past RV/STG to read raw
+# source directly — the exact layer violation I4 exists to catch.
+#
+# Real-substrate check (2026-06-22): none of the source tables these
+# models read have a corresponding hub/sat in raw_vault/, and none have
+# a v_psa_stg wrapper either. So the burn-down requires BUILDING the RV
+# objects first, then refactoring each BV model to read from RV via
+# ref() — not a simple two-line swap.
+#
+# Per-entry annotations name the source table being read, so the burn-
+# down list reads as fix-instructions rather than just labels.
+
+# I4 BV-source debt — refactor to read from RV
+#   source: custom_fivetran_smartsheet_flo_insurance_partner.insurance_partner_name
+#   no RV target — build hub/sat first
+I4 models/bus_vault/pit_bridge/connected_device/pb_installer_order.sql
+
+# I4 BV-source debt — refactor to read from RV
+#   source: reference.flo_shopify_email_serial_device_id_map
+#   no RV target — build hub/sat first
+I4 models/bus_vault/pit_bridge/connected_device/pb_insurance_order_device_matched.sql
+
+# I4 BV-source debt — refactor to read from RV
+#   source: custom_fivetran_smartsheet_flo_insurance_partner.insurance_partner_name
+#   no RV target — build hub/sat first
+I4 models/bus_vault/pit_bridge/connected_device/pb_insurance_partner_tagged.sql
+
+# I4 BV-source debt — refactor to read from RV
+#   source: reference.frontdoor_orderid_installdates
+#   no RV target — build hub/sat first
+I4 models/bus_vault/pit_bridge/connected_device/pb_order_install_resolved.sql
+
+# I4 BV-source debt — refactor to read from RV
+#   sources: reference.frontdoor_order_status_v_2 + reference.frontdoor_status_map
+#   no RV target — build hub/sat first
+I4 models/bus_vault/pit_bridge/connected_device/pit_order_status_latest.sql
+
+# ── H10 FIX-FIRST DEBT (40 files) — HASHDIFF in PK/unique grain ──
+# HIGH-PRIORITY correctness risk. HASHDIFF in a grain test masks true
+# duplicates: if two distinct rows have the same parent_HK + LOAD_DTS but
+# different payloads (and HASHDIFFs differ), the unique test passes when it
+# should have flagged a grain violation. Sat grain MUST be parent_HK +
+# LOAD_DTS + dependent child keys only — never the HASHDIFF/HASHDIFF_* column.
+#
+# POLICY: this is the FIRST grandfather tier for a *correctness* check.
+# I2/I4 are layer-direction debt (data shape is correct, location is wrong).
+# H10 HASHDIFF/BKCC entries are wrong-shape debt — the model's own grain
+# contract is violated. NEW correctness-tier entries require an explicit
+# DataOps lead waiver (NOT just adding to this list). The standard burn-
+# down policy below still applies — entries are only ever removed.
+#
+# Burn-down: remove HASHDIFF from the model YAML's primary_key /
+# unique_combination_of_columns column list, re-run dbt test, then delete
+# the corresponding line from this file.
+
+H10 models/raw_vault/sat/lmsat_survey_question_response_answer__simplesat_yale.yml
+H10 models/raw_vault/sat/lsat_handling_unit_content__winn_sap.yml
+H10 models/raw_vault/sat/lsat_installation_event__winn_sap.yml
+H10 models/raw_vault/sat/lsat_object_list_detail__winn_sap.yml
+H10 models/raw_vault/sat/lsat_serial_number_assignment__winn_sap.yml
+H10 models/raw_vault/sat/lsat_survey_question_response_answer.yml
+H10 models/raw_vault/sat/sat_balance_transaction__flo_sense.yml
+H10 models/raw_vault/sat/sat_device_account_details__flo_dynamodb.yml
+H10 models/raw_vault/sat/sat_device_account_subscription__flo_dynamodb.yml
+H10 models/raw_vault/sat/sat_device_inventory__flo_public.yml
+H10 models/raw_vault/sat/sat_device_location_details__flo_dynamodb.yml
+H10 models/raw_vault/sat/sat_device_location_subscription__flo_dynamodb.yml
+H10 models/raw_vault/sat/sat_device_status__flo_service.yml
+H10 models/raw_vault/sat/sat_device_telemetry__flo_daily.yml
+H10 models/raw_vault/sat/sat_flo_user_account_group_role__flo_dynamodb.yml
+H10 models/raw_vault/sat/sat_flo_user_details__flo_dynamodb.yml
+H10 models/raw_vault/sat/sat_flo_user_profile__flo_dynamodb.yml
+H10 models/raw_vault/sat/sat_item_details__datavations.yml
+H10 models/raw_vault/sat/sat_order_header_business_data__winn_sap.yml
+H10 models/raw_vault/sat/sat_order_line_business_data__winn_sap.yml
+H10 models/raw_vault/sat/sat_paired_device__flo_dynamodb.yml
+H10 models/raw_vault/sat/sat_question_details__simplesat.yml
+H10 models/raw_vault/sat/sat_question_rules__simplesat.yml
+H10 models/raw_vault/sat/sat_response__hyd_delighted.yml
+H10 models/raw_vault/sat/sat_response__naboo_delighted.yml
+H10 models/raw_vault/sat/sat_response__sws_delighted.yml
+H10 models/raw_vault/sat/sat_response__vak_delighted.yml
+H10 models/raw_vault/sat/sat_response__yale_delighted.yml
+H10 models/raw_vault/sat/sat_response_answer__sws_delighted.yml
+H10 models/raw_vault/sat/sat_response_answer_selection__sws_delighted.yml
+H10 models/raw_vault/sat/sat_response_details__simplesat.yml
+H10 models/raw_vault/sat/sat_survey_details__simplesat.yml
+H10 models/raw_vault/sat/sat_user_engagement_screen__android_flo.yml
+H10 models/raw_vault/sat/sat_user_engagement_screen__android_moen.yml
+H10 models/raw_vault/sat/sat_user_engagement_screen__ios_flo.yml
+H10 models/raw_vault/sat/sat_user_engagement_screen__ios_moen.yml
+H10 models/raw_vault/sat/sat_user_engagement_track__android_flo.yml
+H10 models/raw_vault/sat/sat_user_engagement_track__android_moen.yml
+H10 models/raw_vault/sat/sat_user_engagement_track__ios_flo.yml
+H10 models/raw_vault/sat/sat_user_engagement_track__ios_moen.yml
+
+# ── H10 standards debt (6 files) — metadata column in grain ──
+# Lower-priority than the HASHDIFF correctness tier. These entries have a
+# load-time or replication-state metadata column inside the grain test where
+# only key columns belong. Not a correctness risk in the same way HASHDIFF
+# is, but still wrong per DV 2.0 grain contract.
+#
+# Burn-down: remove the listed column(s) from the grain test, re-run dbt
+# test, then delete the corresponding line from this file.
+#
+# PSA_LOAD_DTS in grain (3 files):
+H10 models/raw_vault/sat/lsat_product_rating__appbot.yml
+H10 models/raw_vault/sat/lsat_response__centercode.yml
+H10 models/raw_vault/sat/sat_product__delighted_yale.yml
+#
+# _FIVETRAN_DELETED in grain (3 files):
+H10 models/raw_vault/sat/sat_paired_device_event__flo_dynamodb.yml
+H10 models/raw_vault/sat/sat_review__bazaarvoice.yml
+H10 models/raw_vault/sat/sat_review__bazaarvoice_yale.yml
+
+# ── H11 debt (146 files) — satellite missing foreign_key constraint ──
+# Each listed sat YAML is missing the foreign_key constraint that points
+# parent_HK back to its parent hub (or link, for LSATs). The model
+# generator adds this FK automatically — a missing FK indicates either
+# (a) the YAML was hand-edited around the generator, or (b) checked in
+# before running the build pipeline. Functionally a structural defect:
+# downstream consumers cannot navigate the model graph correctly.
+#
+# Burn-down: re-run the sat through the generator (which restores the FK
+# template) OR hand-add the FK constraint to the YAML, then delete the
+# corresponding line from this file.
+
+H11 models/raw_vault/sat/_model_yml/esat_sales_agency_group__emtk_ebs.yml
+H11 models/raw_vault/sat/_model_yml/rsat_invoice_line.yml
+H11 models/raw_vault/sat/_model_yml/sat_category_products__profitero.yml
+H11 models/raw_vault/sat/_model_yml/sat_competitive_products_profitero.yml
+H11 models/raw_vault/sat/_sat_appbot__models.yml
+H11 models/raw_vault/sat/_sat_delighted__models.yml
+H11 models/raw_vault/sat/_sat_reference__models.yml
+H11 models/raw_vault/sat/lmsat_pos_main_weekly__datavations.yml
+H11 models/raw_vault/sat/lmsat_price_availability__fiberon_profitero_share.yml
+H11 models/raw_vault/sat/lmsat_price_availability__fypon_profitero_share.yml
+H11 models/raw_vault/sat/lmsat_price_availability__larson_profitero_share.yml
+H11 models/raw_vault/sat/lmsat_price_availability__security_profitero_share.yml
+H11 models/raw_vault/sat/lmsat_price_availability__thermatru_profitero_share.yml
+H11 models/raw_vault/sat/lmsat_price_availability__winn_profitero_share.yml
+H11 models/raw_vault/sat/lmsat_survey_question_response_answer__simplesat_yale.yml
+H11 models/raw_vault/sat/lsat_alert_feedback__flo_dynamodb.yml
+H11 models/raw_vault/sat/lsat_handling_unit_content__winn_sap.yml
+H11 models/raw_vault/sat/lsat_installation_event__winn_sap.yml
+H11 models/raw_vault/sat/lsat_material_valuation__winn_sap.yml
+H11 models/raw_vault/sat/lsat_object_list_detail__winn_sap.yml
+H11 models/raw_vault/sat/lsat_order_fulfillment__winn_shopify.yml
+H11 models/raw_vault/sat/lsat_order_refund__winn_shopify.yml
+H11 models/raw_vault/sat/lsat_price_availability__profitero.yml
+H11 models/raw_vault/sat/lsat_product_rating__appbot.yml
+H11 models/raw_vault/sat/lsat_product_review__appbot.yml
+H11 models/raw_vault/sat/lsat_product_review__profitero_share.yml
+H11 models/raw_vault/sat/lsat_product_variant__winn_shopify.yml
+H11 models/raw_vault/sat/lsat_response__centercode.yml
+H11 models/raw_vault/sat/lsat_same_as_plant_transfer__winn_sap.yml
+H11 models/raw_vault/sat/lsat_serial_number_assignment__winn_sap.yml
+H11 models/raw_vault/sat/lsat_subscription_order__winn_prive.yml
+H11 models/raw_vault/sat/lsat_survey_question_response_answer.yml
+H11 models/raw_vault/sat/msat_bom_component_selection__winn_sap.yml
+H11 models/raw_vault/sat/msat_bom_header__winn_sap.yml
+H11 models/raw_vault/sat/msat_bom_permanent__winn_sap.yml
+H11 models/raw_vault/sat/msat_capacity_description__winn_sap.yml
+H11 models/raw_vault/sat/msat_capacity_interval__winn_sap.yml
+H11 models/raw_vault/sat/msat_capacity_uom__winn_sap.yml
+H11 models/raw_vault/sat/msat_coa_cost_element__winn_sap.yml
+H11 models/raw_vault/sat/msat_controlling_cost_element__winn_sap.yml
+H11 models/raw_vault/sat/msat_customer_site_use__ml_ebs.yml
+H11 models/raw_vault/sat/msat_delivery_flo_serial__winn_sap.yml
+H11 models/raw_vault/sat/msat_flow_daily_agg__flodetect.yml
+H11 models/raw_vault/sat/msat_item_catalog__amazon.yml
+H11 models/raw_vault/sat/msat_logistics_shipment_stage__winn_sap.yml
+H11 models/raw_vault/sat/msat_order_discount__winn_shopify.yml
+H11 models/raw_vault/sat/msat_order_tag__winn_shopify.yml
+H11 models/raw_vault/sat/msat_question_details__simplesat_yale.yml
+H11 models/raw_vault/sat/msat_question_rules__simplesat_yale.yml
+H11 models/raw_vault/sat/msat_response_details__simplesat_yale.yml
+H11 models/raw_vault/sat/msat_survey_details__simplesat_yale.yml
+H11 models/raw_vault/sat/msat_uom_name__winn_sap.yml
+H11 models/raw_vault/sat/sat_account_grouping__winn_sap.yml
+H11 models/raw_vault/sat/sat_alarm_definition__flo_prod.yml
+H11 models/raw_vault/sat/sat_applist__appbot.yml
+H11 models/raw_vault/sat/sat_balance_transaction__flo_sense.yml
+H11 models/raw_vault/sat/sat_brand__profitero.yml
+H11 models/raw_vault/sat/sat_brand__profitero_share.yml
+H11 models/raw_vault/sat/sat_capacity__winn_sap.yml
+H11 models/raw_vault/sat/sat_co_activity_type__winn_sap.yml
+H11 models/raw_vault/sat/sat_controlling_area__winn_sap.yml
+H11 models/raw_vault/sat/sat_controlling_header__winn_sap.yml
+H11 models/raw_vault/sat/sat_cost_activity_type_total__winn_sap.yml
+H11 models/raw_vault/sat/sat_cost_center_master_data__winn_sap.yml
+H11 models/raw_vault/sat/sat_cost_center_texts__winn_sap.yml
+H11 models/raw_vault/sat/sat_cost_totals_for_external_postings__winn_sap.yml
+H11 models/raw_vault/sat/sat_cost_transaction_type__winn_sap.yml
+H11 models/raw_vault/sat/sat_customer_party__ml_ebs.yml
+H11 models/raw_vault/sat/sat_customer_party_site__ml_ebs.yml
+H11 models/raw_vault/sat/sat_customer_product__profitero.yml
+H11 models/raw_vault/sat/sat_customer_product__profitero_share.yml
+H11 models/raw_vault/sat/sat_customer_site__ml_ebs.yml
+H11 models/raw_vault/sat/sat_customer_site_address__ml_ebs.yml
+H11 models/raw_vault/sat/sat_device_account_details__flo_dynamodb.yml
+H11 models/raw_vault/sat/sat_device_account_subscription__flo_dynamodb.yml
+H11 models/raw_vault/sat/sat_device_inventory__flo_public.yml
+H11 models/raw_vault/sat/sat_device_location_details__flo_dynamodb.yml
+H11 models/raw_vault/sat/sat_device_location_subscription__flo_dynamodb.yml
+H11 models/raw_vault/sat/sat_device_status__flo_service.yml
+H11 models/raw_vault/sat/sat_device_telemetry__flo_daily.yml
+H11 models/raw_vault/sat/sat_entity__winn_sap.yml
+H11 models/raw_vault/sat/sat_external_claims.yml
+H11 models/raw_vault/sat/sat_flo_user_account_group_role__flo_dynamodb.yml
+H11 models/raw_vault/sat/sat_flo_user_details__flo_dynamodb.yml
+H11 models/raw_vault/sat/sat_flo_user_profile__flo_dynamodb.yml
+H11 models/raw_vault/sat/sat_general_object__winn_sap.yml
+H11 models/raw_vault/sat/sat_gl_account__winn_sap.yml
+H11 models/raw_vault/sat/sat_gl_company_code__winn_sap.yml
+H11 models/raw_vault/sat/sat_gl_entries__winn_sap.yml
+H11 models/raw_vault/sat/sat_gl_header__winn_sap.yml
+H11 models/raw_vault/sat/sat_gl_user__winn_sap.yml
+H11 models/raw_vault/sat/sat_incident_details__flo_prod.yml
+H11 models/raw_vault/sat/sat_item_details__datavations.yml
+H11 models/raw_vault/sat/sat_ledger__winn_sap.yml
+H11 models/raw_vault/sat/sat_order_confirmation__winn_sap.yml
+H11 models/raw_vault/sat/sat_order_header__ml_ebs.yml
+H11 models/raw_vault/sat/sat_order_header__tt_e21.yml
+H11 models/raw_vault/sat/sat_order_header__winn_sap.yml
+H11 models/raw_vault/sat/sat_order_header_business_data__winn_sap.yml
+H11 models/raw_vault/sat/sat_order_line__tt_e21.yml
+H11 models/raw_vault/sat/sat_order_line_business_data__winn_sap.yml
+H11 models/raw_vault/sat/sat_order_line_status__winn_sap.yml
+H11 models/raw_vault/sat/sat_order_lines_all__ml_ebs.yml
+H11 models/raw_vault/sat/sat_origin_co_object__winn_sap.yml
+H11 models/raw_vault/sat/sat_paired_device__flo_dynamodb.yml
+H11 models/raw_vault/sat/sat_paired_device_event__flo_dynamodb.yml
+H11 models/raw_vault/sat/sat_product__bazaarvoice.yml
+H11 models/raw_vault/sat/sat_product__bazaarvoice_yale.yml
+H11 models/raw_vault/sat/sat_product__delighted.yml
+H11 models/raw_vault/sat/sat_product__delighted_yale.yml
+H11 models/raw_vault/sat/sat_profit_center_master_data__winn_sap.yml
+H11 models/raw_vault/sat/sat_profit_center_totals__winn_sap.yml
+H11 models/raw_vault/sat/sat_quality_activity__winn_sap.yml
+H11 models/raw_vault/sat/sat_quality_causes__winn_sap.yml
+H11 models/raw_vault/sat/sat_quality_issue__winn_sap.yml
+H11 models/raw_vault/sat/sat_quality_notification__winn_sap.yml
+H11 models/raw_vault/sat/sat_quality_task__winn_sap.yml
+H11 models/raw_vault/sat/sat_question_details__simplesat.yml
+H11 models/raw_vault/sat/sat_question_rules__simplesat.yml
+H11 models/raw_vault/sat/sat_response__hyd_delighted.yml
+H11 models/raw_vault/sat/sat_response__naboo_delighted.yml
+H11 models/raw_vault/sat/sat_response__sws_delighted.yml
+H11 models/raw_vault/sat/sat_response__vak_delighted.yml
+H11 models/raw_vault/sat/sat_response__yale_delighted.yml
+H11 models/raw_vault/sat/sat_response_answer__sws_delighted.yml
+H11 models/raw_vault/sat/sat_response_answer_selection__sws_delighted.yml
+H11 models/raw_vault/sat/sat_response_details__simplesat.yml
+H11 models/raw_vault/sat/sat_retailer__appbot.yml
+H11 models/raw_vault/sat/sat_retailer__profitero.yml
+H11 models/raw_vault/sat/sat_retailer__profitero_share.yml
+H11 models/raw_vault/sat/sat_review__bazaarvoice.yml
+H11 models/raw_vault/sat/sat_review__bazaarvoice_yale.yml
+H11 models/raw_vault/sat/sat_sales_invoice__winn_sap.yml
+H11 models/raw_vault/sat/sat_sales_invoice_line__winn_sap.yml
+H11 models/raw_vault/sat/sat_smart_device__hyd_shadow.yml
+H11 models/raw_vault/sat/sat_smart_device__nab_shadow.yml
+H11 models/raw_vault/sat/sat_smart_device__vak_shadow.yml
+H11 models/raw_vault/sat/sat_subscriber__winn_prive.yml
+H11 models/raw_vault/sat/sat_subscription__winn_prive.yml
+H11 models/raw_vault/sat/sat_survey_details__simplesat.yml
+H11 models/raw_vault/sat/sat_uom__winn_sap.yml
+H11 models/raw_vault/sat/sat_user_engagement_screen__android_flo.yml
+H11 models/raw_vault/sat/sat_user_engagement_screen__ios_flo.yml
+H11 models/raw_vault/sat/sat_user_engagement_track__android_flo.yml
+H11 models/raw_vault/sat/sat_user_engagement_track__ios_flo.yml
+H11 models/raw_vault/sat/sat_work_center__winn_sap.yml

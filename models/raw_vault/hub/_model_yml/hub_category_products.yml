@@ -1,0 +1,22 @@
+version: 2
+models:
+  - name: hub_category_products
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - CATEGORY_HK
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          config:
+            severity: warn
+          arguments:
+            min_value: 4
+    columns:
+      - name: CATEGORY_HK
+        tests:
+          - unique:
+              config:
+                severity: warn
+          - not_null:
+              config:
+                severity: warn

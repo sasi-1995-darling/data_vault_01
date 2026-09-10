@@ -1,0 +1,12 @@
+version: 2
+models:
+  - name: ref_pos_sellthrough_phases__winn
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - PHASE
+              - CATEGORY
+              - PRODUCT_LINE
+              - BASE_MATERIAL
+    columns: []

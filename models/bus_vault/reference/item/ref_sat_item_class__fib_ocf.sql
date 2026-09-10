@@ -1,0 +1,290 @@
+---- SRC LAYER ----
+WITH
+SRC_SFB            as ( SELECT * FROM {{ ref('v_psa_stg_ref_item_class__fib_ocf') }} as SRC 
+                         {% if is_incremental() %}
+                         WHERE SRC.LOAD_DTS > (SELECT DATEADD('HOUR', '-1', MAX(LOAD_DTS)) FROM {{this}})
+                         {% endif %}  )
+
+/*
+SRC_SFB            as ( SELECT * FROM STAGING.v_psa_stg_ref_ITEM_CLASS__fib_ocf )
+*/
+---- LOGIC LAYER ----
+
+, LOGIC_SFB as (
+    SELECT
+        ITEM_CLASS_BK
+      , ITEM_CLASS_CODE
+      , ITEM_CLASS_ID
+      , SEED_DATA_SOURCE
+      , ATTRIBUTE_3
+      , ATTRIBUTE_DATE_4
+      , NIR_CHANGE_TYPE_ID
+      , ATTRIBUTE_NUMBER_8
+      , ATTRIBUTE_18
+      , ATTRIBUTE_1
+      , ATTRIBUTE_8
+      , PUBLIC_FLAG
+      , ATTRIBUTE_7
+      , ORA_SEED_SET_2
+      , SEMANTIC_REGEN_REQUEST_ID
+      , CREATION_DATE
+      , ATTRIBUTE_17
+      , ATTRIBUTE_TIMESTAMP_4
+      , ATTRIBUTE_15
+      , ATTRIBUTE_2
+      , OBJECT_VERSION_NUMBER
+      , ATTRIBUTE_NUMBER_2
+      , ITEM_NUM_GEN_METHOD
+      , ITEM_DESC_GEN_METHOD
+      , ATTRIBUTE_11
+      , ORA_SEED_SET_1
+      , LAST_UPDATE_DATE
+      , ATTRIBUTE_NUMBER_5
+      , LAST_UPDATE_LOGIN
+      , MATCHING_SETUP_DATA_1
+      , ATTRIBUTE_NUMBER_3
+      , MATCHING_SETUP_DATA_2
+      , CHANGE_ORDER_TYPE_ID
+      , JOB_DEFINITION_NAME
+      , ATTRIBUTE_DATE_5
+      , JOB_DEFINITION_PACKAGE
+      , ATTRIBUTE_TIMESTAMP_2
+      , ATTRIBUTE_NUMBER_9
+      , ATTRIBUTE_10
+      , ATTRIBUTE_5
+      , PARENT_ITEM_CLASS_ID
+      , ATTRIBUTE_20
+      , ITEM_CLASS_TYPE
+      , ATTRIBUTE_DATE_2
+      , ATTRIBUTE_14
+      , ATTRIBUTE_12
+      , ATTRIBUTE_TIMESTAMP_3
+      , CREATED_BY
+      , ATTRIBUTE_NUMBER_6
+      , ATTRIBUTE_DATE_3
+      , ATTRIBUTE_NUMBER_7
+      , ATTRIBUTE_NUMBER_10
+      , ATTRIBUTE_6
+      , REQUEST_ID
+      , ATTRIBUTE_9
+      , CFG_ITEM_NUM_GEN_METHOD
+      , DEFAULT_ITEM_CLASS_FLAG
+      , ENABLED_FLAG
+      , NIR_REQD
+      , ATTRIBUTE_DATE_1
+      , ATTRIBUTE_4
+      , ATTRIBUTE_13
+      , ATTRIBUTE_CATEGORY
+      , ATTRIBUTE_TIMESTAMP_5
+      , ITEM_CREATION_ALLOWED_FLAG
+      , ATTRIBUTE_NUMBER_4
+      , ATTRIBUTE_16
+      , VERSION_ENABLED_FLAG
+      , ATTRIBUTE_NUMBER_1
+      , ATTRIBUTE_TIMESTAMP_1
+      , ATTRIBUTE_19
+      , LAST_UPDATED_BY
+      , _FIVETRAN_DELETED
+      , _FIVETRAN_SYNCED
+      , PSA_DELETE_IND
+      , PSA_LOAD_DTS
+      , PSA_RECORD_SOURCE
+      , LOAD_DTS
+      , REC_SRC
+      , HASHDIFF
+    FROM SRC_SFB
+)
+---- RENAME LAYER ----
+
+, RENAME_SFB as (
+    SELECT
+        ITEM_CLASS_BK
+      , ITEM_CLASS_CODE
+      , ITEM_CLASS_ID
+      , SEED_DATA_SOURCE
+      , ATTRIBUTE_3
+      , ATTRIBUTE_DATE_4
+      , NIR_CHANGE_TYPE_ID
+      , ATTRIBUTE_NUMBER_8
+      , ATTRIBUTE_18
+      , ATTRIBUTE_1
+      , ATTRIBUTE_8
+      , PUBLIC_FLAG
+      , ATTRIBUTE_7
+      , ORA_SEED_SET_2
+      , SEMANTIC_REGEN_REQUEST_ID
+      , CREATION_DATE
+      , ATTRIBUTE_17
+      , ATTRIBUTE_TIMESTAMP_4
+      , ATTRIBUTE_15
+      , ATTRIBUTE_2
+      , OBJECT_VERSION_NUMBER
+      , ATTRIBUTE_NUMBER_2
+      , ITEM_NUM_GEN_METHOD
+      , ITEM_DESC_GEN_METHOD
+      , ATTRIBUTE_11
+      , ORA_SEED_SET_1
+      , LAST_UPDATE_DATE
+      , ATTRIBUTE_NUMBER_5
+      , LAST_UPDATE_LOGIN
+      , MATCHING_SETUP_DATA_1
+      , ATTRIBUTE_NUMBER_3
+      , MATCHING_SETUP_DATA_2
+      , CHANGE_ORDER_TYPE_ID
+      , JOB_DEFINITION_NAME
+      , ATTRIBUTE_DATE_5
+      , JOB_DEFINITION_PACKAGE
+      , ATTRIBUTE_TIMESTAMP_2
+      , ATTRIBUTE_NUMBER_9
+      , ATTRIBUTE_10
+      , ATTRIBUTE_5
+      , PARENT_ITEM_CLASS_ID
+      , ATTRIBUTE_20
+      , ITEM_CLASS_TYPE
+      , ATTRIBUTE_DATE_2
+      , ATTRIBUTE_14
+      , ATTRIBUTE_12
+      , ATTRIBUTE_TIMESTAMP_3
+      , CREATED_BY
+      , ATTRIBUTE_NUMBER_6
+      , ATTRIBUTE_DATE_3
+      , ATTRIBUTE_NUMBER_7
+      , ATTRIBUTE_NUMBER_10
+      , ATTRIBUTE_6
+      , REQUEST_ID
+      , ATTRIBUTE_9
+      , CFG_ITEM_NUM_GEN_METHOD
+      , DEFAULT_ITEM_CLASS_FLAG
+      , ENABLED_FLAG
+      , NIR_REQD
+      , ATTRIBUTE_DATE_1
+      , ATTRIBUTE_4
+      , ATTRIBUTE_13
+      , ATTRIBUTE_CATEGORY
+      , ATTRIBUTE_TIMESTAMP_5
+      , ITEM_CREATION_ALLOWED_FLAG
+      , ATTRIBUTE_NUMBER_4
+      , ATTRIBUTE_16
+      , VERSION_ENABLED_FLAG
+      , ATTRIBUTE_NUMBER_1
+      , ATTRIBUTE_TIMESTAMP_1
+      , ATTRIBUTE_19
+      , LAST_UPDATED_BY
+      , _FIVETRAN_DELETED
+      , _FIVETRAN_SYNCED
+      , PSA_DELETE_IND
+      , PSA_LOAD_DTS
+      , PSA_RECORD_SOURCE
+      , LOAD_DTS
+      , REC_SRC
+      , HASHDIFF
+    FROM LOGIC_SFB
+)
+---- FILTER LAYER ----
+
+, FILTER_SFB as (
+    SELECT *
+    FROM RENAME_SFB
+)
+
+---- JOIN LAYER ----
+, JOIN_RESULT as (
+    SELECT *
+    FROM FILTER_SFB
+)
+
+---- FINAL LAYER ----
+SELECT
+          ITEM_CLASS_BK
+        , ITEM_CLASS_CODE
+        , ITEM_CLASS_ID
+        , SEED_DATA_SOURCE
+        , ATTRIBUTE_3
+        , ATTRIBUTE_DATE_4
+        , NIR_CHANGE_TYPE_ID
+        , ATTRIBUTE_NUMBER_8
+        , ATTRIBUTE_18
+        , ATTRIBUTE_1
+        , ATTRIBUTE_8
+        , PUBLIC_FLAG
+        , ATTRIBUTE_7
+        , ORA_SEED_SET_2
+        , SEMANTIC_REGEN_REQUEST_ID
+        , CREATION_DATE
+        , ATTRIBUTE_17
+        , ATTRIBUTE_TIMESTAMP_4
+        , ATTRIBUTE_15
+        , ATTRIBUTE_2
+        , OBJECT_VERSION_NUMBER
+        , ATTRIBUTE_NUMBER_2
+        , ITEM_NUM_GEN_METHOD
+        , ITEM_DESC_GEN_METHOD
+        , ATTRIBUTE_11
+        , ORA_SEED_SET_1
+        , LAST_UPDATE_DATE
+        , ATTRIBUTE_NUMBER_5
+        , LAST_UPDATE_LOGIN
+        , MATCHING_SETUP_DATA_1
+        , ATTRIBUTE_NUMBER_3
+        , MATCHING_SETUP_DATA_2
+        , CHANGE_ORDER_TYPE_ID
+        , JOB_DEFINITION_NAME
+        , ATTRIBUTE_DATE_5
+        , JOB_DEFINITION_PACKAGE
+        , ATTRIBUTE_TIMESTAMP_2
+        , ATTRIBUTE_NUMBER_9
+        , ATTRIBUTE_10
+        , ATTRIBUTE_5
+        , PARENT_ITEM_CLASS_ID
+        , ATTRIBUTE_20
+        , ITEM_CLASS_TYPE
+        , ATTRIBUTE_DATE_2
+        , ATTRIBUTE_14
+        , ATTRIBUTE_12
+        , ATTRIBUTE_TIMESTAMP_3
+        , CREATED_BY
+        , ATTRIBUTE_NUMBER_6
+        , ATTRIBUTE_DATE_3
+        , ATTRIBUTE_NUMBER_7
+        , ATTRIBUTE_NUMBER_10
+        , ATTRIBUTE_6
+        , REQUEST_ID
+        , ATTRIBUTE_9
+        , CFG_ITEM_NUM_GEN_METHOD
+        , DEFAULT_ITEM_CLASS_FLAG
+        , ENABLED_FLAG
+        , NIR_REQD
+        , ATTRIBUTE_DATE_1
+        , ATTRIBUTE_4
+        , ATTRIBUTE_13
+        , ATTRIBUTE_CATEGORY
+        , ATTRIBUTE_TIMESTAMP_5
+        , ITEM_CREATION_ALLOWED_FLAG
+        , ATTRIBUTE_NUMBER_4
+        , ATTRIBUTE_16
+        , VERSION_ENABLED_FLAG
+        , ATTRIBUTE_NUMBER_1
+        , ATTRIBUTE_TIMESTAMP_1
+        , ATTRIBUTE_19
+        , LAST_UPDATED_BY
+        , _FIVETRAN_DELETED
+        , _FIVETRAN_SYNCED
+        , PSA_DELETE_IND
+        , PSA_LOAD_DTS
+        , PSA_RECORD_SOURCE
+        , LOAD_DTS
+        , REC_SRC
+        , HASHDIFF
+FROM JOIN_RESULT
+{% if is_incremental() %}
+WHERE NOT EXISTS (
+    SELECT 1 
+    FROM {{ this }} existing
+    WHERE existing.ITEM_CLASS_BK = JOIN_RESULT.ITEM_CLASS_BK
+    AND existing.HASH_DIFF = JOIN_RESULT.HASH_DIFF
+)
+{% endif %} 
+{% if not is_incremental() %}
+/*the following qualify is to restrict multiple loads of touched records during the initial build. Ex: multiple row per hk, hashdiff */
+qualify 1= row_number()over(partition by ITEM_CLASS_BK, HASHDIFF order by PSA_LOAD_DTS)
+{% endif %}

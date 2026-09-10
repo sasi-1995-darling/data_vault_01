@@ -1,0 +1,15 @@
+version: 2
+models:
+  - name: v_psa_stg_co_activity_type_details__winn_sap
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          config:
+            severity: warn
+          arguments:
+            combination_of_columns:
+              - SPRAS
+              - LSTAR
+              - DATBI
+              - KOKRS
+              - LOAD_DTS
+    columns: []

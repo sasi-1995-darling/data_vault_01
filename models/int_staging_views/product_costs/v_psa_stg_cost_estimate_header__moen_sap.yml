@@ -1,0 +1,14 @@
+version: 2
+models:
+- name: v_psa_stg_cost_estimate_header__moen_sap
+  columns:
+  - name: ITEM_BK
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+  - name: PLANT_BK
+    data_tests:
+    - not_null:
+        config:
+          severity: warn

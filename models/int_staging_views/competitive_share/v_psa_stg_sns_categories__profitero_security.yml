@@ -1,0 +1,32 @@
+version: 2
+models:
+  - name: v_psa_stg_sns_categories__profitero_security
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          config:
+            severity: warn
+          arguments:
+            combination_of_columns:
+              - ID
+              - LOAD_DTS
+    columns:
+      - name: SNS_CATEGORY_BK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: ID
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: LOAD_DTS
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: SNS_CATEGORY_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn

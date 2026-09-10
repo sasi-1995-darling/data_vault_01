@@ -1,0 +1,162 @@
+---- SRC LAYER ----
+WITH
+SRC_STG            as ( SELECT * FROM {{ ref('v_psa_stg_amz_product_sale__security_profitero_share') }} as SRC
+                        {% if is_incremental() %}
+                        WHERE src.LOAD_DTS > (SELECT DATEADD('HOUR', -1, MAX(LOAD_DTS)) FROM {{ this }} )
+                        {% endif %} )
+/*
+SRC_STG            as ( SELECT * FROM int_staging_views.v_psa_stg_amz_product_sale__security_profitero_share )
+*/
+---- LOGIC LAYER ----
+
+, LOGIC_STG as (
+    SELECT
+        ASIN_SNS_CATEGORY_HK
+      , DIM_AMZ_PRODUCT_SALE_KEY
+      , DIM_DATE_KEY
+      , DIM_AMZ_PRODUCT_KEY
+      , DIM_AMZ_CATEGORY_KEY
+      , ACCOUNT_PRODUCT_ID
+      , DATE
+      , LOAD_DTS
+      , ASIN
+      , SNS_CATEGORY_ID
+      , PLATFORM
+      , FIRST_PARTY_SALES
+      , THIRD_PARTY_SALES
+      , TOTAL_SALES
+      , FIRST_PARTY_UNITS
+      , THIRD_PARTY_UNITS
+      , TOTAL_UNITS
+      , REPORTED_IN_ARA
+      , CREATED_AT
+      , UPDATED_AT
+      , IS_DELETED
+      , PSA_LOAD_DTS
+      , PSA_RECORD_SOURCE
+      , PSA_DELETE_IND
+      , BKCC
+      , REC_SRC
+      , HASHDIFF
+    FROM SRC_STG
+)
+---- RENAME LAYER ----
+
+, RENAME_STG as (
+    SELECT
+        ASIN_SNS_CATEGORY_HK
+      , DIM_AMZ_PRODUCT_SALE_KEY
+      , DIM_DATE_KEY
+      , DIM_AMZ_PRODUCT_KEY
+      , DIM_AMZ_CATEGORY_KEY
+      , ACCOUNT_PRODUCT_ID
+      , DATE
+      , LOAD_DTS
+      , ASIN
+      , SNS_CATEGORY_ID
+      , PLATFORM
+      , FIRST_PARTY_SALES
+      , THIRD_PARTY_SALES
+      , TOTAL_SALES
+      , FIRST_PARTY_UNITS
+      , THIRD_PARTY_UNITS
+      , TOTAL_UNITS
+      , REPORTED_IN_ARA
+      , CREATED_AT
+      , UPDATED_AT
+      , IS_DELETED
+      , PSA_LOAD_DTS
+      , PSA_RECORD_SOURCE
+      , PSA_DELETE_IND
+      , BKCC
+      , REC_SRC
+      , HASHDIFF
+    FROM LOGIC_STG
+)
+---- FILTER LAYER ----
+
+, FILTER_STG as (
+    SELECT *
+    FROM RENAME_STG
+)
+---- JOIN LAYER ----
+, JOIN_RESULT as (
+    SELECT * FROM FILTER_STG
+)
+
+---- FINAL LAYER ----
+SELECT
+          ASIN_SNS_CATEGORY_HK
+        , DATE
+        , DIM_AMZ_PRODUCT_SALE_KEY
+        , DIM_DATE_KEY
+        , DIM_AMZ_PRODUCT_KEY
+        , DIM_AMZ_CATEGORY_KEY
+        , ACCOUNT_PRODUCT_ID
+        , LOAD_DTS
+        , ASIN
+        , SNS_CATEGORY_ID
+        , PLATFORM
+        , FIRST_PARTY_SALES
+        , THIRD_PARTY_SALES
+        , TOTAL_SALES
+        , FIRST_PARTY_UNITS
+        , THIRD_PARTY_UNITS
+        , TOTAL_UNITS
+        , REPORTED_IN_ARA
+        , CREATED_AT
+        , UPDATED_AT
+        , IS_DELETED
+        , PSA_LOAD_DTS
+        , PSA_RECORD_SOURCE
+        , PSA_DELETE_IND
+        , BKCC
+        , REC_SRC
+        , HASHDIFF
+FROM JOIN_RESULT
+{% if is_incremental() %}
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM {{ this }} existing
+    WHERE existing.ASIN_SNS_CATEGORY_HK          = JOIN_RESULT.ASIN_SNS_CATEGORY_HK
+      AND existing.DATE             = JOIN_RESULT.DATE
+      AND existing.HASHDIFF         = JOIN_RESULT.HASHDIFF
+)
+
+{% else %}
+
+QUALIFY 1 = ROW_NUMBER() OVER (PARTITION BY ASIN_SNS_CATEGORY_HK, DATE, HASHDIFF ORDER BY PSA_LOAD_DTS)
+
+union all
+SELECT 
+MD5_BINARY(GR.VALUE) AS ASIN_SNS_CATEGORY_HK,
+'1900-01-01'::DATE AS DATE,
+NULL AS DIM_AMZ_PRODUCT_SALE_KEY,
+NULL AS DIM_DATE_KEY,
+NULL AS DIM_AMZ_PRODUCT_KEY,
+NULL AS DIM_AMZ_CATEGORY_KEY,
+NULL AS ACCOUNT_PRODUCT_ID,
+'1900-01-01T00:00:00'::TIMESTAMP_NTZ AS LOAD_DTS,
+GR.VALUE AS ASIN,
+NULL AS SNS_CATEGORY_ID,
+NULL AS PLATFORM,
+NULL AS FIRST_PARTY_SALES,
+NULL AS THIRD_PARTY_SALES,
+NULL AS TOTAL_SALES,
+NULL AS FIRST_PARTY_UNITS,
+NULL AS THIRD_PARTY_UNITS,
+NULL AS TOTAL_UNITS,
+NULL AS REPORTED_IN_ARA,
+'1900-01-01'::DATE AS CREATED_AT,
+'1900-01-01'::DATE AS UPDATED_AT,
+'N' AS IS_DELETED,
+'1900-01-01'::TIMESTAMP AS PSA_LOAD_DTS,
+NULL AS PSA_RECORD_SOURCE,
+'N' AS PSA_DELETE_IND,
+DECODE(GR.VALUE, 0, 'GHOST RECORD-SYSTEM', -1, 'GHOST RECORD-nullkey-required', -2, 'GHOST RECORD-nullkey-optional') AS BKCC,
+'USAZET.SNOWFLAKE.FBIN.DERIVED' AS REC_SRC,
+MD5_BINARY('') AS HASHDIFF
+FROM
+TABLE(strtok_split_to_table('0|-1|-2', '|')) AS GR
+{% endif %}
+

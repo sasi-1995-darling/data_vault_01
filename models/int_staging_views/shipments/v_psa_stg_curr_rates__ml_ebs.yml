@@ -1,0 +1,25 @@
+version: 2
+models:
+  - name: v_psa_stg_curr_rates__ml_ebs
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          config:
+            severity: warn
+          arguments:
+            combination_of_columns:
+              - from_currency
+              - to_currency
+              - conversion_type
+              - conversion_date
+              - LOAD_DTS
+    columns:
+      - name: CURR_RATES_BK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: LOAD_DTS
+        tests:
+          - not_null:
+              config:
+                severity: warn

@@ -1,0 +1,9 @@
+version: 2
+models:
+  - name: pb_stg_pos_dim_date_comp_share
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - DATE
+    columns: []

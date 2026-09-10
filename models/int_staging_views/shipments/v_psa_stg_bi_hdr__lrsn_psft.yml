@@ -1,0 +1,67 @@
+version: 2
+models:
+  - name: v_psa_stg_bi_hdr__lrsn_psft
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          config:
+            severity: warn
+          arguments:
+            combination_of_columns:
+              - INVOICE
+              - LOAD_DTS
+    columns:
+      - name: INVOICE_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: INVOICE_BK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: LOAD_DTS
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: REC_SRC
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: CUSTOMER_SOLDTO_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: CUSTOMER_SHIPTO_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: CUSTOMER_BILLTO_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: INVOICE_CUSTOMER_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: SALES_REP_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: INVOICE_SALES_REP_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: HASHDIFF
+        tests:
+          - not_null:
+              config:
+                severity: warn

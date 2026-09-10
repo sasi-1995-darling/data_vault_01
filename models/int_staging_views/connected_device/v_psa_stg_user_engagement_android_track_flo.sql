@@ -1,0 +1,248 @@
+---- SRC LAYER ----
+WITH
+SRC_D1             as ( SELECT ANONYMOUS_ID, CONTEXT_APP_BUILD, CONTEXT_APP_NAME, CONTEXT_APP_NAMESPACE, CONTEXT_APP_VERSION, CONTEXT_DEVICE_ADVERTISING_ID, CONTEXT_DEVICE_AD_TRACKING_ENABLED, CONTEXT_DEVICE_ID, CONTEXT_DEVICE_MANUFACTURER, CONTEXT_DEVICE_MODEL, CONTEXT_DEVICE_NAME, CONTEXT_DEVICE_TOKEN, CONTEXT_DEVICE_TYPE, CONTEXT_IP, CONTEXT_LIBRARY_NAME, CONTEXT_LIBRARY_VERSION, CONTEXT_LOCALE, CONTEXT_NETWORK_BLUETOOTH, CONTEXT_NETWORK_CARRIER, CONTEXT_NETWORK_CELLULAR, CONTEXT_NETWORK_WIFI, CONTEXT_OS_NAME, CONTEXT_OS_VERSION, CONTEXT_SCREEN_DENSITY, CONTEXT_SCREEN_HEIGHT, CONTEXT_SCREEN_WIDTH, CONTEXT_TIMEZONE, CONTEXT_TRAITS_ANONYMOUS_ID, CONTEXT_TRAITS_EMAIL, CONTEXT_TRAITS_FIRST_NAME, CONTEXT_TRAITS_LAST_NAME, CONTEXT_TRAITS_USER_ID, CONTEXT_USER_AGENT, EVENT, EVENT_TEXT, ID, ORIGINAL_TIMESTAMP, PSA_DELETE_IND, PSA_LOAD_DTS, PSA_RECORD_SOURCE, RECEIVED_AT, SENT_AT, TIMESTAMP, USER_ID, UUID_TS FROM {{ source('android', 'tracks') }} as SRC  ),
+SRC_A1             as ( SELECT BKCC, REC_SRC FROM {{ ref('ref_business_key_collision') }} as SRC  )
+
+/*
+SRC_D1             as ( SELECT * FROM android.tracks )
+SRC_A1             as ( SELECT * FROM raw_vault.ref_business_key_collision )
+*/
+---- LOGIC LAYER ----
+
+, LOGIC_D1 as (
+    SELECT
+        CONTEXT_NETWORK_WIFI
+      , CONTEXT_OS_VERSION
+      , CONTEXT_TRAITS_USER_ID
+      , CONTEXT_DEVICE_TOKEN
+      , CONTEXT_LOCALE
+      , CONTEXT_APP_BUILD
+      , CONTEXT_APP_VERSION
+      , CONTEXT_SCREEN_WIDTH
+      , ID
+      , ORIGINAL_TIMESTAMP
+      , CONTEXT_NETWORK_BLUETOOTH
+      , CONTEXT_NETWORK_CARRIER
+      , CONTEXT_OS_NAME
+      , CONTEXT_USER_AGENT
+      , RECEIVED_AT
+      , COALESCE(ANONYMOUS_ID, '-2')                                 as                                       ANONYMOUS_ID
+      , CONTEXT_APP_NAME
+      , CONTEXT_DEVICE_ID
+      , CONTEXT_LIBRARY_VERSION
+      , CONTEXT_NETWORK_CELLULAR
+      , CONTEXT_TIMEZONE
+      , COALESCE(CONTEXT_TRAITS_ANONYMOUS_ID, '-2')                  as                        CONTEXT_TRAITS_ANONYMOUS_ID
+      , TIMESTAMP
+      , CONTEXT_DEVICE_ADVERTISING_ID
+      , CONTEXT_DEVICE_MANUFACTURER
+      , CONTEXT_DEVICE_MODEL
+      , CONTEXT_DEVICE_TYPE
+      , CONTEXT_SCREEN_HEIGHT
+      , EVENT
+      , USER_ID
+      , CONTEXT_DEVICE_AD_TRACKING_ENABLED
+      , CONTEXT_DEVICE_NAME
+      , CONTEXT_IP
+      , CONTEXT_SCREEN_DENSITY
+      , CONTEXT_TRAITS_LAST_NAME
+      , CONTEXT_LIBRARY_NAME
+      , CONTEXT_TRAITS_FIRST_NAME
+      , EVENT_TEXT
+      , SENT_AT
+      , UUID_TS
+      , CONTEXT_APP_NAMESPACE
+      , PSA_LOAD_DTS
+      , PSA_RECORD_SOURCE
+      , PSA_DELETE_IND
+      , ANONYMOUS_ID                                                 as                                   RAW_ANONYMOUS_ID
+      , CONTEXT_TRAITS_ANONYMOUS_ID                                  as                    RAW_CONTEXT_TRAITS_ANONYMOUS_ID
+      , CONTEXT_TRAITS_EMAIL                                         as                           RAW_CONTEXT_TRAITS_EMAIL
+    FROM SRC_D1
+)
+
+, LOGIC_A1 as (
+    SELECT
+        REC_SRC
+      , BKCC
+    FROM SRC_A1
+)
+---- RENAME LAYER ----
+
+, RENAME_D1 as (
+    SELECT
+        CONTEXT_NETWORK_WIFI
+      , CONTEXT_OS_VERSION
+      , CONTEXT_TRAITS_USER_ID
+      , CONTEXT_DEVICE_TOKEN
+      , CONTEXT_LOCALE
+      , CONTEXT_APP_BUILD
+      , CONTEXT_APP_VERSION
+      , CONTEXT_SCREEN_WIDTH
+      , ID
+      , ORIGINAL_TIMESTAMP
+      , CONTEXT_NETWORK_BLUETOOTH
+      , CONTEXT_NETWORK_CARRIER
+      , CONTEXT_OS_NAME
+      , CONTEXT_USER_AGENT
+      , RECEIVED_AT
+      , ANONYMOUS_ID
+      , CONTEXT_APP_NAME
+      , CONTEXT_DEVICE_ID
+      , CONTEXT_LIBRARY_VERSION
+      , CONTEXT_NETWORK_CELLULAR
+      , CONTEXT_TIMEZONE
+      , CONTEXT_TRAITS_ANONYMOUS_ID
+      , TIMESTAMP
+      , CONTEXT_DEVICE_ADVERTISING_ID
+      , CONTEXT_DEVICE_MANUFACTURER
+      , CONTEXT_DEVICE_MODEL
+      , CONTEXT_DEVICE_TYPE
+      , CONTEXT_SCREEN_HEIGHT
+      , EVENT
+      , USER_ID
+      , CONTEXT_DEVICE_AD_TRACKING_ENABLED
+      , CONTEXT_DEVICE_NAME
+      , CONTEXT_IP
+      , CONTEXT_SCREEN_DENSITY
+      , CONTEXT_TRAITS_LAST_NAME
+      , CONTEXT_LIBRARY_NAME
+      , CONTEXT_TRAITS_FIRST_NAME
+      , EVENT_TEXT
+      , SENT_AT
+      , UUID_TS
+      , CONTEXT_APP_NAMESPACE
+      , PSA_LOAD_DTS
+      , PSA_RECORD_SOURCE
+      , PSA_DELETE_IND
+      , RAW_ANONYMOUS_ID
+      , RAW_CONTEXT_TRAITS_ANONYMOUS_ID
+      , RAW_CONTEXT_TRAITS_EMAIL
+    FROM LOGIC_D1
+)
+
+, RENAME_A1 as (
+    SELECT
+        REC_SRC
+      , BKCC
+    FROM LOGIC_A1
+)
+---- FILTER LAYER ----
+
+, FILTER_D1 as (
+    SELECT *
+    FROM RENAME_D1
+)
+
+, FILTER_A1 as (
+    SELECT *
+    FROM RENAME_A1
+    WHERE rec_src = 'US.ANDROID.TRACKS'
+)
+
+---- JOIN LAYER ----
+, JOIN_RESULT as (
+    SELECT *
+    FROM FILTER_D1
+    INNER JOIN FILTER_A1
+        ON '1' = '1'
+)
+
+---- FINAL LAYER ----
+SELECT
+          COALESCE(RAW_CONTEXT_TRAITS_ANONYMOUS_ID, '-1')              as CONSUMER_BK
+        , CONVERT_TIMEZONE('UTC', PSA_LOAD_DTS)                        as LOAD_DTS
+        , CONTEXT_NETWORK_WIFI
+        , CONTEXT_OS_VERSION
+        , CONTEXT_TRAITS_USER_ID
+        , CONTEXT_DEVICE_TOKEN
+        , CONTEXT_LOCALE
+        , CONTEXT_APP_BUILD
+        , CONTEXT_APP_VERSION
+        , CONTEXT_SCREEN_WIDTH
+        , ID
+        , ORIGINAL_TIMESTAMP
+        , CONTEXT_NETWORK_BLUETOOTH
+        , CONTEXT_NETWORK_CARRIER
+        , CONTEXT_OS_NAME
+        , CONTEXT_USER_AGENT
+        , RECEIVED_AT
+        , ANONYMOUS_ID
+        , CONTEXT_APP_NAME
+        , CONTEXT_DEVICE_ID
+        , CONTEXT_LIBRARY_VERSION
+        , CONTEXT_NETWORK_CELLULAR
+        , CONTEXT_TIMEZONE
+        , CONTEXT_TRAITS_ANONYMOUS_ID
+        , TIMESTAMP
+        , CONTEXT_DEVICE_ADVERTISING_ID
+        , CONTEXT_DEVICE_MANUFACTURER
+        , CONTEXT_DEVICE_MODEL
+        , CONTEXT_DEVICE_TYPE
+        , CONTEXT_SCREEN_HEIGHT
+        , EVENT
+        , USER_ID
+        , CONTEXT_DEVICE_AD_TRACKING_ENABLED
+        , CONTEXT_DEVICE_NAME
+        , CONTEXT_IP
+        , CONTEXT_SCREEN_DENSITY
+        , CONTEXT_TRAITS_LAST_NAME
+        , CONTEXT_LIBRARY_NAME
+        , CONTEXT_TRAITS_FIRST_NAME
+        , EVENT_TEXT
+        , SENT_AT
+        , UUID_TS
+        , CONTEXT_APP_NAMESPACE
+        , PSA_LOAD_DTS
+        , PSA_RECORD_SOURCE
+        , PSA_DELETE_IND
+        , REC_SRC
+        , BKCC
+        , MD5_BINARY(UPPER(CONCAT_WS('||',
+          COALESCE(NULLIF(TRIM(CAST(CONSUMER_BK as VARCHAR)),''), '^^')
+        , COALESCE(NULLIF(TRIM(CAST(BKCC as VARCHAR)),''), '^^')
+        ))) as CONSUMER_HK
+        , MD5_BINARY(UPPER(NULLIF(CONCAT(
+              IFNULL(TRIM(CONTEXT_NETWORK_WIFI::text), '^^') 
+            , '||', IFNULL(TRIM(CONTEXT_OS_VERSION::text), '^^') 
+            , '||', IFNULL(TRIM(CONTEXT_TRAITS_USER_ID::text), '^^') 
+            , '||', IFNULL(TRIM(CONTEXT_DEVICE_TOKEN::text), '^^') 
+            , '||', IFNULL(TRIM(CONTEXT_LOCALE::text), '^^') 
+            , '||', IFNULL(TRIM(CONTEXT_APP_BUILD::text), '^^') 
+            , '||', IFNULL(TRIM(CONTEXT_APP_VERSION::text), '^^') 
+            , '||', IFNULL(TRIM(CONTEXT_SCREEN_WIDTH::text), '^^') 
+            , '||', IFNULL(TRIM(ID::text), '^^') 
+            , '||', IFNULL(TRIM(ORIGINAL_TIMESTAMP::text), '^^') 
+            , '||', IFNULL(TRIM(CONTEXT_NETWORK_BLUETOOTH::text), '^^') 
+            , '||', IFNULL(TRIM(CONTEXT_NETWORK_CARRIER::text), '^^') 
+            , '||', IFNULL(TRIM(CONTEXT_OS_NAME::text), '^^') 
+            , '||', IFNULL(TRIM(CONTEXT_USER_AGENT::text), '^^') 
+            , '||', IFNULL(TRIM(RECEIVED_AT::text), '^^') 
+            , '||', IFNULL(TRIM(ANONYMOUS_ID::text), '^^') 
+            , '||', IFNULL(TRIM(CONTEXT_APP_NAME::text), '^^') 
+            , '||', IFNULL(TRIM(CONTEXT_DEVICE_ID::text), '^^') 
+            , '||', IFNULL(TRIM(CONTEXT_LIBRARY_VERSION::text), '^^') 
+            , '||', IFNULL(TRIM(CONTEXT_NETWORK_CELLULAR::text), '^^') 
+            , '||', IFNULL(TRIM(CONTEXT_TIMEZONE::text), '^^') 
+            , '||', IFNULL(TRIM(CONTEXT_TRAITS_ANONYMOUS_ID::text), '^^') 
+            , '||', IFNULL(TRIM(TIMESTAMP::text), '^^') 
+            , '||', IFNULL(TRIM(CONTEXT_DEVICE_ADVERTISING_ID::text), '^^') 
+            , '||', IFNULL(TRIM(CONTEXT_DEVICE_MANUFACTURER::text), '^^') 
+            , '||', IFNULL(TRIM(CONTEXT_DEVICE_MODEL::text), '^^') 
+            , '||', IFNULL(TRIM(CONTEXT_DEVICE_TYPE::text), '^^') 
+            , '||', IFNULL(TRIM(CONTEXT_SCREEN_HEIGHT::text), '^^') 
+            , '||', IFNULL(TRIM(EVENT::text), '^^') 
+            , '||', IFNULL(TRIM(USER_ID::text), '^^') 
+            , '||', IFNULL(TRIM(CONTEXT_DEVICE_AD_TRACKING_ENABLED::text), '^^') 
+            , '||', IFNULL(TRIM(CONTEXT_DEVICE_NAME::text), '^^') 
+            , '||', IFNULL(TRIM(CONTEXT_IP::text), '^^') 
+            , '||', IFNULL(TRIM(CONTEXT_SCREEN_DENSITY::text), '^^') 
+            , '||', IFNULL(TRIM(CONTEXT_TRAITS_LAST_NAME::text), '^^') 
+            , '||', IFNULL(TRIM(CONTEXT_LIBRARY_NAME::text), '^^') 
+            , '||', IFNULL(TRIM(CONTEXT_TRAITS_FIRST_NAME::text), '^^') 
+            , '||', IFNULL(TRIM(EVENT_TEXT::text), '^^') 
+            , '||', IFNULL(TRIM(SENT_AT::text), '^^') 
+            , '||', IFNULL(TRIM(UUID_TS::text), '^^') 
+            , '||', IFNULL(TRIM(CONTEXT_APP_NAMESPACE::text), '^^') 
+        ), '^^||^^')))  as HASHDIFF
+FROM JOIN_RESULT

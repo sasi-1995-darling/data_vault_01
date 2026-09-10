@@ -1,0 +1,9 @@
+version: 2
+models:
+  - name: ref_lookup_values__ml_ascp
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - LOOKUP_VALUE_HK
+    columns: []

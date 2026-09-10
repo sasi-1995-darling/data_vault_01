@@ -1,0 +1,10 @@
+version: 2
+models:
+  - name: ref_mrp_element_description__winn_sap
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - ORDER_TYPE_CODE
+              - LOAD_DTS
+    columns: []

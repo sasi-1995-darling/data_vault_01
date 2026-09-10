@@ -1,0 +1,26 @@
+version: 2
+models:
+- name: lnk_deliveries_in_shipment
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - DELIVERIES_IN_SHIPMENT_LHK
+  - dbt_expectations.expect_table_row_count_to_be_between:
+      arguments:
+        min_value: 4
+      config:
+        severity: warn
+  columns:
+  - name: SHIPMENT_HK
+    data_tests:
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'hub_shipment' )
+          pk_column_name: SHIPMENT_HK
+  - name: DELIVERY_HK
+    data_tests:
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'hub_delivery_v1' )
+          pk_column_name: DELIVERY_HK

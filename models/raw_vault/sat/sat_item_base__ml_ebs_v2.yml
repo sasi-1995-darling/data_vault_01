@@ -1,0 +1,23 @@
+version: 2
+models:
+  - name: sat_item_base__ml_ebs_v2
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - ITEM_HK
+              - INVENTORY_ITEM_ID
+              - ORGANIZATION_ID
+              - LOAD_DTS
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          config:
+            severity: warn
+          arguments:
+            min_value: 4
+    columns:
+      - name: ITEM_HK
+        tests:
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'hub_item_v1' )
+                pk_column_name: ITEM_HK

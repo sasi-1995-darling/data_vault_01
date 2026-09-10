@@ -1,0 +1,205 @@
+# Integration test YAML config: v_psa_stg_retailers__appbot
+# Simulates Stage 1 (Tech Design Creator) output for validation against
+# the existing production model at:
+#   models/int_staging_views/consumer_feedback/v_psa_stg_retailers__appbot.sql
+#
+# Source: PSA_PROD.APPBOT.APPLIST
+# BK: STORE -> RETAILER_BK
+# HASHDIFF: STORE_ID only (1 data column)
+# BKCC REC_SRC: US.APPBOT.APPLIST
+
+schema_version: "1.0"
+
+filename: retailers__appbot
+
+models:
+  - layer: STG
+    derived_name: v_psa_stg_retailers__appbot
+    short_name: retailers__appbot
+    sources:
+      - source_schema: appbot_psa
+        source_table: APPLIST
+        alias: S
+        source_layer_filter: "WHERE psa_delete_ind = 'N'"
+        filter_conditions: ""
+        join_type: ""
+        parent_join_number: "1"
+        parent_table_join: ""
+        child_table_join: ""
+        target_schema: consumer_feedback
+    columns:
+      # === BK column ===
+      - source_table: S
+        source_column: STORE
+        staging_column_name: RETAILER_BK
+        datatype: VARCHAR
+        hashdiff: ""
+        not_null: "yes"
+        unique: "COMPOSITE: RETAILER_BK, LOAD_DTS"
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 1
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      # === LOAD_DTS (derived from PSA_LOAD_DTS) ===
+      - source_table: S
+        source_column: "(DERIVED)"
+        staging_column_name: LOAD_DTS
+        datatype: TIMESTAMP
+        hashdiff: ""
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: "CONVERT_TIMEZONE('UTC', PSA_LOAD_DTS)"
+        order: 2
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      # === Data column (in HASHDIFF) ===
+      - source_table: S
+        source_column: STORE_ID
+        staging_column_name: STORE_ID
+        datatype: VARCHAR
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 3
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      # === PSA metadata columns ===
+      - source_table: S
+        source_column: PSA_LOAD_DTS
+        staging_column_name: PSA_LOAD_DTS
+        datatype: TIMESTAMP
+        hashdiff: ""
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 4
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: PSA_RECORD_SOURCE
+        staging_column_name: PSA_RECORD_SOURCE
+        datatype: VARCHAR
+        hashdiff: ""
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 5
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: PSA_DELETE_IND
+        staging_column_name: PSA_DELETE_IND
+        datatype: VARCHAR
+        hashdiff: ""
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 6
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      # === BKCC columns (from cross join — no source_table) ===
+      - source_table: ""
+        source_column: REC_SRC
+        staging_column_name: REC_SRC
+        datatype: VARCHAR
+        hashdiff: ""
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 7
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: ""
+        source_column: BKCC
+        staging_column_name: BKCC
+        datatype: VARCHAR
+        hashdiff: ""
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 8
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      # === HK (deferred hash in FINAL layer) ===
+      - source_table: ""
+        source_column: "(DERIVED)"
+        staging_column_name: RETAILER_HK
+        datatype: BINARY
+        hashdiff: ""
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: "HASH: RETAILER_BK, BKCC"
+        order: 9
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      # === HASHDIFF placeholder (signals HASHDIFF generation) ===
+      - source_table: ""
+        source_column: "(DERIVED)"
+        staging_column_name: HASHDIFF
+        datatype: BINARY
+        hashdiff: ""
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: "HASH: STORE_ID"
+        order: 10
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+_pipeline_metadata:
+  bkcc_rec_src: "US.APPBOT.APPLIST"
+  has_fivetran_deleted: false
+  has_psa_delete_ind: false
+  psa_delete_filter: false
+  null_bk_coalesced: false
+  large_volume: false
+  row_count: 50000

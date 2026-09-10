@@ -1,0 +1,9 @@
+version: 2
+models:
+  - name: pit_brand_v2
+    data_tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - BRAND_HK
+              - BKCC

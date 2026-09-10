@@ -1,0 +1,92 @@
+
+with
+cte_bkcc as (select * from {{ ref('ref_business_key_collision') }}
+where rec_src = 'USOHNO.SAP.ECCPRD.Z_MVKE')
+select 
+MANDT
+, MATNR
+, VKORG
+, VTWEG
+, GLREQUEST
+, LVORM
+, VERSG
+, BONUS
+, PROVG
+, SKTOF
+, VMSTA
+, VMSTD
+, AUMNG
+, LFMNG
+, EFMNG
+, SCMNG
+, SCHME
+, VRKME
+, MTPOS
+, DWERK
+, PRODH
+, PMATN
+, KONDM
+, KTGRM
+, MVGR1
+, MVGR2
+, MVGR3
+, MVGR4
+, MVGR5
+, SSTUF
+, PFLKS
+, LSTFL
+, LSTVZ
+, LSTAK
+, LDVFL
+, LDBFL
+, LDVZL
+, LDBZL
+, VDVFL
+, VDBFL
+, VDVZL
+, VDBZL
+, PRAT1
+, PRAT2
+, PRAT3
+, PRAT4
+, PRAT5
+, PRAT6
+, PRAT7
+, PRAT8
+, PRAT9
+, PRATA
+, RDPRF
+, MEGRU
+, LFMAX
+, RJART
+, PBIND
+, VAVME
+, MATKC
+, PVMSO
+, "/BEV1/EMLGRP"    as BEV1_EMLGRP
+, "/BEV1/EMDRCKSPL" as BEV1_EMDRCKSPL
+, "/BEV1/RPBEZME" as BEV1_RPBEZME
+, "/BEV1/RPSNS" as BEV1_RPSNS
+, "/BEV1/RPSFA" as BEV1_RPSFA
+, "/BEV1/RPSKI" as BEV1_RPSKI
+, "/BEV1/RPSCO" as BEV1_RPSCO
+, "/BEV1/RPSSO" as BEV1_RPSSO
+, PLGTP
+, ZZSOBSDT
+, ZZSDELDATE
+, ZZWEXPDT
+, GLDELFLAG
+, GLSOURCESYSTEM
+,GLCHANGETIME
+,  TO_TIMESTAMP_NTZ(
+    SUBSTR(GLCHANGETIME, 1, 8) || ' ' ||
+    SUBSTR(GLCHANGETIME, 9, 2) || ':' ||
+    SUBSTR(GLCHANGETIME, 11, 2) || ':' ||
+    SUBSTR(GLCHANGETIME, 13, 2) || '.' ||
+    REGEXP_REPLACE(SUBSTR(GLCHANGETIME, 16), '^\\.', ''),
+    'YYYYMMDD HH24:MI:SS.FF9'
+) AS  GLCHANGETIME_DTTM 
+, cte_bkcc.rec_src
+, cte_bkcc.bkcc
+ from {{ source('bronze_moen_sap', 'z_mvke') }}
+inner join cte_bkcc on 1=1

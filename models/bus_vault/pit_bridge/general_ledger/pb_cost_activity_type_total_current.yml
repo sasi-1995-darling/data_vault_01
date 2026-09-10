@@ -1,0 +1,9 @@
+version: 2
+models:
+  - name: pb_cost_activity_type_total_current
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - COST_ACTIVITY_TYPE_TOTALS_HK
+    columns: []

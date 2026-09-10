@@ -1,0 +1,28 @@
+version: 2
+models:
+  - name: ref_sat_batch_sources__ml_ebs
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - BATCH_SOURCE_BK
+              - LOAD_DTS
+    columns:
+      - name: BATCH_SOURCE_BK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+          - dbt_utils.relationships_where:
+              arguments:
+                to: ref( 'ref_hub_batch_sources' )
+                field: BATCH_SOURCE_BK
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'ref_hub_batch_sources' )
+                pk_column_name: BATCH_SOURCE_BK
+      - name: LOAD_DTS
+        tests:
+          - not_null:
+              config:
+                severity: warn

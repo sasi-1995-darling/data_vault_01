@@ -1,0 +1,19 @@
+version: 2
+models:
+  - name: ref_po_status__tt_e21
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - PO_STATUS_CODE_TYPE
+    columns:
+      - name: PO_STATUS_CODE_TYPE
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: PO_STATUS_CODE_VALUE
+        tests:
+          - not_null:
+              config:
+                severity: warn

@@ -1,0 +1,11 @@
+version: 1
+
+sources:
+  - name: o8__winn
+    description: data arrives from o8 daily
+    database: edp_bronze_{{env_var('DBT_SOURCE_ENV')}}
+    schema: O8
+    tables:
+      - name: part_master
+        description: despite of the name this is a master of part-location-supplier
+      - name: part_buffer_tracking

@@ -1,0 +1,28 @@
+version: 2
+models:
+- name: sat_amz_category__security_profitero_share
+  data_tests:
+  - dbt_constraints.primary_key:
+      name: pk_sat_amz_category__security_profitero_share
+      arguments:
+        column_names:
+        - SNS_CATEGORY_HK
+        - LOAD_DTS
+      config:
+        severity: warn
+  - dbt_expectations.expect_table_row_count_to_be_between:
+      name: rowcount_sat_amz_category__security_profitero_share
+      arguments:
+        min_value: 4
+      config:
+        severity: warn
+  columns:
+  - name: SNS_CATEGORY_HK
+    data_tests:
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'hub_sns_category' )
+          pk_column_name: SNS_CATEGORY_HK
+  config:
+    tags:
+    - sat

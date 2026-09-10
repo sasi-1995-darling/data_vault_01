@@ -1,0 +1,18 @@
+version: 2
+models:
+  - name: v_psa_stg_item_version__winn_sap
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - PLANT_ITEM_HK
+              - STLAN
+              - STLAL
+              - VERID
+              - LOAD_DTS
+    columns:
+      - name: PLANT_ITEM_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn

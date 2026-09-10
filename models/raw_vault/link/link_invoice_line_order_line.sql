@@ -1,0 +1,67 @@
+---- SRC LAYER ----
+WITH
+SRC_SINVLML        as ( SELECT * FROM {{ ref('v_psa_stg_invoice_line__ml_ebs') }} as SRC 
+                        QUALIFY (ROW_NUMBER() OVER(PARTITION BY INVOICE_LINE_ORDER_LINE_HK ORDER BY LOAD_DTS ))=1 )
+
+/*
+SRC_SINVLML        as ( SELECT * FROM STAGING.v_psa_stg_invoice_line__ml_ebs )
+*/
+---- LOGIC LAYER ----
+
+, LOGIC_SINVLML as (
+    SELECT
+        INVOICE_LINE_ORDER_LINE_HK
+      , ORDER_LINE_HK
+      , INVOICE_LINE_HK
+      , LOAD_DTS
+      , REC_SRC
+    FROM SRC_SINVLML
+)
+---- RENAME LAYER ----
+
+, RENAME_SINVLML as (
+    SELECT
+        INVOICE_LINE_ORDER_LINE_HK
+      , ORDER_LINE_HK
+      , INVOICE_LINE_HK
+      , LOAD_DTS
+      , REC_SRC
+    FROM LOGIC_SINVLML
+)
+---- FILTER LAYER ----
+
+, FILTER_SINVLML as (
+    SELECT *
+    FROM RENAME_SINVLML
+)
+---- JOIN LAYER ----
+, JOIN_RESULT as (
+    SELECT * FROM FILTER_SINVLML
+)
+
+---- FINAL LAYER ----
+SELECT
+          INVOICE_LINE_ORDER_LINE_HK
+        , ORDER_LINE_HK
+        , INVOICE_LINE_HK
+        , LOAD_DTS
+        , REC_SRC
+FROM JOIN_RESULT
+{% if is_incremental() %}
+WHERE NOT EXISTS (
+    SELECT 1 
+    FROM {{ this }} existing
+    WHERE existing.INVOICE_LINE_ORDER_LINE_HK = JOIN_RESULT.INVOICE_LINE_ORDER_LINE_HK
+)
+{% endif %}
+
+{% if not is_incremental() %}
+union all
+SELECT 
+MD5_BINARY(GR.VALUE) as INVOICE_LINE_ORDER_LINE_HK
+, MD5_BINARY(GR.VALUE) as ORDER_LINE_HK
+, MD5_BINARY(GR.VALUE) as INVOICE_LINE_HK, CONVERT_TIMEZONE('UTC','1900-01-01'::TIMESTAMP)::TIMESTAMP  AS LOAD_DTS
+, 'USAZET.SNOWFLAKE.FBIN.DERIVED' AS REC_SRC
+FROM
+TABLE(strtok_split_to_table('0|-1|-2', '|')) AS GR
+{% endif %}

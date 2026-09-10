@@ -1,0 +1,18 @@
+version: 2
+models:
+- name: v_psa_stg_object_list_detail__winn_sap
+  data_tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - OBJECT_LIST_HK
+        - LOAD_DTS
+        - HASHDIFF
+      config:
+        severity: warn
+  columns:
+  - name: OBJECT_LIST_BK
+    data_tests:
+    - not_null:
+        config:
+          severity: warn

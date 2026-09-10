@@ -1,0 +1,10 @@
+version: 2
+models:
+- name: ref_resource_category__winn_sap
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - RESOURCE_CATEGORY_CODE
+        - LOAD_DTS
+  columns: []

@@ -1,0 +1,594 @@
+---- SRC LAYER ----
+WITH
+SRC_OHTTE21          as ( SELECT * FROM {{ ref('v_psa_stg_order_header__tt_e21') }} as SRC 
+                         {% if is_incremental() %}
+                         WHERE SRC.LOAD_DTS > (SELECT DATEADD('HOUR', '-1', MAX(LOAD_DTS)) FROM {{this}})
+                         {% endif %} )
+/*
+SRC_SOSAP          as ( SELECT * FROM STAGING.v_psa_stg_order_header__WINN_SAP )
+*/
+---- LOGIC LAYER ----
+
+, LOGIC_OHTTE21 as (
+    SELECT
+            ORDER_HEADER_HK
+        , _FIVETRAN_ID
+        , ORIG_GEOCODE
+        , PRICEID
+        , CUSTV2
+        , CUSTV1
+        , ORDER_STAT
+        , CARD_TRANS_ID
+        , REGREL_USER
+        , SHIPCNTRY
+        , FRT_PAY_MTH
+        , CONSOL_NUMB
+        , INVOICE_DATE
+        , SHIPTO_CODE
+        , PROJID
+        , HOLD_CODE
+        , TAX_EXEMPT_ID
+        , CUSTF2
+        , CUSTF1
+        , SHIPNAME
+        , RET_INST_FLAG
+        , ORDFRMGEOCODE
+        , DIVISION_CODE
+        , ORDER_CALLER
+        , LCHFLD2
+        , HANDLING_CHRG
+        , LCHFLD1
+        , LCHFLD4
+        , SHIPGEOCODE
+        , LCHFLD3
+        , BO_RULE
+        , TRANSINS_FLAG
+        , SHIPST
+        , ORDFRMPHONE
+        , SHIPCOUNTRY
+        , DUEOUT_TIME
+        , NOTES1
+        , DEPARTMENT
+        , BILLMI
+        , NOTES2
+        , LCHFLD5
+        , ACK_PRNT_METH
+        , DISCNT
+        , ORDER_BY
+        , DATE_INV_PRINT
+        , CANCEL_DATE
+        , STOPCHG
+        , CUST_NAME_QUAL
+        , BILLCITY
+        , REL_CREDIT
+        , ACK_FLAG
+       ,  ORDFRMST
+        , REP2_PCT
+        , CARD_TYPE
+        , VOLDIS_SO
+        , FOB_CODE
+        , CARD_APPROVAL
+        , JOB_CODE
+        , DATE_INV
+        , TOTDISC
+        , USER_SO
+        , CUST_CODE
+        , MET_OF_SHIP
+        , CARD_USER_NAME
+        , BILLST
+        , SHIPMI
+        , CHGUSER
+        , VTXCITY
+        , TOTTAX
+        , ORDFRMCOUNTRY
+        , REGREL_DATE
+        , BANK_ABA_CODE
+        , ORDER_TYPE
+        , SHIPCHG
+        , CUST_PO
+        , ORIG_REL_NUMB
+        , CARR_CODE
+       ,  REP1
+        , REP2
+        , ORDFRMMI
+        , BILLCOUNTRY
+        , SHIPCITY
+        , BANK_ACCT
+        , STEP_CODE
+        , DATE_INVOICE
+        , DATE_ENTERED
+        , ORDFRMNAME
+        , QUOTE_NUMB
+        , ORDER_TERMS
+        , PAY_TYPE
+        , UPDATE_DATE
+        , DUETIME
+        , EFFDATE
+        , DTFLD1
+        , NUMFLD1
+        , NUMFLD2
+        , PRIORITY
+        , NUMFLD3
+        , DTFLD4
+        , BILLTO_CODE
+        , NUMFLD4
+        , NUMFLD5
+        , NUMFLD6
+       ,  DTFLD2
+        , DTFLD3
+        , CARD_RESP_TEXT
+        , SOURCE_CODE
+        , MISCCHG
+        , CUST_REQ_DATE
+        , PHASE_NO
+        , ALLOC_LOCK
+        , DUEDATE
+        , EXPIRE_DATE
+        , TAXRATE
+        , SHIPQUALIFIER
+        , ORDER_CLASS
+        , SCHFLD6
+        , ORDER_DATE
+        , BILLZIP
+        , TOTSALES
+        , BID_NO
+        , ORDFRMCITY
+        , BILLNAME
+        , SHIPPHONE
+        , ALLOC_STAT
+        , ACK_PRNT_DATE
+        , UTILCHG
+        , REQ_NUMBER
+       ,  DATE_CUST
+        , SCHFLD1
+        , SHIPFNAME
+        , BILLQUALIFIER
+        , SCHFLD3
+        , SCHFLD2
+        , BANK_ACCT_TYPE
+        , SCHFLD5
+        , CARD_EXP_DATE
+        , SCHFLD4
+        , TAXFLG
+        , BILTYPE_SO
+        , ORDFRMQUALIFIER
+        , REP1_PCT
+        , DOC_IMAGE_NUMB
+        , DUEOUT_DATE
+        , BILLPHONE
+        , ORIG_ORDER_NUMB
+        , GIFT_FLAG
+        , CONTRACT_NO
+        , CARD_NUMBER
+        , ORDFRMADD3
+        , ORDFRMADD1
+        , ORDFRMADD2
+        , SHIPADD2
+       ,  SHIPADD1
+        , SHIPADD3
+        , VTXST
+        , TAXDIST
+        , CHARGED_FRT
+        , ORDFRMZIP
+        , DATE_ALLOC
+        , BO_DATE
+        , BILLADD1
+        , COST_CTR
+        , SHIPZIP
+        , BILLADD2
+        , MID_INITAL
+        , BILLADD3
+        , SHIPTO_PO
+        , ORDER_SOURCE
+        , AUTO_CONSOL
+        , PROMO_CODE
+        , SPDRCHG
+        , DOC_IMAGE_FOLDER
+        , CHGSTAT
+        , DOC_IMAGE_PAGE
+        , VTXCOUNTY
+        , CUST_NAME
+        , BANK_NAME
+        , _FIVETRAN_DELETED
+        , LOAD_DTS
+        , REC_SRC
+        , BKCC
+      , HASHDIFF
+    FROM SRC_OHTTE21
+)
+---- JOIN LAYER ----
+
+, JOIN_RESULT as (
+    SELECT *
+    FROM LOGIC_OHTTE21
+    /*
+    When SRC_SOSAP is activated, union or join logic goes here. Example:
+    UNION ALL
+    SELECT * FROM LOGIC_SOSAP
+    */
+)
+
+---- FINAL LAYER ----
+SELECT
+          ORDER_HEADER_HK
+        , _FIVETRAN_ID
+        , ORIG_GEOCODE
+        , PRICEID
+        , CUSTV2
+        , CUSTV1
+        , ORDER_STAT
+        , CARD_TRANS_ID
+        , REGREL_USER
+        , SHIPCNTRY
+        , FRT_PAY_MTH
+        , CONSOL_NUMB
+        , INVOICE_DATE
+        , SHIPTO_CODE
+        , PROJID
+        , HOLD_CODE
+        , TAX_EXEMPT_ID
+        , CUSTF2
+        , CUSTF1
+        , SHIPNAME
+        , RET_INST_FLAG
+        , ORDFRMGEOCODE
+        , DIVISION_CODE
+        , ORDER_CALLER
+        , LCHFLD2
+        , HANDLING_CHRG
+        , LCHFLD1
+        , LCHFLD4
+        , SHIPGEOCODE
+        , LCHFLD3
+        , BO_RULE
+        , TRANSINS_FLAG
+        , SHIPST
+        , ORDFRMPHONE
+        , SHIPCOUNTRY
+        , DUEOUT_TIME
+        , NOTES1
+        , DEPARTMENT
+        , BILLMI
+        , NOTES2
+        , LCHFLD5
+        , ACK_PRNT_METH
+        , DISCNT
+        , ORDER_BY
+        , DATE_INV_PRINT
+        , CANCEL_DATE
+        , STOPCHG
+        , CUST_NAME_QUAL
+        , BILLCITY
+        , REL_CREDIT
+        , ACK_FLAG
+        , ORDFRMST
+        , REP2_PCT
+        , CARD_TYPE
+        , VOLDIS_SO
+        , FOB_CODE
+        , CARD_APPROVAL
+        , JOB_CODE
+        , DATE_INV
+        , TOTDISC
+        , USER_SO
+        , CUST_CODE
+        , MET_OF_SHIP
+        , CARD_USER_NAME
+        , BILLST
+        , SHIPMI
+        , CHGUSER
+        , VTXCITY
+        , TOTTAX
+        , ORDFRMCOUNTRY
+        , REGREL_DATE
+        , BANK_ABA_CODE
+        , ORDER_TYPE
+        , SHIPCHG
+        , CUST_PO
+        , ORIG_REL_NUMB
+        , CARR_CODE
+        , REP1
+        , REP2
+        , ORDFRMMI
+        , BILLCOUNTRY
+        , SHIPCITY
+        , BANK_ACCT
+        , STEP_CODE
+        , DATE_INVOICE
+        , DATE_ENTERED
+        , ORDFRMNAME
+        , QUOTE_NUMB
+        , ORDER_TERMS
+        , PAY_TYPE
+        , UPDATE_DATE
+        , DUETIME
+        , EFFDATE
+        , DTFLD1
+        , NUMFLD1
+        , NUMFLD2
+        , PRIORITY
+        , NUMFLD3
+        , DTFLD4
+        , BILLTO_CODE
+        , NUMFLD4
+        , NUMFLD5
+        , NUMFLD6
+        , DTFLD2
+        , DTFLD3
+        , CARD_RESP_TEXT
+        , SOURCE_CODE
+        , MISCCHG
+        , CUST_REQ_DATE
+        , PHASE_NO
+        , ALLOC_LOCK
+        , DUEDATE
+        , EXPIRE_DATE
+        , TAXRATE
+        , SHIPQUALIFIER
+        , ORDER_CLASS
+        , SCHFLD6
+        , ORDER_DATE
+        , BILLZIP
+        , TOTSALES
+        , BID_NO
+        , ORDFRMCITY
+        , BILLNAME
+        , SHIPPHONE
+        , ALLOC_STAT
+        , ACK_PRNT_DATE
+        , UTILCHG
+        , REQ_NUMBER
+        , DATE_CUST
+        , SCHFLD1
+        , SHIPFNAME
+        , BILLQUALIFIER
+        , SCHFLD3
+        , SCHFLD2
+        , BANK_ACCT_TYPE
+        , SCHFLD5
+        , CARD_EXP_DATE
+        , SCHFLD4
+        , TAXFLG
+        , BILTYPE_SO
+        , ORDFRMQUALIFIER
+        , REP1_PCT
+        , DOC_IMAGE_NUMB
+        , DUEOUT_DATE
+        , BILLPHONE
+        , ORIG_ORDER_NUMB
+        , GIFT_FLAG
+        , CONTRACT_NO
+        , CARD_NUMBER
+        , ORDFRMADD3
+        , ORDFRMADD1
+        , ORDFRMADD2
+        , SHIPADD2
+        , SHIPADD1
+        , SHIPADD3
+        , VTXST
+        , TAXDIST
+        , CHARGED_FRT
+        , ORDFRMZIP
+        , DATE_ALLOC
+        , BO_DATE
+        , BILLADD1
+        , COST_CTR
+        , SHIPZIP
+        , BILLADD2
+        , MID_INITAL
+        , BILLADD3
+        , SHIPTO_PO
+        , ORDER_SOURCE
+        , AUTO_CONSOL
+        , PROMO_CODE
+        , SPDRCHG
+        , DOC_IMAGE_FOLDER
+        , CHGSTAT
+        , DOC_IMAGE_PAGE
+        , VTXCOUNTY
+        , CUST_NAME
+        , BANK_NAME
+        , _FIVETRAN_DELETED
+        , LOAD_DTS
+        , REC_SRC
+        , BKCC
+        , HASHDIFF
+FROM JOIN_RESULT
+{% if is_incremental() %}
+WHERE NOT EXISTS (
+    SELECT 1 
+    FROM {{ this }} existing
+    WHERE existing.ORDER_HEADER_HK= JOIN_RESULT.ORDER_HEADER_HK
+    AND existing.HASHDIFF = JOIN_RESULT.HASHDIFF
+)
+{% endif %} 
+{% if not is_incremental() %}
+/*the following qualify is to restrict multiple loads of touched records during the initial build. Ex: multiple row per hk, hashdiff */
+qualify 1= row_number()over(partition by ORDER_HEADER_HK, HASHDIFF order by LOAD_DTS)
+union all
+    SELECT        
+    MD5_BINARY(GR.VALUE) AS ORDER_HEADER_HK
+, NULL AS _FIVETRAN_ID
+, NULL AS ORIG_GEOCODE
+, NULL AS PRICEID
+, NULL AS CUSTV2
+, NULL AS CUSTV1
+, NULL AS ORDER_STAT
+, NULL AS CARD_TRANS_ID
+, NULL AS REGREL_USER
+, NULL AS SHIPCNTRY
+, NULL AS FRT_PAY_MTH
+, NULL AS CONSOL_NUMB
+, NULL AS INVOICE_DATE
+, NULL AS SHIPTO_CODE
+, NULL AS PROJID
+, NULL AS HOLD_CODE
+, NULL AS TAX_EXEMPT_ID
+, NULL AS CUSTF2
+, NULL AS CUSTF1
+, NULL AS SHIPNAME
+, NULL AS RET_INST_FLAG
+, NULL AS ORDFRMGEOCODE
+, NULL AS DIVISION_CODE
+, NULL AS ORDER_CALLER
+, NULL AS LCHFLD2
+, NULL AS HANDLING_CHRG
+, NULL AS LCHFLD1
+, NULL AS LCHFLD4
+, NULL AS SHIPGEOCODE
+, NULL AS LCHFLD3
+, NULL AS BO_RULE
+, NULL AS TRANSINS_FLAG
+, NULL AS SHIPST
+, NULL AS ORDFRMPHONE
+, NULL AS SHIPCOUNTRY
+, NULL AS DUEOUT_TIME
+, NULL AS NOTES1
+, NULL AS DEPARTMENT
+, NULL AS BILLMI
+, NULL AS NOTES2
+, NULL AS LCHFLD5
+, NULL AS ACK_PRNT_METH
+, NULL AS DISCNT
+, NULL AS ORDER_BY
+, NULL AS DATE_INV_PRINT
+, NULL AS CANCEL_DATE
+, NULL AS STOPCHG
+, NULL AS CUST_NAME_QUAL
+, NULL AS BILLCITY
+, NULL AS REL_CREDIT
+, NULL AS ACK_FLAG
+, NULL AS ORDFRMST
+, NULL AS REP2_PCT
+, NULL AS CARD_TYPE
+, NULL AS VOLDIS_SO
+, NULL AS FOB_CODE
+, NULL AS CARD_APPROVAL
+, NULL AS JOB_CODE
+, NULL AS DATE_INV
+, NULL AS TOTDISC
+, NULL AS USER_SO
+, NULL AS CUST_CODE
+, NULL AS MET_OF_SHIP
+, NULL AS CARD_USER_NAME
+, NULL AS BILLST
+, NULL AS SHIPMI
+, NULL AS CHGUSER
+, NULL AS VTXCITY
+, NULL AS TOTTAX
+, NULL AS ORDFRMCOUNTRY
+, NULL AS REGREL_DATE
+, NULL AS BANK_ABA_CODE
+, NULL AS ORDER_TYPE
+, NULL AS SHIPCHG
+, NULL AS CUST_PO
+, NULL AS ORIG_REL_NUMB
+, NULL AS CARR_CODE
+, NULL AS REP1
+, NULL AS REP2
+, NULL AS ORDFRMMI
+, NULL AS BILLCOUNTRY
+, NULL AS SHIPCITY
+, NULL AS BANK_ACCT
+, NULL AS STEP_CODE
+, NULL AS DATE_INVOICE
+, NULL AS DATE_ENTERED
+, NULL AS ORDFRMNAME
+, NULL AS QUOTE_NUMB
+, NULL AS ORDER_TERMS
+, NULL AS PAY_TYPE
+, NULL AS UPDATE_DATE
+, NULL AS DUETIME
+, NULL AS EFFDATE
+, NULL AS DTFLD1
+, NULL AS NUMFLD1
+, NULL AS NUMFLD2
+, NULL AS PRIORITY
+, NULL AS NUMFLD3
+, NULL AS DTFLD4
+, NULL AS BILLTO_CODE
+, NULL AS NUMFLD4
+, NULL AS NUMFLD5
+, NULL AS NUMFLD6
+, NULL AS DTFLD2
+, NULL AS DTFLD3
+, NULL AS CARD_RESP_TEXT
+, NULL AS SOURCE_CODE
+, NULL AS MISCCHG
+, NULL AS CUST_REQ_DATE
+, NULL AS PHASE_NO
+, NULL AS ALLOC_LOCK
+, NULL AS DUEDATE
+, NULL AS EXPIRE_DATE
+, NULL AS TAXRATE
+, NULL AS SHIPQUALIFIER
+, NULL AS ORDER_CLASS
+, NULL AS SCHFLD6
+, NULL AS ORDER_DATE
+, NULL AS BILLZIP
+, NULL AS TOTSALES
+, NULL AS BID_NO
+, NULL AS ORDFRMCITY
+, NULL AS BILLNAME
+, NULL AS SHIPPHONE
+, NULL AS ALLOC_STAT
+, NULL AS ACK_PRNT_DATE
+, NULL AS UTILCHG
+, NULL AS REQ_NUMBER
+, NULL AS DATE_CUST
+, NULL AS SCHFLD1
+, NULL AS SHIPFNAME
+, NULL AS BILLQUALIFIER
+, NULL AS SCHFLD3
+, NULL AS SCHFLD2
+, NULL AS BANK_ACCT_TYPE
+, NULL AS SCHFLD5
+, NULL AS CARD_EXP_DATE
+, NULL AS SCHFLD4
+, NULL AS TAXFLG
+, NULL AS BILTYPE_SO
+, NULL AS ORDFRMQUALIFIER
+, NULL AS REP1_PCT
+, NULL AS DOC_IMAGE_NUMB
+, NULL AS DUEOUT_DATE
+, NULL AS BILLPHONE
+, NULL AS ORIG_ORDER_NUMB
+, NULL AS GIFT_FLAG
+, NULL AS CONTRACT_NO
+, NULL AS CARD_NUMBER
+, NULL AS ORDFRMADD3
+, NULL AS ORDFRMADD1
+, NULL AS ORDFRMADD2
+, NULL AS SHIPADD2
+, NULL AS SHIPADD1
+, NULL AS SHIPADD3
+, NULL AS VTXST
+, NULL AS TAXDIST
+, NULL AS CHARGED_FRT
+, NULL AS ORDFRMZIP
+, NULL AS DATE_ALLOC
+, NULL AS BO_DATE
+, NULL AS BILLADD1
+, NULL AS COST_CTR
+, NULL AS SHIPZIP
+, NULL AS BILLADD2
+, NULL AS MID_INITAL
+, NULL AS BILLADD3
+, NULL AS SHIPTO_PO
+, NULL AS ORDER_SOURCE
+, NULL AS AUTO_CONSOL
+, NULL AS PROMO_CODE
+, NULL AS SPDRCHG
+, NULL AS DOC_IMAGE_FOLDER
+, NULL AS CHGSTAT
+, NULL AS DOC_IMAGE_PAGE
+, NULL AS VTXCOUNTY
+, NULL AS CUST_NAME
+, NULL AS BANK_NAME
+, NULL AS _FIVETRAN_DELETED
+, CONVERT_TIMEZONE('UTC','1900-01-01') as LOAD_DTS
+    ,'USAZET.SNOWFLAKE.FBIN.DERIVED' AS REC_SRC
+    , DECODE(GR.VALUE, 0, 'GHOST RECORD-SYSTEM', -1, 'GHOST RECORD-nullkey-required', -2, 'GHOST RECORD-nullkey-optional')  AS BKCC
+    , ''::BINARY as HASHDIFF FROM
+            TABLE(strtok_split_to_table('0|-1|-2', '|')) AS GR
+    {% endif %}

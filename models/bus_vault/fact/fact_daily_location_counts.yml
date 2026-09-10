@@ -1,0 +1,10 @@
+version: 2
+models:
+- name: fact_daily_location_counts
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - BKCC
+        - REC_SRC
+        - DATE_KEY_YYYYMMDD

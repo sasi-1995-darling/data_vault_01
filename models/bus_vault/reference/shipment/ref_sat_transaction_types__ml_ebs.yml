@@ -1,0 +1,28 @@
+version: 2
+models:
+  - name: ref_sat_transaction_types__ml_ebs
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - TRANSACTION_TYPE_BK
+              - LOAD_DTS
+    columns:
+      - name: TRANSACTION_TYPE_BK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+          - dbt_utils.relationships_where:
+              arguments:
+                to: ref( 'ref_hub_transaction_types' )
+                field: TRANSACTION_TYPE_BK
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'ref_hub_transaction_types' )
+                pk_column_name: TRANSACTION_TYPE_BK
+      - name: LOAD_DTS
+        tests:
+          - not_null:
+              config:
+                severity: warn

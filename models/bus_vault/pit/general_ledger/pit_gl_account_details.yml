@@ -1,0 +1,9 @@
+version: 2
+models:
+  - name: pit_gl_account_details
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - GL_ACCOUNT_DETAILS_HK
+    columns: []

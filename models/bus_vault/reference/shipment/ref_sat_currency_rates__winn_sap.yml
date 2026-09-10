@@ -1,0 +1,20 @@
+version: 2
+models:
+  - name: ref_sat_currency_rates__winn_sap
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - CURR_RATES_BK
+              - LOAD_DTS
+    columns:
+      - name: CURR_RATES_BK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: LOAD_DTS
+        tests:
+          - not_null:
+              config:
+                severity: warn

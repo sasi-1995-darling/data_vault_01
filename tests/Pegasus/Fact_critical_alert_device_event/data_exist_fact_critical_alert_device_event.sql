@@ -1,0 +1,1 @@
+select * from ({{ data_exist('fact_critical_alert_device_event','US.NOTIFICATION_API.CLEANED_FLO_PROD_NOTIFICATION_API_INCIDENT')}}) 

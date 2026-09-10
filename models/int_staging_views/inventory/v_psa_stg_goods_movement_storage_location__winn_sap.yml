@@ -1,0 +1,28 @@
+version: 2
+models:
+- name: v_psa_stg_goods_movement_storage_location__winn_sap
+  data_tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - LGORT
+        - WERKS
+        - LOAD_DTS
+      config:
+        severity: warn
+  columns:
+  - name: LGORT
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+  - name: WERKS
+    data_tests:
+    - not_null:
+        config:
+          severity: warn          
+  - name: LOAD_DTS
+    data_tests:
+    - not_null:
+        config:
+          severity: warn

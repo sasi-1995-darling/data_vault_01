@@ -1,0 +1,184 @@
+---- SRC LAYER ----
+WITH
+SRC_S1             as ( SELECT * FROM {{ ref('v_psa_stg_response__yale_delighted') }} as SRC 
+                         {% if is_incremental() %}
+                         WHERE SRC.LOAD_DTS > (SELECT DATEADD('HOUR', '-1', MAX(LOAD_DTS)) FROM {{this}})
+                         {% endif %}  )
+
+/*
+SRC_S1             as ( SELECT * FROM staging.v_psa_stg_response__yale_delighted )
+*/
+---- LOGIC LAYER ----
+
+, LOGIC_S1 as (
+    SELECT
+        PRODUCT_HK
+      , LOAD_DTS
+      , ID
+      , _FIVETRAN_DELETED
+      , PERSON_ID
+      , _FIVETRAN_SYNCED
+      , PROPERTIES_DELIGHTED_BROWSER
+      , PROPERTIES_DELIGHTED_SOURCE
+      , CREATED_AT
+      , PROPERTIES_DELIGHTED_OPERATING_SYSTEM
+      , SURVEY_TYPE
+      , SCORE
+      , UPDATED_AT
+      , COMMENT
+      , PERMALINK
+      , PROPERTIES_DELIGHTED_DEVICE_TYPE
+      , PROPERTIES_LOCK_TYPE
+      , PROPERTIES_SKUNUMBER
+      , PROPERTIES_LAST_NAME
+      , PROPERTIES_APP_BRAND
+      , PROPERTIES_FIRST_NAME
+      , PROPERTIES_LOCK_SERIAL_NUMBER
+      , PROPERTIES_DAYS_SINCE_LOCK_SETUP
+      , PROPERTIES_PRODUCT_NAME
+      , PROPERTIES_TECHNOLOGY
+      , PROPERTIES_SHOPIFY_PRODUCT_NAME
+      , PROPERTIES_PARENT_ID
+      , PSA_LOAD_DTS
+      , PSA_RECORD_SOURCE
+      , PSA_DELETE_IND
+      , REC_SRC
+      , BKCC
+      , HASHDIFF
+    FROM SRC_S1
+)
+---- RENAME LAYER ----
+
+, RENAME_S1 as (
+    SELECT
+        PRODUCT_HK
+      , LOAD_DTS
+      , ID
+      , _FIVETRAN_DELETED
+      , PERSON_ID
+      , _FIVETRAN_SYNCED
+      , PROPERTIES_DELIGHTED_BROWSER
+      , PROPERTIES_DELIGHTED_SOURCE
+      , CREATED_AT
+      , PROPERTIES_DELIGHTED_OPERATING_SYSTEM
+      , SURVEY_TYPE
+      , SCORE
+      , UPDATED_AT
+      , COMMENT
+      , PERMALINK
+      , PROPERTIES_DELIGHTED_DEVICE_TYPE
+      , PROPERTIES_LOCK_TYPE
+      , PROPERTIES_SKUNUMBER
+      , PROPERTIES_LAST_NAME
+      , PROPERTIES_APP_BRAND
+      , PROPERTIES_FIRST_NAME
+      , PROPERTIES_LOCK_SERIAL_NUMBER
+      , PROPERTIES_DAYS_SINCE_LOCK_SETUP
+      , PROPERTIES_PRODUCT_NAME
+      , PROPERTIES_TECHNOLOGY
+      , PROPERTIES_SHOPIFY_PRODUCT_NAME
+      , PROPERTIES_PARENT_ID
+      , PSA_LOAD_DTS
+      , PSA_RECORD_SOURCE
+      , PSA_DELETE_IND
+      , REC_SRC
+      , BKCC
+      , HASHDIFF
+    FROM LOGIC_S1
+)
+---- FILTER LAYER ----
+
+, FILTER_S1 as (
+    SELECT *
+    FROM RENAME_S1
+)
+---- JOIN LAYER ----
+, JOIN_RESULT as (
+    SELECT * FROM FILTER_S1
+)
+
+---- FINAL LAYER ----
+SELECT
+          PRODUCT_HK
+        , LOAD_DTS
+        , CAST(ID AS varchar) ID
+        , _FIVETRAN_DELETED
+        , PERSON_ID
+        , _FIVETRAN_SYNCED
+        , PROPERTIES_DELIGHTED_BROWSER
+        , PROPERTIES_DELIGHTED_SOURCE
+        , CREATED_AT
+        , PROPERTIES_DELIGHTED_OPERATING_SYSTEM
+        , SURVEY_TYPE
+        , SCORE
+        , UPDATED_AT
+        , COMMENT
+        , PERMALINK
+        , PROPERTIES_DELIGHTED_DEVICE_TYPE
+        , PROPERTIES_LOCK_TYPE
+        , PROPERTIES_SKUNUMBER
+        , PROPERTIES_LAST_NAME
+        , PROPERTIES_APP_BRAND
+        , PROPERTIES_FIRST_NAME
+        , PROPERTIES_LOCK_SERIAL_NUMBER
+        , PROPERTIES_DAYS_SINCE_LOCK_SETUP
+        , PROPERTIES_PRODUCT_NAME
+        , PROPERTIES_TECHNOLOGY
+        , PROPERTIES_SHOPIFY_PRODUCT_NAME
+        , PROPERTIES_PARENT_ID
+        , PSA_LOAD_DTS
+        , PSA_RECORD_SOURCE
+        , PSA_DELETE_IND
+        , REC_SRC
+        , BKCC
+        , HASHDIFF
+FROM JOIN_RESULT
+{% if is_incremental() %}
+WHERE NOT EXISTS (
+    SELECT 1 
+    FROM {{ this }} existing
+    WHERE existing.PRODUCT_HK = JOIN_RESULT.PRODUCT_HK     AND existing.HASHDIFF = JOIN_RESULT.HASHDIFF 
+)
+{% endif %}
+
+ 
+{% if not is_incremental() %}
+qualify 1= row_number()over(partition by PRODUCT_HK, HASHDIFF order by PSA_LOAD_DTS) 
+union all
+SELECT 
+  MD5_BINARY(GR.VALUE) AS PRODUCT_HK  
+  , CONVERT_TIMEZONE('UTC','1900-01-01'::TIMESTAMP) as LOAD_DTS
+  , CAST(GR.VALUE AS varchar) AS ID
+  , null as _FIVETRAN_DELETED
+  , null as PERSON_ID
+  , null as _FIVETRAN_SYNCED
+  , null as PROPERTIES_DELIGHTED_BROWSER
+  , null as PROPERTIES_DELIGHTED_SOURCE
+  , null as CREATED_AT
+  , null as PROPERTIES_DELIGHTED_OPERATING_SYSTEM
+  , null as SURVEY_TYPE
+  , null as SCORE
+  , null as UPDATED_AT
+  , null as COMMENT
+  , null as PERMALINK
+  , null as PROPERTIES_DELIGHTED_DEVICE_TYPE
+  , null as PROPERTIES_LOCK_TYPE
+  , null as PROPERTIES_SKUNUMBER
+  , null as PROPERTIES_LAST_NAME
+  , null as PROPERTIES_APP_BRAND
+  , null as PROPERTIES_FIRST_NAME
+  , null as PROPERTIES_LOCK_SERIAL_NUMBER
+  , null as PROPERTIES_DAYS_SINCE_LOCK_SETUP
+  , null as PROPERTIES_PRODUCT_NAME
+  , null as PROPERTIES_TECHNOLOGY
+  , null as PROPERTIES_SHOPIFY_PRODUCT_NAME
+  , null as PROPERTIES_PARENT_ID
+  , null as PSA_LOAD_DTS
+  , null as PSA_RECORD_SOURCE
+  , null as PSA_DELETE_IND
+  , 'US.DELIGHTED_HYDRA.RESPONSE' AS REC_SRC
+  , DECODE(GR.VALUE, 0, 'GHOST RECORD-SYSTEM', -1, 'GHOST RECORD-nullkey-required', -2, 'GHOST RECORD-nullkey-optional')  AS  BKCC
+  , ''::BINARY as HASH_DIFF
+FROM
+TABLE(strtok_split_to_table('0|-1|-2', '|')) AS GR
+{% endif %}

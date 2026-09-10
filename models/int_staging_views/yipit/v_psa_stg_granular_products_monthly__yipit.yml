@@ -1,0 +1,30 @@
+version: 2
+models:
+  - name: v_psa_stg_granular_products_monthly__yipit
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          config:
+            severity: warn
+          arguments:
+            combination_of_columns:
+              - sku
+              - month
+              - retailer
+              - channel
+              - segment
+              - sub_category
+              - class
+              - sub_class
+              - manufacturer
+              - brand
+              - web_description
+              - upc
+              - model_num
+              - material
+              - finish
+              - gmv
+              - sample_size
+              - asp
+              - unit_est
+              - state
+    columns: []

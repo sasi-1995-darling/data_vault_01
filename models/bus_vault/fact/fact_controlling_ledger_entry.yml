@@ -1,0 +1,9 @@
+version: 2
+models:
+  - name: fact_controlling_ledger_entry
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - CONTROLLING_LEDGER_ENTRY_HK
+    columns: []

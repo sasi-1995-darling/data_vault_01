@@ -1,0 +1,10 @@
+version: 2
+
+models:
+  - name: hub_cust_sales_area
+    description: This is the raw vault hub model for customer sales area
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - cust_sales_area_hk

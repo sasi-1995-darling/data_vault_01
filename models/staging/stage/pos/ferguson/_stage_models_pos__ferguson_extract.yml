@@ -1,0 +1,19 @@
+version: 2
+
+models:
+  - name: stg_pos_moen_hofr__ferguson_extract
+    description: This is the staging model from Ferguson POS M3A for MOEN & HOFR
+    columns:
+      - name: fei_product_code
+        tests:
+          - not_null
+      - name: date
+        tests:
+          - not_null
+  - name: stg_pos_product_code_sap_xref__ferguson_extract
+    description: This is the staging cross reference model from Ferguson POS for MOEN & HOFR
+    columns:
+      - name: xref_id
+        tests:
+          - not_null
+              

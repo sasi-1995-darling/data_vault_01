@@ -1,0 +1,14 @@
+version: 2
+models:
+  - name: pit_uom_details
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - UOM_HK
+    columns:
+      - name: UOM_BK
+        tests:
+          - not_null:
+              config:
+                severity: warn

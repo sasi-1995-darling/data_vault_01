@@ -1,0 +1,1 @@
+select * from ({{ row_uniqueness('fact_survey_response') }}) 

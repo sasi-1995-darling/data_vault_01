@@ -1,0 +1,16 @@
+version: 2
+models:
+  - name: ref_product_categories__yipit
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - retailer
+              - brand
+              - sku
+              - model_num
+              - category
+              - sub_class
+              - sub_category
+              - class
+    columns: []

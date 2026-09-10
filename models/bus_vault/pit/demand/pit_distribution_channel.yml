@@ -1,0 +1,22 @@
+version: 2
+models:
+- name: pit_distribution_channel
+  data_tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - DISTRIBUTION_CHANNEL_HK
+        - LANGUAGE_KEY
+      config:
+        severity: warn
+  columns:
+  - name: DISTRIBUTION_CHANNEL_HK
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+  - name: LANGUAGE_KEY
+    data_tests:
+    - not_null:
+        config:
+          severity: warn

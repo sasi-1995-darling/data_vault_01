@@ -1,0 +1,56 @@
+---- SRC LAYER ----
+WITH
+SRC_ka             as ( SELECT BKCC, CUSTOMER_GROUP_DESCRIPTION, FORECAST_CUSTOMER_GROUP_HK, FORECAST_CUSTOMER_GROUP_BK, LANGUAGE_KEY, CUSTOMER_GROUP, REC_SRC FROM {{ ref('pit_forecast_customer_group') }} as SRC  )
+
+/*
+SRC_ka             as ( SELECT * FROM BUS_VAULT.pit_forecast_customer_group )
+*/
+---- LOGIC LAYER ----
+
+, LOGIC_ka as (
+    SELECT
+        FORECAST_CUSTOMER_GROUP_HK
+      , FORECAST_CUSTOMER_GROUP_BK
+      , CUSTOMER_GROUP_DESCRIPTION
+      , LANGUAGE_KEY
+      , CUSTOMER_GROUP
+      , BKCC
+      , REC_SRC
+    FROM SRC_ka
+)
+---- RENAME LAYER ----
+
+, RENAME_ka as (
+    SELECT
+        FORECAST_CUSTOMER_GROUP_HK
+      , FORECAST_CUSTOMER_GROUP_BK
+      , CUSTOMER_GROUP_DESCRIPTION
+      , LANGUAGE_KEY
+      , CUSTOMER_GROUP
+      , BKCC
+      , REC_SRC
+    FROM LOGIC_ka
+)
+---- FILTER LAYER ----
+
+, FILTER_ka as (
+    SELECT *
+    FROM RENAME_ka
+)
+
+---- JOIN LAYER ----
+, JOIN_RESULT as (
+    SELECT *
+    FROM FILTER_ka
+)
+
+---- FINAL LAYER ----
+SELECT
+        FORECAST_CUSTOMER_GROUP_HK
+      , FORECAST_CUSTOMER_GROUP_BK
+      , CUSTOMER_GROUP_DESCRIPTION
+      , LANGUAGE_KEY
+      , CUSTOMER_GROUP
+      , BKCC
+      , REC_SRC
+FROM JOIN_RESULT

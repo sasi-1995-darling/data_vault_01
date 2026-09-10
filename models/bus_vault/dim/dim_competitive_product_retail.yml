@@ -1,0 +1,18 @@
+version: 2
+models:
+  - name: dim_competitive_product_retail
+    description: >
+      Dimension view for competitive products in the retail context.
+      Grain: one row per COMPETITIVE_PRODUCT_HK + RETAILER_HK.
+      Sourced exclusively from pb_competitive_product_retail__datavations (PIT Bridge).
+      Includes product identity (HK), item descriptive attributes (name, brand, item ID),
+      and retailer classification (RETAILER, SECTOR).
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - COMPETITIVE_PRODUCT_HK
+              - RETAILER_HK
+          config:
+            severity: warn
+    columns: []

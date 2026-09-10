@@ -1,0 +1,24 @@
+version: 2
+models:
+- name: lmsat_demand_plan__winn_sap
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - DEMAND_PLAN_LHK
+        - MATERIAL
+        - CALWEEK
+        - DATE0
+        - LOAD_DTS
+  - dbt_expectations.expect_table_row_count_to_be_between:
+      arguments:
+        min_value: 4
+      config:
+        severity: warn
+  columns:
+  - name: DEMAND_PLAN_LHK
+    data_tests:
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'lnk_demand_plan' )
+          pk_column_name: DEMAND_PLAN_LHK

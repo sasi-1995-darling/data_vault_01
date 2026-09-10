@@ -1,0 +1,5 @@
+version: 2
+models:
+- name: pb_stg_response_centercode
+  tests: []
+  columns: []

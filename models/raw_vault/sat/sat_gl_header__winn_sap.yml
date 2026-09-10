@@ -1,0 +1,20 @@
+version: 2
+models:
+  - name: sat_gl_header__winn_sap
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - GENERAL_LEDGER_HK
+              - LOAD_DTS
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          config:
+            severity: warn
+          arguments:
+            min_value: 4
+    columns:
+      - name: GENERAL_LEDGER_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn

@@ -1,0 +1,28 @@
+version: 2
+models:
+  - name: ref_sat_prod_grp_lu__lrsn_psft
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - PROD_GRP_BK
+              - LOAD_DTS
+    columns:
+      - name: PROD_GRP_BK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+          - dbt_utils.relationships_where:
+              arguments:
+                to: ref( 'ref_hub_prod_grp_lu' )
+                field: PROD_GRP_BK
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'ref_hub_prod_grp_lu' )
+                pk_column_name: PROD_GRP_BK
+      - name: LOAD_DTS
+        tests:
+          - not_null:
+              config:
+                severity: warn

@@ -1,0 +1,83 @@
+---- SRC LAYER ----
+WITH
+SRC_P              as ( SELECT * FROM {{ ref('pit_quality_task_current') }} as SRC  )
+
+/*
+SRC_P              as ( SELECT * FROM RAW_VAULT.PIT_QUALITY_TASK_CURRENT )
+*/
+---- LOGIC LAYER ----
+
+, LOGIC_P as (
+    SELECT
+        NOTIFICATION_BK
+      , TASK_BK
+      , TASK_NOTIFICATION_BK
+      , CATALOG_TYPE
+      , CODE_GROUP
+      , TASK_CODE
+      , TASK_CREATION_DATE__YYYYMMDD
+      , TASK_UPDATE_DATE__YYYYMMDD
+      , PLANNED_START_DATE__YYYYMMDD
+      , PLANNED_FINISH_DATE__YYYYMMDD
+      , OBJECT_NUMBER
+      , QUANTITY
+      , QUANTITY_UOM
+      , REC_SRC
+      , BKCC
+      , IS_DELETED
+    FROM SRC_P
+)
+---- RENAME LAYER ----
+
+, RENAME_P as (
+    SELECT
+        NOTIFICATION_BK
+      , TASK_BK
+      , TASK_NOTIFICATION_BK
+      , CATALOG_TYPE
+      , CODE_GROUP
+      , TASK_CODE
+      , TASK_CREATION_DATE__YYYYMMDD
+      , TASK_UPDATE_DATE__YYYYMMDD
+      , PLANNED_START_DATE__YYYYMMDD
+      , PLANNED_FINISH_DATE__YYYYMMDD
+      , OBJECT_NUMBER
+      , QUANTITY
+      , QUANTITY_UOM
+      , REC_SRC
+      , BKCC
+      , IS_DELETED
+    FROM LOGIC_P
+)
+---- FILTER LAYER ----
+
+, FILTER_P as (
+    SELECT *
+    FROM RENAME_P
+)
+
+---- JOIN LAYER ----
+, JOIN_RESULT as (
+    SELECT *
+    FROM FILTER_P
+)
+
+---- FINAL LAYER ----
+SELECT
+          NOTIFICATION_BK
+        , TASK_BK
+        , TASK_NOTIFICATION_BK
+        , CATALOG_TYPE
+        , CODE_GROUP
+        , TASK_CODE
+        , TASK_CREATION_DATE__YYYYMMDD
+        , TASK_UPDATE_DATE__YYYYMMDD
+        , PLANNED_START_DATE__YYYYMMDD
+        , PLANNED_FINISH_DATE__YYYYMMDD
+        , OBJECT_NUMBER
+        , QUANTITY
+        , QUANTITY_UOM
+        , REC_SRC
+        , BKCC
+        , IS_DELETED
+FROM JOIN_RESULT

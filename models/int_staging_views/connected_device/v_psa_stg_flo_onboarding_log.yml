@@ -1,0 +1,29 @@
+version: 2
+models:
+- name: v_psa_stg_flo_onboarding_log
+  data_tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - PAIRED_DEVICE_EVENT_BK
+        - LOAD_DTS
+        - EVENT
+        - _FIVETRAN_DELETED
+      config:
+        severity: warn
+  columns:
+  - name: PAIRED_DEVICE_EVENT_HK
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+  - name: PAIRED_DEVICE_EVENT_BK
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+  - name: LOAD_DTS
+    data_tests:
+    - not_null:
+        config:
+          severity: warn

@@ -1,0 +1,8 @@
+version: 2
+models:
+- name: pb_delivery_line_item
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - DELIVERY_LINE_DETAIL_LHK

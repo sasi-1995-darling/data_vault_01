@@ -1,0 +1,50 @@
+version: 2
+models:
+  - name: v_psa_stg_sales_inventory_history__moen_menards
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          config:
+            severity: warn
+          arguments:
+            combination_of_columns:
+              - STORE_HK
+              - ITEM
+              - FILE_NAME
+              - FILE_ROW_NUMBER
+              - LOAD_DTS
+    columns:
+      - name: STORE_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: STORE_BK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: ITEM
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: FILE_NAME
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: LOAD_DTS
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: LOCATION
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: FILE_ROW_NUMBER
+        tests:
+          - not_null:
+              config:
+                severity: warn

@@ -1,0 +1,96 @@
+{{ config(alias='fact_device_telemetry') }}
+---- SRC LAYER ----
+WITH
+SRC_DT             as ( SELECT AGGREGATE_DATE, AVG_NIGHT_TEMPERATURE, AVG_PRESSURE, AVG_TEMPERATURE, BKCC, CREATED_AT, DEVICE_BK, FLOW_RECORDS, GALLONS, MAX_GPM, MAX_PRESSURE, MAX_TEMPERATURE, MEDIAN_GPS, MIN_PRESSURE, MIN_TEMPERATURE, PAIRED_DEVICE_BK, P_STATIC, RECORDS, REC_SRC, UPDATED_AT FROM {{ ref('fact_device_telemetry') }} as SRC  )
+
+/*
+SRC_DT             as ( SELECT * FROM BUS_VAULT.FACT_DEVICE_TELEMETRY )
+*/
+---- LOGIC LAYER ----
+
+, LOGIC_DT as (
+    SELECT
+        PAIRED_DEVICE_BK
+      , DEVICE_BK
+      , BKCC
+      , REC_SRC
+      , AGGREGATE_DATE
+      , GALLONS
+      , MAX_GPM
+      , MIN_PRESSURE
+      , MAX_PRESSURE
+      , AVG_PRESSURE
+      , MIN_TEMPERATURE
+      , MAX_TEMPERATURE
+      , AVG_TEMPERATURE
+      , RECORDS
+      , FLOW_RECORDS
+      , AVG_NIGHT_TEMPERATURE
+      , CREATED_AT
+      , UPDATED_AT
+      , MEDIAN_GPS
+      , P_STATIC
+    FROM SRC_DT
+)
+---- RENAME LAYER ----
+
+, RENAME_DT as (
+    SELECT
+        PAIRED_DEVICE_BK
+      , DEVICE_BK
+      , BKCC
+      , REC_SRC
+      , AGGREGATE_DATE
+      , GALLONS
+      , MAX_GPM
+      , MIN_PRESSURE
+      , MAX_PRESSURE
+      , AVG_PRESSURE
+      , MIN_TEMPERATURE
+      , MAX_TEMPERATURE
+      , AVG_TEMPERATURE
+      , RECORDS
+      , FLOW_RECORDS
+      , AVG_NIGHT_TEMPERATURE
+      , CREATED_AT
+      , UPDATED_AT
+      , MEDIAN_GPS
+      , P_STATIC
+    FROM LOGIC_DT
+)
+---- FILTER LAYER ----
+
+, FILTER_DT as (
+    SELECT *
+    FROM RENAME_DT
+)
+
+---- JOIN LAYER ----
+, JOIN_RESULT as (
+    SELECT *
+    FROM FILTER_DT
+)
+
+---- FINAL LAYER ----
+SELECT
+          PAIRED_DEVICE_BK
+        , DEVICE_BK
+        , BKCC
+        , REC_SRC
+        , AGGREGATE_DATE
+        , GALLONS
+        , MAX_GPM
+        , MIN_PRESSURE
+        , MAX_PRESSURE
+        , AVG_PRESSURE
+        , MIN_TEMPERATURE
+        , MAX_TEMPERATURE
+        , AVG_TEMPERATURE
+        , RECORDS
+        , FLOW_RECORDS
+        , AVG_NIGHT_TEMPERATURE
+        , CREATED_AT
+        , UPDATED_AT
+        , MEDIAN_GPS
+        , P_STATIC
+FROM JOIN_RESULT

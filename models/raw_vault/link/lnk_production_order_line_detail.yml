@@ -1,0 +1,26 @@
+version: 2
+models:
+  - name: lnk_production_order_line_detail
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - PRODUCTION_ORDER_LINE_LHK
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          config:
+            severity: warn
+          arguments:
+            min_value: 4
+    columns:
+      - name: PRODUCTION_ORDER_LINE_HK
+        tests:
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'hub_production_order_line' )
+                pk_column_name: PRODUCTION_ORDER_LINE_HK
+      - name: PRODUCTION_ORDER_HK
+        tests:
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'hub_production_order' )
+                pk_column_name: PRODUCTION_ORDER_HK

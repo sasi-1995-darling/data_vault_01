@@ -1,0 +1,8 @@
+version: 2
+models:
+  - name: dim_date_fiscal_445
+    time_spine:
+      standard_granularity_column: DATE # column for the standard grain of your table
+    columns:
+      - name: DATE
+        granularity: day # set granularity at column-level for standard_granularity_column

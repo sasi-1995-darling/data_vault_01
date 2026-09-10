@@ -1,0 +1,1 @@
+select * from ({{ row_uniqueness('ref_product_categories__yipit') }}) 	 

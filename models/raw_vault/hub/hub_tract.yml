@@ -1,0 +1,17 @@
+version: 2
+models:
+  - name: hub_tract
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - TRACT_HK
+    columns:
+      - name: TRACT_HK
+        tests:
+          - unique:
+              config:
+                severity: warn
+          - not_null:
+              config:
+                severity: warn

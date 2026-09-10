@@ -1,0 +1,13 @@
+version: 2
+
+models:
+  - name: hub_sales_region
+    description: This is the raw vault hub model for sales regions
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - sales_region_hk
+    config:
+      tags:
+        - emtek

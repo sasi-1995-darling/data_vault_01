@@ -1,0 +1,9 @@
+# version: 2
+
+# models:
+#   - name: fact_invoice_line_transaction
+#     description: Sales fact for sales invoice line transaction
+#     tests:
+#       - dbt_constraints.primary_key:
+#           column_names:
+#             - fact_invoice_line_transaction_pk

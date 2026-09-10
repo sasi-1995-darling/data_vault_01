@@ -1,0 +1,10 @@
+version: 2
+models:
+- name: im_fact_monetary_transaction
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - TRANSACTION_BK
+        - CREATED_TS
+  columns: []

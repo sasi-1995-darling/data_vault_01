@@ -1,0 +1,5 @@
+version: 2
+models:
+- name: fact_statistical_key_figure_totals
+  tests: []
+  columns: []

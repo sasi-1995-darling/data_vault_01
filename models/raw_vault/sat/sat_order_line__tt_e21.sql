@@ -1,0 +1,504 @@
+---- SRC LAYER ----
+WITH
+SRC_OHTTE21          as ( SELECT * FROM {{ ref('v_psa_stg_order_line__tt_e21') }} as SRC 
+                         {% if is_incremental() %}
+                         WHERE SRC.LOAD_DTS > (SELECT DATEADD('HOUR', '-1', MAX(LOAD_DTS)) FROM {{this}})
+                         {% endif %} )
+/*
+SRC_SOSAP          as ( SELECT * FROM STAGING.v_psa_stg_order_line__WINN_SAP )
+*/
+---- LOGIC LAYER ----
+
+, LOGIC_OHTTE21 as (
+    SELECT
+        ORDER_LINE_HK
+       , _FIVETRAN_ID
+       , ORIG_GEOCODE
+       , PACK_QTY
+       , ITEM_TERMS
+       , ITEM_LOAD_NO
+       , SHIPTO_CODE
+       , CONSOL_NUMB
+       , ORIG_ITEM_NO
+       , TAX_EXEMPT_ID
+       , ITEM_PSDISC_TY
+       , PART_ATTRIBUTE1
+       , ITEM_DISCOUNT_TY
+       , PART_ATTRIBUTE3
+       , PART_ATTRIBUTE2
+       , DISC_TYPE
+       , PART_ATTRIBUTE5
+       , PART_ATTRIBUTE4
+       , CONFIG_ID
+       , DIVISION_CODE
+       , PART_ATTRIBUTE6
+       , LCHFLD2
+       , COMMIT_QTY
+       , LCHFLD1
+       , MAINT_PART_CODE
+       , ITEM_TAXABLE
+       , VOL_DISC_TY
+       , ACK_PRNT_METH
+       , PO_REL
+       , DATE_INV_PRINT
+       , CANCEL_DATE
+       , ITEM_ALOW1
+       , CUST_PO_ITEM
+       , ITEM_ALOW2
+       , PACK_CHARGE
+       , PART_CODE
+       , ITEM_COST
+       , PO_ITEM
+       , ITEM_OUTTIME
+       , ITEM_SALETYPE
+       , DATE_INV
+       , ITEM_DISCOUNT
+       , ITEM_NTPRICE
+       , QTY_RECVD
+       , VOL_DISC_AMT
+       , EXT_PRICE
+       , XCUR_CONV
+       , TOT_QTY_ORD
+       , CUST_PO
+       , ORIG_REL_NUMB
+       , MSTRKIT_ITEM_NO
+       , CARR_CODE
+       , KIT_REQ_FLAG
+       , BCUR_CONV
+       , ITEM_PRICEID
+       , DATE_INVOICE
+       , DATE_ENTERED
+       , UPDATE_DATE
+       , ITEM_LIST_PRICE
+       , DTFLD1
+       , NUMFLD1
+       , NUMFLD2
+       , ITEM_ALOW2T
+       , NUMFLD3
+       , QTY_ALLOCATED
+       , DTFLD2
+       , UOM_CONV
+       , BALDUE
+       , TOT_QTY_INVOICE
+       , MSTRKIT_CODE
+       , PO_VEND_CODE
+       , QTY
+       , CUST_REQ_DATE
+       , XCUR_UOM
+       , ORDER_DISC_TY
+       , DISP_PART
+       , EXPIRE_DATE
+       , DUEDATE
+       , ITEM_PSDISC_AMT
+       , PART_DESC
+       , PO_UNIT_PRICE
+       , ITEM_ALOW1T
+       , SHIPTO_GEOCODE
+       , ACK_PRNT_DATE
+       , ITEM_WGT
+       , PO_NUMBER
+       , ITEM_REP
+       , PACK_UOM
+       ,REQ_NUMBER
+       ,SCHFLD1
+       ,DATE_CUST
+       ,SCHFLD3
+       ,ITEM_GWGT
+       ,SCHFLD2
+       ,ITEM_PPV
+       ,ORIG_ORDER_NUMB
+       ,ITEM_OUTDATE
+       ,GIFT_FLAG
+       ,ITEM_STATUS
+       ,BCUR_UOM
+       ,ITEM_MSG
+       ,ITEM_TYPE
+       ,DATE_RECVD
+       ,DATE_ALLOC
+       ,COST_CTR
+       ,TOT_QTY_SHIP
+       ,ORDER_DISC_AMT
+       , UOM
+       ,QTY_SHIPPED
+       ,ITEM_PRICE
+       ,CART_CHG
+       , _FIVETRAN_DELETED
+       , LOAD_DTS
+       , REC_SRC
+       , BKCC
+      , HASHDIFF
+    FROM SRC_OHTTE21
+)
+---- JOIN LAYER ----
+
+, JOIN_RESULT as (
+    SELECT
+        ORDER_LINE_HK
+       , _FIVETRAN_ID
+       , ORIG_GEOCODE
+       , PACK_QTY
+       , ITEM_TERMS
+       , ITEM_LOAD_NO
+       , SHIPTO_CODE
+       , CONSOL_NUMB
+       , ORIG_ITEM_NO
+       , TAX_EXEMPT_ID
+       , ITEM_PSDISC_TY
+       , PART_ATTRIBUTE1
+       , ITEM_DISCOUNT_TY
+       , PART_ATTRIBUTE3
+       , PART_ATTRIBUTE2
+       , DISC_TYPE
+       , PART_ATTRIBUTE5
+       , PART_ATTRIBUTE4
+       , CONFIG_ID
+       , DIVISION_CODE
+       , PART_ATTRIBUTE6
+       , LCHFLD2
+       , COMMIT_QTY
+       , LCHFLD1
+       , MAINT_PART_CODE
+       , ITEM_TAXABLE
+       , VOL_DISC_TY
+       , ACK_PRNT_METH
+       , PO_REL
+       , DATE_INV_PRINT
+       , CANCEL_DATE
+       , ITEM_ALOW1
+       , CUST_PO_ITEM
+       , ITEM_ALOW2
+       , PACK_CHARGE
+       , PART_CODE
+       , ITEM_COST
+       , PO_ITEM
+       , ITEM_OUTTIME
+       , ITEM_SALETYPE
+       , DATE_INV
+       , ITEM_DISCOUNT
+       , ITEM_NTPRICE
+       , QTY_RECVD
+       , VOL_DISC_AMT
+       , EXT_PRICE
+       , XCUR_CONV
+       , TOT_QTY_ORD
+       , CUST_PO
+       , ORIG_REL_NUMB
+       , MSTRKIT_ITEM_NO
+       , CARR_CODE
+       , KIT_REQ_FLAG
+       , BCUR_CONV
+       , ITEM_PRICEID
+       , DATE_INVOICE
+       , DATE_ENTERED
+       , UPDATE_DATE
+       , ITEM_LIST_PRICE
+       , DTFLD1
+       , NUMFLD1
+       , NUMFLD2
+       , ITEM_ALOW2T
+       , NUMFLD3
+       , QTY_ALLOCATED
+       , DTFLD2
+       , UOM_CONV
+       , BALDUE
+       , TOT_QTY_INVOICE
+       , MSTRKIT_CODE
+       , PO_VEND_CODE
+       , QTY
+       , CUST_REQ_DATE
+       , XCUR_UOM
+       , ORDER_DISC_TY
+       , DISP_PART
+       , EXPIRE_DATE
+       , DUEDATE
+       , ITEM_PSDISC_AMT
+       , PART_DESC
+       , PO_UNIT_PRICE
+       , ITEM_ALOW1T
+       , SHIPTO_GEOCODE
+       , ACK_PRNT_DATE
+       , ITEM_WGT
+       , PO_NUMBER
+       , ITEM_REP
+       , PACK_UOM
+       , REQ_NUMBER
+       , SCHFLD1
+       , DATE_CUST
+       , SCHFLD3
+       , ITEM_GWGT
+       , SCHFLD2
+       , ITEM_PPV
+       , ORIG_ORDER_NUMB
+       , ITEM_OUTDATE
+       , GIFT_FLAG
+       , ITEM_STATUS
+       , BCUR_UOM
+       , ITEM_MSG
+       , ITEM_TYPE
+       , DATE_RECVD
+       , DATE_ALLOC
+       , COST_CTR
+       , TOT_QTY_SHIP
+       , ORDER_DISC_AMT
+       , UOM
+       , QTY_SHIPPED
+       , ITEM_PRICE
+       , CART_CHG
+       , _FIVETRAN_DELETED
+       , LOAD_DTS
+       , REC_SRC
+       , BKCC
+       , HASHDIFF
+    FROM LOGIC_OHTTE21
+)
+---- FINAL LAYER ----
+SELECT
+          ORDER_LINE_HK
+       , _FIVETRAN_ID
+       , ORIG_GEOCODE
+       , PACK_QTY
+       , ITEM_TERMS
+       , ITEM_LOAD_NO
+       , SHIPTO_CODE
+       , CONSOL_NUMB
+       , ORIG_ITEM_NO
+       , TAX_EXEMPT_ID
+       , ITEM_PSDISC_TY
+       , PART_ATTRIBUTE1
+       , ITEM_DISCOUNT_TY
+       , PART_ATTRIBUTE3
+       , PART_ATTRIBUTE2
+       , DISC_TYPE
+       , PART_ATTRIBUTE5
+       , PART_ATTRIBUTE4
+       , CONFIG_ID
+       , DIVISION_CODE
+       , PART_ATTRIBUTE6
+       , LCHFLD2
+       , COMMIT_QTY
+       , LCHFLD1
+       , MAINT_PART_CODE
+       , ITEM_TAXABLE
+       , VOL_DISC_TY
+       , ACK_PRNT_METH
+       , PO_REL
+       , DATE_INV_PRINT
+       , CANCEL_DATE
+       , ITEM_ALOW1
+       , CUST_PO_ITEM
+       , ITEM_ALOW2
+       , PACK_CHARGE
+       , PART_CODE
+       , ITEM_COST
+       , PO_ITEM
+       , ITEM_OUTTIME
+       , ITEM_SALETYPE
+       , DATE_INV
+       , ITEM_DISCOUNT
+       , ITEM_NTPRICE
+       , QTY_RECVD
+       , VOL_DISC_AMT
+       , EXT_PRICE
+       , XCUR_CONV
+       , TOT_QTY_ORD
+       , CUST_PO
+       , ORIG_REL_NUMB
+       , MSTRKIT_ITEM_NO
+       , CARR_CODE
+       , KIT_REQ_FLAG
+       , BCUR_CONV
+       , ITEM_PRICEID
+       , DATE_INVOICE
+       , DATE_ENTERED
+       , UPDATE_DATE
+       , ITEM_LIST_PRICE
+       , DTFLD1
+       , NUMFLD1
+       , NUMFLD2
+       , ITEM_ALOW2T
+       , NUMFLD3
+       , QTY_ALLOCATED
+       , DTFLD2
+       , UOM_CONV
+       , BALDUE
+       , TOT_QTY_INVOICE
+       , MSTRKIT_CODE
+       , PO_VEND_CODE
+       , QTY
+       , CUST_REQ_DATE
+       , XCUR_UOM
+       , ORDER_DISC_TY
+       , DISP_PART
+       , EXPIRE_DATE
+       , DUEDATE
+       , ITEM_PSDISC_AMT
+       , PART_DESC
+       , PO_UNIT_PRICE
+       , ITEM_ALOW1T
+       , SHIPTO_GEOCODE
+       , ACK_PRNT_DATE
+       , ITEM_WGT
+       , PO_NUMBER
+       , ITEM_REP
+       , PACK_UOM
+       ,REQ_NUMBER
+       ,SCHFLD1
+       ,DATE_CUST
+       ,SCHFLD3
+       ,ITEM_GWGT
+       ,SCHFLD2
+       ,ITEM_PPV
+       ,ORIG_ORDER_NUMB
+       ,ITEM_OUTDATE
+       ,GIFT_FLAG
+       ,ITEM_STATUS
+       ,BCUR_UOM
+       ,ITEM_MSG
+       ,ITEM_TYPE
+       ,DATE_RECVD
+       ,DATE_ALLOC
+       ,COST_CTR
+       ,TOT_QTY_SHIP
+       ,ORDER_DISC_AMT
+       , UOM
+       ,QTY_SHIPPED
+       ,ITEM_PRICE
+       ,CART_CHG
+       , _FIVETRAN_DELETED
+       , LOAD_DTS
+       , REC_SRC
+       , BKCC
+      , HASHDIFF
+FROM JOIN_RESULT
+{% if is_incremental() %}
+WHERE NOT EXISTS (
+    SELECT 1 
+    FROM {{ this }} existing
+    WHERE existing.ORDER_LINE_HK= JOIN_RESULT.ORDER_LINE_HK
+    AND existing.HASHDIFF = JOIN_RESULT.HASHDIFF
+)
+{% endif %} 
+{% if not is_incremental() %}
+/*the following qualify is to restrict multiple loads of touched records during the initial build. Ex: multiple row per hk, hashdiff */
+qualify 1= row_number()over(partition by ORDER_LINE_HK, HASHDIFF order by LOAD_DTS)
+union all
+    SELECT        
+    MD5_BINARY(GR.VALUE) AS ORDER_LINE_HK
+, NULL AS _FIVETRAN_ID
+, NULL AS ORIG_GEOCODE
+, NULL AS PACK_QTY
+, NULL AS ITEM_TERMS
+, NULL AS ITEM_LOAD_NO
+, NULL AS SHIPTO_CODE
+, NULL AS CONSOL_NUMB
+, NULL AS ORIG_ITEM_NO
+, NULL AS TAX_EXEMPT_ID
+, NULL AS ITEM_PSDISC_TY
+, NULL AS PART_ATTRIBUTE1
+, NULL AS ITEM_DISCOUNT_TY
+, NULL AS PART_ATTRIBUTE3
+, NULL AS PART_ATTRIBUTE2
+, NULL AS DISC_TYPE
+, NULL AS PART_ATTRIBUTE5
+, NULL AS PART_ATTRIBUTE4
+, NULL AS CONFIG_ID
+, NULL AS DIVISION_CODE
+, NULL AS PART_ATTRIBUTE6
+, NULL AS LCHFLD2
+, NULL AS COMMIT_QTY
+, NULL AS LCHFLD1
+, NULL AS MAINT_PART_CODE
+, NULL AS ITEM_TAXABLE
+, NULL AS VOL_DISC_TY
+, NULL AS ACK_PRNT_METH
+, NULL AS PO_REL
+, NULL AS DATE_INV_PRINT
+, NULL AS CANCEL_DATE
+, NULL AS ITEM_ALOW1
+, NULL AS CUST_PO_ITEM
+, NULL AS ITEM_ALOW2
+, NULL AS PACK_CHARGE
+, NULL AS PART_CODE
+, NULL AS ITEM_COST
+, NULL AS PO_ITEM
+, NULL AS ITEM_OUTTIME
+, NULL AS ITEM_SALETYPE
+, NULL AS DATE_INV
+, NULL AS ITEM_DISCOUNT
+, NULL AS ITEM_NTPRICE
+, NULL AS QTY_RECVD
+, NULL AS VOL_DISC_AMT
+, NULL AS EXT_PRICE
+, NULL AS XCUR_CONV
+, NULL AS TOT_QTY_ORD
+, NULL AS CUST_PO
+, NULL AS ORIG_REL_NUMB
+, NULL AS MSTRKIT_ITEM_NO
+, NULL AS CARR_CODE
+, NULL AS KIT_REQ_FLAG
+, NULL AS BCUR_CONV
+, NULL AS ITEM_PRICEID
+, NULL AS DATE_INVOICE
+, NULL AS DATE_ENTERED
+, NULL AS UPDATE_DATE
+, NULL AS ITEM_LIST_PRICE
+, NULL AS DTFLD1
+, NULL AS NUMFLD1
+, NULL AS NUMFLD2
+, NULL AS ITEM_ALOW2T
+, NULL AS NUMFLD3
+, NULL AS QTY_ALLOCATED
+, NULL AS DTFLD2
+, NULL AS UOM_CONV
+, NULL AS BALDUE
+, NULL AS TOT_QTY_INVOICE
+, NULL AS MSTRKIT_CODE
+, NULL AS PO_VEND_CODE
+, NULL AS QTY
+, NULL AS CUST_REQ_DATE
+, NULL AS XCUR_UOM
+, NULL AS ORDER_DISC_TY
+, NULL AS DISP_PART
+, NULL AS EXPIRE_DATE
+, NULL AS DUEDATE
+, NULL AS ITEM_PSDISC_AMT
+, NULL AS PART_DESC
+, NULL AS PO_UNIT_PRICE
+, NULL AS ITEM_ALOW1T
+, NULL AS SHIPTO_GEOCODE
+, NULL AS ACK_PRNT_DATE
+, NULL AS ITEM_WGT
+, NULL AS PO_NUMBER
+, NULL AS ITEM_REP
+, NULL AS PACK_UOM
+, NULL AS REQ_NUMBER
+, NULL AS SCHFLD1
+, NULL AS DATE_CUST
+, NULL AS SCHFLD3
+, NULL AS ITEM_GWGT
+, NULL AS SCHFLD2
+, NULL AS ITEM_PPV
+, NULL AS ORIG_ORDER_NUMB
+, NULL AS ITEM_OUTDATE
+, NULL AS GIFT_FLAG
+, NULL AS ITEM_STATUS
+, NULL AS BCUR_UOM
+, NULL AS ITEM_MSG
+, NULL AS ITEM_TYPE
+, NULL AS DATE_RECVD
+, NULL AS DATE_ALLOC
+, NULL AS COST_CTR
+, NULL AS TOT_QTY_SHIP
+, NULL AS ORDER_DISC_AMT
+, NULL AS UOM
+, NULL AS QTY_SHIPPED
+, NULL AS ITEM_PRICE
+, NULL AS CART_CHG
+, NULL AS _FIVETRAN_DELETED
+, CONVERT_TIMEZONE('UTC','1900-01-01'::TIMESTAMP) as LOAD_DTS
+    ,'USAZET.SNOWFLAKE.FBIN.DERIVED' AS REC_SRC
+    , DECODE(GR.VALUE, 0, 'GHOST RECORD-SYSTEM', -1, 'GHOST RECORD-nullkey-required', -2, 'GHOST RECORD-nullkey-optional')  AS BKCC
+    , MD5_BINARY('') as HASHDIFF
+ FROM
+            TABLE(strtok_split_to_table('0|-1|-2', '|')) AS GR
+    {% endif %}

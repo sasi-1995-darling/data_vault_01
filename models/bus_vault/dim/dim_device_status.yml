@@ -1,0 +1,5 @@
+version: 2
+models:
+- name: dim_device_status
+  data_tests: []
+  columns: []

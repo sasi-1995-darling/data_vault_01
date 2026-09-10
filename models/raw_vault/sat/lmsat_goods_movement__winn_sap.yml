@@ -1,0 +1,19 @@
+version: 2
+models:
+  - name: lmsat_goods_movement__winn_sap
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - LNK_GOODS_MOVEMENT_HK
+              - LOAD_DTS
+    columns:
+      - name: LNK_GOODS_MOVEMENT_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'lnk_goods_movement' )
+                pk_column_name: LNK_GOODS_MOVEMENT_HK

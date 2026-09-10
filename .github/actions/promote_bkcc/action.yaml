@@ -1,0 +1,129 @@
+name: "Promote BKCC Reference Data"
+description: "Promotes Business Key Collision Code reference data between environments"
+
+inputs:
+  dbt_svc_token:
+    description: "DBT Cloud service token"
+    required: true
+  source_env:
+    description: "Source environment (DEV, QA)"
+    required: true
+  target_env:
+    description: "Target environment (QA, PROD)"
+    required: true
+  job_id:
+    description: "DBT Cloud job ID to use for the operation"
+    required: true
+
+outputs:
+  deleted_count:
+    description: "Number of records deleted"
+    value: ${{ steps.promote.outputs.deleted_count }}
+  inserted_count:
+    description: "Number of records inserted"
+    value: ${{ steps.promote.outputs.inserted_count }}
+  updated_count:
+    description: "Number of records updated"
+    value: ${{ steps.promote.outputs.updated_count }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Promote BKCC Data
+      id: promote
+      shell: bash
+      run: |
+        DBT_SVC_TOKEN=${{ inputs.dbt_svc_token }}
+        SOURCE_ENV=${{ inputs.source_env }}
+        TARGET_ENV=${{ inputs.target_env }}
+        JOB_ID=${{ inputs.job_id }}
+        
+        echo "Promoting BKCC from ${SOURCE_ENV} to ${TARGET_ENV}"
+        
+        # Map environment names to database names
+        case "${SOURCE_ENV}" in
+          DEV) SOURCE_DB="DATAVAULT_DEV";;
+          QA) SOURCE_DB="DATAVAULT_QA";;
+          *) echo "Invalid source environment"; exit 1;;
+        esac
+        
+        case "${TARGET_ENV}" in
+          QA) TARGET_DB="DATAVAULT_QA";;
+          PROD) TARGET_DB="DATAVAULT_PROD";;
+          *) echo "Invalid target environment"; exit 1;;
+        esac
+        
+        TARGET_ENV_LOWER=$(echo ${TARGET_ENV} | tr '[:upper:]' '[:lower:]')
+        
+        echo "Source DB: ${SOURCE_DB}"
+        echo "Target DB: ${TARGET_DB}"
+        echo "Target environment: ${TARGET_ENV_LOWER}"
+        
+        # Trigger the dbt Cloud job - using exact pattern from pr-cleanup.yaml
+        RESPONSE=$(curl -s --request POST \
+          --url "https://cloud.getdbt.com/api/v2/accounts/173296/jobs/${JOB_ID}/run/" \
+          --header "Accept: application/json" \
+          --header "Authorization: Token ${DBT_SVC_TOKEN}" \
+          --header "Content-Type: application/json" \
+          --data "{
+            \"cause\": \"BKCC Promotion: ${SOURCE_ENV} to ${TARGET_ENV}\",
+            \"steps_override\": [\"dbt run-operation promote_bkcc --args '{\\\"source_db\\\": \\\"${SOURCE_DB}\\\", \\\"target_db\\\": \\\"${TARGET_DB}\\\"}'\"],
+            \"target_name\": \"${TARGET_ENV_LOWER}\"
+          }")
+        
+        echo "API Response:"
+        echo "$RESPONSE" | jq '.'
+        
+        # Check if successful
+        SUCCESS=$(echo "$RESPONSE" | jq -r '.status.is_success // false')
+        if [ "$SUCCESS" = "true" ]; then
+          RUN_ID=$(echo "$RESPONSE" | jq -r '.data.id')
+          echo "SUCCESS: BKCC Promotion job triggered with ID: $RUN_ID"
+        else
+          echo "FAILED: API call unsuccessful"
+          ERROR_MSG=$(echo "$RESPONSE" | jq -r '.status.user_message // "Unknown error"')
+          echo "Error: $ERROR_MSG"
+          exit 1
+        fi
+        
+        # Poll for completion
+        echo "Polling for job completion..."
+        MAX_WAIT_TIME=600  # 10 minutes
+        ELAPSED_TIME=0
+        SLEEP_SECONDS=10
+        
+        while true; do
+          if [ $ELAPSED_TIME -ge $MAX_WAIT_TIME ]; then
+            echo "Timeout reached after $(($ELAPSED_TIME / 60)) minutes"
+            exit 1
+          fi
+          
+          STATUS_RESPONSE=$(curl -s --request GET \
+            --url "https://cloud.getdbt.com/api/v2/accounts/173296/runs/$RUN_ID/" \
+            --header "Authorization: Token $DBT_SVC_TOKEN" \
+            --header "Content-Type: application/json")
+          
+          STATUS_CODE=$(echo "$STATUS_RESPONSE" | jq -r '.data.status')
+          STATUS_HUMANIZED=$(echo "$STATUS_RESPONSE" | jq -r '.data.status_humanized')
+          
+          echo "Current status: ${STATUS_HUMANIZED} (code: ${STATUS_CODE})"
+          
+          # Check if terminal state reached (10=Success, 20=Error, 30=Cancelled)
+          if [[ $STATUS_CODE -eq 10 ]]; then
+            echo "✅ BKCC Promotion completed successfully"
+            
+            # Set outputs (placeholder - actual counts would need to be parsed from logs)
+            echo "deleted_count=0" >> $GITHUB_OUTPUT
+            echo "inserted_count=0" >> $GITHUB_OUTPUT
+            echo "updated_count=0" >> $GITHUB_OUTPUT
+            break
+          elif [[ $STATUS_CODE -eq 20 || $STATUS_CODE -eq 30 ]]; then
+            echo "❌ BKCC Promotion failed"
+            echo "Final status: ${STATUS_HUMANIZED}"
+            echo "$STATUS_RESPONSE" | jq '.'
+            exit 1
+          fi
+          
+          sleep $SLEEP_SECONDS
+          ELAPSED_TIME=$((ELAPSED_TIME + SLEEP_SECONDS))
+        done

@@ -1,0 +1,100 @@
+---- SRC LAYER ----
+WITH
+SRC_S              as ( SELECT * FROM {{ source('lrsn_psft_sysadm', 'ps_po_line') }} as SRC  ),
+SRC_HDR            as ( SELECT BUSINESS_UNIT, PO_ID, VENDOR_ID FROM {{ source('lrsn_psft_sysadm', 'ps_po_hdr') }} as SRC 
+                        QUALIFY 1 = ROW_NUMBER() OVER (PARTITION BY PO_ID, BUSINESS_UNIT ORDER BY _FIVETRAN_SYNCED DESC, PSA_LOAD_DTS DESC) ),
+SRC_BKCC          as ( SELECT BKCC, REC_SRC FROM {{ ref('ref_business_key_collision') }} WHERE rec_src = 'USSDBR.ORCL.PSFTPRD.PS_PO_LINE' )
+
+/*
+SRC_S              as ( SELECT * FROM lrsn_psft_sysadm.ps_po_line )
+SRC_HDR            as ( SELECT * FROM lrsn_psft_sysadm.ps_po_hdr )
+SRC_BKCC          as ( SELECT BKCC, REC_SRC FROM RAW_VAULT.REF_BUSINESS_KEY_COLLISION WHERE rec_src = 'USSDBR.ORCL.PSFTPRD.PS_PO_LINE' )
+*/
+---- LOGIC LAYER ----
+
+, LOGIC_S as (
+    SELECT
+        CONCAT_WS('||', COALESCE(BUSINESS_UNIT, ''), COALESCE(PO_ID, ''), COALESCE(LINE_NBR, '')) as                                         PO_ITEM_BK
+      , CONCAT_WS('||', BUSINESS_UNIT, PO_ID)                        as                                       PO_HEADER_BK
+      , COALESCE(VENDOR_ID::TEXT, '')                                as                                        SUPPLIER_BK
+      , CONVERT_TIMEZONE('UTC', _FIVETRAN_SYNCED)                    as                                           LOAD_DTS
+      , BUSINESS_UNIT
+      , PO_ID
+      , COALESCE(LINE_NBR::TEXT, '')                                 as                                           LINE_NBR
+      , CANCEL_STATUS
+      , UNIT_OF_MEASURE
+      , _FIVETRAN_DELETED
+      , _FIVETRAN_SYNCED
+      , PSA_LOAD_DTS
+      , PSA_DELETE_IND
+    FROM SRC_S
+)
+
+, LOGIC_HDR as (
+    SELECT
+        PO_ID                                                        as                                          HDR_PO_ID
+      , VENDOR_ID
+      , BUSINESS_UNIT                                                as                                  HDR_BUSINESS_UNIT
+    FROM SRC_HDR
+)
+
+---- JOIN LAYER ----
+, JOIN_RESULT as (
+    SELECT *
+    FROM LOGIC_S
+    LEFT JOIN LOGIC_HDR
+        ON PO_ID = LOGIC_HDR.HDR_PO_ID
+    INNER JOIN SRC_BKCC ON '1' = '1'
+)
+
+---- FINAL LAYER ----
+SELECT
+          PO_ITEM_BK
+        , PO_HEADER_BK
+        , SUPPLIER_BK
+        , LOAD_DTS
+        , BUSINESS_UNIT
+        , PO_ID
+        , LINE_NBR
+        , CANCEL_STATUS
+        , UNIT_OF_MEASURE
+        , HDR_PO_ID
+        , VENDOR_ID
+        , HDR_BUSINESS_UNIT
+        , _FIVETRAN_DELETED
+        , _FIVETRAN_SYNCED
+        , PSA_LOAD_DTS
+        , PSA_DELETE_IND
+        , MD5_BINARY(UPPER(CONCAT_WS('||',
+          COALESCE(NULLIF(TRIM(CAST(BUSINESS_UNIT as VARCHAR)),''), '^^')
+        , COALESCE(NULLIF(TRIM(CAST(PO_ID as VARCHAR)),''), '^^')
+        , COALESCE(NULLIF(TRIM(CAST(LINE_NBR as VARCHAR)),''), '^^')
+        , COALESCE(NULLIF(TRIM(CAST(BKCC as VARCHAR)),''), '^^')
+        ))) as PO_ITEM_HK
+        , MD5_BINARY(UPPER(CONCAT_WS('||',
+          COALESCE(NULLIF(TRIM(CAST(BUSINESS_UNIT as VARCHAR)),''), '^^')
+        , COALESCE(NULLIF(TRIM(CAST(PO_ID as VARCHAR)),''), '^^')
+        , COALESCE(NULLIF(TRIM(CAST(BKCC as VARCHAR)),''), '^^')
+        ))) as PO_HEADER_HK
+        , MD5_BINARY(UPPER(CONCAT_WS('||',
+          COALESCE(NULLIF(TRIM(CAST(VENDOR_ID as VARCHAR)),''), '^^')
+        , COALESCE(NULLIF(TRIM(CAST(BKCC as VARCHAR)),''), '^^')
+        ))) as SUPPLIER_HK
+        , MD5_BINARY(UPPER(CONCAT_WS('||',
+          COALESCE(NULLIF(TRIM(CAST(PO_ID as VARCHAR)),''), '^^')
+        , COALESCE(NULLIF(TRIM(CAST(LINE_NBR as VARCHAR)),''), '^^')
+        , COALESCE(NULLIF(TRIM(CAST(VENDOR_ID as VARCHAR)),''), '^^')
+        , COALESCE(NULLIF(TRIM(CAST(BUSINESS_UNIT as VARCHAR)),''), '^^')
+        ))) as LNK_PO_ITEM_HK
+        , MD5_BINARY(UPPER(NULLIF(CONCAT(
+              IFNULL(TRIM(BUSINESS_UNIT::text), '^^') 
+            , '||', IFNULL(TRIM(PO_ID::text), '^^') 
+            , '||', IFNULL(TRIM(LINE_NBR::text), '^^') 
+            , '||', IFNULL(TRIM(CANCEL_STATUS::text), '^^') 
+            , '||', IFNULL(TRIM(UNIT_OF_MEASURE::text), '^^') 
+            , '||', IFNULL(TRIM(VENDOR_ID::text), '^^') 
+            , '||', IFNULL(TRIM(HDR_BUSINESS_UNIT::text), '^^') 
+            , '||', IFNULL(TRIM(_FIVETRAN_DELETED::text), '^^') 
+            , '||', IFNULL(TRIM(PSA_DELETE_IND::text), '^^') 
+        ), '^^||^^')))  as HASHDIFF
+FROM JOIN_RESULT

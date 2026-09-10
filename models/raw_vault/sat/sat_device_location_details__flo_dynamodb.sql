@@ -1,0 +1,269 @@
+---- SRC LAYER ----
+WITH
+SRC_FL             as ( SELECT * FROM {{ ref('v_psa_stg_flo_device_location') }} as SRC 
+                         {% if is_incremental() %}
+                         WHERE SRC.LOAD_DTS > (SELECT DATEADD('HOUR', '-1', MAX(LOAD_DTS)) FROM {{this}})
+                         {% endif %}  )
+
+/*
+SRC_FL             as ( SELECT * FROM staging.v_psa_stg_flo_device_location )
+*/
+---- LOGIC LAYER ----
+
+, LOGIC_FL as (
+    SELECT
+        DEVICE_LOCATION_HK
+      , LOAD_DTS
+      , LOCATION_ID
+      , ACCOUNT_ID
+      , _FIVETRAN_DELETED
+      , COUNTRY
+      , ADDRESS
+      , STORIES
+      , BATHROOM_AMENITIES
+      , CITY
+      , LOCATION_SIZE_CATEGORY
+      , TIMEZONE
+      , GALVANIZED_PLUMBING
+      , KITCHEN_AMENITIES
+      , LOCATION_TYPE
+      , GALLONS_PER_DAY_GOAL
+      , IS_PROFILE_COMPLETE
+      , OUTDOOR_AMENITIES
+      , POSTALCODE
+      , STATE
+      , OCCUPANTS
+      , WATER_SHUTOFF_KNOWN
+      , _FIVETRAN_SYNCED
+      , EXPANSION_TANK
+      , TANKLESS
+      , WATER_FILTERING_SYSTEM
+      , WHOLE_HOUSE_HUMIDIFIER
+      , HOT_WATER_RECIRCULATION
+      , LOCATION_NAME
+      , ADDRESS_2
+      , LOCATION_SIZE
+      , WELL_SYSTEM
+      , WATER_SOFTENER
+      , PROFILE_COMPLETED
+      , CONSUMPTION
+      , BATHROOMS
+      , IS_USING_AWAY_SCHEDULE
+      , PROFILE
+      , IS_IRRIGATION_SCHEDULE_ENABLED
+      , REVERT_MINUTES
+      , REVERT_MODE
+      , REVERT_SCHEDULED_AT
+      , TARGET_SYSTEM_MODE
+      , AREAS
+      , _MERGED_INTO_LOCATION_ID
+      , PARENT_LOCATION_ID
+      , LOCATION_CLASS
+      , GEO_POSITIONING
+      , PSA_LOAD_DTS
+      , PSA_RECORD_SOURCE
+      , PSA_DELETE_IND
+      , REC_SRC
+      , BKCC
+      , HASHDIFF
+    FROM SRC_FL
+)
+---- RENAME LAYER ----
+
+, RENAME_FL as (
+    SELECT
+        DEVICE_LOCATION_HK
+      , LOAD_DTS
+      , LOCATION_ID
+      , ACCOUNT_ID
+      , _FIVETRAN_DELETED
+      , COUNTRY
+      , ADDRESS
+      , STORIES
+      , BATHROOM_AMENITIES
+      , CITY
+      , LOCATION_SIZE_CATEGORY
+      , TIMEZONE
+      , GALVANIZED_PLUMBING
+      , KITCHEN_AMENITIES
+      , LOCATION_TYPE
+      , GALLONS_PER_DAY_GOAL
+      , IS_PROFILE_COMPLETE
+      , OUTDOOR_AMENITIES
+      , POSTALCODE
+      , STATE
+      , OCCUPANTS
+      , WATER_SHUTOFF_KNOWN
+      , _FIVETRAN_SYNCED
+      , EXPANSION_TANK
+      , TANKLESS
+      , WATER_FILTERING_SYSTEM
+      , WHOLE_HOUSE_HUMIDIFIER
+      , HOT_WATER_RECIRCULATION
+      , LOCATION_NAME
+      , ADDRESS_2
+      , LOCATION_SIZE
+      , WELL_SYSTEM
+      , WATER_SOFTENER
+      , PROFILE_COMPLETED
+      , CONSUMPTION
+      , BATHROOMS
+      , IS_USING_AWAY_SCHEDULE
+      , PROFILE
+      , IS_IRRIGATION_SCHEDULE_ENABLED
+      , REVERT_MINUTES
+      , REVERT_MODE
+      , REVERT_SCHEDULED_AT
+      , TARGET_SYSTEM_MODE
+      , AREAS
+      , _MERGED_INTO_LOCATION_ID
+      , PARENT_LOCATION_ID
+      , LOCATION_CLASS
+      , GEO_POSITIONING
+      , PSA_LOAD_DTS
+      , PSA_RECORD_SOURCE
+      , PSA_DELETE_IND
+      , REC_SRC
+      , BKCC
+      , HASHDIFF
+    FROM LOGIC_FL
+)
+---- FILTER LAYER ----
+
+, FILTER_FL as (
+    SELECT *
+    FROM RENAME_FL
+)
+---- JOIN LAYER ----
+, JOIN_RESULT as (
+    SELECT * FROM FILTER_FL
+)
+
+---- FINAL LAYER ----
+SELECT
+          DEVICE_LOCATION_HK
+        , LOAD_DTS
+        , LOCATION_ID
+        , ACCOUNT_ID
+        , _FIVETRAN_DELETED
+        , COUNTRY
+        , ADDRESS
+        , STORIES
+        , BATHROOM_AMENITIES
+        , CITY
+        , LOCATION_SIZE_CATEGORY
+        , TIMEZONE
+        , GALVANIZED_PLUMBING
+        , KITCHEN_AMENITIES
+        , LOCATION_TYPE
+        , GALLONS_PER_DAY_GOAL
+        , IS_PROFILE_COMPLETE
+        , OUTDOOR_AMENITIES
+        , POSTALCODE
+        , STATE
+        , OCCUPANTS
+        , WATER_SHUTOFF_KNOWN
+        , _FIVETRAN_SYNCED
+        , EXPANSION_TANK
+        , TANKLESS
+        , WATER_FILTERING_SYSTEM
+        , WHOLE_HOUSE_HUMIDIFIER
+        , HOT_WATER_RECIRCULATION
+        , LOCATION_NAME
+        , ADDRESS_2
+        , LOCATION_SIZE
+        , WELL_SYSTEM
+        , WATER_SOFTENER
+        , PROFILE_COMPLETED
+        , CONSUMPTION
+        , BATHROOMS
+        , IS_USING_AWAY_SCHEDULE
+        , PROFILE
+        , IS_IRRIGATION_SCHEDULE_ENABLED
+        , REVERT_MINUTES
+        , REVERT_MODE
+        , REVERT_SCHEDULED_AT
+        , TARGET_SYSTEM_MODE
+        , AREAS
+        , _MERGED_INTO_LOCATION_ID
+        , PARENT_LOCATION_ID
+        , LOCATION_CLASS
+        , GEO_POSITIONING
+        , PSA_LOAD_DTS
+        , PSA_RECORD_SOURCE
+        , PSA_DELETE_IND
+        , REC_SRC
+        , BKCC
+        , HASHDIFF
+FROM JOIN_RESULT
+{% if is_incremental() %}
+WHERE NOT EXISTS (
+    SELECT 1 
+    FROM {{ this }} existing
+    WHERE existing.DEVICE_LOCATION_HK = JOIN_RESULT.DEVICE_LOCATION_HK 
+    AND existing.HASHDIFF = JOIN_RESULT.HASHDIFF
+)
+{% endif %} 
+
+{% if not is_incremental() %}
+qualify 1= row_number()over(partition by DEVICE_LOCATION_HK, HASHDIFF order by LOAD_DTS) 
+union all
+SELECT
+MD5_BINARY(GR.VALUE) AS DEVICE_LOCATION_HK
+, CONVERT_TIMEZONE('UTC','1900-01-01'::TIMESTAMP)  AS LOAD_DTS
+, GR.VALUE::TEXT  as LOCATION_ID
+, null  as _FIVETRAN_DELETED
+,null as ACCOUNT_ID
+,null as COUNTRY
+,null as ADDRESS
+,null as STORIES
+,null as BATHROOM_AMENITIES
+,null as CITY
+,null as LOCATION_SIZE_CATEGORY
+,null as TIMEZONE
+,null as GALVANIZED_PLUMBING
+,null as KITCHEN_AMENITIES
+,null as LOCATION_TYPE
+,null as GALLONS_PER_DAY_GOAL
+,null as IS_PROFILE_COMPLETE
+,null as OUTDOOR_AMENITIES
+,null as POSTALCODE
+,null as STATE
+,null as OCCUPANTS
+,null as WATER_SHUTOFF_KNOWN
+,null as _FIVETRAN_SYNCED
+,null as EXPANSION_TANK
+,null as TANKLESS
+,null as WATER_FILTERING_SYSTEM
+,null as WHOLE_HOUSE_HUMIDIFIER
+,null as HOT_WATER_RECIRCULATION
+,null as LOCATION_NAME
+,null as ADDRESS_2
+,null as LOCATION_SIZE
+,null as WELL_SYSTEM
+,null as WATER_SOFTENER
+,null as PROFILE_COMPLETED
+,null as CONSUMPTION
+,null as BATHROOMS
+,null as IS_USING_AWAY_SCHEDULE
+,null as PROFILE
+,null as IS_IRRIGATION_SCHEDULE_ENABLED
+,null as REVERT_MINUTES
+,null as REVERT_MODE
+,null as REVERT_SCHEDULED_AT
+,null as TARGET_SYSTEM_MODE
+,null as AREAS
+,null as _MERGED_INTO_LOCATION_ID
+,null as PARENT_LOCATION_ID
+,null as LOCATION_CLASS
+,null as GEO_POSITIONING
+,null as PSA_LOAD_DTS
+,null as PSA_RECORD_SOURCE
+,null as PSA_DELETE_IND
+, DECODE(GR.VALUE, 0, 'GHOST RECORD-SYSTEM', -1, 'GHOST RECORD-nullkey-required', -2, 'GHOST RECORD-nullkey-optional')  AS BKCC
+, 'USAZET.SNOWFLAKE.FBIN.DERIVED' AS REC_SRC
+, ''::BINARY as HASH_DIFF
+FROM
+TABLE(strtok_split_to_table('0|-1|-2', '|')) AS GR
+
+{% endif %}

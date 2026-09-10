@@ -1,0 +1,29 @@
+version: 2
+models:
+- name: sat_legal_entity__fib_ocf
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - LEGAL_ENTITY_HK
+        - LOAD_DTS
+  - dbt_expectations.expect_table_row_count_to_be_between:
+      arguments:
+        min_value: 4
+      config:
+        severity: warn
+  columns:
+  - name: LEGAL_ENTITY_HK
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'hub_legal_entity' )
+          pk_column_name: LEGAL_ENTITY_HK
+  - name: LEGAL_ENTITY_IDENTIFIER
+    data_tests:
+    - not_null:
+        config:
+          severity: warn

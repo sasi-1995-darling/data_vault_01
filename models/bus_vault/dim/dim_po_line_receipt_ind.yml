@@ -1,0 +1,9 @@
+version: 2
+models:
+  - name: dim_po_line_receipt_ind
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - PO_LINE_RECEIPT_IND_HK
+    columns: []

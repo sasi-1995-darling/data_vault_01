@@ -1,0 +1,24 @@
+version: 2
+
+models:
+  - name: link_plant_shipment
+    description: This is the raw vault link model between shipment and plant
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - plant_shipment_hk
+      - dbt_constraints.foreign_key:
+          arguments:
+            fk_column_names:
+              - plant_hk
+            pk_table_name: ref('hub_plant')
+            pk_column_names:
+              - plant_hk
+      - dbt_constraints.foreign_key:
+          arguments:
+            fk_column_names:
+              - copa_sales_hk
+            pk_table_name: ref('hub_shipment_sap')
+            pk_column_names:
+              - copa_sales_hk

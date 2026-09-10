@@ -1,0 +1,1 @@
+select * from ({{ data_exist('fact_flow_events_device_period','US.FLO_TELEMETRY.FLODETECT_EVENTS_DEVICE_DAILY_AGG')}})

@@ -1,0 +1,1 @@
+select * from ({{ data_exist('fact_monetary_transaction','US.STRIPE_FLOSENSE.BALANCE_TRANSACTION')}})

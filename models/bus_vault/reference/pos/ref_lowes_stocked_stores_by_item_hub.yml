@@ -1,0 +1,17 @@
+version: 2
+models:
+  - name: ref_lowes_stocked_stores_by_item_hub
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - LOWES_SKU_BK
+    columns:
+      - name: LOWES_SKU_BK
+        tests:
+          - unique:
+              config:
+                severity: warn
+          - not_null:
+              config:
+                severity: warn

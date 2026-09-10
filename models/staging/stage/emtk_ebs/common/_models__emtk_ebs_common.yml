@@ -1,0 +1,51 @@
+version: 2
+
+models:
+  - name: stg_contact__emtk_ebs_common
+    description: This is the hash staging model from Emtek for hub_contact
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - contact_hk
+
+  - name: stg_item_base__emtk_ebs_common
+    description: This is the hash staging model from Emtek for hub_item and sat_item_base
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - item_hk
+
+  - name: stg_item_language__emtk_ebs_common
+    description: This is the hash staging model from Emtek for sat_item_language
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - item_hk
+
+  - name: stg_item_category_map__emtk_ebs_common
+    description: This is the hash staging model from Emtek for multi-active msat_item_category
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - item_hk
+              - item_category_cdk
+
+  - name: stg_item_cost__emtk_ebs_common
+    description: This is the hash staging model from Emtek for sat_item_cost
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - item_hk
+
+  - name: stg_oracle_lookup_values__emtk_ebs_common
+    description: This is the hash staging model from Emtek for ref_oracle_lookup_values
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - oracle_lookup_hk

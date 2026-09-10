@@ -1,0 +1,1 @@
+select * from ({{validity_check('fact_shipment_fbin','posted_datekey','brand',["'MOEN','MASTER LOCK','FIBERON','LARSON'"],"NOT BETWEEN '19950101' AND '21001231'")}})

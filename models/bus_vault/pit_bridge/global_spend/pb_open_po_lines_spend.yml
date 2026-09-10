@@ -1,0 +1,9 @@
+version: 2
+models:
+  - name: pb_open_po_lines_spend
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - OPEN_PO_HK
+    columns: []

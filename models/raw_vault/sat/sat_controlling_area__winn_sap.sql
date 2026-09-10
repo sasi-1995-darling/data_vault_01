@@ -1,0 +1,277 @@
+---- SRC LAYER ----
+WITH
+SRC_SWINN          as ( SELECT * FROM {{ ref('v_psa_stg_controlling_area__winn_sap') }} as SRC 
+                         {% if is_incremental() %}
+                         WHERE SRC.LOAD_DTS > (SELECT DATEADD('HOUR', '-1', MAX(LOAD_DTS)) FROM {{this}})
+                         {% endif %}  )
+
+/*
+SRC_SWINN          as ( SELECT * FROM STAGING.V_PSA_STG_CONTROLLING_AREA__WINN_SAP )
+*/
+---- LOGIC LAYER ----
+
+, LOGIC_SWINN as (
+    SELECT
+        CONTROLLING_AREA_HK
+      , MANDT
+      , KOKRS
+      , GLREQUEST
+      , BEZEI
+      , WAERS
+      , KTOPL
+      , LMONA
+      , KOKFI
+      , LOGSYSTEM
+      , ALEMT
+      , MD_LOGSYSTEM
+      , KHINR
+      , KOMP1
+      , KOMP0
+      , KOMP2
+      , ERKRS
+      , DPRCT
+      , PHINR
+      , PCLDG
+      , PCBEL
+      , XWBUK
+      , BPHINR
+      , XBPALE
+      , KSTAR_FIN
+      , KSTAR_FID
+      , PCACUR
+      , PCACURTP
+      , PCATRCUR
+      , CTYP
+      , RCLAC
+      , BLART
+      , FIKRS
+      , RCL_PRIMAC
+      , PCA_ALEMT
+      , PCA_VALU
+      , CVPROF
+      , CVACT
+      , VNAME
+      , PCA_ACC_DIFF
+      , TP_VALOHB
+      , DEFPRCTR
+      , AUTH_USE_NO_STD
+      , AUTH_USE_ADD1
+      , AUTH_USE_ADD2
+      , AUTH_KE_NO_STD
+      , AUTH_KE_USE_ADD1
+      , AUTH_KE_USE_ADD2
+      , GLDELFLAG
+      , GLCHANGETIME
+      , GLSOURCESYSTEM
+      , LOAD_DTS
+      , PSA_RECORD_SOURCE
+      , PSA_DELETE_IND
+      , BKCC
+      , HASHDIFF
+    FROM SRC_SWINN
+)
+---- RENAME LAYER ----
+
+, RENAME_SWINN as (
+    SELECT
+        CONTROLLING_AREA_HK
+      , MANDT
+      , KOKRS
+      , GLREQUEST
+      , BEZEI
+      , WAERS
+      , KTOPL
+      , LMONA
+      , KOKFI
+      , LOGSYSTEM
+      , ALEMT
+      , MD_LOGSYSTEM
+      , KHINR
+      , KOMP1
+      , KOMP0
+      , KOMP2
+      , ERKRS
+      , DPRCT
+      , PHINR
+      , PCLDG
+      , PCBEL
+      , XWBUK
+      , BPHINR
+      , XBPALE
+      , KSTAR_FIN
+      , KSTAR_FID
+      , PCACUR
+      , PCACURTP
+      , PCATRCUR
+      , CTYP
+      , RCLAC
+      , BLART
+      , FIKRS
+      , RCL_PRIMAC
+      , PCA_ALEMT
+      , PCA_VALU
+      , CVPROF
+      , CVACT
+      , VNAME
+      , PCA_ACC_DIFF
+      , TP_VALOHB
+      , DEFPRCTR
+      , AUTH_USE_NO_STD
+      , AUTH_USE_ADD1
+      , AUTH_USE_ADD2
+      , AUTH_KE_NO_STD
+      , AUTH_KE_USE_ADD1
+      , AUTH_KE_USE_ADD2
+      , GLDELFLAG
+      , GLCHANGETIME
+      , GLSOURCESYSTEM
+      , LOAD_DTS
+      , PSA_RECORD_SOURCE
+      , PSA_DELETE_IND
+      , BKCC
+      , HASHDIFF
+    FROM LOGIC_SWINN
+)
+---- FILTER LAYER ----
+
+, FILTER_SWINN as (
+    SELECT *
+    FROM RENAME_SWINN
+)
+
+---- JOIN LAYER ----
+, JOIN_RESULT as (
+    SELECT *
+    FROM FILTER_SWINN
+)
+
+---- FINAL LAYER ----
+SELECT
+          CONTROLLING_AREA_HK
+        , MANDT
+        , KOKRS
+        , GLREQUEST
+        , BEZEI
+        , WAERS
+        , KTOPL
+        , LMONA
+        , KOKFI
+        , LOGSYSTEM
+        , ALEMT
+        , MD_LOGSYSTEM
+        , KHINR
+        , KOMP1
+        , KOMP0
+        , KOMP2
+        , ERKRS
+        , DPRCT
+        , PHINR
+        , PCLDG
+        , PCBEL
+        , XWBUK
+        , BPHINR
+        , XBPALE
+        , KSTAR_FIN
+        , KSTAR_FID
+        , PCACUR
+        , PCACURTP
+        , PCATRCUR
+        , CTYP
+        , RCLAC
+        , BLART
+        , FIKRS
+        , RCL_PRIMAC
+        , PCA_ALEMT
+        , PCA_VALU
+        , CVPROF
+        , CVACT
+        , VNAME
+        , PCA_ACC_DIFF
+        , TP_VALOHB
+        , DEFPRCTR
+        , AUTH_USE_NO_STD
+        , AUTH_USE_ADD1
+        , AUTH_USE_ADD2
+        , AUTH_KE_NO_STD
+        , AUTH_KE_USE_ADD1
+        , AUTH_KE_USE_ADD2
+        , GLDELFLAG
+        , GLCHANGETIME
+        , GLSOURCESYSTEM
+        , LOAD_DTS
+        , PSA_RECORD_SOURCE
+        , PSA_DELETE_IND
+        , BKCC
+        , HASHDIFF
+FROM JOIN_RESULT
+{% if is_incremental() %}
+WHERE NOT EXISTS (
+    SELECT 1 
+    FROM {{ this }} existing
+    WHERE existing.CONTROLLING_AREA_HK= JOIN_RESULT.CONTROLLING_AREA_HK
+    AND existing.HASHDIFF = JOIN_RESULT.HASHDIFF
+)
+{% endif %} 
+{% if not is_incremental() %}
+/*the following qualify is to restrict multiple loads of touched records during the initial build. Ex: multiple row per hk, hashdiff */
+qualify 1= row_number()over(partition by CONTROLLING_AREA_HK, HASHDIFF order by LOAD_DTS)
+union all
+    SELECT        
+    MD5_BINARY(GR.VALUE) AS CONTROLLING_AREA_HK
+, CAST(NULL AS STRING) AS MANDT
+, CAST(NULL AS STRING) AS KOKRS
+, CAST(NULL AS NUMBER) AS GLREQUEST
+, CAST(NULL AS STRING) AS BEZEI
+, CAST(NULL AS STRING) AS WAERS
+, CAST(NULL AS STRING) AS KTOPL
+, CAST(NULL AS STRING) AS LMONA
+, CAST(NULL AS STRING) AS KOKFI
+, CAST(NULL AS STRING) AS LOGSYSTEM
+, CAST(NULL AS STRING) AS ALEMT
+, CAST(NULL AS STRING) AS MD_LOGSYSTEM
+, CAST(NULL AS STRING) AS KHINR
+, CAST(NULL AS STRING) AS KOMP1
+, CAST(NULL AS STRING) AS KOMP0
+, CAST(NULL AS STRING) AS KOMP2
+, CAST(NULL AS STRING) AS ERKRS
+, CAST(NULL AS STRING) AS DPRCT
+, CAST(NULL AS STRING) AS PHINR
+, CAST(NULL AS STRING) AS PCLDG
+, CAST(NULL AS STRING) AS PCBEL
+, CAST(NULL AS STRING) AS XWBUK
+, CAST(NULL AS STRING) AS BPHINR
+, CAST(NULL AS STRING) AS XBPALE
+, CAST(NULL AS STRING) AS KSTAR_FIN
+, CAST(NULL AS STRING) AS KSTAR_FID
+, CAST(NULL AS STRING) AS PCACUR
+, CAST(NULL AS STRING) AS PCACURTP
+, CAST(NULL AS STRING) AS PCATRCUR
+, CAST(NULL AS STRING) AS CTYP
+, CAST(NULL AS STRING) AS RCLAC
+, CAST(NULL AS STRING) AS BLART
+, CAST(NULL AS STRING) AS FIKRS
+, CAST(NULL AS STRING) AS RCL_PRIMAC
+, CAST(NULL AS STRING) AS PCA_ALEMT
+, CAST(NULL AS STRING) AS PCA_VALU
+, CAST(NULL AS STRING) AS CVPROF
+, CAST(NULL AS STRING) AS CVACT
+, CAST(NULL AS STRING) AS VNAME
+, CAST(NULL AS STRING) AS PCA_ACC_DIFF
+, CAST(NULL AS STRING) AS TP_VALOHB
+, CAST(NULL AS STRING) AS DEFPRCTR
+, CAST(NULL AS STRING) AS AUTH_USE_NO_STD
+, CAST(NULL AS STRING) AS AUTH_USE_ADD1
+, CAST(NULL AS STRING) AS AUTH_USE_ADD2
+, CAST(NULL AS STRING) AS AUTH_KE_NO_STD
+, CAST(NULL AS STRING) AS AUTH_KE_USE_ADD1
+, CAST(NULL AS STRING) AS AUTH_KE_USE_ADD2
+, CAST(NULL AS STRING) AS GLDELFLAG
+, CAST(NULL AS NUMBER) AS GLCHANGETIME
+, CAST(NULL AS STRING) AS GLSOURCESYSTEM
+, CONVERT_TIMEZONE('UTC','1900-01-01')  as  LOAD_DTS
+, CAST(NULL AS STRING) AS PSA_DELETE_IND
+,'USAZET.SNOWFLAKE.FBIN.DERIVED' AS REC_SRC
+, DECODE(GR.VALUE, 0, 'GHOST RECORD-SYSTEM', -1, 'GHOST RECORD-nullkey-required', -2, 'GHOST RECORD-nullkey-optional')  AS BKCC
+, ''::BINARY as HASHDIFF FROM
+        TABLE(strtok_split_to_table('0|-1|-2', '|')) AS GR
+{% endif %}

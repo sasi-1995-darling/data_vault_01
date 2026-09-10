@@ -1,0 +1,9 @@
+version: 2
+models:
+  - name: im_dim_date_gregorian
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - DATE_BK
+    columns: []

@@ -1,0 +1,10 @@
+version: 2
+models:
+- name: fact_false_positive_rate_period
+  data_tests: 
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - PERIOD_TYPE
+        - PERIOD_START_DATE_KEY
+  columns: []

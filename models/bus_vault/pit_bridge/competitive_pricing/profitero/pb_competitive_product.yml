@@ -1,0 +1,13 @@
+version: 2
+models:
+  - name: pb_competitive_product
+    data_tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - COMPETITIVE_PRODUCT_HK
+              - RETAILER_HK
+              - SOURCE
+          config:
+            severity: warn
+    columns: []

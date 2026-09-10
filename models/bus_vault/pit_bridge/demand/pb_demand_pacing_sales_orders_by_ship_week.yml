@@ -1,0 +1,15 @@
+version: 2
+models:
+- name: pb_demand_pacing_sales_orders_by_ship_week
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+          - DISTRIBUTION_CHANNEL_HK
+          - DIVISION_HK
+          - ITEM_HK
+          - PLANT_HK
+          - CUSTOMER_SOLDTO_HK
+          - SALES_ORGANIZATION_HK
+          - REQUESTED_SHIP_WEEK__YYYYWW
+  columns: []

@@ -1,0 +1,5 @@
+version: 2
+models:
+- name: rep_device_event
+  data_tests: []
+  columns: []

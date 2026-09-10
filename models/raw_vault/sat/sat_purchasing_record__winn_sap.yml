@@ -1,0 +1,29 @@
+version: 2
+models:
+  - name: sat_purchasing_record__winn_sap
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - PURCHASING_RECORD_HK
+              - LOAD_DTS
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          config:
+            severity: warn
+          arguments:
+            min_value: 4
+    columns:
+      - name: PURCHASING_RECORD_HK
+        tests:
+    # - dbt_utils.relationships_where:
+    #     to: ref( 'hub_purchasing_record' )
+    #     field: PURCHASING_RECORD_HK
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'hub_purchasing_record' )
+                pk_column_name: PURCHASING_RECORD_HK
+      - name: INFNR
+        tests:
+          - not_null:
+              config:
+                severity: warn

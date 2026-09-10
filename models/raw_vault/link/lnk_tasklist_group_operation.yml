@@ -1,0 +1,26 @@
+version: 2
+models:
+- name: lnk_tasklist_group_operation
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - LNK_TASKLIST_OPERATION_HK
+  - dbt_expectations.expect_table_row_count_to_be_between:
+      arguments:
+        min_value: 4
+      config:
+        severity: warn
+  columns:
+  - name: TASKLIST_OPERATION_HK
+    data_tests:
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'hub_tasklist_operation' )
+          pk_column_name: TASKLIST_OPERATION_HK
+  - name: TASKLIST_GROUP_HK
+    data_tests:
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'hub_tasklist_group' )
+          pk_column_name: TASKLIST_GROUP_HK

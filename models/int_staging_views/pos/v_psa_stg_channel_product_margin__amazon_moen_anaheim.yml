@@ -1,0 +1,15 @@
+version: 2
+models:
+- name: v_psa_stg_channel_product_margin__amazon_moen_anaheim
+  data_tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - ASIN
+        - END_DATE
+        - MARKETPLACE_ID
+        - START_DATE
+        - LOAD_DTS
+      config:
+        severity: warn
+  columns: []

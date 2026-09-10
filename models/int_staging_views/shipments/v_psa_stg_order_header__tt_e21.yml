@@ -1,0 +1,17 @@
+version: 2
+models:
+  - name: v_psa_stg_order_header__tt_e21
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          config:
+            severity: warn
+          arguments:
+            combination_of_columns:
+              - ORDER_HEADER_HK
+              - LOAD_DTS
+    columns:
+      - name: ORDER_HEADER_BK
+        tests:
+          - not_null:
+              config:
+                severity: warn

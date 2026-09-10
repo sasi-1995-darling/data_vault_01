@@ -1,0 +1,19 @@
+# version: 2
+
+# models:
+#   - name: dim_item_master
+#     description: Common dimension for items categories  
+#     tests:
+#       - dbt_constraints.primary_key:
+#           column_names:
+#             - base_material
+#             - brand
+#             - item_id
+
+
+    # config:
+    #   tags:
+    #     - emtek
+
+            
+            

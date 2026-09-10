@@ -1,0 +1,9 @@
+version: 2
+models:
+  - name: pit_cost_element_current
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - COST_ELEMENT_HK
+    columns: []

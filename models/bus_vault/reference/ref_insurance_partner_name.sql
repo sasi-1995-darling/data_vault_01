@@ -1,0 +1,56 @@
+{{ config(materialized='table') }}
+---- SRC LAYER ----
+WITH
+SRC AS (
+    SELECT
+        PARTNER_NUMBER,
+        INSURANCE_PARTNER,
+        PSA_DELETE_IND,
+        LOAD_DTS
+    FROM {{ ref('v_psa_stg_insurance_partner_name') }}
+    QUALIFY ROW_NUMBER() OVER (PARTITION BY PARTNER_NUMBER ORDER BY LOAD_DTS DESC) = 1
+)
+
+---- LOGIC LAYER ----
+, LOGIC AS (
+    SELECT
+        PARTNER_NUMBER,
+        INSURANCE_PARTNER,
+        PSA_DELETE_IND,
+        LOAD_DTS
+    FROM SRC
+)
+
+---- RENAME LAYER ----
+, RENAME AS (
+    SELECT
+        PARTNER_NUMBER,
+        INSURANCE_PARTNER,
+        PSA_DELETE_IND,
+        LOAD_DTS
+    FROM LOGIC
+)
+
+---- FILTER LAYER ----
+, FILTER_RESULT AS (
+    SELECT
+        PARTNER_NUMBER,
+        INSURANCE_PARTNER,
+        LOAD_DTS
+    FROM RENAME
+    WHERE COALESCE(PSA_DELETE_IND, 'N') = 'N'
+      AND PARTNER_NUMBER IS NOT NULL
+)
+
+---- JOIN LAYER ----
+, JOIN_RESULT AS (
+    SELECT *
+    FROM FILTER_RESULT
+)
+
+---- FINAL LAYER ----
+SELECT
+      PARTNER_NUMBER
+    , INSURANCE_PARTNER
+    , LOAD_DTS
+FROM JOIN_RESULT

@@ -1,0 +1,14 @@
+version: 2
+models:
+  - name: v_psa_stg_po_item__tt_e21
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          config:
+            severity: warn
+          arguments:
+            combination_of_columns:
+              - PO_NUMBER
+              - ITEM_NO
+              - REL_NUMB
+              - LOAD_DTS
+    columns: []

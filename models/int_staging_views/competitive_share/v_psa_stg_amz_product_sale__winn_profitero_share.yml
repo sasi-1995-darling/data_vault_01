@@ -1,0 +1,24 @@
+version: 2
+models:
+  - name: v_psa_stg_amz_product_sale__winn_profitero_share
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          config:
+            severity: warn
+          arguments:
+            combination_of_columns:
+              - ASIN_BK
+              - SNS_CATEGORY_BK
+              - DATE
+              - LOAD_DTS
+    columns:
+      - name: ASIN_BK
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: SNS_CATEGORY_BK
+        data_tests:
+          - not_null:
+              config:
+                severity: warn

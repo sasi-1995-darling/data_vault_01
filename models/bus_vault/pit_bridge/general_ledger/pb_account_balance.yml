@@ -1,0 +1,10 @@
+version: 2
+models:
+  - name: pb_account_balance
+    data_tests:
+    - dbt_constraints.primary_key:
+        arguments:
+          column_names:
+            - COST_TOTALS_FOR_POSTINGS_HK
+            - FISCAL_MONTH__YYYYMM
+    columns: []

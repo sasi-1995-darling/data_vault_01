@@ -1,0 +1,18 @@
+version: 2
+models:
+  - name: v_psa_stg_bom_component_item__winn_sap
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - LNK_BOM_ITEM_HK
+              - STLTY
+              - STLKN
+              - STPOZ
+              - LOAD_DTS
+    columns:
+      - name: LNK_BOM_ITEM_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn

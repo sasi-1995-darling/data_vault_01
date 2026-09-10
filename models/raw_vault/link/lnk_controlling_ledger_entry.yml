@@ -1,0 +1,38 @@
+version: 2
+models:
+- name: lnk_controlling_ledger_entry
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - CONTROLLING_LEDGER_ENTRY_HK
+  - dbt_expectations.expect_table_row_count_to_be_between:
+      arguments:
+        min_value: 4
+      config:
+        severity: warn
+  columns:
+  - name: CONTROLLING_LEDGER_HEADER_HK
+    data_tests:
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'hub_controlling_ledger_header' )
+          pk_column_name: CONTROLLING_LEDGER_HEADER_HK
+  - name: LEDGER_HK
+    data_tests:
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'hub_ledger' )
+          pk_column_name: LEDGER_HK
+  - name: COST_ELEMENT_HK
+    data_tests:
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'hub_cost_element' )
+          pk_column_name: COST_ELEMENT_HK
+  - name: CONTROLLING_AREA_HK
+    data_tests:
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'hub_controlling_area' )
+          pk_column_name: CONTROLLING_AREA_HK

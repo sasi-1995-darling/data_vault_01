@@ -1,0 +1,1 @@
+select * from ({{ data_exist('fact_device_telemetry','US.FLO_DYNAMODB.PROD_ICD')}})

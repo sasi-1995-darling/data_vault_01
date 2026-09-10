@@ -1,0 +1,14 @@
+version: 2
+
+models:
+  - name: stg_xref_consumer_price
+    description: This is stage model for average daily consumer price for all brands customerwise.
+    tests:
+      - 'dbt_constraints.primary_key:':
+          arguments:
+            column_names:
+              - day
+              - brand
+              - customer
+              - base_material
+              - rec_src

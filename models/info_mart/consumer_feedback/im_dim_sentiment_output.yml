@@ -1,0 +1,5 @@
+version: 2
+models:
+- name: im_dim_sentiment_output
+  tests: []
+  columns: []

@@ -1,0 +1,192 @@
+name: "Trigger DBT Cloud Job"
+description: "Trigger the DBT Cloud job for a specific environment with retry logic"
+inputs:
+  dbt_svc_token:
+    description: "DBT Cloud service token"
+    required: true
+  environment:
+    description: "The DBT environment where the job will run (DEV, QA, PROD)"
+    required: true
+  job_id:
+    description: "The ID of the DBT Cloud job to trigger"
+    required: true
+  dbt_command:
+    description: "The DBT command to run (full or incremental)"
+    required: true
+  job_type:
+    description: "The type of job to run (full or incremental)"
+    required: true
+  pr_number:
+    description: "Pull request number for QA isolation"
+    required: false
+
+runs:
+  using: "composite"
+  steps:
+    - name: Trigger DBT Cloud Job
+      id: trigger-dbt-job
+      shell: bash
+      env:
+        # Inputs and PR-context values arrive via env (not inline ${{ }}) to
+        # prevent script injection (CWE-78) for untrusted values and to keep
+        # the service token out of the rendered shell. Reference as shell vars.
+        DBT_SVC_TOKEN: ${{ inputs.dbt_svc_token }} # secret
+        JOB_ID: ${{ inputs.job_id }}
+        ENVIRONMENT: ${{ inputs.environment }}
+        JOB_TYPE: ${{ inputs.job_type }}
+        DBT_COMMAND: ${{ inputs.dbt_command }} # derived from changed filenames — untrusted
+        GIT_HEAD_REF: ${{ github.head_ref }} # untrusted input
+        PR_NUMBER_INPUT: ${{ github.event.pull_request.number }}
+      run: |
+        PR_NUMBER="${GITHUB_PR_NUMBER:-${PR_NUMBER_INPUT}}"
+        JOB_ID_FOR_SCHEMA="${DBT_CLOUD_JOB_ID:-${JOB_ID}}"
+
+        echo "Running: ${DBT_COMMAND}"
+        echo "Environment: ${ENVIRONMENT}"
+        echo "PR Number: ${PR_NUMBER}"
+        echo "Job ID: ${JOB_ID}"
+
+        if [ "${ENVIRONMENT}" = "DEV" ]; then
+          CAUSE="Testing PR #${PR_NUMBER_INPUT} - Changes to DEV"
+          GIT_BRANCH="${GIT_HEAD_REF}"
+        elif [ "${ENVIRONMENT}" = "QA" ]; then
+          CAUSE="Testing PR #${PR_NUMBER_INPUT} - Changes to QA"
+          GIT_BRANCH="${GIT_HEAD_REF}"
+        elif [ "${ENVIRONMENT}" = "PROD" ]; then
+          CAUSE="Deploying to PROD - PR #${PR_NUMBER_INPUT}"
+          GIT_BRANCH="${GIT_HEAD_REF}"
+        else
+          echo "Invalid environment. Please provide a valid environment (DEV, QA, PROD)"
+          exit 1
+        fi
+
+        echo "Cause: ${CAUSE}"
+        echo "Git Branch: ${GIT_BRANCH}"
+
+        # For QA environment, create PR-specific schema name
+          if [ "${ENVIRONMENT}" = "QA" ] && [ -n "${PR_NUMBER}" ]; then
+            TARGET_SCHEMA="dbt_cloud_pr_${JOB_ID_FOR_SCHEMA}_${PR_NUMBER}"
+            echo "Target Schema: ${TARGET_SCHEMA}"
+
+            # Create JSON using printf to avoid heredoc YAML conflicts - now with vars for force PR schema
+            JSON_PAYLOAD=$(printf '{"cause": "%s", "git_branch": "%s", "steps_override": ["%s"], "execute_steps": ["%s"], "target_name_override": "qa", "target_name": "qa", "schema_override": "%s", "vars": {"force_pr_schema": true, "pr_schema_prefix": "%s"}}' \
+              "${CAUSE}" "${GIT_BRANCH}" "${DBT_COMMAND}" "${DBT_COMMAND}" "${TARGET_SCHEMA}" "${TARGET_SCHEMA}")
+          
+        else
+          TARGET_ENV=$(echo $ENVIRONMENT | tr '[:upper:]' '[:lower:]')
+          echo "Target Environment: ${TARGET_ENV}"
+          
+          # Create JSON using printf 
+          JSON_PAYLOAD=$(printf '{"cause": "%s", "git_branch": "%s", "steps_override": ["%s"], "execute_steps": ["%s"], "target_name_override": "%s", "target_name": "%s"}' \
+            "${CAUSE}" "${GIT_BRANCH}" "${DBT_COMMAND}" "${DBT_COMMAND}" "${TARGET_ENV}" "${TARGET_ENV}")
+        fi
+
+        echo "JSON Payload:"
+        echo "${JSON_PAYLOAD}" | jq '.'
+
+        # ── Retry logic: 3 attempts with exponential backoff ──────────────
+        # Handles transient dbt Cloud API errors (HTTP 502/503/504, network
+        # timeouts) that would otherwise fail the entire pipeline.
+        # Non-retryable errors (4xx auth/validation) fail fast immediately.
+        # Backoff sequence: 10s → 20s (doubles each retry).
+        # ──────────────────────────────────────────────────────────────────
+        MAX_ATTEMPTS=3
+        ATTEMPT=0
+        RETRY_DELAY=10
+        RESPONSE_FILE=$(mktemp)
+
+        while [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
+          ATTEMPT=$((ATTEMPT + 1))
+          echo "=== API Trigger Attempt ${ATTEMPT} of ${MAX_ATTEMPTS} ==="
+
+          # Make API call to DBT Cloud — capture both HTTP status and response body
+          # --connect-timeout 30: fail fast on DNS/connect issues
+          # --max-time 120: cap total request time to 2 minutes
+          CURL_EXIT_CODE=0
+          HTTP_STATUS=$(curl -sS --request POST \
+              --url "https://cloud.getdbt.com/api/v2/accounts/173296/jobs/${JOB_ID}/run/" \
+              --header 'Accept: application/json' \
+              --header "Authorization: Token ${DBT_SVC_TOKEN}" \
+              --header 'Content-Type: application/json' \
+              --data "${JSON_PAYLOAD}" \
+              --connect-timeout 30 \
+              --max-time 120 \
+              --output "${RESPONSE_FILE}" \
+              --write-out "%{http_code}") || CURL_EXIT_CODE=$?
+          RESPONSE=$(cat "${RESPONSE_FILE}")
+
+          # Determine if this is a retryable error or a hard failure
+          RETRYABLE_ERROR=false
+          ERROR_MSG=""
+
+          if [ $CURL_EXIT_CODE -ne 0 ]; then
+            # curl itself failed (network error, DNS, timeout)
+            RETRYABLE_ERROR=true
+            if [ $CURL_EXIT_CODE -eq 28 ]; then
+              ERROR_MSG="Request timed out (curl exit 28)"
+            else
+              ERROR_MSG="curl failed with exit code ${CURL_EXIT_CODE}"
+            fi
+          else
+            # curl succeeded — check HTTP status and API response
+            SUCCESS=$(echo "$RESPONSE" | jq -r '.status.is_success // false' 2>/dev/null || echo "false")
+            ERROR_MSG=$(echo "$RESPONSE" | jq -r '.status.user_message // "Unknown error"' 2>/dev/null || echo "Unknown error")
+
+            if [[ "$HTTP_STATUS" =~ ^2[0-9][0-9]$ ]] && [ "$SUCCESS" = "true" ]; then
+              echo "✅ API call succeeded on attempt ${ATTEMPT} (HTTP ${HTTP_STATUS})"
+              break
+            fi
+
+            # Only retry on transient HTTP errors (502/503/504)
+            case "$HTTP_STATUS" in
+              502|503|504)
+                RETRYABLE_ERROR=true
+                ;;
+            esac
+          fi
+
+          # Retry if transient and not the last attempt; otherwise fail
+          if [ "$RETRYABLE_ERROR" = "true" ] && [ $ATTEMPT -lt $MAX_ATTEMPTS ]; then
+            echo "⚠️  Attempt ${ATTEMPT} failed (HTTP ${HTTP_STATUS:-N/A}): ${ERROR_MSG}"
+            echo "Retrying in ${RETRY_DELAY}s..."
+            sleep $RETRY_DELAY
+            RETRY_DELAY=$((RETRY_DELAY * 2))  # Exponential backoff: 10s → 20s
+          else
+            if [ "$RETRYABLE_ERROR" = "true" ]; then
+              echo "❌ All ${MAX_ATTEMPTS} attempts failed (transient errors)."
+            else
+              echo "❌ Non-retryable API failure on attempt ${ATTEMPT}."
+            fi
+            echo "HTTP status: ${HTTP_STATUS:-N/A}"
+            echo "Last response:"
+            echo "$RESPONSE" | jq '.' 2>/dev/null || echo "$RESPONSE"
+            echo "${ERROR_MSG}"
+            rm -f "${RESPONSE_FILE}"
+            exit 1
+          fi
+        done
+
+        rm -f "${RESPONSE_FILE}"
+
+        # Log API response for debugging
+        echo "Response:"
+        echo "$RESPONSE" | jq '.'
+
+        # Extract key information from the API response
+        RUN_ID=$(echo "$RESPONSE" | jq -r '.data.id')
+        echo "RUN_ID: $RUN_ID"
+
+        DBT_JOB_HREF=$(echo "$RESPONSE" | jq -r '.data.href')
+        echo "DBT_JOB_HREF: $DBT_JOB_HREF"
+
+        JOB_CREATED_AT=$(echo "$RESPONSE" | jq -r '.data.created_at')
+        echo "JOB_CREATED_AT: $JOB_CREATED_AT"
+
+        # Format the timestamp to be more human-readable
+        FORMATTED_TIME=$(echo "$JOB_CREATED_AT" | sed 's/T/ /' | sed 's/\.[0-9]*+00:00/ UTC/')
+        echo "Formatted time: $FORMATTED_TIME"
+
+        # Set environment variables that can be used by subsequent workflow steps
+        echo "${ENVIRONMENT}_${JOB_TYPE}_HREF=${DBT_JOB_HREF}" >> $GITHUB_ENV
+        echo "${ENVIRONMENT}_${JOB_TYPE}_JOB_CREATED_AT=${FORMATTED_TIME}" >> $GITHUB_ENV
+        echo "${ENVIRONMENT}_${JOB_TYPE}_RUN_ID=${RUN_ID}" >> $GITHUB_ENV

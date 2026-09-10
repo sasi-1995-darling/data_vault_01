@@ -1,0 +1,27 @@
+version: 2
+models:
+  - name: v_psa_stg_brands__ref_file
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          config:
+            severity: warn
+          arguments:
+            combination_of_columns:
+              - BRAND_BK
+              - LOAD_DTS
+    columns:
+      - name: BRAND_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: BRAND_BK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: LOAD_DTS
+        tests:
+          - not_null:
+              config:
+                severity: warn

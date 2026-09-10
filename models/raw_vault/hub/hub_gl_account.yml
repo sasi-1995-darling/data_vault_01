@@ -1,0 +1,13 @@
+version: 2
+models:
+  - name: hub_gl_account
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - GL_ACCOUNT_HK
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          config:
+            severity: warn
+          arguments:
+            min_value: 4

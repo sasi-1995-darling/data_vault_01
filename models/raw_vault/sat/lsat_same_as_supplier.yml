@@ -1,0 +1,24 @@
+version: 2
+models:
+  - name: lsat_same_as_supplier
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - SLNK_SUPPLIER_HK
+              - LOAD_DTS
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          config:
+            severity: warn
+          arguments:
+            min_value: 4
+    columns:
+      - name: SLNK_SUPPLIER_HK
+        tests:
+    # - dbt_utils.relationships_where:
+    #     to: ref( 'lnk_same_as_supplier' )
+    #     field: SLNK_SUPPLIER_HK
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'lnk_same_as_supplier' )
+                pk_column_name: SLNK_SUPPLIER_HK

@@ -1,0 +1,53 @@
+version: 2
+models:
+  - name: link_invoice_payment_schedule
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - INVOICE_PAYMENT_SCHEDULE_HK
+    columns:
+      - name: INVOICE_PAYMENT_SCHEDULE_HK
+        tests:
+          - unique:
+              config:
+                severity: warn
+          - not_null:
+              config:
+                severity: warn
+      - name: INVOICE_HK
+        tests:
+          - dbt_utils.relationships_where:
+              arguments:
+                to: ref( 'hub_invoice_header' )
+                field: INVOICE_HK
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'hub_invoice_header' )
+                pk_column_name: INVOICE_HK
+          - not_null:
+              config:
+                severity: warn
+      - name: PAYMENT_SCHEDULE_HK
+        tests:
+          - dbt_utils.relationships_where:
+              arguments:
+                to: ref( 'hub_payment_schedule' )
+                field: PAYMENT_SCHEDULE_HK
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'hub_payment_schedule' )
+                pk_column_name: PAYMENT_SCHEDULE_HK
+          - not_null:
+              config:
+                severity: warn
+      - name: LOAD_DTS
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: REC_SRC
+        tests:
+          - not_null:
+              config:
+                severity: warn

@@ -1,0 +1,184 @@
+---- SRC LAYER ----
+WITH
+SRC_PBIS           as ( SELECT APP_SOURCE, BKCC, CONSUMER_BK, CONSUMER_HK, PLATFORM, REC_SRC, SCREEN_ACTION_TS, SCREEN_NAME, SCREEN_TRACKING_ID, SCREEN_TRAIT_ID FROM {{ ref('pb_stg_app_user_engagement_ios_screen') }} as SRC  ),
+SRC_PBAS           as ( SELECT APP_SOURCE, BKCC, CONSUMER_BK, CONSUMER_HK, PLATFORM, REC_SRC, SCREEN_ACTION_TS, SCREEN_NAME, SCREEN_TRACKING_ID, SCREEN_TRAIT_ID FROM {{ ref('pb_stg_app_user_engagement_android_screen') }} as SRC  ),
+SRC_PBAC           as ( SELECT APP_SOURCE, BKCC, CONSUMER_BK, CONSUMER_HK, PLATFORM, REC_SRC, SCREEN_ACTION_TS, SCREEN_NAME, SCREEN_TRACKING_ID, SCREEN_TRAIT_ID FROM {{ ref('pb_stg_app_user_engagement_ios_screen_flo') }} as SRC  ),
+SRC_PBAD           as ( SELECT APP_SOURCE, BKCC, CONSUMER_BK, CONSUMER_HK, PLATFORM, REC_SRC, SCREEN_ACTION_TS, SCREEN_NAME, SCREEN_TRACKING_ID, SCREEN_TRAIT_ID FROM {{ ref('pb_stg_app_user_engagement_android_screen_flo') }} as SRC  )
+
+/*
+SRC_PBIS           as ( SELECT * FROM BUS_VAULT.PB_STG_APP_USER_ENGAGEMENT_IOS_SCREEN )
+SRC_PBAS           as ( SELECT * FROM BUS_VAULT.PB_STG_APP_USER_ENGAGEMENT_ANDROID_SCREEN )
+SRC_PBAC           as ( SELECT * FROM BUS_VAULT.PB_STG_APP_USER_ENGAGEMENT_IOS_SCREEN_FLO )
+SRC_PBAD           as ( SELECT * FROM BUS_VAULT.PB_STG_APP_USER_ENGAGEMENT_ANDROID_SCREEN_FLO )
+*/
+---- LOGIC LAYER ----
+
+, LOGIC_PBIS as (
+    SELECT
+        CONSUMER_HK
+      , CONSUMER_BK
+      , BKCC
+      , REC_SRC
+      , SCREEN_TRAIT_ID
+      , SCREEN_TRACKING_ID
+      , SCREEN_NAME
+      , SCREEN_ACTION_TS
+      , PLATFORM
+      , APP_SOURCE
+    FROM SRC_PBIS
+)
+
+, LOGIC_PBAS as (
+    SELECT
+        CONSUMER_HK
+      , CONSUMER_BK
+      , BKCC
+      , REC_SRC
+      , SCREEN_TRAIT_ID
+      , SCREEN_TRACKING_ID
+      , SCREEN_NAME
+      , SCREEN_ACTION_TS
+      , PLATFORM
+      , APP_SOURCE
+    FROM SRC_PBAS
+)
+
+, LOGIC_PBAC as (
+    SELECT
+        CONSUMER_HK
+      , CONSUMER_BK
+      , BKCC
+      , REC_SRC
+      , SCREEN_TRAIT_ID
+      , SCREEN_TRACKING_ID
+      , SCREEN_NAME
+      , SCREEN_ACTION_TS
+      , PLATFORM
+      , APP_SOURCE
+    FROM SRC_PBAC
+)
+
+, LOGIC_PBAD as (
+    SELECT
+        CONSUMER_HK
+      , CONSUMER_BK
+      , BKCC
+      , REC_SRC
+      , SCREEN_TRAIT_ID
+      , SCREEN_TRACKING_ID
+      , SCREEN_NAME
+      , SCREEN_ACTION_TS
+      , PLATFORM
+      , APP_SOURCE
+    FROM SRC_PBAD
+)
+---- RENAME LAYER ----
+
+, RENAME_PBIS as (
+    SELECT
+        CONSUMER_HK
+      , CONSUMER_BK
+      , BKCC
+      , REC_SRC
+      , SCREEN_TRAIT_ID
+      , SCREEN_TRACKING_ID
+      , SCREEN_NAME
+      , SCREEN_ACTION_TS
+      , PLATFORM
+      , APP_SOURCE
+    FROM LOGIC_PBIS
+)
+
+, RENAME_PBAS as (
+    SELECT
+        CONSUMER_HK
+      , CONSUMER_BK
+      , BKCC
+      , REC_SRC
+      , SCREEN_TRAIT_ID
+      , SCREEN_TRACKING_ID
+      , SCREEN_NAME
+      , SCREEN_ACTION_TS
+      , PLATFORM
+      , APP_SOURCE
+    FROM LOGIC_PBAS
+)
+
+, RENAME_PBAC as (
+    SELECT
+        CONSUMER_HK
+      , CONSUMER_BK
+      , BKCC
+      , REC_SRC
+      , SCREEN_TRAIT_ID
+      , SCREEN_TRACKING_ID
+      , SCREEN_NAME
+      , SCREEN_ACTION_TS
+      , PLATFORM
+      , APP_SOURCE
+    FROM LOGIC_PBAC
+)
+
+, RENAME_PBAD as (
+    SELECT
+        CONSUMER_HK
+      , CONSUMER_BK
+      , BKCC
+      , REC_SRC
+      , SCREEN_TRAIT_ID
+      , SCREEN_TRACKING_ID
+      , SCREEN_NAME
+      , SCREEN_ACTION_TS
+      , PLATFORM
+      , APP_SOURCE
+    FROM LOGIC_PBAD
+)
+---- FILTER LAYER ----
+
+, FILTER_PBIS as (
+    SELECT *
+    FROM RENAME_PBIS
+)
+
+, FILTER_PBAS as (
+    SELECT *
+    FROM RENAME_PBAS
+)
+
+, FILTER_PBAC as (
+    SELECT *
+    FROM RENAME_PBAC
+)
+
+, FILTER_PBAD as (
+    SELECT *
+    FROM RENAME_PBAD
+)
+---- JOIN LAYER ----
+, JOIN_RESULT as (
+    SELECT * FROM FILTER_PBIS
+    UNION
+    SELECT * FROM FILTER_PBAS
+    UNION
+    SELECT * FROM FILTER_PBAC
+    UNION
+    SELECT * FROM FILTER_PBAD
+)
+
+---- FINAL LAYER ----
+SELECT
+              row_number() over(order by 1)                            as SEQ_ID
+        , CURRENT_DATE                                                 as SNAPSHOTDATE
+        , CONVERT_TIMEZONE('UTC', CURRENT_TIMESTAMP )                  as PB_LOAD_DTS
+        , CONSUMER_HK
+        , CONSUMER_BK
+        , BKCC
+        , REC_SRC
+        , SCREEN_TRAIT_ID
+        , SCREEN_TRACKING_ID
+        , SCREEN_NAME
+        , SCREEN_ACTION_TS
+        , PLATFORM
+        , APP_SOURCE
+FROM JOIN_RESULT
+qualify 1= row_number() over(partition by CONSUMER_HK , SCREEN_NAME, PLATFORM order by SCREEN_ACTION_TS DESC, PB_LOAD_DTS DESC)

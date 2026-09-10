@@ -1,0 +1,18 @@
+version: 2
+models:
+- name: lsat_product_review__profitero_share
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - PRODUCT_RETAILER_HK
+        - UKEY
+        - PRODUCT_ID
+        - Duplicate_group
+        - LOAD_DTS
+  - dbt_expectations.expect_table_row_count_to_be_between:
+      arguments:
+        min_value: 4
+      config:
+        severity: warn
+  columns: []

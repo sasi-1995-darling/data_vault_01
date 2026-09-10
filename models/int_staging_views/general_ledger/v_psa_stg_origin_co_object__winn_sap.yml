@@ -1,0 +1,49 @@
+version: 2
+models:
+  - name: v_psa_stg_origin_co_object__winn_sap
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          config:
+            severity: warn
+          arguments:
+            combination_of_columns:
+              - KOKRS
+              - KOATY
+              - HRKFT
+              - LOAD_DTS
+    columns:
+      - name: CONTROLLING_AREA_BK
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: ORIGIN_TYPE_BK
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: ORIGIN_GROUP_BK
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: MANDT
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: KOKRS
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: KOATY
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: HRKFT
+        data_tests:
+          - not_null:
+              config:
+                severity: warn

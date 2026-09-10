@@ -1,0 +1,25 @@
+version: 2
+models:
+  - name: sat_competitive_products__profitero
+    data_tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - COMPETITIVE_PRODUCT_HK
+              - LOAD_DTS
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          config:
+            severity: warn
+          arguments:
+            min_value: 4
+    columns:
+      - name: COMPETITIVE_PRODUCT_HK
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: LOAD_DTS
+        data_tests:
+          - not_null:
+              config:
+                severity: warn

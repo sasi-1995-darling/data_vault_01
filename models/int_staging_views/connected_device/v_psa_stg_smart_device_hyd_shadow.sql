@@ -1,0 +1,367 @@
+---- SRC LAYER ----
+WITH
+SRC_D1             as ( SELECT ALERTS, BATTERY_LIFE_REMAINING, BATTERY_PERCENTAGE, BEEPER_PIEZO_ENABLE, CLIENTID, COMMAND, COMMAND_SRC, CONNECTED, CURRENT_VERSION, DEVICE_TYPE, DEV_DEVICE, DISP_LANGUAGE, FIRMWARE_VERSION, FLOW_SENSOR_CONNECTED, FLOW_SENSOR_KFACTOR, FLOW_SENSOR_OFFSET, HYDRA_OVERVIEW_DURATION, HYDRA_OVERVIEW_DURATION_REMAINING, HYDRA_OVERVIEW_FLOW, HYDRA_OVERVIEW_PAUSED, HYDRA_OVERVIEW_RAIN, HYDRA_OVERVIEW_RESTRICTED, HYDRA_OVERVIEW_RUN_PLAN_SEQ_NUM, HYDRA_OVERVIEW_STATUS, HYDRA_OVERVIEW_ZONE_ID, LAST_CONNECT, LOGALERTACK_EVENTID, LOGALERTACK_TYPE, LOGCOMMAND_ARGS, LOGCOMMAND_COMMAND, LOGCOMMAND_DURATION, LOGCOMMAND_EVENTID, LOG_DEBUG, LOG_DEBUG_STATE, MASTER_VALVE_CONNECTED, MASTER_VALVE_STATUS, NUM_ZONES, POWER_SOURCE, PSA_DELETE_IND, PSA_LOAD_DTS, PSA_RECORD_SOURCE, RAIN_SENSOR_CONNECTED, RAIN_SENSOR_TYPE, RESTRICT_LOADED, SCHEDULER_COMMAND, SCHEDULER_SCHEDULE_ID, SCHEDULER_SENSOR_ID, SCHEDULER_SRC, SCHEDULER_TIMEOUT, SCHEDULER_ZONE_ID, SCHEDULES_LOADED, SCHEDULES_MAX, SCHEDULE_NEXT_ID, SCHEDULE_NEXT_STARTTIME, SCHEDULE_NEXT_WILL_RUN_SOON, SCHEDULE_RUNNING_ID, SEASONAL_ADJUST, SERIAL_NUMBER, SOIL_SENSORS, SOIL_SENSORS_LOST, SYSTEM_STATE, TEMP_SCALE, TIMESTAMP, TIMEZONE_OFFSET, UPGRADE_URI, VERSION, WATER_ENABLE, WEATHER_SKIP_ENDTIME, WEATHER_SKIP_REASON, WEATHER_SKIP_STARTTIME, WIFI_NETWORK, WIFI_NO_POLL, WIFI_RSSI, ZONES, _RESCUED_DATA FROM {{ source('databricks_integration', 'dt_cleaned_hyd_shadow') }} as SRC  ),
+SRC_A1             as ( SELECT BKCC, REC_SRC FROM {{ ref('ref_business_key_collision') }} as SRC  )
+
+/*
+SRC_D1             as ( SELECT * FROM databricks_integration.DT_CLEANED_HYD_SHADOW )
+SRC_A1             as ( SELECT * FROM raw_vault.ref_business_key_collision )
+*/
+---- LOGIC LAYER ----
+
+, LOGIC_D1 as (
+    SELECT
+        CLIENTID                                                     as                                    SMART_DEVICE_BK
+      , CLIENTID
+      , SERIAL_NUMBER
+      , TIMESTAMP
+      , FIRMWARE_VERSION
+      , UPGRADE_URI
+      , CONNECTED
+      , LAST_CONNECT
+      , WIFI_RSSI
+      , WIFI_NETWORK
+      , WIFI_NO_POLL
+      , COMMAND
+      , COMMAND_SRC
+      , LOGCOMMAND_COMMAND
+      , LOGCOMMAND_EVENTID
+      , LOGCOMMAND_DURATION
+      , LOGCOMMAND_ARGS
+      , LOGALERTACK_EVENTID
+      , LOGALERTACK_TYPE
+      , LOG_DEBUG
+      , LOG_DEBUG_STATE
+      , SYSTEM_STATE
+      , DEV_DEVICE
+      , DISP_LANGUAGE
+      , POWER_SOURCE
+      , BATTERY_PERCENTAGE
+      , BATTERY_LIFE_REMAINING
+      , BEEPER_PIEZO_ENABLE
+      , TEMP_SCALE
+      , TIMEZONE_OFFSET
+      , SCHEDULER_COMMAND
+      , SCHEDULER_SRC
+      , SCHEDULER_TIMEOUT
+      , SCHEDULER_ZONE_ID
+      , SCHEDULER_SCHEDULE_ID
+      , SCHEDULER_SENSOR_ID
+      , WATER_ENABLE
+      , SCHEDULE_RUNNING_ID
+      , SCHEDULE_NEXT_ID
+      , SCHEDULE_NEXT_STARTTIME
+      , SCHEDULE_NEXT_WILL_RUN_SOON
+      , MASTER_VALVE_CONNECTED
+      , MASTER_VALVE_STATUS
+      , RAIN_SENSOR_CONNECTED
+      , RAIN_SENSOR_TYPE
+      , SEASONAL_ADJUST
+      , SOIL_SENSORS
+      , SOIL_SENSORS_LOST
+      , FLOW_SENSOR_CONNECTED
+      , FLOW_SENSOR_KFACTOR
+      , FLOW_SENSOR_OFFSET
+      , WEATHER_SKIP_REASON
+      , WEATHER_SKIP_STARTTIME
+      , WEATHER_SKIP_ENDTIME
+      , HYDRA_OVERVIEW_STATUS
+      , HYDRA_OVERVIEW_ZONE_ID
+      , HYDRA_OVERVIEW_DURATION
+      , HYDRA_OVERVIEW_DURATION_REMAINING
+      , HYDRA_OVERVIEW_FLOW
+      , HYDRA_OVERVIEW_RAIN
+      , HYDRA_OVERVIEW_RESTRICTED
+      , HYDRA_OVERVIEW_RUN_PLAN_SEQ_NUM
+      , HYDRA_OVERVIEW_PAUSED
+      , SCHEDULES_MAX
+      , SCHEDULES_LOADED
+      , RESTRICT_LOADED
+      , NUM_ZONES
+      , ZONES
+      , ALERTS
+      , CURRENT_VERSION
+      , DEVICE_TYPE
+      , VERSION
+      , _RESCUED_DATA
+      , PSA_LOAD_DTS
+      , PSA_RECORD_SOURCE
+      , PSA_DELETE_IND
+    FROM SRC_D1
+)
+
+, LOGIC_A1 as (
+    SELECT
+        REC_SRC
+      , BKCC
+    FROM SRC_A1
+)
+---- RENAME LAYER ----
+
+, RENAME_D1 as (
+    SELECT
+        SMART_DEVICE_BK
+      , CLIENTID
+      , SERIAL_NUMBER
+      , TIMESTAMP
+      , FIRMWARE_VERSION
+      , UPGRADE_URI
+      , CONNECTED
+      , LAST_CONNECT
+      , WIFI_RSSI
+      , WIFI_NETWORK
+      , WIFI_NO_POLL
+      , COMMAND
+      , COMMAND_SRC
+      , LOGCOMMAND_COMMAND
+      , LOGCOMMAND_EVENTID
+      , LOGCOMMAND_DURATION
+      , LOGCOMMAND_ARGS
+      , LOGALERTACK_EVENTID
+      , LOGALERTACK_TYPE
+      , LOG_DEBUG
+      , LOG_DEBUG_STATE
+      , SYSTEM_STATE
+      , DEV_DEVICE
+      , DISP_LANGUAGE
+      , POWER_SOURCE
+      , BATTERY_PERCENTAGE
+      , BATTERY_LIFE_REMAINING
+      , BEEPER_PIEZO_ENABLE
+      , TEMP_SCALE
+      , TIMEZONE_OFFSET
+      , SCHEDULER_COMMAND
+      , SCHEDULER_SRC
+      , SCHEDULER_TIMEOUT
+      , SCHEDULER_ZONE_ID
+      , SCHEDULER_SCHEDULE_ID
+      , SCHEDULER_SENSOR_ID
+      , WATER_ENABLE
+      , SCHEDULE_RUNNING_ID
+      , SCHEDULE_NEXT_ID
+      , SCHEDULE_NEXT_STARTTIME
+      , SCHEDULE_NEXT_WILL_RUN_SOON
+      , MASTER_VALVE_CONNECTED
+      , MASTER_VALVE_STATUS
+      , RAIN_SENSOR_CONNECTED
+      , RAIN_SENSOR_TYPE
+      , SEASONAL_ADJUST
+      , SOIL_SENSORS
+      , SOIL_SENSORS_LOST
+      , FLOW_SENSOR_CONNECTED
+      , FLOW_SENSOR_KFACTOR
+      , FLOW_SENSOR_OFFSET
+      , WEATHER_SKIP_REASON
+      , WEATHER_SKIP_STARTTIME
+      , WEATHER_SKIP_ENDTIME
+      , HYDRA_OVERVIEW_STATUS
+      , HYDRA_OVERVIEW_ZONE_ID
+      , HYDRA_OVERVIEW_DURATION
+      , HYDRA_OVERVIEW_DURATION_REMAINING
+      , HYDRA_OVERVIEW_FLOW
+      , HYDRA_OVERVIEW_RAIN
+      , HYDRA_OVERVIEW_RESTRICTED
+      , HYDRA_OVERVIEW_RUN_PLAN_SEQ_NUM
+      , HYDRA_OVERVIEW_PAUSED
+      , SCHEDULES_MAX
+      , SCHEDULES_LOADED
+      , RESTRICT_LOADED
+      , NUM_ZONES
+      , ZONES
+      , ALERTS
+      , CURRENT_VERSION
+      , DEVICE_TYPE
+      , VERSION
+      , _RESCUED_DATA
+      , PSA_LOAD_DTS
+      , PSA_RECORD_SOURCE
+      , PSA_DELETE_IND
+    FROM LOGIC_D1
+)
+
+, RENAME_A1 as (
+    SELECT
+        REC_SRC
+      , BKCC
+    FROM LOGIC_A1
+)
+---- FILTER LAYER ----
+
+, FILTER_D1 as (
+    SELECT *
+    FROM RENAME_D1
+)
+
+, FILTER_A1 as (
+    SELECT *
+    FROM RENAME_A1
+    WHERE rec_src = 'US.DATABRICKS_INTEGRATION.DT_CLEANED_HYD_SHADOW'
+)
+
+---- JOIN LAYER ----
+, JOIN_RESULT as (
+    SELECT *
+    FROM FILTER_D1
+    INNER JOIN FILTER_A1
+        ON '1' = '1'
+)
+
+---- FINAL LAYER ----
+SELECT
+          SMART_DEVICE_BK
+        , CONVERT_TIMEZONE('UTC', PSA_LOAD_DTS)                        as LOAD_DTS
+        , CLIENTID
+        , SERIAL_NUMBER
+        , TIMESTAMP
+        , FIRMWARE_VERSION
+        , UPGRADE_URI
+        , CONNECTED
+        , LAST_CONNECT
+        , WIFI_RSSI
+        , WIFI_NETWORK
+        , WIFI_NO_POLL
+        , COMMAND
+        , COMMAND_SRC
+        , LOGCOMMAND_COMMAND
+        , LOGCOMMAND_EVENTID
+        , LOGCOMMAND_DURATION
+        , LOGCOMMAND_ARGS
+        , LOGALERTACK_EVENTID
+        , LOGALERTACK_TYPE
+        , LOG_DEBUG
+        , LOG_DEBUG_STATE
+        , SYSTEM_STATE
+        , DEV_DEVICE
+        , DISP_LANGUAGE
+        , POWER_SOURCE
+        , BATTERY_PERCENTAGE
+        , BATTERY_LIFE_REMAINING
+        , BEEPER_PIEZO_ENABLE
+        , TEMP_SCALE
+        , TIMEZONE_OFFSET
+        , SCHEDULER_COMMAND
+        , SCHEDULER_SRC
+        , SCHEDULER_TIMEOUT
+        , SCHEDULER_ZONE_ID
+        , SCHEDULER_SCHEDULE_ID
+        , SCHEDULER_SENSOR_ID
+        , WATER_ENABLE
+        , SCHEDULE_RUNNING_ID
+        , SCHEDULE_NEXT_ID
+        , SCHEDULE_NEXT_STARTTIME
+        , SCHEDULE_NEXT_WILL_RUN_SOON
+        , MASTER_VALVE_CONNECTED
+        , MASTER_VALVE_STATUS
+        , RAIN_SENSOR_CONNECTED
+        , RAIN_SENSOR_TYPE
+        , SEASONAL_ADJUST
+        , SOIL_SENSORS
+        , SOIL_SENSORS_LOST
+        , FLOW_SENSOR_CONNECTED
+        , FLOW_SENSOR_KFACTOR
+        , FLOW_SENSOR_OFFSET
+        , WEATHER_SKIP_REASON
+        , WEATHER_SKIP_STARTTIME
+        , WEATHER_SKIP_ENDTIME
+        , HYDRA_OVERVIEW_STATUS
+        , HYDRA_OVERVIEW_ZONE_ID
+        , HYDRA_OVERVIEW_DURATION
+        , HYDRA_OVERVIEW_DURATION_REMAINING
+        , HYDRA_OVERVIEW_FLOW
+        , HYDRA_OVERVIEW_RAIN
+        , HYDRA_OVERVIEW_RESTRICTED
+        , HYDRA_OVERVIEW_RUN_PLAN_SEQ_NUM
+        , HYDRA_OVERVIEW_PAUSED
+        , SCHEDULES_MAX
+        , SCHEDULES_LOADED
+        , RESTRICT_LOADED
+        , NUM_ZONES
+        , ZONES
+        , ALERTS
+        , CURRENT_VERSION
+        , DEVICE_TYPE
+        , VERSION
+        , _RESCUED_DATA
+        , PSA_LOAD_DTS
+        , PSA_RECORD_SOURCE
+        , PSA_DELETE_IND
+        , REC_SRC
+        , BKCC
+        , MD5_BINARY(UPPER(CONCAT_WS('||',
+          COALESCE(NULLIF(TRIM(CAST(SMART_DEVICE_BK as VARCHAR)),''), '^^')
+        , COALESCE(NULLIF(TRIM(CAST(BKCC as VARCHAR)),''), '^^')
+        ))) as SMART_DEVICE_HK
+        , MD5_BINARY(UPPER(NULLIF(CONCAT(
+              IFNULL(TRIM(SERIAL_NUMBER::text), '^^') 
+            , '||', IFNULL(TRIM(TIMESTAMP::text), '^^') 
+            , '||', IFNULL(TRIM(FIRMWARE_VERSION::text), '^^') 
+            , '||', IFNULL(TRIM(UPGRADE_URI::text), '^^') 
+            , '||', IFNULL(TRIM(CONNECTED::text), '^^') 
+            , '||', IFNULL(TRIM(LAST_CONNECT::text), '^^') 
+            , '||', IFNULL(TRIM(WIFI_RSSI::text), '^^') 
+            , '||', IFNULL(TRIM(WIFI_NETWORK::text), '^^') 
+            , '||', IFNULL(TRIM(WIFI_NO_POLL::text), '^^') 
+            , '||', IFNULL(TRIM(COMMAND::text), '^^') 
+            , '||', IFNULL(TRIM(COMMAND_SRC::text), '^^') 
+            , '||', IFNULL(TRIM(LOGCOMMAND_COMMAND::text), '^^') 
+            , '||', IFNULL(TRIM(LOGCOMMAND_EVENTID::text), '^^') 
+            , '||', IFNULL(TRIM(LOGCOMMAND_DURATION::text), '^^') 
+            , '||', IFNULL(TRIM(LOGCOMMAND_ARGS::text), '^^') 
+            , '||', IFNULL(TRIM(LOGALERTACK_EVENTID::text), '^^') 
+            , '||', IFNULL(TRIM(LOGALERTACK_TYPE::text), '^^') 
+            , '||', IFNULL(TRIM(LOG_DEBUG::text), '^^') 
+            , '||', IFNULL(TRIM(LOG_DEBUG_STATE::text), '^^') 
+            , '||', IFNULL(TRIM(SYSTEM_STATE::text), '^^') 
+            , '||', IFNULL(TRIM(DEV_DEVICE::text), '^^') 
+            , '||', IFNULL(TRIM(DISP_LANGUAGE::text), '^^') 
+            , '||', IFNULL(TRIM(POWER_SOURCE::text), '^^') 
+            , '||', IFNULL(TRIM(BATTERY_PERCENTAGE::text), '^^') 
+            , '||', IFNULL(TRIM(BATTERY_LIFE_REMAINING::text), '^^') 
+            , '||', IFNULL(TRIM(BEEPER_PIEZO_ENABLE::text), '^^') 
+            , '||', IFNULL(TRIM(TEMP_SCALE::text), '^^') 
+            , '||', IFNULL(TRIM(TIMEZONE_OFFSET::text), '^^') 
+            , '||', IFNULL(TRIM(SCHEDULER_COMMAND::text), '^^') 
+            , '||', IFNULL(TRIM(SCHEDULER_SRC::text), '^^') 
+            , '||', IFNULL(TRIM(SCHEDULER_TIMEOUT::text), '^^') 
+            , '||', IFNULL(TRIM(SCHEDULER_ZONE_ID::text), '^^') 
+            , '||', IFNULL(TRIM(SCHEDULER_SCHEDULE_ID::text), '^^') 
+            , '||', IFNULL(TRIM(SCHEDULER_SENSOR_ID::text), '^^') 
+            , '||', IFNULL(TRIM(WATER_ENABLE::text), '^^') 
+            , '||', IFNULL(TRIM(SCHEDULE_RUNNING_ID::text), '^^') 
+            , '||', IFNULL(TRIM(SCHEDULE_NEXT_ID::text), '^^') 
+            , '||', IFNULL(TRIM(SCHEDULE_NEXT_STARTTIME::text), '^^') 
+            , '||', IFNULL(TRIM(SCHEDULE_NEXT_WILL_RUN_SOON::text), '^^') 
+            , '||', IFNULL(TRIM(MASTER_VALVE_CONNECTED::text), '^^') 
+            , '||', IFNULL(TRIM(MASTER_VALVE_STATUS::text), '^^') 
+            , '||', IFNULL(TRIM(RAIN_SENSOR_CONNECTED::text), '^^') 
+            , '||', IFNULL(TRIM(RAIN_SENSOR_TYPE::text), '^^') 
+            , '||', IFNULL(TRIM(SEASONAL_ADJUST::text), '^^') 
+            , '||', IFNULL(TRIM(SOIL_SENSORS::text), '^^') 
+            , '||', IFNULL(TRIM(SOIL_SENSORS_LOST::text), '^^') 
+            , '||', IFNULL(TRIM(FLOW_SENSOR_CONNECTED::text), '^^') 
+            , '||', IFNULL(TRIM(FLOW_SENSOR_KFACTOR::text), '^^') 
+            , '||', IFNULL(TRIM(FLOW_SENSOR_OFFSET::text), '^^') 
+            , '||', IFNULL(TRIM(WEATHER_SKIP_REASON::text), '^^') 
+            , '||', IFNULL(TRIM(WEATHER_SKIP_STARTTIME::text), '^^') 
+            , '||', IFNULL(TRIM(WEATHER_SKIP_ENDTIME::text), '^^') 
+            , '||', IFNULL(TRIM(HYDRA_OVERVIEW_STATUS::text), '^^') 
+            , '||', IFNULL(TRIM(HYDRA_OVERVIEW_ZONE_ID::text), '^^') 
+            , '||', IFNULL(TRIM(HYDRA_OVERVIEW_DURATION::text), '^^') 
+            , '||', IFNULL(TRIM(HYDRA_OVERVIEW_DURATION_REMAINING::text), '^^') 
+            , '||', IFNULL(TRIM(HYDRA_OVERVIEW_FLOW::text), '^^') 
+            , '||', IFNULL(TRIM(HYDRA_OVERVIEW_RAIN::text), '^^') 
+            , '||', IFNULL(TRIM(HYDRA_OVERVIEW_RESTRICTED::text), '^^') 
+            , '||', IFNULL(TRIM(HYDRA_OVERVIEW_RUN_PLAN_SEQ_NUM::text), '^^') 
+            , '||', IFNULL(TRIM(HYDRA_OVERVIEW_PAUSED::text), '^^') 
+            , '||', IFNULL(TRIM(SCHEDULES_MAX::text), '^^') 
+            , '||', IFNULL(TRIM(SCHEDULES_LOADED::text), '^^') 
+            , '||', IFNULL(TRIM(RESTRICT_LOADED::text), '^^') 
+            , '||', IFNULL(TRIM(NUM_ZONES::text), '^^') 
+            , '||', IFNULL(TRIM(ZONES::text), '^^') 
+            , '||', IFNULL(TRIM(ALERTS::text), '^^') 
+            , '||', IFNULL(TRIM(CURRENT_VERSION::text), '^^') 
+            , '||', IFNULL(TRIM(DEVICE_TYPE::text), '^^') 
+            , '||', IFNULL(TRIM(VERSION::text), '^^') 
+            , '||', IFNULL(TRIM(_RESCUED_DATA::text), '^^') 
+        ), '^^||^^')))  as HASHDIFF
+FROM JOIN_RESULT

@@ -1,0 +1,10 @@
+version: 2
+models:
+  - name: ref_item_sourcing_category_v2
+    data_tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - OP_CO
+              - ITEM
+    columns: []

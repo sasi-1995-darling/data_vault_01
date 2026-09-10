@@ -1,0 +1,54 @@
+version: 2
+models:
+  - name: lnk_cost_activity_type_total
+    data_tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - COST_ACTIVITY_TYPE_TOTALS_HK
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          config:
+            severity: warn
+          arguments:
+            min_value: 4
+    columns:
+      - name: LEDGER_HK
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: OBJECT_NUMBER_HK
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: FISCAL_PERIOD_HK
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: COST_VALUE_TYPE_HK
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: COST_VERSION_HK
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: COST_TRANSACTION_TYPE_HK
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: PERIOD_BLOCK_HK
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: LOAD_DTS
+        data_tests:
+          - not_null:
+              config:
+                severity: warn

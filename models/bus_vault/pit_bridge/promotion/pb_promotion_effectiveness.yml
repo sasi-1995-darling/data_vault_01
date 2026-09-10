@@ -1,0 +1,12 @@
+version: 2
+models:
+- name: pb_promotion_effectiveness
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - LNK_ACCOUNT_BASE_MATERIAL_PROMOTION_HK
+        - PROMOTION_ID
+        - PROMOTION_START_DATE
+        - PROMOTION_END_DATE
+  columns: []

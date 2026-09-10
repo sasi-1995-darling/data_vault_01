@@ -1,0 +1,37 @@
+version: 2
+models:
+- name: lnk_work_center_capacity
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - LNK_WORK_CENTER_CAPACITY_HK
+  - dbt_expectations.expect_table_row_count_to_be_between:
+      arguments:
+        min_value: 4
+        severity: warn
+  columns:
+  - name: PLANT_HK
+    data_tests:
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'hub_plant_v1' )
+          pk_column_name: PLANT_HK
+  - name: WORK_CENTER_HK
+    data_tests:
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'hub_work_center' )
+          pk_column_name: WORK_CENTER_HK
+  - name: WORK_CENTER_LOCATION_HK
+    data_tests:
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'hub_work_center_location' )
+          pk_column_name: WORK_CENTER_LOCATION_HK
+  - name: CAPACITY_HK
+    data_tests:
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'hub_capacity' )
+          pk_column_name: CAPACITY_HK

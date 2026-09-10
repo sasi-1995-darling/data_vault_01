@@ -1,0 +1,268 @@
+---- SRC LAYER ----
+WITH
+SRC_imfgamle       as ( SELECT * FROM {{ ref('v_psa_stg_item_manufacturing_attributes__ml_ebs') }} as SRC 
+                        {% if is_incremental() %}
+                              where src.load_dts > (select dateadd('HOUR',-1,max(load_dts)) from {{ this }})
+                            {% endif %}   )
+
+/*
+SRC_imfgamle       as ( SELECT * FROM STAGING.v_psa_stg_item_manufacturing_attributes__ml_ebs )
+*/
+---- LOGIC LAYER ----
+
+, LOGIC_imfgamle as (
+    SELECT
+        ITEM_HK
+      , INVENTORY_ITEM_ID
+      , ATTRIBUTE10
+      , CUT_KEY_FLAG
+      , ATTRIBUTE14
+      , OVERRIDE_TC_AUTO_PRINT_FLAG
+      , ATTRIBUTE13
+      , HARMONIZATION_CODE
+      , ATTRIBUTE12
+      , ASSEMBLY_CHART_FORMAT
+      , ATTRIBUTE11
+      , BODY_ID
+      , MASTER_KEY_FLAG
+      , STAMPING_TYPE
+      , CONTEXT
+      , GENERATE_FLAG
+      , SERIAL_NUMBER_FLAG
+      , KEY_BLANK_ID
+      , MFG_DESCRIPTION
+      , COMB_TAG_FORMAT
+      , SYSTEM_TYPE
+      , CREATED_BY
+      , ATTRIBUTE3
+      , LAST_UPDATED_BY
+      , HARMONIZATION_DESC
+      , ATTRIBUTE2
+      , ATTRIBUTE1
+      , CYLINDER_ID
+      , SERIAL_BASE_ID
+      , BASE_PRODUCT
+      , ATTRIBUTE9
+      , LAST_UPDATE_LOGIN
+      , WORKSHEET_FORMAT
+      , ATTRIBUTE8
+      , ATTRIBUTE7
+      , ATTRIBUTE6
+      , ATTRIBUTE5
+      , ATTRIBUTE4
+      , RESERVE_FLAG
+      , NUMBER_MFG_UNITS
+      , ATTRIBUTE15
+      , CHART_FORMAT
+      , _FIVETRAN_DELETED
+      , _FIVETRAN_ID
+      , _FIVETRAN_SYNCED
+      , CREATION_DATE
+      , LAST_UPDATE_DATE
+      , PSA_LOAD_DTS
+      , PSA_RECORD_SOURCE
+      , PSA_DELETE_IND
+      , LOAD_DTS
+      , REC_SRC
+      , HASHDIFF
+    FROM SRC_imfgamle
+)
+---- RENAME LAYER ----
+
+, RENAME_imfgamle as (
+    SELECT
+        ITEM_HK
+      , INVENTORY_ITEM_ID
+      , ATTRIBUTE10
+      , CUT_KEY_FLAG
+      , ATTRIBUTE14
+      , OVERRIDE_TC_AUTO_PRINT_FLAG
+      , ATTRIBUTE13
+      , HARMONIZATION_CODE
+      , ATTRIBUTE12
+      , ASSEMBLY_CHART_FORMAT
+      , ATTRIBUTE11
+      , BODY_ID
+      , MASTER_KEY_FLAG
+      , STAMPING_TYPE
+      , CONTEXT
+      , GENERATE_FLAG
+      , SERIAL_NUMBER_FLAG
+      , KEY_BLANK_ID
+      , MFG_DESCRIPTION
+      , COMB_TAG_FORMAT
+      , SYSTEM_TYPE
+      , CREATED_BY
+      , ATTRIBUTE3
+      , LAST_UPDATED_BY
+      , HARMONIZATION_DESC
+      , ATTRIBUTE2
+      , ATTRIBUTE1
+      , CYLINDER_ID
+      , SERIAL_BASE_ID
+      , BASE_PRODUCT
+      , ATTRIBUTE9
+      , LAST_UPDATE_LOGIN
+      , WORKSHEET_FORMAT
+      , ATTRIBUTE8
+      , ATTRIBUTE7
+      , ATTRIBUTE6
+      , ATTRIBUTE5
+      , ATTRIBUTE4
+      , RESERVE_FLAG
+      , NUMBER_MFG_UNITS
+      , ATTRIBUTE15
+      , CHART_FORMAT
+      , _FIVETRAN_DELETED
+      , _FIVETRAN_ID
+      , _FIVETRAN_SYNCED
+      , CREATION_DATE
+      , LAST_UPDATE_DATE
+      , PSA_LOAD_DTS
+      , PSA_RECORD_SOURCE
+      , PSA_DELETE_IND
+      , LOAD_DTS
+      , REC_SRC
+      , HASHDIFF
+    FROM LOGIC_imfgamle
+)
+---- FILTER LAYER ----
+
+, FILTER_imfgamle as (
+    SELECT *
+    FROM RENAME_imfgamle
+)
+
+---- JOIN LAYER ----
+, JOIN_RESULT as (
+    SELECT *
+    FROM FILTER_imfgamle
+)
+
+---- FINAL LAYER ----
+SELECT
+          ITEM_HK
+        , INVENTORY_ITEM_ID
+        , ATTRIBUTE10
+        , CUT_KEY_FLAG
+        , ATTRIBUTE14
+        , OVERRIDE_TC_AUTO_PRINT_FLAG
+        , ATTRIBUTE13
+        , HARMONIZATION_CODE
+        , ATTRIBUTE12
+        , ASSEMBLY_CHART_FORMAT
+        , ATTRIBUTE11
+        , BODY_ID
+        , MASTER_KEY_FLAG
+        , STAMPING_TYPE
+        , CONTEXT
+        , GENERATE_FLAG
+        , SERIAL_NUMBER_FLAG
+        , KEY_BLANK_ID
+        , MFG_DESCRIPTION
+        , COMB_TAG_FORMAT
+        , SYSTEM_TYPE
+        , CREATED_BY
+        , ATTRIBUTE3
+        , LAST_UPDATED_BY
+        , HARMONIZATION_DESC
+        , ATTRIBUTE2
+        , ATTRIBUTE1
+        , CYLINDER_ID
+        , SERIAL_BASE_ID
+        , BASE_PRODUCT
+        , ATTRIBUTE9
+        , LAST_UPDATE_LOGIN
+        , WORKSHEET_FORMAT
+        , ATTRIBUTE8
+        , ATTRIBUTE7
+        , ATTRIBUTE6
+        , ATTRIBUTE5
+        , ATTRIBUTE4
+        , RESERVE_FLAG
+        , NUMBER_MFG_UNITS
+        , ATTRIBUTE15
+        , CHART_FORMAT
+        , _FIVETRAN_DELETED
+        , _FIVETRAN_ID
+        , _FIVETRAN_SYNCED
+        , CREATION_DATE
+        , LAST_UPDATE_DATE
+        , PSA_LOAD_DTS
+        , PSA_RECORD_SOURCE
+        , PSA_DELETE_IND
+        , LOAD_DTS
+        , REC_SRC
+        , HASHDIFF
+FROM JOIN_RESULT
+{% if is_incremental() %}
+WHERE NOT EXISTS (
+    SELECT 1 
+    FROM {{ this }} existing
+    WHERE existing.ITEM_HK = JOIN_RESULT.ITEM_HK
+    AND existing.HASHDIFF = JOIN_RESULT.HASHDIFF
+)
+{% endif %}
+{% if not is_incremental() %}
+
+/* The following qualifier is implemented to prevent multiple loads of touched records during the initial build, such as multiple rows per HK and hashdiff. */
+qualify 1 = row_number() over (partition by ITEM_HK, INVENTORY_ITEM_ID, CUT_KEY_FLAG, BODY_ID, MASTER_KEY_FLAG, KEY_BLANK_ID, CYLINDER_ID, SERIAL_BASE_ID, _FIVETRAN_ID, HASHDIFF order by PSA_LOAD_DTS)
+
+union all
+SELECT 
+MD5_BINARY(GR.VALUE) AS ITEM_HK,
+GR.VALUE::number AS INVENTORY_ITEM_ID,
+NULL AS ATTRIBUTE10,
+NULL AS CUT_KEY_FLAG,
+NULL AS ATTRIBUTE14,
+NULL AS OVERRIDE_TC_AUTO_PRINT_FLAG,
+NULL AS ATTRIBUTE13,
+NULL AS HARMONIZATION_CODE,
+NULL AS ATTRIBUTE12,
+NULL AS ASSEMBLY_CHART_FORMAT,
+NULL AS ATTRIBUTE11,
+NULL AS BODY_ID,
+NULL AS MASTER_KEY_FLAG,
+NULL AS STAMPING_TYPE,
+NULL AS CONTEXT,
+NULL AS GENERATE_FLAG,
+NULL AS SERIAL_NUMBER_FLAG,
+NULL AS KEY_BLANK_ID,
+NULL AS MFG_DESCRIPTION,
+NULL AS COMB_TAG_FORMAT,
+NULL AS SYSTEM_TYPE,
+NULL AS CREATED_BY,
+NULL AS ATTRIBUTE3,
+NULL AS LAST_UPDATED_BY,
+NULL AS HARMONIZATION_DESC,
+NULL AS ATTRIBUTE2,
+NULL AS ATTRIBUTE1,
+NULL AS CYLINDER_ID,
+NULL AS SERIAL_BASE_ID,
+NULL AS BASE_PRODUCT,
+NULL AS ATTRIBUTE9,
+NULL AS LAST_UPDATE_LOGIN,
+NULL AS WORKSHEET_FORMAT,
+NULL AS ATTRIBUTE8,
+NULL AS ATTRIBUTE7,
+NULL AS ATTRIBUTE6,
+NULL AS ATTRIBUTE5,
+NULL AS ATTRIBUTE4,
+NULL AS RESERVE_FLAG,
+NULL AS NUMBER_MFG_UNITS,
+NULL AS ATTRIBUTE15,
+NULL AS CHART_FORMAT,
+NULL AS _FIVETRAN_DELETED,
+NULL AS _FIVETRAN_ID,
+NULL AS _FIVETRAN_SYNCED,
+NULL AS CREATION_DATE,
+NULL AS LAST_UPDATE_DATE,
+'1900-01-01'::TIMESTAMP AS PSA_LOAD_DTS,
+NULL AS PSA_RECORD_SOURCE,
+'N' AS PSA_DELETE_IND,
+CONVERT_TIMEZONE('UTC','1900-01-01'::TIMESTAMP) AS LOAD_DTS,
+'USAZET.SNOWFLAKE.FBIN.DERIVED' AS REC_SRC,
+''::BINARY AS HASHDIFF
+FROM
+TABLE(strtok_split_to_table('0|-1|-2', '|')) AS GR
+{% endif %}

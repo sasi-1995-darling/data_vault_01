@@ -1,0 +1,11 @@
+version: 2
+models:
+- name: ref_work_center_responsible_role__winn_sap
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - RESPONSIBLE_ROLE_PERSON
+        - PLANT
+        - LOAD_DTS
+  columns: []

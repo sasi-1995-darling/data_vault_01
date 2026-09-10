@@ -1,0 +1,15 @@
+version: 2
+models:
+  - name: fact_daily_cumulative_product_rating_v2
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - PRODUCT_BK
+              - RETAILER_BK
+              - BRAND_BK
+              - BKCC
+              - DATE_KEY
+              - COUNTRY
+              - REC_SRC
+    columns: []

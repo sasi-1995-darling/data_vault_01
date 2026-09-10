@@ -1,0 +1,27 @@
+{
+  // ========================================================
+  // dbt-datavault Workspace Configuration
+  //
+  // SETUP: Copy this file to dbt-datavault.code-workspace
+  //        (without .template) and customize the personal
+  //        settings below. Open the .code-workspace file
+  //        instead of the folder for full configuration.
+  //
+  // The .code-workspace file is gitignored — your personal
+  // settings stay local.
+  // ========================================================
+  "folders": [
+    {
+      "path": "."
+    }
+  ],
+  "settings": {
+    // ====================================================
+    // PERSONAL SETTINGS — customize for your machine
+    // These override .vscode/settings.json for this workspace
+    // ====================================================
+    "dbt.fusionExecutablePath": "/path/to/your/dbt",
+    "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python3",
+    "python.terminal.activateEnvironment": true
+  }
+}

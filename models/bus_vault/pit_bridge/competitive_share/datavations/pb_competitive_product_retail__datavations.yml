@@ -1,0 +1,16 @@
+version: 2
+models:
+  - name: pb_competitive_product_retail__datavations
+    description: >
+      PIT Bridge table for the competitive product + retailer dimension grain.
+      Grain: one row per COMPETITIVE_PRODUCT_HK + RETAILER_HK (latest LOAD_DTS per pair,
+      derived from pb_pos_main_weekly__datavations via QUALIFY dedup), enriched with item
+      descriptive attributes joined from pb_item_details__datavations.
+      Intended as the upstream source for dim_competitive_product_retail.
+    data_tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - COMPETITIVE_PRODUCT_HK
+              - RETAILER_HK
+    columns: []

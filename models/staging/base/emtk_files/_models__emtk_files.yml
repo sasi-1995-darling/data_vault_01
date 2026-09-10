@@ -1,0 +1,18 @@
+version: 2
+
+models:
+  - name: base_luxury_hardware_bath__emtk_files
+    description: This is the base staging model for Emtek luxury_hardware_bath
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - part_number
+
+  - name: base_luxury_hardware_cabinet__emtk_files
+    description: This is the base staging model for Emtek luxury_hardware_cabinet
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - part_number

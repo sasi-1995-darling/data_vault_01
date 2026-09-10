@@ -1,0 +1,78 @@
+---- SRC LAYER ----
+WITH
+SRC_QMEL           as ( SELECT * FROM {{ ref('v_psa_stg_quality_notifications') }} as SRC 
+                        QUALIFY (ROW_NUMBER() OVER(PARTITION BY QUALITY_NOTIFICATION_HK ORDER BY LOAD_DTS ))=1 )
+/*
+SRC_QMEL           as ( SELECT * FROM STAGING.V_PSA_STG_QUALITY_NOTIFICATIONS )
+, SRC_ITEM           as ( SELECT * FROM RAW_VAULT.HUB_ITEM_V1 )
+*/
+---- LOGIC LAYER ----
+
+, LOGIC_QMEL as (
+    SELECT
+        QUALITY_NOTIFICATION_ITEM_HK
+      , QUALITY_NOTIFICATION_HK
+      , LOAD_DTS
+      , REC_SRC
+      , QUALITY_NOTIFICATION_BK
+      , ITEM_HK
+    FROM SRC_QMEL
+)
+
+
+-- ---- RENAME LAYER ----
+
+, RENAME_QMEL as (
+    SELECT
+        QUALITY_NOTIFICATION_ITEM_HK
+      , QUALITY_NOTIFICATION_HK
+      , LOAD_DTS
+      , REC_SRC
+      , QUALITY_NOTIFICATION_BK
+      , ITEM_HK     
+    FROM LOGIC_QMEL
+)
+
+
+---- FILTER LAYER ----
+
+, FILTER_QMEL as (
+    SELECT *
+    FROM RENAME_QMEL
+)
+
+
+---- JOIN LAYER ----
+, JOIN_RESULT as (
+    SELECT *
+    FROM FILTER_QMEL
+)
+
+---- FINAL LAYER ----
+SELECT
+          QUALITY_NOTIFICATION_ITEM_HK
+        , QUALITY_NOTIFICATION_HK
+        , LOAD_DTS
+        , REC_SRC
+        , ITEM_HK
+FROM JOIN_RESULT
+{% if is_incremental() %}
+WHERE NOT EXISTS (
+    SELECT 1 
+    FROM {{ this }} existing
+    WHERE 
+    existing.QUALITY_NOTIFICATION_ITEM_HK = JOIN_RESULT.QUALITY_NOTIFICATION_ITEM_HK
+)
+{% endif %}
+{% if not is_incremental() %}
+union
+
+SELECT 
+MD5_BINARY(GR.VALUE) QUALITY_NOTIFICATION_ITEM_HK
+, MD5_BINARY(GR.VALUE) QUALITY_NOTIFICATION_HK
+, CONVERT_TIMEZONE('UTC','1900-01-01'::TIMESTAMP) as LOAD_DTS 
+, 'USAZET.SNOWFLAKE.FBIN.DERIVED' AS REC_SRC
+, MD5_BINARY(GR.VALUE) ITEM_HK
+FROM
+TABLE(strtok_split_to_table('0|-1|-2', '|')) AS GR
+{% endif %}

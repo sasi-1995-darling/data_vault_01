@@ -1,0 +1,29 @@
+version: 2
+models:
+  - name: ref_sat_currency_rates__ml_ebs
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - CURR_RATES_BK
+              - CONVERSION_TYPE
+              - LOAD_DTS
+    columns:
+      - name: CURR_RATES_BK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+          - dbt_utils.relationships_where:
+              arguments:
+                to: ref( 'ref_hub_currency_rates' )
+                field: CURR_RATES_BK
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'ref_hub_currency_rates' )
+                pk_column_name: CURR_RATES_BK
+      - name: LOAD_DTS
+        tests:
+          - not_null:
+              config:
+                severity: warn

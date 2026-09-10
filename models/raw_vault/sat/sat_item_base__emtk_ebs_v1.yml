@@ -1,0 +1,46 @@
+version: 2
+models:
+- name: sat_item_base__emtk_ebs_v1
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - ITEM_HK
+        - INVENTORY_ITEM_ID
+        - ORGANIZATION_ID
+        - LOAD_DTS
+  - dbt_expectations.expect_table_row_count_to_be_between:
+      arguments:
+        min_value: 4
+      config:
+        severity: warn
+  columns:
+  - name: ITEM_HK
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'hub_item_v1' )
+          pk_column_name: ITEM_HK
+  - name: LOAD_DTS
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+  - name: REC_SRC
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+  - name: BKCC
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+  - name: HASHDIFF
+    data_tests:
+    - not_null:
+        config:
+          severity: warn

@@ -1,0 +1,15 @@
+version: 2
+models:
+- name: fact_app_active_user_period
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - BKCC
+        - REC_SRC
+        - PERIOD_TYPE
+        - PERIOD_START_DATE
+        - PLATFORM
+        - APP_SOURCE
+  columns: []
+

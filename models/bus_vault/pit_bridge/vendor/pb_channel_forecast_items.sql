@@ -1,0 +1,192 @@
+---- SRC LAYER ----
+WITH
+SRC_LV             as ( SELECT ITEM_HK, REC_SRC, STORE_HK, CHANNEL_FORECAST_ITEMS_LHK FROM {{ ref('lnk_channel_forecast_items') }} as SRC  ),
+SRC_LMSAM          as ( SELECT ASIN, FORECAST_GENERATION_DATE, MARKETPLACE_ID, MEAN_FORECAST_UNITS, PSA_DELETE_IND, P_70_FORECAST_UNITS, P_80_FORECAST_UNITS, P_90_FORECAST_UNITS, CHANNEL_FORECAST_ITEMS_LHK, END_DATE, MAX(FORECAST_GENERATION_DATE) OVER (PARTITION BY ASIN, END_DATE) AS LMSAM_MAX_FORECAST_GENERATION_DATE FROM {{ ref('lmsat_channel_forecast_items__amazon_moen_inc') }} as SRC 
+                        QUALIFY 1 = ROW_NUMBER() OVER (PARTITION BY CHANNEL_FORECAST_ITEMS_LHK ORDER BY FORECAST_GENERATION_DATE DESC, LOAD_DTS DESC)),
+SRC_LMSAMA         as ( SELECT ASIN, FORECAST_GENERATION_DATE, MARKETPLACE_ID, MEAN_FORECAST_UNITS, PSA_DELETE_IND, P_70_FORECAST_UNITS, P_80_FORECAST_UNITS, P_90_FORECAST_UNITS, CHANNEL_FORECAST_ITEMS_LHK, END_DATE, MAX(FORECAST_GENERATION_DATE) OVER (PARTITION BY ASIN, END_DATE) AS LMSAMA_MAX_FORECAST_GENERATION_DATE FROM {{ ref('lmsat_channel_forecast_items__amazon_moen_anaheim') }} as SRC 
+                        QUALIFY 1 = ROW_NUMBER() OVER (PARTITION BY CHANNEL_FORECAST_ITEMS_LHK ORDER BY FORECAST_GENERATION_DATE DESC, LOAD_DTS DESC)),
+SRC_HI             as ( SELECT ITEM_BK, ITEM_HK FROM {{ ref('hub_item_v1') }} as SRC  ),
+SRC_HS             as ( SELECT BKCC, STORE_BK, STORE_HK FROM {{ ref('hub_store') }} as SRC  )
+
+---- LOGIC LAYER ----
+
+, LOGIC_LV as (
+    SELECT
+        CONVERT_TIMEZONE('UTC', CURRENT_TIMESTAMP )                  as PB_LOAD_DTS
+      , 'PB_CHANNEL_FORECAST'                                        as PB_REC_SRC
+      , REC_SRC
+      , STORE_HK
+      , ITEM_HK
+      , CHANNEL_FORECAST_ITEMS_LHK
+    FROM SRC_LV
+)
+
+, LOGIC_LMSAM as (
+    SELECT
+         CHANNEL_FORECAST_ITEMS_LHK as LNK_HK
+        ,ASIN
+        ,FORECAST_GENERATION_DATE
+        ,MARKETPLACE_ID
+        ,MEAN_FORECAST_UNITS
+        ,P_70_FORECAST_UNITS
+        ,P_80_FORECAST_UNITS
+        ,P_90_FORECAST_UNITS
+        ,PSA_DELETE_IND as DELETE_IND
+        ,END_DATE
+        ,LMSAM_MAX_FORECAST_GENERATION_DATE as MAX_FORECAST_GENERATION_DATE
+    FROM SRC_LMSAM
+)
+
+, LOGIC_LMSAMA as (
+    SELECT
+         CHANNEL_FORECAST_ITEMS_LHK as LNK_HK
+        ,ASIN
+        ,FORECAST_GENERATION_DATE
+        ,MARKETPLACE_ID
+        ,MEAN_FORECAST_UNITS
+        ,P_70_FORECAST_UNITS
+        ,P_80_FORECAST_UNITS
+        ,P_90_FORECAST_UNITS
+        ,PSA_DELETE_IND as DELETE_IND
+        ,END_DATE
+        ,LMSAMA_MAX_FORECAST_GENERATION_DATE as MAX_FORECAST_GENERATION_DATE
+    FROM SRC_LMSAMA
+)
+
+, LOGIC_HI as (
+    SELECT
+         ITEM_HK as hub_ITEM_HK
+        ,ITEM_BK
+    FROM SRC_HI
+)
+
+, LOGIC_HS as (
+    SELECT
+         BKCC
+        ,STORE_BK
+        ,STORE_HK as hub_STORE_HK
+    FROM SRC_HS
+)
+---- RENAME LAYER ----
+
+, RENAME_LV as (
+    SELECT
+        PB_LOAD_DTS
+      , PB_REC_SRC
+      , REC_SRC
+      , STORE_HK
+      , ITEM_HK
+      , CHANNEL_FORECAST_ITEMS_LHK
+    FROM LOGIC_LV
+)
+
+, RENAME_HS as (
+    SELECT
+        BKCC
+      , STORE_BK
+      , hub_STORE_HK
+    FROM LOGIC_HS
+)
+
+, RENAME_HI as (
+    SELECT
+        hub_ITEM_HK
+      , ITEM_BK
+    FROM LOGIC_HI
+)
+
+, RENAME_LMSAM as (
+    SELECT
+         LNK_HK
+        ,ASIN
+        ,FORECAST_GENERATION_DATE
+        ,MARKETPLACE_ID
+        ,MEAN_FORECAST_UNITS
+        ,P_70_FORECAST_UNITS
+        ,P_80_FORECAST_UNITS
+        ,P_90_FORECAST_UNITS
+        ,DELETE_IND
+        ,END_DATE
+        ,MAX_FORECAST_GENERATION_DATE
+    FROM LOGIC_LMSAM
+)
+
+, RENAME_LMSAMA as (
+    SELECT
+         LNK_HK
+        ,ASIN
+        ,FORECAST_GENERATION_DATE
+        ,MARKETPLACE_ID
+        ,MEAN_FORECAST_UNITS
+        ,P_70_FORECAST_UNITS
+        ,P_80_FORECAST_UNITS
+        ,P_90_FORECAST_UNITS
+        ,DELETE_IND
+        ,END_DATE
+        ,MAX_FORECAST_GENERATION_DATE
+    FROM LOGIC_LMSAMA
+)
+---- FILTER LAYER ----
+
+, FILTER_LV as ( SELECT * FROM RENAME_LV )
+, FILTER_HI as ( SELECT * FROM RENAME_HI )
+, FILTER_HS as ( SELECT * FROM RENAME_HS )
+
+-- Union all sources together into a single unified stream
+, UNIFIED_sat as (
+    SELECT * FROM RENAME_LMSAM
+    UNION ALL
+    SELECT * FROM RENAME_LMSAMA
+)
+
+---- JOIN LAYER ----
+, JOIN_RESULT as (
+    SELECT 
+         l.PB_LOAD_DTS
+        ,l.PB_REC_SRC
+        ,l.REC_SRC
+        ,l.STORE_HK
+        ,l.ITEM_HK
+        ,l.CHANNEL_FORECAST_ITEMS_LHK
+        ,hs.BKCC
+        ,hs.STORE_BK
+        ,hi.ITEM_BK
+        ,sat.ASIN
+        ,sat.FORECAST_GENERATION_DATE
+        ,sat.MARKETPLACE_ID
+        ,sat.MEAN_FORECAST_UNITS
+        ,sat.P_70_FORECAST_UNITS
+        ,sat.P_80_FORECAST_UNITS
+        ,sat.P_90_FORECAST_UNITS
+        ,sat.DELETE_IND
+    FROM FILTER_LV l
+    LEFT JOIN FILTER_HI hi ON l.ITEM_HK = hi.hub_ITEM_HK
+    LEFT JOIN FILTER_HS hs ON l.STORE_HK = hs.hub_STORE_HK
+    LEFT JOIN UNIFIED_sat sat ON l.CHANNEL_FORECAST_ITEMS_LHK = sat.LNK_HK
+                             AND sat.FORECAST_GENERATION_DATE = sat.MAX_FORECAST_GENERATION_DATE
+)
+
+---- FINAL LAYER ----
+SELECT
+          row_number() over(order by 1)                                as SEQ_ID
+        , CURRENT_DATE                                                 as SNAPSHOTDATE
+        , PB_LOAD_DTS
+        , BKCC
+        , PB_REC_SRC
+        , REC_SRC
+        , STORE_HK
+        , ITEM_HK
+        , CHANNEL_FORECAST_ITEMS_LHK
+        , STORE_BK
+        , ITEM_BK
+        , ASIN
+        , TO_CHAR(FORECAST_GENERATION_DATE, 'YYYYMMDD')::INTEGER       as FORECAST_GENERATION_DATE__YYYYMMDD
+        , MEAN_FORECAST_UNITS
+        , MARKETPLACE_ID
+        , P_70_FORECAST_UNITS
+        , P_80_FORECAST_UNITS
+        , P_90_FORECAST_UNITS
+        , CASE 
+            WHEN BKCC = 'Running_Horse' THEN DELETE_IND 
+          END                                                          as IS_DELETED
+FROM JOIN_RESULT

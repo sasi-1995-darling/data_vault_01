@@ -1,0 +1,66 @@
+version: 2
+
+models:
+  - name: stg_application__appbot_api
+    description: This is the staging model from Appbott for hub application
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - application_hk
+
+  #- name: stg_rating__appbot_api
+  #  description: This is the staging model from Appbott for hub rating 
+  #  tests:
+  #    - dbt_constraints.primary_key:
+  #        column_names:
+  #         - rating_hk
+  #  columns:
+  #    - name: app_id
+  #      tests:
+  #        - relationships:
+  #            field: id
+  #            to: ref('stg_application__appbot_api')
+  #  columns:
+  #    - name: country
+  #      tests:
+  #        - dbt_utils.not_accepted_values:
+  #            values: ['All']             
+
+  - name: stg_review__appbot_api
+    description: This is the staging model from Appbott for hub review
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - review_hk
+    columns:
+      - name: customer_product_id
+        tests:
+          - relationships:
+              arguments:
+                field: id
+                to: ref('stg_application__appbot_api')
+  - name: stg_linkratingapp__appbot_api
+    description: This is the staging model from hub rating and application
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - link_rating_applist_details_hk
+
+  - name: stg_linkreviewapp__appbot_api
+    description: This is the staging model from hub review and application
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - link_review_applist_details_hk
+
+  - name: stg_linkreviewbrand__appbot_api
+    description: This is the staging model from hub review and brand
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - link_review_brand_hk

@@ -1,0 +1,22 @@
+version: 2
+
+models:
+  - name: sat_delivery_detail__emtk_ebs
+    description: This is the raw vault satellite model for deliveries (currently from shipping invoices)
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - delivery_hk
+              - load_dts
+      - dbt_constraints.foreign_key:
+          arguments:
+            fk_column_names:
+              - delivery_hk
+            pk_table_name: ref('hub_delivery')
+            pk_column_names:
+              - delivery_hk
+    config:
+      tags:
+        - emtek
+        - ebs

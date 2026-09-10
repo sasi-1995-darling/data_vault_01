@@ -1,0 +1,56 @@
+version: 2
+
+models:
+  - name: stg_pos_fiscal_calendar__hd_askuity
+    description: This is the home depot staging model for Fiscal Calendar
+    tests:
+      - 'dbt_constraints.primary_key:':
+          arguments:
+            column_names:
+              - date
+  - name: stg_pos_product_customer_inventory__hd_askuity
+    description: This is the home depot staging model for Inventory
+    tests:
+      - 'dbt_constraints.primary_key:':
+          arguments:
+            column_names:
+              - day
+              - sku_nbr
+              - d_store_nbr
+              - merch_vendor
+              - manuf_part_number
+    columns:
+      - name: day
+        tests:
+          - not_null
+      - name: sku_nbr
+        tests:
+          - not_null
+  - name: stg_pos_customer_location__hd_askuity
+    description: This is the home depot staging model for store locations
+    tests:
+      - 'dbt_constraints.primary_key:':
+          arguments:
+            column_names:
+              - location_id
+  - name: stg_pos_product_customer__hd_askuity
+    description: This is the home depot staging model for POS
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - day
+              - sku_nbr
+              - d_store_nbr
+              - merch_vendor
+              - manuf_part_number
+              - fulfillment_channel
+              - home_depot_account
+              - sku_status
+    columns:
+      - name: day
+        tests:
+          - not_null
+      - name: sku_nbr
+        tests:
+          - not_null

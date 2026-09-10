@@ -1,0 +1,17 @@
+version: 2
+models:
+  - name: hub_county
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - COUNTY_HK
+    columns:
+      - name: COUNTY_HK
+        tests:
+          - unique:
+              config:
+                severity: warn
+          - not_null:
+              config:
+                severity: warn

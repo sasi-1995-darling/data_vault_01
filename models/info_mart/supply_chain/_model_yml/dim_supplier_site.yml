@@ -1,0 +1,13 @@
+version: 2
+
+models:
+  - name: dim_supplier_site
+    description: Supply chain dimension for supplier sites
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - dim_supplier_site_pk
+    config:
+      tags:
+        - emtek

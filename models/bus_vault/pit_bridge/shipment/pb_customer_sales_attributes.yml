@@ -1,0 +1,9 @@
+version: 2
+models:
+- name: pb_customer_sales_attributes
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - CUSTOMER_SALES_ATTRIBUTES_KEY
+  columns: []

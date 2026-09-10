@@ -1,0 +1,17 @@
+version: 2
+models:
+  - name: fact_quality_task
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - TASK_NOTIFICATION_BK
+    columns:
+      - name: TASK_NOTIFICATION_BK
+        tests:
+          - unique:
+              config:
+                severity: warn
+          - not_null:
+              config:
+                severity: warn

@@ -1,0 +1,182 @@
+# ============================================================================
+# P0.1 Labeled Corpus — backtest harness ground truth
+# ============================================================================
+#
+# Version: v1.1.0     (bump on any schema change; document rationale below)
+# Generated: 2026-06-07 (v1.0.0); repointed 2026-06-11 (v1.1.0)
+# Schema: scripts/automation/src/triage/backtest_schema.py :: LabelSet
+#
+# Purpose
+# -------
+# Ground-truth labels for the 7 P0.1 dbt Cloud failure payloads. Consumed by
+# the backtest harness (`scripts.automation.src.triage.backtest`) to score
+# `triage_failure(raw_payload)` output against expected pattern_id + outcome.
+#
+# Provenance discipline (per session-prompt H4 refinement, 2026-06-07)
+# --------------------------------------------------------------------
+# Every entry carries a `provenance` block explaining WHY its expected values
+# are what they are. Reviewers can distinguish empirically-grounded labels
+# (catalog provenance cites the run_id directly) from category-confirmed
+# labels (catalog notes the run_id as a recurring incident but does not
+# independently byte-verify it) from no-pattern-applicable labels
+# (sprint-1-deferred Cluster C scope).
+#
+# This sets the Phase-2 precedent: production failures + manufactured cases
+# added later MUST carry the same provenance shape. Best-guess labels lacking
+# provenance are inadmissible for backtest scoring without a recorded
+# rationale.
+#
+# Schema version log
+# ------------------
+# v1.0.0 (2026-06-07) — initial schema; 7 P0.1 entries; required fields
+#   {run_id, cluster, expected_pattern_id, expected_outcome, payload_source,
+#    payload_path, payload_shape, provenance{cluster_source, pattern_source,
+#    derivation}, notes}.
+# v1.1.0 (2026-06-11) — schema fields unchanged; payload_source flipped
+#   from `scratch` → `fixture` for all 7 entries, with payload_path
+#   repointed from `~/scratch/triage-day4/run_<id>_cluster_<X>.json` to
+#   the committed pipeline-emitted equivalents under
+#   `docs/triage-agent/fixtures/`. Activates the fixture branch of
+#   resolve_payload_path() (dead code prior to this bump) and the
+#   L173-181 traversal-defense is_relative_to check that gates it.
+#   Operational test (1) from phase-2-backtest-corpus-gate.md is
+#   content-based, not path-based — the gate's in-sample status is
+#   preserved across this repoint.
+#
+# Payload source notes
+# --------------------
+# As of v1.1.0, all 7 raw payloads are resolved against committed
+# fixtures under docs/triage-agent/fixtures/ — clean-clone CI exercises
+# the live producer→consumer chain without any scratch dependency. The
+# fixtures are pipeline-emitted (redactor_pipeline.py --all) from the
+# v1.0.0 raw scratch payloads in ~/scratch/triage-day4/; the chain is
+# raw-scratch → redactor_pipeline → committed-fixture → backtest harness.
+# The raw scratch directory is retained on operator hosts but is no
+# longer on the harness's load path.
+# ============================================================================
+
+version: v1.1.0
+generated_at_utc: "2026-06-07"
+
+notes: |
+  **In-sample corpus.** These 7 payloads INFORMED the Phase-1 catalog
+  design (Patterns 1–3). 100% precision/recall on this corpus reflects
+  in-sample fit, NOT generalization to novel failures. Out-of-sample
+  evidence requires Phase-2 corpus expansion against held-out
+  production failures — sprint-1-deferred captures the expansion
+  strategy. The v1.1.0 fixture repoint is a transport change (where
+  the harness reads the payload bytes from); it does NOT change which
+  payloads INFORMED the catalog, so the in-sample classification is
+  preserved.
+
+  Three of the seven labels are category-confirmed (485850628, 485851058
+  — Pattern 3) rather than empirically-cited in the catalog provenance.
+  See per-entry `provenance.derivation` for the distinction. Two of the
+  seven (Cluster C: 484675412, 486060143) are no-pattern-applicable per
+  sprint-1-deferred #15; their PASS verdict confirms the orchestrator's
+  zero-match branch, not catalog coverage of Cluster C.
+
+  CI gating: non-gating in Phase 1 (H6 adjudication 2026-06-07). Phase 2
+  promotes to gating once corpus stabilizes.
+
+labels:
+  # --------------------------------------------------------------------------
+  # Cluster A — manifest_parse_failure_invalid_model_language_v1 (Pattern 3)
+  # --------------------------------------------------------------------------
+  - run_id: 485821754
+    cluster: A
+    expected_pattern_id: manifest_parse_failure_invalid_model_language_v1
+    expected_outcome: classified
+    payload_source: fixture
+    payload_path: "docs/triage-agent/fixtures/early_failure_manifest_parse_485821754.json"
+    payload_shape: raw
+    provenance:
+      cluster_source: "~/scratch/triage-day4/MANIFEST.txt line `485821754 | A |`"
+      pattern_source: "fbin_error_catalog.yml Pattern 3 provenance.citation 'run_id=485821754'"
+      derivation: "catalog directly cites this run_id as canonical Pattern-3 evidence"
+    notes: "Manifest-parse failure; 'Encountered an error:' anchor at byte 315 of 2.89 MB raw logs."
+
+  - run_id: 485850628
+    cluster: A
+    expected_pattern_id: manifest_parse_failure_invalid_model_language_v1
+    expected_outcome: classified
+    payload_source: fixture
+    payload_path: "docs/triage-agent/fixtures/early_failure_manifest_parse_485850628.json"
+    payload_shape: raw
+    provenance:
+      cluster_source: "~/scratch/triage-day4/MANIFEST.txt line `485850628 | A |`"
+      pattern_source: "fbin_error_catalog.yml Pattern 3 notes — 'TWO additional incident occurrences observed in the P0.1 corpus dump (runs 485850628 and 485851058)'"
+      derivation: "category-confirmed by Pattern 3 catalog notes (recurrent failure category); not independently byte-verified prior to this backtest"
+    notes: "Manifest-parse failure; 'Encountered an error:' anchor at byte 671. Category-confirmed label."
+
+  - run_id: 485851058
+    cluster: A
+    expected_pattern_id: manifest_parse_failure_invalid_model_language_v1
+    expected_outcome: classified
+    payload_source: fixture
+    payload_path: "docs/triage-agent/fixtures/early_failure_manifest_parse_485851058.json"
+    payload_shape: raw
+    provenance:
+      cluster_source: "~/scratch/triage-day4/MANIFEST.txt line `485851058 | A |`"
+      pattern_source: "fbin_error_catalog.yml Pattern 3 notes — 'TWO additional incident occurrences observed in the P0.1 corpus dump (runs 485850628 and 485851058)'"
+      derivation: "category-confirmed by Pattern 3 catalog notes (recurrent failure category); not independently byte-verified prior to this backtest"
+    notes: "Manifest-parse failure; 'Encountered an error:' anchor at byte 333. Category-confirmed label."
+
+  # --------------------------------------------------------------------------
+  # Cluster B — pr_isolated_schema_missing_upstream_v1 (Pattern 2)
+  # --------------------------------------------------------------------------
+  - run_id: 487333396
+    cluster: B
+    expected_pattern_id: pr_isolated_schema_missing_upstream_v1
+    expected_outcome: classified
+    payload_source: fixture
+    payload_path: "docs/triage-agent/fixtures/early_failure_pr_schema_missing_487333396.json"
+    payload_shape: raw
+    provenance:
+      cluster_source: "~/scratch/triage-day4/MANIFEST.txt line `487333396 | B |`"
+      pattern_source: "fbin_error_catalog.yml Pattern 2 provenance.citation 'run_id=487333396'"
+      derivation: "catalog directly cites this run_id as canonical Pattern-2 evidence (LSAT_ITEM_INVENTORY_VC__AMAZON missing)"
+    notes: "PR-isolated schema missing upstream; QA env 296453, PR job 786808."
+
+  - run_id: 487313189
+    cluster: B
+    expected_pattern_id: pr_isolated_schema_missing_upstream_v1
+    expected_outcome: classified
+    payload_source: fixture
+    payload_path: "docs/triage-agent/fixtures/early_failure_pr_schema_missing_487313189.json"
+    payload_shape: raw
+    provenance:
+      cluster_source: "~/scratch/triage-day4/MANIFEST.txt line `487313189 | B |`"
+      pattern_source: "fbin_error_catalog.yml Pattern 2 provenance.notes — 'Two confirming Gate-D runs: 487333396 ... and 487313189'"
+      # Independently confirmed by catalog (second confirming Gate-D run, different missing object: LNK_ITEM_INVENTORY). Empirically grounded.
+      derivation: "catalog provenance.notes lists this run_id as the second confirming Gate-D evidence — empirically grounded"
+    notes: "PR-isolated schema missing upstream (LNK_ITEM_INVENTORY missing); QA env 296453, PR job 786808."
+
+  # --------------------------------------------------------------------------
+  # Cluster C — no Phase-1 pattern matches (deferred per sprint-1-deferred #15)
+  # --------------------------------------------------------------------------
+  - run_id: 484675412
+    cluster: C
+    expected_pattern_id: null
+    expected_outcome: unknown_handed_to_human
+    payload_source: fixture
+    payload_path: "docs/triage-agent/fixtures/early_failure_dmf_failure_484675412.json"
+    payload_shape: raw
+    provenance:
+      cluster_source: "~/scratch/triage-day4/MANIFEST.txt line `484675412 | C |`"
+      pattern_source: "no Phase-1 pattern targets Cluster C (sprint-1-deferred item #15)"
+      derivation: "lessons-learned entry 5 — Q1 probe v2 empirically confirmed 'Cluster C (2 payloads) → 0 matches ×2' under LITERAL projection"
+    notes: "DMF / SQL syntax error category. Catalog pattern deferred to Round 4+."
+
+  - run_id: 486060143
+    cluster: C
+    expected_pattern_id: null
+    expected_outcome: unknown_handed_to_human
+    payload_source: fixture
+    payload_path: "docs/triage-agent/fixtures/early_failure_dmf_failure_486060143.json"
+    payload_shape: raw
+    provenance:
+      cluster_source: "~/scratch/triage-day4/MANIFEST.txt line `486060143 | C |`"
+      pattern_source: "no Phase-1 pattern targets Cluster C (sprint-1-deferred item #15)"
+      derivation: "lessons-learned entry 5 — Q1 probe v2 empirically confirmed Cluster C zero-match; the committed Cluster C fixture (early_failure_dmf_failure_486060143.json) was a hand-built orchestrator-test artifact in v1.0.0; v1.1.0 re-emitted it through the redactor pipeline so the same bytes that the orchestrator's TestClusterCFixture consumes are now also the backtest harness's load target"
+    notes: "DMF / SQL syntax error category. Re-emitted in v1.1.0 to the uniform envelope shape; consumed by both backtest harness (this label) and orchestrator unit tests (test_triage_orchestrator.TestClusterCFixture)."

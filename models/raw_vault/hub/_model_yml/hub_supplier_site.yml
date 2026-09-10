@@ -1,0 +1,13 @@
+version: 2
+
+models:
+  - name: hub_supplier_site
+    description: This is the raw vault hub model for supplier sites
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - supplier_site_hk
+    config:
+      tags:
+        - emtek

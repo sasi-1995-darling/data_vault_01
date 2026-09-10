@@ -1,0 +1,43 @@
+version: 2
+models:
+- name: lnk_location_assignment_detail
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - LNK_LOCATION_ASSIGNMENT_DETAIL_HK
+      config:
+        severity: warn
+  - dbt_expectations.expect_table_row_count_to_be_between:
+      arguments:
+        min_value: 4
+      config:
+        severity: warn
+  columns:
+  - name: LOCATION_ASSIGNMENT_HK
+    data_tests:
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'hub_location_assignment' )
+          pk_column_name: LOCATION_ASSIGNMENT_HK
+        config:
+          severity: warn
+  - name: COST_CENTER_HK
+    data_tests:
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'hub_cost_center' )
+          pk_column_name: COST_CENTER_HK
+        config:
+          severity: warn
+  - name: PLANT_HK
+    data_tests:
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'hub_plant_v1' )
+          pk_column_name: PLANT_HK
+        config:
+          severity: warn
+  config:
+    tags:
+      - lnk

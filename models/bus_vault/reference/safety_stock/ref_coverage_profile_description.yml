@@ -1,0 +1,12 @@
+version: 2
+models:
+- name: ref_coverage_profile_description
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - PLANT
+        - COVERAGE_PROFILE_CODE
+        - LANGUAGE_KEY
+        - LOAD_DTS
+  columns: []

@@ -1,0 +1,23 @@
+version: 2
+models:
+- name: sat_ecommerce_property_traffic_by_channel_history__winn_google_analytics
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - PROPERTY
+        - SESSION_DEFAULT_CHANNEL_GROUPING
+        - DATE
+        - LOAD_DTS
+  - dbt_expectations.expect_table_row_count_to_be_between:
+      arguments:
+        min_value: 4
+      config:
+        severity: warn
+  columns:
+  - name: ECOMMERCE_PROPERTY_HK
+    data_tests:
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'hub_ecommerce_property' )
+          pk_column_name: ECOMMERCE_PROPERTY_HK

@@ -1,0 +1,18 @@
+version: 2
+
+models:
+  - name: base_pos_lowes_moen_xref
+    description: This is the base for Lowes Item to Moen Base Material Xref
+    tests:
+      - 'dbt_constraints.primary_key:':
+          arguments:
+            column_names:
+              - lowes_sku
+
+  - name: base_pos_customer_location__lowes
+    description: This is the base for Lowes customer Location
+    tests:
+      - 'dbt_constraints.primary_key:':
+          arguments:
+            column_names:
+              - location_id

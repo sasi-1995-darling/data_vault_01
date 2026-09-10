@@ -1,0 +1,12 @@
+version: 2
+models:
+  - name: v_psa_stg_ref_po_status__tt_e21
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          config:
+            severity: warn
+          arguments:
+            combination_of_columns:
+              - PO_STATUS_CODE_TYPE
+              - LOAD_DTS
+    columns: []

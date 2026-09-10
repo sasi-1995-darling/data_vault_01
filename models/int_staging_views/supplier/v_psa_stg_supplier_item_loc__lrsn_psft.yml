@@ -1,0 +1,25 @@
+version: 2
+models:
+  - name: v_psa_stg_supplier_item_loc__lrsn_psft
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          config:
+            severity: warn
+          arguments:
+            combination_of_columns:
+              - INV_ITEM_ID
+              - VENDOR_SETID
+              - VENDOR_ID
+              - VNDR_LOC
+              - LOAD_DTS
+    columns:
+      - name: SUPPLIER_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: ITEM_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn

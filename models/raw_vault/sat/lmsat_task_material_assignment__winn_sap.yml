@@ -1,0 +1,22 @@
+version: 2
+models:
+- name: lmsat_task_material_assignment__winn_sap
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - LNK_PLANT_TASKLIST_ITEM_ASSIGNMENT_HK
+        - PLNAL
+        - ZKRIZ
+        - ZAEHL
+        - LOAD_DTS
+  columns:
+      - name: LNK_PLANT_TASKLIST_ITEM_ASSIGNMENT_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'lnk_plant_tasklist_item_assignment' )
+                pk_column_name: LNK_PLANT_TASKLIST_ITEM_ASSIGNMENT_HK

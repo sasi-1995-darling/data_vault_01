@@ -1,0 +1,31 @@
+version: 2
+models:
+  - name: v_psa_stg_ref_installer
+    description: "Staging view for ref_installer — deduplicates by INSTALLER_YA_TAG (latest PSA_LOAD_DTS wins)"
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          config:
+            severity: warn
+          arguments:
+            combination_of_columns:
+              - INSTALLER_YA_TAG
+              - LOAD_DTS
+    columns:
+      - name: INSTALLER_YA_TAG
+        description: "YA tag identifying the installer partner."
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: INSTALLER_NAME
+        description: "Business name of the installer partner."
+      - name: LOAD_DTS
+        description: "UTC-normalized PSA load timestamp used with INSTALLER_YA_TAG as the staging grain."
+      - name: BKCC
+        description: "Business key control column."
+      - name: REC_SRC
+        description: "Record source identifier."
+      - name: PSA_RECORD_SOURCE
+        description: "PSA record source for the installer reference row."
+      - name: PSA_DELETE_IND
+        description: "PSA delete indicator for filtering inactive installer reference rows downstream."

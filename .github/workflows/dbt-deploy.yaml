@@ -1,0 +1,931 @@
+name: DBT Environment Deployment Pipeline
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: [main]
+
+# ── Native concurrency control ──────────────────────────────────────────
+# Replaces styfle/cancel-workflow-action@0.9.1 (Node.js 20, deprecated).
+# Cancels in-progress runs for the same PR when new commits are pushed.
+# ────────────────────────────────────────────────────────────────────────
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  # ============================================================
+  # STEP 0: Generate a short-lived GitHub App installation token.
+  #
+  # WHY: Replaces the user-owned DBT_PR_TOKEN PAT that expired.
+  #   - PATs are tied to an individual, expire on a schedule,
+  #     and break the team when the owner leaves or forgets to rotate.
+  #   - GitHub App tokens are org-owned, auto-expire after 1 hour,
+  #     and are minted fresh each run — zero rotation overhead.
+  #
+  # APP: Uses existing org app "fbin-snowflake-integration"
+  #      (FBWINN-Data-Analytics org → Settings → GitHub Apps)
+  #      Permissions granted:
+  #        - Contents:       Read & Write
+  #        - Pull requests:  Read & Write
+  #        - Metadata:       Read
+  #
+  # SECRETS REQUIRED in dbt-datavault repo:
+  #   vars.DATAOPS_APP_ID          = 1243856
+  #   secrets.DATAOPS_APP_PRIVATE_KEY = contents of the .pem private key
+  # ============================================================
+  generate-app-token:
+    # ── Sequencing anchor + credential validation ──────────────────────────
+    # Validates GitHub App credentials before any downstream job starts.
+    # Each downstream job generates its own short-lived token independently
+    # using the same App credentials — no cross-job secret passing required.
+    # This eliminates the base64 encode/decode workaround and is the approach
+    # recommended by GitHub for cross-job token usage.
+    # ──────────────────────────────────────────────────────────────────────
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate GitHub App credentials
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1  # v3
+        with:
+          app-id: ${{ vars.DATAOPS_APP_ID }}
+          private-key: ${{ secrets.DATAOPS_APP_PRIVATE_KEY }}
+
+  # ── Cancel previous runs ──────────────────────────────────────────────
+  # Uses GitHub's native concurrency control instead of styfle/cancel-workflow-action@0.9.1
+  # which is stuck on Node.js 20 (deprecated June 2, 2026, removed Sep 16, 2026).
+  # Native concurrency is zero-dependency and handles cancellation at the workflow level.
+  # ──────────────────────────────────────────────────────────────────────
+
+  generate-dbt-command:
+    needs: generate-app-token
+    runs-on: ubuntu-latest
+    outputs:
+      full_dbt_command: ${{ steps.dbt-command.outputs.full_dbt_command }}
+      dev_dbt_command: ${{ steps.dbt-command.outputs.dev_dbt_command }}
+      clone_dbt_command: ${{ steps.dbt-command.outputs.clone_dbt_command }}
+      incremental_dbt_command: ${{ steps.dbt-command.outputs.incremental_dbt_command }}
+      test_dbt_command: ${{ steps.dbt-command.outputs.test_dbt_command }}
+      has_model_changes: ${{ steps.dbt-command.outputs.has_model_changes }}
+      has_test_changes: ${{ steps.dbt-command.outputs.has_test_changes }}
+      has_test_only_changes: ${{ steps.dbt-command.outputs.has_test_only_changes }}
+    steps:
+      - name: Generate GitHub App Token
+        id: app-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1  # v3
+        with:
+          app-id: ${{ vars.DATAOPS_APP_ID }}
+          private-key: ${{ secrets.DATAOPS_APP_PRIVATE_KEY }}
+
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v5
+        with:
+          fetch-depth: 0
+          # Use App token so git operations are authenticated as the App,
+          # not as a user PAT. persist-credentials stores it in .git/config
+          # so downstream git commands in this job are also authenticated.
+          token: ${{ steps.app-token.outputs.token }}
+
+      - name: Configure Git
+        run: |
+          git config --global user.name "GitHub Actions Bot"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        # No auth needed here — git config only sets user metadata.
+        # Git credentials are already persisted via actions/checkout token above.
+
+      - name: Fetch PR
+        run: |
+          git fetch origin "+refs/pull/*:refs/remotes/origin/pr/*"
+          git fetch origin main
+
+      - name: Generate dbt command
+        id: dbt-command
+        run: |
+          
+          PR_NUMBER=${{ github.event.pull_request.number }}
+          echo "PR Number: $PR_NUMBER"
+          
+          # Get all changed files
+          # Use merge-base to diff only this PR's changes — excludes models
+          # from other PRs that merged into main after this branch was created.
+          # Fallback: if merge-base fails, revert to origin/main (current behavior).
+          MERGE_BASE=$(git merge-base origin/main origin/pr/$PR_NUMBER/head 2>/dev/null) || MERGE_BASE="origin/main"
+          echo "Merge base: ${MERGE_BASE}"
+          ALL_CHANGED_FILES=$(git diff ${MERGE_BASE} origin/pr/$PR_NUMBER/head --name-only --diff-filter=d || echo "")
+          echo "All changed files:"
+          echo "${ALL_CHANGED_FILES}"
+          
+          # Identify different types of changes
+          MODEL_CHANGES=$(echo "${ALL_CHANGED_FILES}" | grep '^models/.*\.sql$' || echo "")
+          TEST_FILE_CHANGES=$(echo "${ALL_CHANGED_FILES}" | grep -E '^tests/.*\.sql$|^models/.*\.yml$|^models/.*\.yaml$' || echo "")
+          
+          echo "Model changes:"
+          echo "${MODEL_CHANGES}"
+          echo "Test file changes:"
+          echo "${TEST_FILE_CHANGES}"
+          
+          # Set flags for different types of changes
+          HAS_MODEL_CHANGES="false"
+          HAS_TEST_CHANGES="false"
+          HAS_TEST_ONLY_CHANGES="false"
+          
+          if [ -n "${MODEL_CHANGES}" ]; then
+            HAS_MODEL_CHANGES="true"
+          fi
+          
+          if [ -n "${TEST_FILE_CHANGES}" ]; then
+            HAS_TEST_CHANGES="true"
+          fi
+          
+          # If we have test changes but no model changes, it's test-only
+          if [ "${HAS_TEST_CHANGES}" = "true" ] && [ "${HAS_MODEL_CHANGES}" = "false" ]; then
+            HAS_TEST_ONLY_CHANGES="true"
+          fi
+          
+          echo "Has model changes: ${HAS_MODEL_CHANGES}"
+          echo "Has test changes: ${HAS_TEST_CHANGES}"
+          echo "Has test-only changes: ${HAS_TEST_ONLY_CHANGES}"
+          
+          # Initialize commands
+          FULL_DBT_COMMAND=""
+          DEV_DBT_COMMAND=""
+          CLONE_DBT_COMMAND=""
+          INCREMENTAL_DBT_COMMAND=""
+          TEST_DBT_COMMAND=""
+          
+          # Generate model-based commands (EXISTING LOGIC - UNCHANGED)
+          if [ "${HAS_MODEL_CHANGES}" = "true" ]; then
+            MODELS=""
+            RAW_MODELS=""
+            ALL_MODELS=""
+
+            for FILE in ${MODEL_CHANGES}; do
+              MODEL_NAME=$(basename "$FILE" .sql)
+              VALUE=$(echo "$FILE" | cut -d'/' -f2)
+
+              echo "Processing file: ${FILE}"
+              echo "Model name: ${MODEL_NAME}"
+              echo "Folder: ${VALUE}"
+
+              if [ "${VALUE}" == "raw_vault" ]; then
+                if [ -z "${RAW_MODELS}" ]; then
+                  RAW_MODELS="${MODEL_NAME}"
+                else
+                  RAW_MODELS="${RAW_MODELS} ${MODEL_NAME}"
+                fi
+                echo "RAW_MODELS: ${RAW_MODELS}"
+          
+                # Also add to ALL_MODELS for full build (with + suffix for downstream)
+                if [ -z "${ALL_MODELS}" ]; then
+                  ALL_MODELS="${MODEL_NAME}+"
+                else
+                  ALL_MODELS="${ALL_MODELS} ${MODEL_NAME}+"
+                fi
+              else
+                # Add to regular models
+                if [ -z "${MODELS}" ]; then
+                  MODELS="${MODEL_NAME}+"
+                else
+                  MODELS="${MODELS} ${MODEL_NAME}+"
+                fi
+                echo "MODELS: ${MODELS}"
+
+                # Also add to ALL_MODELS for full build
+                if [ -z "${ALL_MODELS}" ]; then
+                  ALL_MODELS="${MODEL_NAME}+"
+                else
+                  ALL_MODELS="${ALL_MODELS} ${MODEL_NAME}+"
+                fi
+              fi
+            done
+
+            echo "ALL_MODELS: ${ALL_MODELS}"
+
+            ### GENERATE FULL BUILD COMMAND (for ALL changed models)
+            # Used by QA and PROD only. QA appends --defer; both materialize real data.
+            if [ -n "${ALL_MODELS}" ]; then
+              FULL_DBT_COMMAND="dbt build --select ${ALL_MODELS} --full-refresh --exclude 'ref_business_key_collision'"
+            fi
+
+            ### GENERATE DEV VALIDATION COMMAND (validation-only — syntax + dependency)
+            # DEV is a fast validation gate. --empty makes model SQL execute against
+            # the real schema WITHOUT scanning source data or materializing rows — dbt
+            # still CREATEs the (empty) relations, but LIMIT 0 is injected into every
+            # ref/source at run time. Uses `dbt run` (models only), NOT `dbt build`:
+            # build also runs tests, and row-count tests (expect_table_row_count_to_be_
+            # between) whose severity is unset/error would FAIL on intentionally-empty
+            # relations, turning DEV into a false-negative gate. Deliberately NOT
+            # --full-refresh: DEV no longer builds rows. Data-logic validation (grain,
+            # dedup, HASHDIFF, incremental branch) is owned by (a) the dev's sandbox
+            # pre-PR and (b) the QA full build. Pre-verified with `dbt compile --empty`
+            # clean across all 2,555 models; the FBIN DV CTE pattern (SRC_O as (SELECT
+            # * FROM <rel> as SRC) → refs alias CTEs, never bare relation names) has no
+            # _dbt_limit_subq collision surface.
+            if [ -n "${ALL_MODELS}" ]; then
+              DEV_DBT_COMMAND="dbt run --select ${ALL_MODELS} --empty --exclude 'ref_business_key_collision'"
+            fi
+
+            ### GENERATE CLONE COMMAND (for large_volume incremental models in the PR)
+            # Intersects the PR's changed models with tag:large_volume and incremental
+            # materialization. Only clones large models that are actually in this PR's
+            # scope — avoids clutter from unrelated large_volume models.
+            # Uses dbt intersection syntax: model+,tag:large_volume,config.materialized:incremental
+            if [ -n "${ALL_MODELS}" ]; then
+              CLONE_SELECTORS=""
+              for MODEL_SELECTOR in ${ALL_MODELS}; do
+                # Each MODEL_SELECTOR is like "model_name+" — intersect with tag and materialization
+                CLONE_SELECTOR="${MODEL_SELECTOR},tag:large_volume,config.materialized:incremental"
+                if [ -z "${CLONE_SELECTORS}" ]; then
+                  CLONE_SELECTORS="${CLONE_SELECTOR}"
+                else
+                  CLONE_SELECTORS="${CLONE_SELECTORS} ${CLONE_SELECTOR}"
+                fi
+              done
+              CLONE_DBT_COMMAND="dbt clone --select ${CLONE_SELECTORS}"
+              echo "CLONE_DBT_COMMAND: ${CLONE_DBT_COMMAND}"
+            fi
+
+            ### GENERATE INCREMENTAL BUILD COMMAND (ONLY for raw_vault models)
+            if [ -n "${RAW_MODELS}" ]; then
+              INCREMENTAL_DBT_COMMAND="dbt run --select ${RAW_MODELS} --empty --exclude 'ref_business_key_collision'"
+            fi
+          fi
+          
+          # CORRECTED: Generate test-specific commands
+          echo "=== GENERATING TEST COMMANDS ==="
+          if [ "${HAS_TEST_CHANGES}" = "true" ]; then
+            if [ "${HAS_TEST_ONLY_CHANGES}" = "true" ]; then
+              echo "Scenario: TEST-ONLY changes detected"
+              # Test-only changes: Include both YAML tests (as model names) and singular tests
+              AFFECTED_TARGETS=""
+              
+              # Parse test files
+              for TEST_FILE in ${TEST_FILE_CHANGES}; do
+                echo "Processing test file: ${TEST_FILE}"
+                
+                if [[ "$TEST_FILE" == *.yml ]] || [[ "$TEST_FILE" == *.yaml ]]; then
+                  # Generic test (YAML) - extract model name from filename
+                  MODEL_NAME=$(basename "$TEST_FILE" .yml)
+                  MODEL_NAME=$(basename "$MODEL_NAME" .yaml)
+                  
+                  echo "Extracted model name from YAML: ${MODEL_NAME}"
+                  
+                  if [ -z "${AFFECTED_TARGETS}" ]; then
+                    AFFECTED_TARGETS="${MODEL_NAME}"
+                  else
+                    AFFECTED_TARGETS="${AFFECTED_TARGETS} ${MODEL_NAME}"
+                  fi
+                fi
+                
+                if [[ "$TEST_FILE" == tests/* ]]; then
+                  # Singular test - extract test name
+                  TEST_NAME=$(basename "$TEST_FILE" .sql)
+                  echo "Extracted singular test name: ${TEST_NAME}"
+                  if [ -z "$AFFECTED_TARGETS" ]; then
+                    AFFECTED_TARGETS="$TEST_NAME"
+                  else
+                    AFFECTED_TARGETS="$AFFECTED_TARGETS $TEST_NAME"
+                  fi
+                fi
+              done
+              
+              # Generate targeted test command
+              if [ -n "$AFFECTED_TARGETS" ]; then
+                # Remove duplicates and create clean list
+                UNIQUE_TARGETS=$(echo "${AFFECTED_TARGETS}" | tr ' ' '\n' | sort -u | tr '\n' ' ' | sed 's/[[:space:]]*$//')
+                TEST_DBT_COMMAND="dbt test --select ${UNIQUE_TARGETS}"
+                echo "✅ Test-only command: ${TEST_DBT_COMMAND}"
+              else
+                # Fallback if no targets found
+                TEST_DBT_COMMAND="dbt test"
+                echo "⚠️ No targets detected, falling back to full test suite"
+              fi
+            else
+              # MIXED CHANGES: Only include singular tests (models are tested via dbt build)
+              echo "Scenario: MIXED changes (models + tests) detected"
+              
+              SINGULAR_TESTS=""
+              YAML_TESTS_ON_UNCHANGED_MODELS=""
+              
+              # Extract singular test names and YAML tests on unchanged models
+              for TEST_FILE in ${TEST_FILE_CHANGES}; do
+                echo "Processing test file: ${TEST_FILE}"
+                
+                if [[ "$TEST_FILE" == tests/* ]]; then
+                  # Singular test - always include
+                  TEST_NAME=$(basename "$TEST_FILE" .sql)
+                  echo "Found singular test: ${TEST_NAME}"
+                  if [ -z "${SINGULAR_TESTS}" ]; then
+                    SINGULAR_TESTS="${TEST_NAME}"
+                  else
+                    SINGULAR_TESTS="${SINGULAR_TESTS} ${TEST_NAME}"
+                  fi
+                fi
+                
+                if [[ "$TEST_FILE" == *.yml ]] || [[ "$TEST_FILE" == *.yaml ]]; then
+                  # Generic test (YAML) - check if it's for a changed model
+                  MODEL_NAME=$(basename "$TEST_FILE" .yml)
+                  MODEL_NAME=$(basename "$MODEL_NAME" .yaml)
+                  
+                  # Check if this model was changed
+                  if echo "${MODEL_CHANGES}" | grep -q "${MODEL_NAME}.sql"; then
+                    echo "YAML test for changed model ${MODEL_NAME} - skipped (covered by dbt build)"
+                  else
+                    echo "YAML test for unchanged model ${MODEL_NAME} - will be included"
+                    if [ -z "${YAML_TESTS_ON_UNCHANGED_MODELS}" ]; then
+                      YAML_TESTS_ON_UNCHANGED_MODELS="${MODEL_NAME}"
+                    else
+                      YAML_TESTS_ON_UNCHANGED_MODELS="${YAML_TESTS_ON_UNCHANGED_MODELS} ${MODEL_NAME}"
+                    fi
+                  fi
+                fi
+              done
+              
+              # Combine singular tests and YAML tests on unchanged models
+              TEST_TARGETS="${SINGULAR_TESTS}"
+              if [ -n "${YAML_TESTS_ON_UNCHANGED_MODELS}" ]; then
+                if [ -z "${TEST_TARGETS}" ]; then
+                  TEST_TARGETS="${YAML_TESTS_ON_UNCHANGED_MODELS}"
+                else
+                  TEST_TARGETS="${TEST_TARGETS} ${YAML_TESTS_ON_UNCHANGED_MODELS}"
+                fi
+              fi
+              
+              if [ -n "${TEST_TARGETS}" ]; then
+                # Remove duplicates
+                UNIQUE_TARGETS=$(echo "${TEST_TARGETS}" | tr ' ' '\n' | sort -u | tr '\n' ' ' | sed 's/[[:space:]]*$//')
+                TEST_DBT_COMMAND="dbt test --select ${UNIQUE_TARGETS}"
+                echo "✅ Mixed changes - testing singular tests only: ${TEST_DBT_COMMAND}"
+                echo "   (Model tests are covered by dbt build command)"
+              else
+                echo "ℹ️  No separate test command needed - all tests covered by dbt build"
+              fi
+            fi
+          else
+            echo "No test changes detected - TEST_DBT_COMMAND will remain empty"
+          fi
+          echo "=== END TEST COMMAND GENERATION ==="
+
+          # Set outputs BEFORE the no-change early-exit, so the downstream deploy
+          # jobs can read has_model_changes / has_test_changes even when there is
+          # nothing to deploy. They guard on these flags via `if:` instead of
+          # relying on this job failing (#1919).
+          echo "full_dbt_command=${FULL_DBT_COMMAND}" >> $GITHUB_OUTPUT
+          echo "dev_dbt_command=${DEV_DBT_COMMAND}" >> $GITHUB_OUTPUT
+          echo "clone_dbt_command=${CLONE_DBT_COMMAND}" >> $GITHUB_OUTPUT
+          echo "incremental_dbt_command=${INCREMENTAL_DBT_COMMAND}" >> $GITHUB_OUTPUT
+          echo "test_dbt_command=${TEST_DBT_COMMAND}" >> $GITHUB_OUTPUT
+          echo "has_model_changes=${HAS_MODEL_CHANGES}" >> $GITHUB_OUTPUT
+          echo "has_test_changes=${HAS_TEST_CHANGES}" >> $GITHUB_OUTPUT
+          echo "has_test_only_changes=${HAS_TEST_ONLY_CHANGES}" >> $GITHUB_OUTPUT
+
+          # If no changes detected, exit cleanly (0). A red X here was cosmetic
+          # (main has required_status_checks: none) but misleading; the deploy
+          # jobs skip via their own `if:` guards on the flags above, so a green
+          # no-op here is correct, not a signal to deploy (#1919).
+          if [ "${HAS_MODEL_CHANGES}" = "false" ] && [ "${HAS_TEST_CHANGES}" = "false" ]; then
+            echo "No relevant changes detected. Nothing to deploy; exiting cleanly."
+            exit 0
+          fi
+          
+          # Set changed files for PR description (use model changes for existing logic)
+          echo "CHANGED_FILES=$(echo ${MODEL_CHANGES} | sed 's/%/%25/g; s/\n/%0A/g; s/\r/%0D/g')" >> $GITHUB_ENV
+          
+          echo "=== FINAL DBT COMMANDS ==="
+          echo "Full: ${FULL_DBT_COMMAND}"
+          echo "Clone: ${CLONE_DBT_COMMAND}"
+          echo "Incremental: ${INCREMENTAL_DBT_COMMAND}"
+          echo "Test: ${TEST_DBT_COMMAND}"
+          echo "Has Model Changes: ${HAS_MODEL_CHANGES}"
+          echo "Has Test Changes: ${HAS_TEST_CHANGES}"
+          echo "Has Test Only Changes: ${HAS_TEST_ONLY_CHANGES}"
+          echo "=========================="
+
+      - name: Process Variables
+        if: steps.dbt-command.outputs.has_model_changes == 'true' || steps.dbt-command.outputs.has_test_changes == 'true'
+        run: |
+          echo "FILES_JSON=$(echo "$CHANGED_FILES" | tr ' ' '\n' | jq -R . | jq -s . | jq -c .)" >> $GITHUB_ENV
+
+      - name: Update PR Description
+        if: steps.dbt-command.outputs.has_model_changes == 'true' || steps.dbt-command.outputs.has_test_changes == 'true'
+        uses: ./.github/actions/update_pr_description
+        with:
+          pr_number: ${{ github.event.pull_request.number }}
+          changed_files: ${{ env.FILES_JSON }}
+          github_repository: ${{ github.repository }}
+          github_token: ${{ steps.app-token.outputs.token }}
+
+      - name: Update PR Title
+        if: steps.dbt-command.outputs.has_model_changes == 'true' || steps.dbt-command.outputs.has_test_changes == 'true'
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          PR_NUMBER=${{ github.event.pull_request.number }}
+          PR_TITLE=$(gh api repos/${{ github.repository }}/pulls/$PR_NUMBER --jq '.title')
+          
+          # Remove existing labels from the title
+          CLEAN_TITLE=$(echo "$PR_TITLE" | sed -E 's/ \| (stg|rv|bv|im|tests)(,(stg|rv|bv|im|tests))*//g' | sed 's/ *$//')
+          
+          echo "CLEAN_TITLE: $CLEAN_TITLE"
+          
+          declare -A label_map
+          
+          # Add model-based labels (EXISTING LOGIC)
+          if [ "${{ steps.dbt-command.outputs.has_model_changes }}" = "true" ]; then
+            for folder in $(echo "$CHANGED_FILES" | tr ' ' '\n' | awk -F'/' '{print $2}' | sort | uniq); do
+              case "$folder" in
+                int_staging_views|staging) label_map["stg"]=1;;
+                raw_vault) label_map["rv"]=1;;
+                bus_vault) label_map["bv"]=1;;
+                info_mart) label_map["im"]=1;;
+              esac
+            done
+          fi
+          
+          # Add test label for test-only changes
+          if [ "${{ steps.dbt-command.outputs.has_test_only_changes }}" = "true" ]; then
+            label_map["tests"]=1
+          fi
+          
+          # Order the labels explicitly
+          ORDERED_LABELS=""
+          for label in stg rv bv im tests; do
+            if [[ -n "${label_map[$label]}" ]]; then
+              if [[ -n "$ORDERED_LABELS" ]]; then
+                ORDERED_LABELS="$ORDERED_LABELS, $label"
+              else
+                ORDERED_LABELS="$label"
+              fi
+            fi
+          done
+          
+          echo "ORDERED_LABELS: $ORDERED_LABELS"
+          
+          if [ -n "$ORDERED_LABELS" ]; then
+            NEW_TITLE="$CLEAN_TITLE | $ORDERED_LABELS"
+          else
+            NEW_TITLE="$CLEAN_TITLE"
+          fi
+          
+          echo "New PR Title: $NEW_TITLE"
+          gh api repos/${{ github.repository }}/pulls/$PR_NUMBER \
+            --method PATCH \
+            --field title="$NEW_TITLE"
+
+  deploy-to-dev:
+    needs: [generate-app-token, generate-dbt-command]
+    # Skip cleanly when there is nothing to deploy. Previously implicit: this job
+    # was skipped because generate-dbt-command FAILED (exit 1) on no-change PRs.
+    # It now exits 0, so guard explicitly on the change flags rather than relying
+    # on a failed dependency to skip (#1919).
+    if: needs.generate-dbt-command.outputs.has_model_changes == 'true' || needs.generate-dbt-command.outputs.has_test_changes == 'true'
+    runs-on: ubuntu-latest
+    environment: DEV
+    steps:
+      - name: Generate GitHub App Token
+        id: app-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1  # v3
+        with:
+          app-id: ${{ vars.DATAOPS_APP_ID }}
+          private-key: ${{ secrets.DATAOPS_APP_PRIVATE_KEY }}
+
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v5
+
+      - name: Update PR with DEV label
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          PR_NUMBER=${{ github.event.pull_request.number }}
+          
+          # Remove any existing environment labels
+          for env_label in dev qa; do
+            gh api repos/${{ github.repository }}/issues/$PR_NUMBER/labels/$env_label \
+              --method DELETE || true
+          done
+
+          # Add DEV label
+          gh api repos/${{ github.repository }}/issues/$PR_NUMBER/labels \
+            --method POST \
+            --field labels[]="dev"
+
+      # DEV VALIDATION BUILD — uses --empty (validation-only), not full-refresh
+      - name: Trigger DEV validation dbt Cloud Job
+        id: trigger_dev_validation_job
+        if: needs.generate-dbt-command.outputs.dev_dbt_command != '' && needs.generate-dbt-command.outputs.has_model_changes == 'true'
+        uses: ./.github/actions/trigger_dbt_cloud_job
+        with:
+          dbt_svc_token: ${{ secrets.DBT_SVC_TOKEN }}
+          environment: "DEV"
+          job_id: 786806
+          dbt_command: ${{ needs.generate-dbt-command.outputs.dev_dbt_command }}
+          job_type: "VALIDATION"
+
+      - name: Poll DBT Job Status
+        id: poll_dev_validation_status
+        if: needs.generate-dbt-command.outputs.dev_dbt_command != '' && needs.generate-dbt-command.outputs.has_model_changes == 'true'
+        uses: ./.github/actions/poll_dbt_job_status
+        with:
+          dbt_svc_token: ${{ secrets.DBT_SVC_TOKEN }}
+          run_id: ${{ env.DEV_VALIDATION_RUN_ID }}
+          environment: "DEV"
+          job_type: "VALIDATION"
+
+      - name: Update PR Description
+        if: needs.generate-dbt-command.outputs.dev_dbt_command != '' && needs.generate-dbt-command.outputs.has_model_changes == 'true'
+        uses: ./.github/actions/update_pr_description
+        with:
+          pr_number: ${{ github.event.pull_request.number }}
+          environment: "DEV - Validation (--empty)"
+          job_created_at: ${{ env.DEV_VALIDATION_JOB_CREATED_AT }}
+          job_finished_at: ${{ env.DEV_VALIDATION_RUN_FINISHED }}
+          job_href: ${{ env.DEV_VALIDATION_HREF }}
+          job_status: ${{ env.DEV_VALIDATION_JOB_STATUS }}
+          github_repository: ${{ github.repository }}
+          github_token: ${{ steps.app-token.outputs.token }}
+
+      - name: Trigger incremental dbt Cloud Job for DEV
+        id: trigger_incremental_dbt_cloud_job_for_dev
+        if: needs.generate-dbt-command.outputs.incremental_dbt_command != '' && needs.generate-dbt-command.outputs.has_model_changes == 'true'
+        uses: ./.github/actions/trigger_dbt_cloud_job
+        with:
+          dbt_svc_token: ${{ secrets.DBT_SVC_TOKEN }}
+          environment: "DEV"
+          job_id: 786806
+          dbt_command: ${{ needs.generate-dbt-command.outputs.incremental_dbt_command }}
+          job_type: "INCREMENTAL"
+
+      - name: Poll DBT Job Status
+        id: poll_dbt_job_status_dev_incremental
+        if: needs.generate-dbt-command.outputs.incremental_dbt_command != '' && needs.generate-dbt-command.outputs.has_model_changes == 'true'
+        uses: ./.github/actions/poll_dbt_job_status
+        with:
+          dbt_svc_token: ${{ secrets.DBT_SVC_TOKEN }}
+          run_id: ${{ env.DEV_INCREMENTAL_RUN_ID }}
+          environment: "DEV"
+          job_type: "INCREMENTAL"
+      
+      - name: Update PR Description
+        if: needs.generate-dbt-command.outputs.incremental_dbt_command != '' && needs.generate-dbt-command.outputs.has_model_changes == 'true'
+        uses: ./.github/actions/update_pr_description
+        with:
+          pr_number: ${{ github.event.pull_request.number }}
+          environment: "DEV - Incremental Refresh"
+          job_created_at: ${{ env.DEV_INCREMENTAL_JOB_CREATED_AT }}
+          job_finished_at: ${{ env.DEV_INCREMENTAL_RUN_FINISHED }}
+          job_href: ${{ env.DEV_INCREMENTAL_HREF }}
+          job_status: ${{ env.DEV_INCREMENTAL_JOB_STATUS }}
+          github_repository: ${{ github.repository }}
+          github_token: ${{ steps.app-token.outputs.token }}
+
+      # TEST EXECUTION STEPS
+      - name: Trigger dbt Test Job for DEV
+        id: trigger_test_dbt_cloud_job_for_dev
+        if: needs.generate-dbt-command.outputs.test_dbt_command != '' && needs.generate-dbt-command.outputs.has_test_changes == 'true'
+        uses: ./.github/actions/trigger_dbt_cloud_job
+        with:
+          dbt_svc_token: ${{ secrets.DBT_SVC_TOKEN }}
+          environment: "DEV"
+          job_id: 786806
+          dbt_command: ${{ needs.generate-dbt-command.outputs.test_dbt_command }}
+          job_type: "TEST"
+
+      - name: Poll DBT Job Status - Tests
+        id: poll_dbt_job_status_dev_test
+        if: needs.generate-dbt-command.outputs.test_dbt_command != '' && needs.generate-dbt-command.outputs.has_test_changes == 'true'
+        uses: ./.github/actions/poll_dbt_job_status
+        with:
+          dbt_svc_token: ${{ secrets.DBT_SVC_TOKEN }}
+          run_id: ${{ env.DEV_TEST_RUN_ID }}
+          environment: "DEV"
+          job_type: "TEST"
+
+      - name: Update PR Description - Tests
+        if: needs.generate-dbt-command.outputs.test_dbt_command != '' && needs.generate-dbt-command.outputs.has_test_changes == 'true'
+        uses: ./.github/actions/update_pr_description
+        with:
+          pr_number: ${{ github.event.pull_request.number }}
+          environment: ${{ needs.generate-dbt-command.outputs.has_test_only_changes == 'true' && 'DEV - Tests Only' || 'DEV - Tests' }}
+          job_created_at: ${{ env.DEV_TEST_JOB_CREATED_AT }}
+          job_finished_at: ${{ env.DEV_TEST_RUN_FINISHED }}
+          job_href: ${{ env.DEV_TEST_HREF }}
+          job_status: ${{ env.DEV_TEST_JOB_STATUS }}
+          github_repository: ${{ github.repository }}
+          github_token: ${{ steps.app-token.outputs.token }}
+
+      - name: Update PR Status - QA Skip for Test-Only
+        if: needs.generate-dbt-command.outputs.has_test_only_changes == 'true'
+        uses: ./.github/actions/update_pr_description
+        with:
+          pr_number: ${{ github.event.pull_request.number }}
+          environment: "QA - Skipped (Tests Only)"
+          job_status: "Skipped - DEV tests passed, ready for manual review"
+          github_repository: ${{ github.repository }}
+          github_token: ${{ steps.app-token.outputs.token }}
+
+      - name: Update PR Status - PROD Skip for Test-Only
+        if: needs.generate-dbt-command.outputs.has_test_only_changes == 'true'
+        uses: ./.github/actions/update_pr_description
+        with:
+          pr_number: ${{ github.event.pull_request.number }}
+          environment: "PROD - Skipped (Tests Only)"
+          job_status: "Skipped - Ready for manual merge after review"
+          github_repository: ${{ github.repository }}
+          github_token: ${{ steps.app-token.outputs.token }}
+
+  deploy-to-qa:
+    needs: [generate-app-token, generate-dbt-command, deploy-to-dev]
+    runs-on: ubuntu-latest
+    environment: QA  
+    if: needs.generate-dbt-command.outputs.has_model_changes == 'true'
+    steps:
+      - name: Generate GitHub App Token
+        id: app-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1  # v3
+        with:
+          app-id: ${{ vars.DATAOPS_APP_ID }}
+          private-key: ${{ secrets.DATAOPS_APP_PRIVATE_KEY }}
+
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v5
+
+      - name: Update PR with QA label
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          PR_NUMBER=${{ github.event.pull_request.number }}
+          
+          # Remove any existing environment labels
+          for env_label in dev qa; do
+            gh api repos/${{ github.repository }}/issues/$PR_NUMBER/labels/$env_label \
+              --method DELETE || true
+          done
+          
+          # Add QA label
+          gh api repos/${{ github.repository }}/issues/$PR_NUMBER/labels \
+            --method POST \
+            --field labels[]="qa"
+
+      # Step 1: Promote BKCC from DEV to QA
+      - name: Promote BKCC from DEV to QA
+        id: promote_bkcc_dev_to_qa
+        uses: ./.github/actions/promote_bkcc
+        with:
+          dbt_svc_token: ${{ secrets.DBT_SVC_TOKEN }}
+          source_env: "DEV"
+          target_env: "QA"
+          job_id: 786808
+
+      # Step 2: Promote BKCC from QA to PROD (BEFORE QA dbt jobs run)
+      - name: Promote BKCC from QA to PROD
+        id: promote_bkcc_qa_to_prod
+        if: steps.promote_bkcc_dev_to_qa.outcome == 'success'
+        uses: ./.github/actions/promote_bkcc
+        with:
+          dbt_svc_token: ${{ secrets.DBT_SVC_TOKEN }}
+          source_env: "QA"
+          target_env: "PROD"
+          job_id: 786800
+
+      # Step 3: Clone large incremental models from PROD into QA PR schema
+      # ── Zero-copy clone (Snowflake) for PR-scoped large_volume models ──
+      # Per dbt Labs best practice: clone incremental models before CI build
+      # so they run incrementally instead of full-refresh. This avoids
+      # expensive full rebuilds of large tables (e.g., pb_reservation) in QA.
+      #
+      # Clone selectors are generated in generate-dbt-command by intersecting
+      # each PR model selector (e.g., model_name+) with tag:large_volume and
+      # config.materialized:incremental. This clones only large_volume
+      # incremental models within the PR's scope — no unrelated models.
+      # If no PR models match the intersection, clone_dbt_command is empty
+      # and this step is skipped entirely.
+      # Ref: https://docs.getdbt.com/best-practices/clone-incremental-models
+      # ──────────────────────────────────────────────────────────────────────
+      - name: Clone large incremental models for QA
+        id: clone_large_models_for_qa
+        if: >-
+          steps.promote_bkcc_qa_to_prod.outcome == 'success'
+          && needs.generate-dbt-command.outputs.clone_dbt_command != ''
+        continue-on-error: true  # Clone is an optimization — failure should not block QA build
+        env:
+          GITHUB_PR_NUMBER: ${{ github.event.pull_request.number }}
+          DBT_CLOUD_JOB_ID: "786808"
+        uses: ./.github/actions/trigger_dbt_cloud_job
+        with:
+          dbt_svc_token: ${{ secrets.DBT_SVC_TOKEN }}
+          environment: "QA"
+          job_id: 786808
+          dbt_command: ${{ needs.generate-dbt-command.outputs.clone_dbt_command }}
+          job_type: "CLONE"
+          pr_number: ${{ github.event.pull_request.number }}
+
+      - name: Poll Clone Job Status
+        id: poll_clone_job_status_qa
+        if: steps.clone_large_models_for_qa.outcome == 'success'
+        continue-on-error: true  # Clone is an optimization — failure should not block QA build
+        uses: ./.github/actions/poll_dbt_job_status
+        with:
+          dbt_svc_token: ${{ secrets.DBT_SVC_TOKEN }}
+          run_id: ${{ env.QA_CLONE_RUN_ID }}
+          environment: "QA"
+          job_type: "CLONE"
+
+      - name: Update PR Description - Clone Success
+        if: always() && steps.poll_clone_job_status_qa.outcome == 'success'
+        uses: ./.github/actions/update_pr_description
+        with:
+          pr_number: ${{ github.event.pull_request.number }}
+          environment: "QA - Clone Large Models"
+          job_created_at: ${{ env.QA_CLONE_JOB_CREATED_AT }}
+          job_finished_at: ${{ env.QA_CLONE_RUN_FINISHED }}
+          job_href: ${{ env.QA_CLONE_HREF }}
+          job_status: ${{ env.QA_CLONE_JOB_STATUS }}
+          github_repository: ${{ github.repository }}
+          github_token: ${{ steps.app-token.outputs.token }}
+
+      - name: Update PR Description - Clone Failed
+        if: >-
+          always()
+          && steps.clone_large_models_for_qa.outcome != 'skipped'
+          && steps.poll_clone_job_status_qa.outcome != 'success'
+        uses: ./.github/actions/update_pr_description
+        with:
+          pr_number: ${{ github.event.pull_request.number }}
+          environment: "QA - Clone Large Models"
+          job_status: "Clone failed (non-blocking) — QA build continues with full-refresh"
+          github_repository: ${{ github.repository }}
+          github_token: ${{ steps.app-token.outputs.token }}
+
+      # Step 4: Now run QA dbt jobs with --defer
+      # --defer: reference production tables for unmodified upstream models.
+      # dbt Cloud provides state via environment-level deferral config (QA defers to PROD).
+      # Large models tagged 'large_volume' are cloned into QA PR schema by the
+      # clone step above. For cloned models to run incrementally, they must have
+      # full_refresh: false set at the model level to override the --full-refresh flag.
+      # Models without that config will still full-refresh despite the clone.
+      # Ref: https://docs.getdbt.com/reference/resource-configs/full_refresh
+      - name: Trigger full dbt Cloud Job for QA
+        if: steps.promote_bkcc_qa_to_prod.outcome == 'success'
+        env:
+          GITHUB_PR_NUMBER: ${{ github.event.pull_request.number }}
+          DBT_CLOUD_JOB_ID: "786808"
+        uses: ./.github/actions/trigger_dbt_cloud_job
+        with:
+          dbt_svc_token: ${{ secrets.DBT_SVC_TOKEN }}
+          environment: "QA"
+          job_id: 786808
+          dbt_command: "${{ needs.generate-dbt-command.outputs.full_dbt_command }} --defer"
+          job_type: "FULL"
+          pr_number: ${{ github.event.pull_request.number }}  
+
+      - name: Poll DBT Job Status
+        if: steps.promote_bkcc_qa_to_prod.outcome == 'success'
+        id: poll_dbt_job_status_qa_full
+        uses: ./.github/actions/poll_dbt_job_status
+        with:
+          dbt_svc_token: ${{ secrets.DBT_SVC_TOKEN }}
+          run_id: ${{ env.QA_FULL_RUN_ID }}
+          environment: "QA"
+          job_type: "FULL"
+          max_wait_time: "5400"  # 1.5 hours — QA full-refresh with --defer can be heavy
+
+      - name: Update PR Description
+        if: always()
+        uses: ./.github/actions/update_pr_description
+        with:
+          pr_number: ${{ github.event.pull_request.number }}
+          environment: "QA - Full Refresh"
+          job_created_at: ${{ env.QA_FULL_JOB_CREATED_AT }}
+          job_finished_at: ${{ env.QA_FULL_RUN_FINISHED }}
+          job_href: ${{ env.QA_FULL_HREF }}
+          job_status: ${{ env.QA_FULL_JOB_STATUS }}
+          github_repository: ${{ github.repository }}
+          github_token: ${{ steps.app-token.outputs.token }}
+
+  deploy-to-prod:
+    needs: [generate-app-token, generate-dbt-command, deploy-to-qa]
+    runs-on: ubuntu-latest
+    environment: PROD  
+    # SKIP entire PROD job for test-only changes
+    if: needs.generate-dbt-command.outputs.has_model_changes == 'true'
+    steps:
+      - name: Generate GitHub App Token
+        id: app-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1  # v3
+        with:
+          app-id: ${{ vars.DATAOPS_APP_ID }}
+          private-key: ${{ secrets.DATAOPS_APP_PRIVATE_KEY }}
+
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v5
+
+      # ── Trigger PROD dbt Cloud Job ────────────────────────────────────────
+      # Runs immediately after checkout — first substantive step.
+      # Auto-merge and branch deletion only happen AFTER this completes
+      # successfully, so a PROD failure never results in a merged PR.
+      # ──────────────────────────────────────────────────────────────────────
+      - name: Trigger full dbt Cloud Job for PROD
+        id: trigger_full_dbt_cloud_job_for_prod
+        if: needs.generate-dbt-command.outputs.full_dbt_command != ''
+        uses: ./.github/actions/trigger_dbt_cloud_job
+        with:
+          dbt_svc_token: ${{ secrets.DBT_SVC_TOKEN }}
+          environment: "PROD"
+          job_id: 786800
+          dbt_command: ${{ needs.generate-dbt-command.outputs.full_dbt_command }}
+          job_type: "FULL"
+
+      - name: Poll DBT Job Status
+        id: poll_dbt_job_status_prod_full
+        uses: ./.github/actions/poll_dbt_job_status
+        with:
+          dbt_svc_token: ${{ secrets.DBT_SVC_TOKEN }}
+          run_id: ${{ env.PROD_FULL_RUN_ID }}
+          environment: "PROD"
+          job_type: "FULL"
+          max_wait_time: "5400"  # 1.5 hours — PROD full-refresh with downstream can be heavy
+
+      # ── Update PR Description ─────────────────────────────────────────────
+      # Mirrors DEV/QA pattern — always update PR with PROD deployment status
+      # so the PR record is complete regardless of success or failure.
+      # ──────────────────────────────────────────────────────────────────────
+      - name: Update PR Description
+        if: always() && steps.poll_dbt_job_status_prod_full.outcome != 'skipped'
+        uses: ./.github/actions/update_pr_description
+        with:
+          pr_number: ${{ github.event.pull_request.number }}
+          environment: "PROD - Full Refresh"
+          job_created_at: ${{ env.PROD_FULL_JOB_CREATED_AT }}
+          job_finished_at: ${{ env.PROD_FULL_RUN_FINISHED }}
+          job_href: ${{ env.PROD_FULL_HREF }}
+          job_status: ${{ env.PROD_FULL_JOB_STATUS }}
+          github_repository: ${{ github.repository }}
+          github_token: ${{ steps.app-token.outputs.token }}
+
+      # ── Auto-merge PR ─────────────────────────────────────────────────────
+      # Runs AFTER PROD dbt job succeeds — never merges on failure.
+      # Uses the GitHub App token (org-owned, no expiry, no user dependency).
+      # Previously used PR_AUTO_MERGE_TOKEN (user PAT, expired every 90 days).
+      # App token also triggers pr-cleanup.yaml (GITHUB_TOKEN cannot do this).
+      # ──────────────────────────────────────────────────────────────────────
+      - name: Auto-merge PR
+        if: steps.poll_dbt_job_status_prod_full.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          # untrusted input — via env to prevent script injection (CWE-78)
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          echo "Merging PR #${PR_NUMBER}: ${PR_TITLE}"
+
+          # Use gh CLI — handles JSON encoding safely, no shell injection risk
+          gh api "repos/${{ github.repository }}/pulls/${PR_NUMBER}/merge" \
+            --method PUT \
+            --field merge_method="squash" \
+            --field commit_title="${PR_TITLE}" \
+            --field commit_message="Automatically merged PR #${PR_NUMBER} after successful production deployment"
+
+          echo "✅ PR #${PR_NUMBER} auto-merged successfully"
+
+      # ── Delete feature branch ─────────────────────────────────────────────
+      # Runs AFTER auto-merge, only when PROD dbt job succeeded.
+      # Branch is preserved on PROD failure for debugging purposes.
+      # Uses gh CLI + GITHUB_TOKEN (auto-generated per workflow run, no manual rotation needed).
+      # ──────────────────────────────────────────────────────────────────────
+      - name: Delete feature branch
+        if: steps.poll_dbt_job_status_prod_full.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # untrusted input — via env to prevent script injection (CWE-78)
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+        run: |
+          BRANCH_NAME="${HEAD_REF}"
+          PROTECTED_BRANCHES="main dev qa"
+
+          echo "Branch to delete: ${BRANCH_NAME}"
+
+          # Guard: never delete protected branches
+          for PROTECTED in $PROTECTED_BRANCHES; do
+            if [ "$BRANCH_NAME" = "$PROTECTED" ]; then
+              echo "⚠️  Branch '${BRANCH_NAME}' is protected — skipping deletion."
+              exit 0
+            fi
+          done
+
+          # Guard: ensure branch name is non-empty
+          if [ -z "$BRANCH_NAME" ]; then
+            echo "⚠️  Branch name is empty — skipping deletion."
+            exit 0
+          fi
+
+          echo "Deleting remote branch: ${BRANCH_NAME}"
+
+          # gh CLI uses GH_TOKEN automatically; handles 422 (already deleted) gracefully
+          if gh api \
+              --method DELETE \
+              -H "Accept: application/vnd.github+json" \
+              "/repos/${{ github.repository }}/git/refs/heads/${BRANCH_NAME}"; then
+            echo "✅ Branch '${BRANCH_NAME}' deleted successfully."
+          else
+            echo "⚠️  Branch may have already been deleted or does not exist. Continuing."
+            exit 0
+          fi

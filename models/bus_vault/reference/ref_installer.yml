@@ -1,0 +1,16 @@
+version: 2
+models:
+  - name: ref_installer
+    description: "Reference table mapping installer YA tags to installer names (FrontDoor, ThumbTack, Beagle)."
+    data_tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_name: INSTALLER_YA_TAG
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          arguments:
+            min_value: 3
+    columns:
+      - name: INSTALLER_YA_TAG
+        description: "YA tag identifying the installer partner"
+      - name: INSTALLER_NAME
+        description: "Business name of the installer partner"

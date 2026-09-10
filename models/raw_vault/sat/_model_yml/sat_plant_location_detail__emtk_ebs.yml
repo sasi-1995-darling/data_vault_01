@@ -1,0 +1,22 @@
+version: 2
+
+models:
+  - name: sat_plant_location_detail__emtk_ebs
+    description: This is the raw vault satellite model for plant location detail
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - plant_location_hk
+              - load_dts
+      - dbt_constraints.foreign_key:
+          arguments:
+            fk_column_names:
+              - plant_location_hk
+            pk_table_name: ref('hub_plant_location')
+            pk_column_names:
+              - plant_location_hk
+    config:
+      tags:
+        - emtek
+        - ebs

@@ -1,0 +1,22 @@
+version: 2
+
+models:
+  - name: sat_sales_agency_detail__emtk_ebs
+    description: This is the raw vault satellite model for sales agency detail
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - sales_agency_hk
+              - load_dts
+      - dbt_constraints.foreign_key:
+          arguments:
+            fk_column_names:
+              - sales_agency_hk
+            pk_table_name: ref('hub_sales_agency')
+            pk_column_names:
+              - sales_agency_hk
+    config:
+      tags:
+        - emtek
+        - ebs

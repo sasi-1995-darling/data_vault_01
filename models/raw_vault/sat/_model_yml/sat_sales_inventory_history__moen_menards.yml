@@ -1,0 +1,46 @@
+version: 2
+models:
+  - name: sat_sales_inventory_history__moen_menards
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - STORE_HK
+              - ITEM
+              - FILE_NAME
+              - LOAD_DTS
+              - FILE_ROW_NUMBER
+    columns:
+      - name: STORE_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+          - dbt_utils.relationships_where:
+              arguments:
+                to: ref( 'hub_store' )
+                field: STORE_HK
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'hub_store' )
+                pk_column_name: STORE_HK
+      - name: ITEM
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: FILE_NAME
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: LOAD_DTS
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: FILE_ROW_NUMBER
+        tests:
+          - not_null:
+              config:
+                severity: warn

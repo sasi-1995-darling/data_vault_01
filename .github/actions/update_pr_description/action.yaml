@@ -1,0 +1,112 @@
+name: 'Update PR Description'
+description: 'Update PR description with environment job information'
+
+inputs:
+  pr_number:
+    description: 'PR number'
+    required: true
+  changed_files:
+    description: 'List of changed files'
+    required: false
+  environment:
+    description: 'Environment (DEV, QA, PROD)'
+    required: false
+  job_created_at:
+    description: 'Job creation timestamp'
+    required: false
+  job_finished_at:
+    description: 'Job finished timestamp'
+    required: false
+  job_href:
+    description: 'Job URL'
+    required: false
+  job_status:
+    description: 'Job status'
+    required: false
+  github_repository:
+    description: 'GitHub repository'
+    required: true
+  github_token:
+    description: 'GitHub token'
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Update PR Description
+      shell: bash
+      run: |
+        # Set variables from action inputs
+        PR_NUMBER=${{ inputs.pr_number }}
+        CHANGED_FILES=${{ inputs.changed_files }}
+        ENVIRONMENT="${{ inputs.environment }}"
+        JOB_CREATED_AT="${{ inputs.job_created_at }}"
+        JOB_FINISHED_AT="${{ inputs.job_finished_at }}"
+        DBT_JOB_HREF="${{ inputs.job_href }}"
+        JOB_STATUS="${{ inputs.job_status }}"
+        GITHUB_REPOSITORY="${{ inputs.github_repository }}"
+        GITHUB_TOKEN="${{ inputs.github_token }}"
+
+        # Fetch current PR description using GitHub API
+        PR_BODY=$(jq -r '.body' <(curl -s -H "Authorization: token ${GITHUB_TOKEN}" https://api.github.com/repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}))
+        
+        # SECTION 1: Update PR description with changed files if provided
+        # ===============================================================
+        if [[ -n "${CHANGED_FILES}" && -z "${JOB_STATUS}" ]]; then
+        # Process the file list from JSON array format:
+          # 1. Replace commas with newlines
+          # 2. Remove opening bracket and whitespace
+          # 3. Remove closing bracket and whitespace
+          # 4. Remove all double quotes
+          # 5. Replace remaining commas with newlines for proper formatting
+          FORMATTED_FILES=$(echo "${CHANGED_FILES}" | tr ',' '\n' | sed 's/^\s*\[\s*//; s/\s*\]\s*$//; s/"//g; s/,/\n/g')
+          
+          # Check if PR already has a "Changed SQL files" section
+          if [[ "${PR_BODY}" == *"Changed SQL files:"* ]]; then
+            UPDATED_BODY=$(printf "%s\n\nChanged SQL files:\n%s" "$(echo "${PR_BODY}" | sed -e "/Changed SQL files:/,\$d")" "${FORMATTED_FILES}")
+          else
+            UPDATED_BODY=$(printf "%s\n\nChanged SQL files:\n%s" "${PR_BODY}" "${FORMATTED_FILES}")
+          fi
+
+          # Send API request to update the PR description
+          curl -X PATCH \
+            -H "Authorization: token ${GITHUB_TOKEN}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER} \
+            -d "$(jq -n --arg body "${UPDATED_BODY}" '{body: $body}')"
+        fi
+        
+        # SECTION 2: Update PR description with job information if provided
+        # ================================================================
+
+        SECTION_HEADING="${ENVIRONMENT} DBT Job"
+        if [[ -z "${JOB_STATUS}" && -n "${ENVIRONMENT}" ]]; then
+
+          # Update the PR description to indicate the PR is null for this run
+          NULL_MESSAGE="This PR will not trigger a ${ENVIRONMENT}"
+          echo "null message: ${NULL_MESSAGE}"
+          
+          UPDATED_BODY=$(printf "%s\n\n${SECTION_HEADING}:\n %s \n %s" \
+            "$(echo "${PR_BODY}" | sed -e "/${SECTION_HEADING}/,\$d")" \
+            "${NULL_MESSAGE}")
+        else
+          echo "Updating PR description with job information..."
+          if [[ -n "${DBT_JOB_HREF}" ]]; then
+
+            # Create section heading based on environment
+            
+            # Remove existing section for this environment if it exists
+            # then append the new job information with timestamp and link
+            UPDATED_BODY=$(printf "%s\n\n${SECTION_HEADING}:\n %s \n Started: %s\nFinished: %s\nStatus: %s" \
+              "$(echo "${PR_BODY}" | sed -e "/${SECTION_HEADING}/,\$d")" \
+              "${DBT_JOB_HREF}" "${JOB_CREATED_AT}" "${JOB_FINISHED_AT}" "${JOB_STATUS}")
+          fi
+        fi
+
+        # Send API request to update the PR description
+          echo "running curl to update description"
+          curl -X PATCH \
+            -H "Authorization: token ${GITHUB_TOKEN}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER} \
+            -d "$(jq -n --arg body "${UPDATED_BODY}" '{body: $body}')"

@@ -1,0 +1,488 @@
+---- SRC LAYER ----
+WITH
+SRC_prsft          as ( SELECT * FROM {{ ref('v_psa_stg_po_header__lrsn_psft') }} as SRC 
+                        {% if is_incremental() %}
+                         where src.load_dts > (select dateadd('HOUR',-1,max(load_dts)) from {{ this }})
+                            {% endif %}   )
+
+/*
+SRC_prsft          as ( SELECT * FROM STAGING.v_psa_stg_po_header__lrsn_psft )
+*/
+---- LOGIC LAYER ----
+
+, LOGIC_prsft as (
+    SELECT
+        PO_HEADER_HK
+      , PO_HEADER_BK
+      , LOAD_DTS
+      , BUSINESS_UNIT
+      , PO_ID
+      , CHNG_ORD_BATCH
+      , PO_TYPE
+      , PO_STATUS
+      , HOLD_STATUS
+      , RECV_STATUS
+      , DISP_ACTION
+      , DISP_METHOD
+      , CHANGE_STATUS
+      , PO_DT
+      , PO_REF
+      , VENDOR_SETID
+      , VENDOR_ID
+      , VNDR_LOC
+      , PRICE_SETID
+      , PRICE_VENDOR
+      , PRICE_LOC
+      , PYMNT_TERMS_CD
+      , BUYER_ID
+      , ORIGIN
+      , CHNG_ORD_SEQ
+      , ADDRESS_SEQ_NUM
+      , CNTCT_SEQ_NUM
+      , SALES_CNTCT_SEQ_N
+      , BILL_LOCATION
+      , TAX_EXEMPT
+      , TAX_EXEMPT_ID
+      , CURRENCY_CD
+      , RT_TYPE
+      , MATCH_ACTION
+      , MATCH_CNTRL_ID
+      , MATCH_STATUS_PO
+      , MATCH_PROCESS_FLG
+      , PROCESS_INSTANCE
+      , APPL_JRNL_ID_ENC
+      , POST_DOC
+      , DST_CNTRL_ID
+      , OPRID_ENTERED_BY
+      , ENTERED_DT
+      , OPRID_APPROVED_BY
+      , APPROVAL_DT
+      , OPRID_MODIFIED_BY
+      , LAST_DTTM_UPDATE
+      , ACCOUNTING_DT
+      , BUSINESS_UNIT_GL
+      , IN_PROCESS_FLG
+      , ACTIVITY_DATE
+      , PO_POST_STATUS
+      , NEXT_MOD_SEQ_NBR
+      , ERS_ACTION
+      , ACCRUE_USE_TAX
+      , CURRENCY_CD_BASE
+      , RATE_DATE
+      , RATE_MULT
+      , RATE_DIV
+      , VAT_ENTITY
+      , BUDGET_HDR_STATUS
+      , KK_AMOUNT_TYPE
+      , KK_TRAN_OVER_FLAG
+      , KK_TRAN_OVER_OPRID
+      , KK_TRAN_OVER_DTTM
+      , LC_ID
+      , BUDGET_HDR_STS_NP
+      , PREPAID_PO_FLG
+      , PREPAID_AMT
+      , PREPAID_AUTH_STAT
+      , PREPAID_STATUS_PO
+      , PAY_TRM_BSE_DT_OPT
+      , TERMS_BASIS_DT
+      , BACKORDER_STATUS
+      , DOC_TOL_HDR_STATUS
+      , MID_ROLL_STATUS
+      , USER_HDR_CHAR1
+      , CUSTOM_C100_A1
+      , CUSTOM_C100_A2
+      , CUSTOM_C100_A3
+      , CUSTOM_C100_A4
+      , CUSTOM_DATE_A
+      , CUSTOM_C1_A
+      , BUDGET_CHECK
+      , POA_STATUS
+      , POA_REQS
+      , CC_SECURITY_ID
+      , CC_USE_FLAG
+      , CC_DISP_OPTION
+      , CONTACT_NAME
+      , CONTACT_PHONE
+      , TEXT254_CC2
+      , TMPLDEFN_ID
+      , SPLIT_PO_BY_SHIPTO
+      , EE_SEQ_NUM
+      , PROCURE_INSTRUM_ID
+      , PI_ID_PARENT
+      , UNIVERSAL_REC_ID
+      , FEDERAL_AWARD_ID
+      , EXCLUDE_REPORTING
+      , _FIVETRAN_DELETED
+      , _FIVETRAN_ID
+      , _FIVETRAN_SYNCED
+      , PSA_LOAD_DTS
+      , PSA_DELETE_IND
+      , REC_SRC
+      , BKCC
+      , HASHDIFF
+    FROM SRC_prsft
+)
+---- RENAME LAYER ----
+
+, RENAME_prsft as (
+    SELECT
+        PO_HEADER_HK
+      , PO_HEADER_BK
+      , LOAD_DTS
+      , BUSINESS_UNIT
+      , PO_ID
+      , CHNG_ORD_BATCH
+      , PO_TYPE
+      , PO_STATUS
+      , HOLD_STATUS
+      , RECV_STATUS
+      , DISP_ACTION
+      , DISP_METHOD
+      , CHANGE_STATUS
+      , PO_DT
+      , PO_REF
+      , VENDOR_SETID
+      , VENDOR_ID
+      , VNDR_LOC
+      , PRICE_SETID
+      , PRICE_VENDOR
+      , PRICE_LOC
+      , PYMNT_TERMS_CD
+      , BUYER_ID
+      , ORIGIN
+      , CHNG_ORD_SEQ
+      , ADDRESS_SEQ_NUM
+      , CNTCT_SEQ_NUM
+      , SALES_CNTCT_SEQ_N
+      , BILL_LOCATION
+      , TAX_EXEMPT
+      , TAX_EXEMPT_ID
+      , CURRENCY_CD
+      , RT_TYPE
+      , MATCH_ACTION
+      , MATCH_CNTRL_ID
+      , MATCH_STATUS_PO
+      , MATCH_PROCESS_FLG
+      , PROCESS_INSTANCE
+      , APPL_JRNL_ID_ENC
+      , POST_DOC
+      , DST_CNTRL_ID
+      , OPRID_ENTERED_BY
+      , ENTERED_DT
+      , OPRID_APPROVED_BY
+      , APPROVAL_DT
+      , OPRID_MODIFIED_BY
+      , LAST_DTTM_UPDATE
+      , ACCOUNTING_DT
+      , BUSINESS_UNIT_GL
+      , IN_PROCESS_FLG
+      , ACTIVITY_DATE
+      , PO_POST_STATUS
+      , NEXT_MOD_SEQ_NBR
+      , ERS_ACTION
+      , ACCRUE_USE_TAX
+      , CURRENCY_CD_BASE
+      , RATE_DATE
+      , RATE_MULT
+      , RATE_DIV
+      , VAT_ENTITY
+      , BUDGET_HDR_STATUS
+      , KK_AMOUNT_TYPE
+      , KK_TRAN_OVER_FLAG
+      , KK_TRAN_OVER_OPRID
+      , KK_TRAN_OVER_DTTM
+      , LC_ID
+      , BUDGET_HDR_STS_NP
+      , PREPAID_PO_FLG
+      , PREPAID_AMT
+      , PREPAID_AUTH_STAT
+      , PREPAID_STATUS_PO
+      , PAY_TRM_BSE_DT_OPT
+      , TERMS_BASIS_DT
+      , BACKORDER_STATUS
+      , DOC_TOL_HDR_STATUS
+      , MID_ROLL_STATUS
+      , USER_HDR_CHAR1
+      , CUSTOM_C100_A1
+      , CUSTOM_C100_A2
+      , CUSTOM_C100_A3
+      , CUSTOM_C100_A4
+      , CUSTOM_DATE_A
+      , CUSTOM_C1_A
+      , BUDGET_CHECK
+      , POA_STATUS
+      , POA_REQS
+      , CC_SECURITY_ID
+      , CC_USE_FLAG
+      , CC_DISP_OPTION
+      , CONTACT_NAME
+      , CONTACT_PHONE
+      , TEXT254_CC2
+      , TMPLDEFN_ID
+      , SPLIT_PO_BY_SHIPTO
+      , EE_SEQ_NUM
+      , PROCURE_INSTRUM_ID
+      , PI_ID_PARENT
+      , UNIVERSAL_REC_ID
+      , FEDERAL_AWARD_ID
+      , EXCLUDE_REPORTING
+      , _FIVETRAN_DELETED
+      , _FIVETRAN_ID
+      , _FIVETRAN_SYNCED
+      , PSA_LOAD_DTS
+      , PSA_DELETE_IND
+      , REC_SRC
+      , BKCC
+      , HASHDIFF
+    FROM LOGIC_prsft
+)
+---- FILTER LAYER ----
+
+, FILTER_prsft as (
+    SELECT *
+    FROM RENAME_prsft
+)
+
+---- JOIN LAYER ----
+, JOIN_RESULT as (
+    SELECT *
+    FROM FILTER_prsft
+)
+
+---- FINAL LAYER ----
+SELECT
+          PO_HEADER_HK
+        , PO_HEADER_BK
+        , LOAD_DTS
+        , BUSINESS_UNIT
+        , PO_ID
+        , CHNG_ORD_BATCH
+        , PO_TYPE
+        , PO_STATUS
+        , HOLD_STATUS
+        , RECV_STATUS
+        , DISP_ACTION
+        , DISP_METHOD
+        , CHANGE_STATUS
+        , PO_DT
+        , PO_REF
+        , VENDOR_SETID
+        , VENDOR_ID
+        , VNDR_LOC
+        , PRICE_SETID
+        , PRICE_VENDOR
+        , PRICE_LOC
+        , PYMNT_TERMS_CD
+        , BUYER_ID
+        , ORIGIN
+        , CHNG_ORD_SEQ
+        , ADDRESS_SEQ_NUM
+        , CNTCT_SEQ_NUM
+        , SALES_CNTCT_SEQ_N
+        , BILL_LOCATION
+        , TAX_EXEMPT
+        , TAX_EXEMPT_ID
+        , CURRENCY_CD
+        , RT_TYPE
+        , MATCH_ACTION
+        , MATCH_CNTRL_ID
+        , MATCH_STATUS_PO
+        , MATCH_PROCESS_FLG
+        , PROCESS_INSTANCE
+        , APPL_JRNL_ID_ENC
+        , POST_DOC
+        , DST_CNTRL_ID
+        , OPRID_ENTERED_BY
+        , ENTERED_DT
+        , OPRID_APPROVED_BY
+        , APPROVAL_DT
+        , OPRID_MODIFIED_BY
+        , LAST_DTTM_UPDATE
+        , ACCOUNTING_DT
+        , BUSINESS_UNIT_GL
+        , IN_PROCESS_FLG
+        , ACTIVITY_DATE
+        , PO_POST_STATUS
+        , NEXT_MOD_SEQ_NBR
+        , ERS_ACTION
+        , ACCRUE_USE_TAX
+        , CURRENCY_CD_BASE
+        , RATE_DATE
+        , RATE_MULT
+        , RATE_DIV
+        , VAT_ENTITY
+        , BUDGET_HDR_STATUS
+        , KK_AMOUNT_TYPE
+        , KK_TRAN_OVER_FLAG
+        , KK_TRAN_OVER_OPRID
+        , KK_TRAN_OVER_DTTM
+        , LC_ID
+        , BUDGET_HDR_STS_NP
+        , PREPAID_PO_FLG
+        , PREPAID_AMT
+        , PREPAID_AUTH_STAT
+        , PREPAID_STATUS_PO
+        , PAY_TRM_BSE_DT_OPT
+        , TERMS_BASIS_DT
+        , BACKORDER_STATUS
+        , DOC_TOL_HDR_STATUS
+        , MID_ROLL_STATUS
+        , USER_HDR_CHAR1
+        , CUSTOM_C100_A1
+        , CUSTOM_C100_A2
+        , CUSTOM_C100_A3
+        , CUSTOM_C100_A4
+        , CUSTOM_DATE_A
+        , CUSTOM_C1_A
+        , BUDGET_CHECK
+        , POA_STATUS
+        , POA_REQS
+        , CC_SECURITY_ID
+        , CC_USE_FLAG
+        , CC_DISP_OPTION
+        , CONTACT_NAME
+        , CONTACT_PHONE
+        , TEXT254_CC2
+        , TMPLDEFN_ID
+        , SPLIT_PO_BY_SHIPTO
+        , EE_SEQ_NUM
+        , PROCURE_INSTRUM_ID
+        , PI_ID_PARENT
+        , UNIVERSAL_REC_ID
+        , FEDERAL_AWARD_ID
+        , EXCLUDE_REPORTING
+        , _FIVETRAN_DELETED
+        , _FIVETRAN_ID
+        , _FIVETRAN_SYNCED
+        , PSA_LOAD_DTS
+        , PSA_DELETE_IND
+        , REC_SRC
+        , BKCC
+        , HASHDIFF
+FROM JOIN_RESULT
+{% if is_incremental() %}
+WHERE NOT EXISTS (
+    SELECT 1 
+    FROM {{ this }} existing
+    WHERE existing.PO_HEADER_HK = JOIN_RESULT.PO_HEADER_HK 
+    AND existing.HASHDIFF = JOIN_RESULT.HASHDIFF
+)
+{% endif %} 
+
+{% if not is_incremental() %}
+/* The following qualifier is implemented to prevent multiple loads of touched records during the initial build, such as multiple rows per HK and hashdiff. */
+qualify 1= row_number()over(partition by PO_HEADER_HK, HASHDIFF order by PSA_LOAD_DTS)
+
+union all
+SELECT
+  MD5_BINARY(GR.VALUE) AS PO_HEADER_HK
+, GR.VALUE AS PO_HEADER_BK
+, CONVERT_TIMEZONE('UTC','1900-01-01'::TIMESTAMP) AS LOAD_DTS
+, GR.VALUE AS BUSINESS_UNIT
+, GR.VALUE AS PO_ID
+, NULL AS PO_TYPE
+, NULL AS CHNG_ORD_BATCH
+, NULL AS PO_STATUS
+, NULL AS HOLD_STATUS
+, NULL AS RECV_STATUS
+, NULL AS DISP_ACTION
+, NULL AS DISP_METHOD
+, NULL AS CHANGE_STATUS
+, NULL AS PO_DT
+, NULL AS PO_REF
+, NULL AS VENDOR_SETID
+, NULL AS VENDOR_ID
+, NULL AS VNDR_LOC
+, NULL AS PRICE_SETID
+, NULL AS PRICE_VENDOR
+, NULL AS PRICE_LOC
+, NULL AS PYMNT_TERMS_CD
+, NULL AS BUYER_ID
+, NULL AS ORIGIN
+, NULL AS CHNG_ORD_SEQ
+, NULL AS ADDRESS_SEQ_NUM
+, NULL AS CNTCT_SEQ_NUM
+, NULL AS SALES_CNTCT_SEQ_N
+, NULL AS BILL_LOCATION
+, NULL AS TAX_EXEMPT
+, NULL AS TAX_EXEMPT_ID
+, NULL AS CURRENCY_CD
+, NULL AS RT_TYPE
+, NULL AS MATCH_ACTION
+, NULL AS MATCH_CNTRL_ID
+, NULL AS MATCH_STATUS_PO
+, NULL AS MATCH_PROCESS_FLG
+, NULL AS PROCESS_INSTANCE
+, NULL AS APPL_JRNL_ID_ENC
+, NULL AS POST_DOC
+, NULL AS DST_CNTRL_ID
+, NULL AS OPRID_ENTERED_BY
+, NULL AS ENTERED_DT
+, NULL AS OPRID_APPROVED_BY
+, NULL AS APPROVAL_DT
+, NULL AS OPRID_MODIFIED_BY
+, NULL AS LAST_DTTM_UPDATE
+, NULL AS ACCOUNTING_DT
+, NULL AS BUSINESS_UNIT_GL
+, NULL AS IN_PROCESS_FLG
+, NULL AS ACTIVITY_DATE
+, NULL AS PO_POST_STATUS
+, NULL AS NEXT_MOD_SEQ_NBR
+, NULL AS ERS_ACTION
+, NULL AS ACCRUE_USE_TAX
+, NULL AS CURRENCY_CD_BASE
+, NULL AS RATE_DATE
+, NULL AS RATE_MULT
+, NULL AS RATE_DIV
+, NULL AS VAT_ENTITY
+, NULL AS BUDGET_HDR_STATUS
+, NULL AS KK_AMOUNT_TYPE
+, NULL AS KK_TRAN_OVER_FLAG
+, NULL AS KK_TRAN_OVER_OPRID
+, NULL AS KK_TRAN_OVER_DTTM
+, NULL AS LC_ID
+, NULL AS BUDGET_HDR_STS_NP
+, NULL AS PREPAID_PO_FLG
+, NULL AS PREPAID_AMT
+, NULL AS PREPAID_AUTH_STAT
+, NULL AS PREPAID_STATUS_PO
+, NULL AS PAY_TRM_BSE_DT_OPT
+, NULL AS TERMS_BASIS_DT
+, NULL AS BACKORDER_STATUS
+, NULL AS DOC_TOL_HDR_STATUS
+, NULL AS MID_ROLL_STATUS
+, NULL AS USER_HDR_CHAR1
+, NULL AS CUSTOM_C100_A1
+, NULL AS CUSTOM_C100_A2
+, NULL AS CUSTOM_C100_A3
+, NULL AS CUSTOM_C100_A4
+, NULL AS CUSTOM_DATE_A
+, NULL AS CUSTOM_C1_A
+, NULL AS BUDGET_CHECK
+, NULL AS POA_STATUS
+, NULL AS POA_REQS
+, NULL AS CC_SECURITY_ID
+, NULL AS CC_USE_FLAG
+, NULL AS CC_DISP_OPTION
+, NULL AS CONTACT_NAME
+, NULL AS CONTACT_PHONE
+, NULL AS TEXT254_CC2
+, NULL AS TMPLDEFN_ID
+, NULL AS SPLIT_PO_BY_SHIPTO
+, NULL AS EE_SEQ_NUM
+, NULL AS PROCURE_INSTRUM_ID
+, NULL AS PI_ID_PARENT
+, NULL AS UNIVERSAL_REC_ID
+, NULL AS FEDERAL_AWARD_ID
+, NULL AS EXCLUDE_REPORTING
+, NULL AS _FIVETRAN_DELETED
+, NULL AS _FIVETRAN_ID
+, NULL AS _FIVETRAN_SYNCED
+, '1900-01-01'::TIMESTAMP AS PSA_LOAD_DTS
+, 'N' AS PSA_DELETE_IND
+, 'USAZET.SNOWFLAKE.FBIN.DERIVED' AS REC_SRC
+, DECODE(GR.VALUE, 0, 'GHOST RECORD-SYSTEM', -1, 'GHOST RECORD-nullkey-required', -2, 'GHOST RECORD-nullkey-optional')  AS BKCC
+, ''::BINARY as HASH_DIFF
+FROM
+TABLE(strtok_split_to_table('0|-1|-2', '|')) AS GR
+{% endif %}

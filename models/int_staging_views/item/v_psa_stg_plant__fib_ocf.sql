@@ -1,0 +1,756 @@
+---- SRC LAYER ----
+WITH
+SRC_S              as ( SELECT * FROM {{ source('outd_ocf_inv', 'inv_org_parameters') }} as SRC  ),
+SRC_A              as ( SELECT * FROM {{ ref('ref_business_key_collision') }} as SRC  )
+
+/*
+SRC_S              as ( SELECT * FROM outd_ocf_inv.inv_org_parameters )
+, SRC_A              as ( SELECT * FROM raw_vault.ref_business_key_collision )
+*/
+---- LOGIC LAYER ----
+
+, LOGIC_S as (
+    SELECT
+        COALESCE(NULLIF(TRIM(ORGANIZATION_CODE),'') ,'-1')               as                                       PLANT_BK
+      , ORGANIZATION_CODE
+      , ORGANIZATION_ID
+      , GLOBAL_ATTRIBUTE_17
+      , PURCHASING_BY_REVISION
+      , ATTRIBUTE_NUMBER_2
+      , WMS_WITH_MFG_ALM
+      , ATTRIBUTE_TIMESTAMP_2
+      , LPN_PREFIX
+      , SERIAL_NUMBER_GENERATION
+      , WCS_ENABLED
+      , GROUPING_JOB_STATUS
+      , CHILD_LOT_VALIDATION_FLAG
+      , DEFAULT_CYC_COUNT_HEADER_ID
+      , ATTRIBUTE_15
+      , QA_SKIPPING_INSP_FLAG
+      , CREATION_DATE
+      , ATTRIBUTE_11
+      , ALLOW_ITEM_SUBSTITUTIONS
+      , GLOBAL_ATTRIBUTE_20
+      , GLOBAL_ATTRIBUTE_3
+      , FA_BOOK_TYPE_CODE
+      , ATTRIBUTE_NUMBER_10
+      , NEGATIVE_INV_RECEIPT_CODE
+      , BUSINESS_UNIT_ID
+      , INVENTORY_FLAG
+      , JOB_DEFINITION_NAME
+      , ATTRIBUTE_9
+      , SOURCE_TYPE
+      , ATTRIBUTE_NUMBER_6
+      , ATTRIBUTE_NUMBER_1
+      , ATTRIBUTE_2
+      , CROSSDOCK_FLAG
+      , COPY_LOT_ATTRIBUTE_FLAG
+      , PARENT_CHILD_GENERATION_FLAG
+      , SOURCE_SUBINVENTORY
+      , LEGAL_ENTITY_ID
+      , GLOBAL_ATTRIBUTE_2
+      , CAPTURE_PICKING_EXCEPTION
+      , EAM_ENABLED_FLAG
+      , INTEGRATED_SYSTEM_CODE
+      , ROUND_REORDER_QTY_FLAG
+      , TIMEZONE_ID
+      , ATTRIBUTE_7
+      , GLOBAL_ATTRIBUTE_10
+      , STARTING_REVISION
+      , GLOBAL_ATTRIBUTE_6
+      , GLOBAL_ATTRIBUTE_11
+      , CARTONIZATION_FLAG
+      , LAST_UPDATE_LOGIN
+      , PICK_QTY_DEFAULT_REASON_ID
+      , AUTO_SERIAL_ALPHA_PREFIX
+      , ALLOW_DIFFERENT_STATUS
+      , GLOBAL_ATTRIBUTE_15
+      , ITEM_DEFINITION_ORG_ID
+      , ATTRIBUTE_DATE_3
+      , ATTRIBUTE_NUMBER_3
+      , ATTRIBUTE_NUMBER_8
+      , ATTRIBUTE_14
+      , ATTRIBUTE_DATE_1
+      , CHILD_LOT_NUMBER_LENGTH
+      , MANUAL_RECEIPT_EXP_AT_DEST
+      , ATTRIBUTE_DATE_5
+      , DEFAULT_LOCATOR_ORDER_VALUE
+      , INTERNAL_CUSTOMER_FLAG
+      , CREATED_BY
+      , PICK_SLIP_BATCH_SIZE
+      , ITEM_GROUPING_CODE
+      , GROUPING_JOB_ID
+      , AUTO_BREAKDOWN_ENABLED
+      , AUTO_DEL_ALLOC_FLAG
+      , ATTRIBUTE_12
+      , ATTRIBUTE_TIMESTAMP_5
+      , STANDARD_PACK_ENABLED
+      , SUPPLIER_ID
+      , ATTRIBUTE_3
+      , MAINT_ORGANIZATION_ID
+      , SOURCE_ORGANIZATION_ID
+      , PRE_FILL_PICKED_QTY
+      , TRADING_PARTNER_ORG_FLAG
+      , CONTRACT_MFG_FLAG
+      , FILL_KILL_SALES_ORDER_FLAG
+      , AUTO_LOT_ALPHA_PREFIX
+      , GLOBAL_ATTRIBUTE_13
+      , CHILD_LOT_ALPHA_PREFIX
+      , ENFORCE_LOCATOR_ALIS_UNQ_FLAG
+      , JOB_DEFINITION_PACKAGE
+      , GLOBAL_ATTRIBUTE_4
+      , ATTRIBUTE_10
+      , ATTRIBUTE_NUMBER_7
+      , STOCK_LOCATOR_CONTROL_CODE
+      , OBJECT_VERSION_NUMBER
+      , ATTRIBUTE_TIMESTAMP_3
+      , USE_CUR_ITEM_COST_FLAG
+      , GLOBAL_ATTRIBUTE_16
+      , SERIAL_NUMBER_TYPE
+      , SPECIAL_HNDLNG_OVRPK_FLAG
+      , GLOBAL_ATTRIBUTE_1
+      , ATTRIBUTE_5
+      , ATTRIBUTE_CATEGORY
+      , ATTRIBUTE_1
+      , ATTRIBUTE_NUMBER_4
+      , UCC_128_SUFFIX_FLAG
+      , PREGEN_PUTAWAY_TASKS_FLAG
+      , FILL_KILL_TRANSFER_ORDERS_FLAG
+      , FILL_KILL_MOVE_ORDER_FLAG
+      , LPN_SUFFIX
+      , LOT_NUMBER_LENGTH
+      , ATTRIBUTE_4
+      , DEFAULT_SUBINV_ORDER_VALUE
+      , SCHEDULE_ID
+      , ATTRIBUTE_DATE_4
+      , TIMEZONE_CODE
+      , ATTRIBUTE_NUMBER_9
+      , PARTY_ID
+      , PROJECT_REFERENCE_ENABLED
+      , DEFAULT_PUT_AWAY_RULE_ID
+      , GLOBAL_ATTRIBUTE_19
+      , WMS_ENABLED_FLAG
+      , GLOBAL_ATTRIBUTE_9
+      , DEFAULT_WMS_PICKING_RULE_ID
+      , ALLOW_NEG_ONHAND_CC_TXNS
+      , GLOBAL_ATTRIBUTE_12
+      , ALLOCATE_SERIAL_FLAG
+      , ATTRIBUTE_NUMBER_5
+      , LOT_NUMBER_UNIQUENESS
+      , CHILD_LOT_ZERO_PADDING_FLAG
+      , LOT_NUMBER_ZERO_PADDING
+      , DEFAULT_CARTON_RULE_ID
+      , ATTRIBUTE_TIMESTAMP_4
+      , GLOBAL_ATTRIBUTE_14
+      , MO_PICK_CONFIRM_REQUIRED
+      , LPN_STARTING_NUMBER
+      , ATTRIBUTE_DATE_2
+      , GLOBAL_ATTRIBUTE_CATEGORY
+      , REPLNSH_MOVE_ORDER_GROUPING
+      , GLOBAL_ATTRIBUTE_8
+      , ATTRIBUTE_6
+      , REQUEST_ID
+      , OVPK_TRANSFER_ORDERS_ENABLED
+      , FIFO_ORIG_RCPT_DATE_FLAG
+      , CREATE_LOT_UOM_CONVERSION
+      , GLOBAL_ATTRIBUTE_18
+      , PROJECT_CONTROL_LEVEL
+      , LOT_NUMBER_GENERATION
+      , ATTRIBUTE_TIMESTAMP_1
+      , REGENERATION_INTERVAL
+      , GLOBAL_ATTRIBUTE_5
+      , MFG_PLANT_FLAG
+      , START_AUTO_SERIAL_NUMBER
+      , SUPPLIER_SITE_ID
+      , MASTER_ORGANIZATION_ID
+      , TRACK_COUNTRY_OF_ORIGIN_FLAG
+      , DEFAULT_PICKING_RULE_ID
+      , DISTRIBUTED_ORGANIZATION_FLAG
+      , GLOBAL_ATTRIBUTE_7
+      , ATTRIBUTE_13
+      , LAST_UPDATED_BY
+      , LAST_UPDATE_DATE
+      , PM_COST_COLLECTION_ENABLED
+      , ATTRIBUTE_8
+      , TOTAL_LPN_LENGTH
+      , CUSTOMER_ACCOUNT_NUMBER
+      , PROFIT_CENTER_BU_ID
+      , KANBAN_CARD_PREFIX
+      , KANBAN_DOC_SEQ_ID
+      , KANBAN_CARD_START_NUMBER
+      , KANBAN_DOC_SEQ_CAT_CODE
+      , _FIVETRAN_DELETED
+      , _FIVETRAN_SYNCED
+      , PSA_DELETE_IND
+      , PSA_LOAD_DTS
+      , PSA_RECORD_SOURCE
+      , CONVERT_TIMEZONE('UTC', _FIVETRAN_SYNCED )                   as                                           LOAD_DTS
+    FROM SRC_S
+)
+
+, LOGIC_A as (
+    SELECT
+        REC_SRC
+      , BKCC
+    FROM SRC_A
+)
+---- RENAME LAYER ----
+
+, RENAME_S as (
+    SELECT
+        PLANT_BK
+      , ORGANIZATION_CODE
+      , ORGANIZATION_ID
+      , GLOBAL_ATTRIBUTE_17
+      , PURCHASING_BY_REVISION
+      , ATTRIBUTE_NUMBER_2
+      , WMS_WITH_MFG_ALM
+      , ATTRIBUTE_TIMESTAMP_2
+      , LPN_PREFIX
+      , SERIAL_NUMBER_GENERATION
+      , WCS_ENABLED
+      , GROUPING_JOB_STATUS
+      , CHILD_LOT_VALIDATION_FLAG
+      , DEFAULT_CYC_COUNT_HEADER_ID
+      , ATTRIBUTE_15
+      , QA_SKIPPING_INSP_FLAG
+      , CREATION_DATE
+      , ATTRIBUTE_11
+      , ALLOW_ITEM_SUBSTITUTIONS
+      , GLOBAL_ATTRIBUTE_20
+      , GLOBAL_ATTRIBUTE_3
+      , FA_BOOK_TYPE_CODE
+      , ATTRIBUTE_NUMBER_10
+      , NEGATIVE_INV_RECEIPT_CODE
+      , BUSINESS_UNIT_ID
+      , INVENTORY_FLAG
+      , JOB_DEFINITION_NAME
+      , ATTRIBUTE_9
+      , SOURCE_TYPE
+      , ATTRIBUTE_NUMBER_6
+      , ATTRIBUTE_NUMBER_1
+      , ATTRIBUTE_2
+      , CROSSDOCK_FLAG
+      , COPY_LOT_ATTRIBUTE_FLAG
+      , PARENT_CHILD_GENERATION_FLAG
+      , SOURCE_SUBINVENTORY
+      , LEGAL_ENTITY_ID
+      , GLOBAL_ATTRIBUTE_2
+      , CAPTURE_PICKING_EXCEPTION
+      , EAM_ENABLED_FLAG
+      , INTEGRATED_SYSTEM_CODE
+      , ROUND_REORDER_QTY_FLAG
+      , TIMEZONE_ID
+      , ATTRIBUTE_7
+      , GLOBAL_ATTRIBUTE_10
+      , STARTING_REVISION
+      , GLOBAL_ATTRIBUTE_6
+      , GLOBAL_ATTRIBUTE_11
+      , CARTONIZATION_FLAG
+      , LAST_UPDATE_LOGIN
+      , PICK_QTY_DEFAULT_REASON_ID
+      , AUTO_SERIAL_ALPHA_PREFIX
+      , ALLOW_DIFFERENT_STATUS
+      , GLOBAL_ATTRIBUTE_15
+      , ITEM_DEFINITION_ORG_ID
+      , ATTRIBUTE_DATE_3
+      , ATTRIBUTE_NUMBER_3
+      , ATTRIBUTE_NUMBER_8
+      , ATTRIBUTE_14
+      , ATTRIBUTE_DATE_1
+      , CHILD_LOT_NUMBER_LENGTH
+      , MANUAL_RECEIPT_EXP_AT_DEST
+      , ATTRIBUTE_DATE_5
+      , DEFAULT_LOCATOR_ORDER_VALUE
+      , INTERNAL_CUSTOMER_FLAG
+      , CREATED_BY
+      , PICK_SLIP_BATCH_SIZE
+      , ITEM_GROUPING_CODE
+      , GROUPING_JOB_ID
+      , AUTO_BREAKDOWN_ENABLED
+      , AUTO_DEL_ALLOC_FLAG
+      , ATTRIBUTE_12
+      , ATTRIBUTE_TIMESTAMP_5
+      , STANDARD_PACK_ENABLED
+      , SUPPLIER_ID
+      , ATTRIBUTE_3
+      , MAINT_ORGANIZATION_ID
+      , SOURCE_ORGANIZATION_ID
+      , PRE_FILL_PICKED_QTY
+      , TRADING_PARTNER_ORG_FLAG
+      , CONTRACT_MFG_FLAG
+      , FILL_KILL_SALES_ORDER_FLAG
+      , AUTO_LOT_ALPHA_PREFIX
+      , GLOBAL_ATTRIBUTE_13
+      , CHILD_LOT_ALPHA_PREFIX
+      , ENFORCE_LOCATOR_ALIS_UNQ_FLAG
+      , JOB_DEFINITION_PACKAGE
+      , GLOBAL_ATTRIBUTE_4
+      , ATTRIBUTE_10
+      , ATTRIBUTE_NUMBER_7
+      , STOCK_LOCATOR_CONTROL_CODE
+      , OBJECT_VERSION_NUMBER
+      , ATTRIBUTE_TIMESTAMP_3
+      , USE_CUR_ITEM_COST_FLAG
+      , GLOBAL_ATTRIBUTE_16
+      , SERIAL_NUMBER_TYPE
+      , SPECIAL_HNDLNG_OVRPK_FLAG
+      , GLOBAL_ATTRIBUTE_1
+      , ATTRIBUTE_5
+      , ATTRIBUTE_CATEGORY
+      , ATTRIBUTE_1
+      , ATTRIBUTE_NUMBER_4
+      , UCC_128_SUFFIX_FLAG
+      , PREGEN_PUTAWAY_TASKS_FLAG
+      , FILL_KILL_TRANSFER_ORDERS_FLAG
+      , FILL_KILL_MOVE_ORDER_FLAG
+      , LPN_SUFFIX
+      , LOT_NUMBER_LENGTH
+      , ATTRIBUTE_4
+      , DEFAULT_SUBINV_ORDER_VALUE
+      , SCHEDULE_ID
+      , ATTRIBUTE_DATE_4
+      , TIMEZONE_CODE
+      , ATTRIBUTE_NUMBER_9
+      , PARTY_ID
+      , PROJECT_REFERENCE_ENABLED
+      , DEFAULT_PUT_AWAY_RULE_ID
+      , GLOBAL_ATTRIBUTE_19
+      , WMS_ENABLED_FLAG
+      , GLOBAL_ATTRIBUTE_9
+      , DEFAULT_WMS_PICKING_RULE_ID
+      , ALLOW_NEG_ONHAND_CC_TXNS
+      , GLOBAL_ATTRIBUTE_12
+      , ALLOCATE_SERIAL_FLAG
+      , ATTRIBUTE_NUMBER_5
+      , LOT_NUMBER_UNIQUENESS
+      , CHILD_LOT_ZERO_PADDING_FLAG
+      , LOT_NUMBER_ZERO_PADDING
+      , DEFAULT_CARTON_RULE_ID
+      , ATTRIBUTE_TIMESTAMP_4
+      , GLOBAL_ATTRIBUTE_14
+      , MO_PICK_CONFIRM_REQUIRED
+      , LPN_STARTING_NUMBER
+      , ATTRIBUTE_DATE_2
+      , GLOBAL_ATTRIBUTE_CATEGORY
+      , REPLNSH_MOVE_ORDER_GROUPING
+      , GLOBAL_ATTRIBUTE_8
+      , ATTRIBUTE_6
+      , REQUEST_ID
+      , OVPK_TRANSFER_ORDERS_ENABLED
+      , FIFO_ORIG_RCPT_DATE_FLAG
+      , CREATE_LOT_UOM_CONVERSION
+      , GLOBAL_ATTRIBUTE_18
+      , PROJECT_CONTROL_LEVEL
+      , LOT_NUMBER_GENERATION
+      , ATTRIBUTE_TIMESTAMP_1
+      , REGENERATION_INTERVAL
+      , GLOBAL_ATTRIBUTE_5
+      , MFG_PLANT_FLAG
+      , START_AUTO_SERIAL_NUMBER
+      , SUPPLIER_SITE_ID
+      , MASTER_ORGANIZATION_ID
+      , TRACK_COUNTRY_OF_ORIGIN_FLAG
+      , DEFAULT_PICKING_RULE_ID
+      , DISTRIBUTED_ORGANIZATION_FLAG
+      , GLOBAL_ATTRIBUTE_7
+      , ATTRIBUTE_13
+      , LAST_UPDATED_BY
+      , LAST_UPDATE_DATE
+      , PM_COST_COLLECTION_ENABLED
+      , ATTRIBUTE_8
+      , TOTAL_LPN_LENGTH
+      , CUSTOMER_ACCOUNT_NUMBER
+      , PROFIT_CENTER_BU_ID
+      , KANBAN_CARD_PREFIX
+      , KANBAN_DOC_SEQ_ID
+      , KANBAN_CARD_START_NUMBER
+      , KANBAN_DOC_SEQ_CAT_CODE
+      , _FIVETRAN_DELETED
+      , _FIVETRAN_SYNCED
+      , PSA_DELETE_IND
+      , PSA_LOAD_DTS
+      , PSA_RECORD_SOURCE
+      , LOAD_DTS
+    FROM LOGIC_S
+)
+
+, RENAME_A as (
+    SELECT
+        REC_SRC
+      , BKCC
+    FROM LOGIC_A
+)
+---- FILTER LAYER ----
+
+, FILTER_S as (
+    SELECT *
+    FROM RENAME_S
+)
+
+, FILTER_A as (
+    SELECT *
+    FROM RENAME_A
+    WHERE rec_src = 'USCLOUD.ORCL.OCFPRD.INV_ORG_PARAMETERS'
+)
+
+---- JOIN LAYER ----
+, JOIN_RESULT as (
+    SELECT *
+    FROM FILTER_S
+    INNER JOIN FILTER_A
+        ON '1' = '1'
+)
+
+---- FINAL LAYER ----
+SELECT
+          PLANT_BK
+        , ORGANIZATION_CODE
+        , ORGANIZATION_ID
+        , GLOBAL_ATTRIBUTE_17
+        , PURCHASING_BY_REVISION
+        , ATTRIBUTE_NUMBER_2
+        , WMS_WITH_MFG_ALM
+        , ATTRIBUTE_TIMESTAMP_2
+        , LPN_PREFIX
+        , SERIAL_NUMBER_GENERATION
+        , WCS_ENABLED
+        , GROUPING_JOB_STATUS
+        , CHILD_LOT_VALIDATION_FLAG
+        , DEFAULT_CYC_COUNT_HEADER_ID
+        , ATTRIBUTE_15
+        , QA_SKIPPING_INSP_FLAG
+        , CREATION_DATE
+        , ATTRIBUTE_11
+        , ALLOW_ITEM_SUBSTITUTIONS
+        , GLOBAL_ATTRIBUTE_20
+        , GLOBAL_ATTRIBUTE_3
+        , FA_BOOK_TYPE_CODE
+        , ATTRIBUTE_NUMBER_10
+        , NEGATIVE_INV_RECEIPT_CODE
+        , BUSINESS_UNIT_ID
+        , INVENTORY_FLAG
+        , JOB_DEFINITION_NAME
+        , ATTRIBUTE_9
+        , SOURCE_TYPE
+        , ATTRIBUTE_NUMBER_6
+        , ATTRIBUTE_NUMBER_1
+        , ATTRIBUTE_2
+        , CROSSDOCK_FLAG
+        , COPY_LOT_ATTRIBUTE_FLAG
+        , PARENT_CHILD_GENERATION_FLAG
+        , SOURCE_SUBINVENTORY
+        , LEGAL_ENTITY_ID
+        , GLOBAL_ATTRIBUTE_2
+        , CAPTURE_PICKING_EXCEPTION
+        , EAM_ENABLED_FLAG
+        , INTEGRATED_SYSTEM_CODE
+        , ROUND_REORDER_QTY_FLAG
+        , TIMEZONE_ID
+        , ATTRIBUTE_7
+        , GLOBAL_ATTRIBUTE_10
+        , STARTING_REVISION
+        , GLOBAL_ATTRIBUTE_6
+        , GLOBAL_ATTRIBUTE_11
+        , CARTONIZATION_FLAG
+        , LAST_UPDATE_LOGIN
+        , PICK_QTY_DEFAULT_REASON_ID
+        , AUTO_SERIAL_ALPHA_PREFIX
+        , ALLOW_DIFFERENT_STATUS
+        , GLOBAL_ATTRIBUTE_15
+        , ITEM_DEFINITION_ORG_ID
+        , ATTRIBUTE_DATE_3
+        , ATTRIBUTE_NUMBER_3
+        , ATTRIBUTE_NUMBER_8
+        , ATTRIBUTE_14
+        , ATTRIBUTE_DATE_1
+        , CHILD_LOT_NUMBER_LENGTH
+        , MANUAL_RECEIPT_EXP_AT_DEST
+        , ATTRIBUTE_DATE_5
+        , DEFAULT_LOCATOR_ORDER_VALUE
+        , INTERNAL_CUSTOMER_FLAG
+        , CREATED_BY
+        , PICK_SLIP_BATCH_SIZE
+        , ITEM_GROUPING_CODE
+        , GROUPING_JOB_ID
+        , AUTO_BREAKDOWN_ENABLED
+        , AUTO_DEL_ALLOC_FLAG
+        , ATTRIBUTE_12
+        , ATTRIBUTE_TIMESTAMP_5
+        , STANDARD_PACK_ENABLED
+        , SUPPLIER_ID
+        , ATTRIBUTE_3
+        , MAINT_ORGANIZATION_ID
+        , SOURCE_ORGANIZATION_ID
+        , PRE_FILL_PICKED_QTY
+        , TRADING_PARTNER_ORG_FLAG
+        , CONTRACT_MFG_FLAG
+        , FILL_KILL_SALES_ORDER_FLAG
+        , AUTO_LOT_ALPHA_PREFIX
+        , GLOBAL_ATTRIBUTE_13
+        , CHILD_LOT_ALPHA_PREFIX
+        , ENFORCE_LOCATOR_ALIS_UNQ_FLAG
+        , JOB_DEFINITION_PACKAGE
+        , GLOBAL_ATTRIBUTE_4
+        , ATTRIBUTE_10
+        , ATTRIBUTE_NUMBER_7
+        , STOCK_LOCATOR_CONTROL_CODE
+        , OBJECT_VERSION_NUMBER
+        , ATTRIBUTE_TIMESTAMP_3
+        , USE_CUR_ITEM_COST_FLAG
+        , GLOBAL_ATTRIBUTE_16
+        , SERIAL_NUMBER_TYPE
+        , SPECIAL_HNDLNG_OVRPK_FLAG
+        , GLOBAL_ATTRIBUTE_1
+        , ATTRIBUTE_5
+        , ATTRIBUTE_CATEGORY
+        , ATTRIBUTE_1
+        , ATTRIBUTE_NUMBER_4
+        , UCC_128_SUFFIX_FLAG
+        , PREGEN_PUTAWAY_TASKS_FLAG
+        , FILL_KILL_TRANSFER_ORDERS_FLAG
+        , FILL_KILL_MOVE_ORDER_FLAG
+        , LPN_SUFFIX
+        , LOT_NUMBER_LENGTH
+        , ATTRIBUTE_4
+        , DEFAULT_SUBINV_ORDER_VALUE
+        , SCHEDULE_ID
+        , ATTRIBUTE_DATE_4
+        , TIMEZONE_CODE
+        , ATTRIBUTE_NUMBER_9
+        , PARTY_ID
+        , PROJECT_REFERENCE_ENABLED
+        , DEFAULT_PUT_AWAY_RULE_ID
+        , GLOBAL_ATTRIBUTE_19
+        , WMS_ENABLED_FLAG
+        , GLOBAL_ATTRIBUTE_9
+        , DEFAULT_WMS_PICKING_RULE_ID
+        , ALLOW_NEG_ONHAND_CC_TXNS
+        , GLOBAL_ATTRIBUTE_12
+        , ALLOCATE_SERIAL_FLAG
+        , ATTRIBUTE_NUMBER_5
+        , LOT_NUMBER_UNIQUENESS
+        , CHILD_LOT_ZERO_PADDING_FLAG
+        , LOT_NUMBER_ZERO_PADDING
+        , DEFAULT_CARTON_RULE_ID
+        , ATTRIBUTE_TIMESTAMP_4
+        , GLOBAL_ATTRIBUTE_14
+        , MO_PICK_CONFIRM_REQUIRED
+        , LPN_STARTING_NUMBER
+        , ATTRIBUTE_DATE_2
+        , GLOBAL_ATTRIBUTE_CATEGORY
+        , REPLNSH_MOVE_ORDER_GROUPING
+        , GLOBAL_ATTRIBUTE_8
+        , ATTRIBUTE_6
+        , REQUEST_ID
+        , OVPK_TRANSFER_ORDERS_ENABLED
+        , FIFO_ORIG_RCPT_DATE_FLAG
+        , CREATE_LOT_UOM_CONVERSION
+        , GLOBAL_ATTRIBUTE_18
+        , PROJECT_CONTROL_LEVEL
+        , LOT_NUMBER_GENERATION
+        , ATTRIBUTE_TIMESTAMP_1
+        , REGENERATION_INTERVAL
+        , GLOBAL_ATTRIBUTE_5
+        , MFG_PLANT_FLAG
+        , START_AUTO_SERIAL_NUMBER
+        , SUPPLIER_SITE_ID
+        , MASTER_ORGANIZATION_ID
+        , TRACK_COUNTRY_OF_ORIGIN_FLAG
+        , DEFAULT_PICKING_RULE_ID
+        , DISTRIBUTED_ORGANIZATION_FLAG
+        , GLOBAL_ATTRIBUTE_7
+        , ATTRIBUTE_13
+        , LAST_UPDATED_BY
+        , LAST_UPDATE_DATE
+        , PM_COST_COLLECTION_ENABLED
+        , ATTRIBUTE_8
+        , TOTAL_LPN_LENGTH
+        , CUSTOMER_ACCOUNT_NUMBER
+        , PROFIT_CENTER_BU_ID
+        , KANBAN_CARD_PREFIX
+        , KANBAN_DOC_SEQ_ID
+        , KANBAN_CARD_START_NUMBER
+        , KANBAN_DOC_SEQ_CAT_CODE
+        , _FIVETRAN_DELETED
+        , _FIVETRAN_SYNCED
+        , PSA_DELETE_IND
+        , PSA_LOAD_DTS
+        , PSA_RECORD_SOURCE
+        , LOAD_DTS
+        , REC_SRC
+        , BKCC
+        , MD5_BINARY(UPPER(CONCAT_WS('||',
+          COALESCE(NULLIF(TRIM(CAST(PLANT_BK as VARCHAR)),''), '^^')
+        , COALESCE(NULLIF(TRIM(CAST(BKCC as VARCHAR)),''), '^^')
+        ))) as PLANT_HK
+        , MD5_BINARY(UPPER(NULLIF(CONCAT(
+              IFNULL(TRIM(ORGANIZATION_ID::text), '^^') 
+            , '||', IFNULL(TRIM(GLOBAL_ATTRIBUTE_17::text), '^^') 
+            , '||', IFNULL(TRIM(PURCHASING_BY_REVISION::text), '^^') 
+            , '||', IFNULL(TRIM(ATTRIBUTE_NUMBER_2::text), '^^') 
+            , '||', IFNULL(TRIM(WMS_WITH_MFG_ALM::text), '^^') 
+            , '||', IFNULL(TRIM(ATTRIBUTE_TIMESTAMP_2::text), '^^') 
+            , '||', IFNULL(TRIM(LPN_PREFIX::text), '^^') 
+            , '||', IFNULL(TRIM(SERIAL_NUMBER_GENERATION::text), '^^') 
+            , '||', IFNULL(TRIM(WCS_ENABLED::text), '^^') 
+            , '||', IFNULL(TRIM(GROUPING_JOB_STATUS::text), '^^') 
+            , '||', IFNULL(TRIM(CHILD_LOT_VALIDATION_FLAG::text), '^^') 
+            , '||', IFNULL(TRIM(DEFAULT_CYC_COUNT_HEADER_ID::text), '^^') 
+            , '||', IFNULL(TRIM(ATTRIBUTE_15::text), '^^') 
+            , '||', IFNULL(TRIM(QA_SKIPPING_INSP_FLAG::text), '^^') 
+            , '||', IFNULL(TRIM(CREATION_DATE::text), '^^') 
+            , '||', IFNULL(TRIM(ATTRIBUTE_11::text), '^^') 
+            , '||', IFNULL(TRIM(ALLOW_ITEM_SUBSTITUTIONS::text), '^^') 
+            , '||', IFNULL(TRIM(GLOBAL_ATTRIBUTE_20::text), '^^') 
+            , '||', IFNULL(TRIM(GLOBAL_ATTRIBUTE_3::text), '^^') 
+            , '||', IFNULL(TRIM(FA_BOOK_TYPE_CODE::text), '^^') 
+            , '||', IFNULL(TRIM(ATTRIBUTE_NUMBER_10::text), '^^') 
+            , '||', IFNULL(TRIM(NEGATIVE_INV_RECEIPT_CODE::text), '^^') 
+            , '||', IFNULL(TRIM(BUSINESS_UNIT_ID::text), '^^') 
+            , '||', IFNULL(TRIM(INVENTORY_FLAG::text), '^^') 
+            , '||', IFNULL(TRIM(JOB_DEFINITION_NAME::text), '^^') 
+            , '||', IFNULL(TRIM(ATTRIBUTE_9::text), '^^') 
+            , '||', IFNULL(TRIM(SOURCE_TYPE::text), '^^') 
+            , '||', IFNULL(TRIM(ATTRIBUTE_NUMBER_6::text), '^^') 
+            , '||', IFNULL(TRIM(ATTRIBUTE_NUMBER_1::text), '^^') 
+            , '||', IFNULL(TRIM(ATTRIBUTE_2::text), '^^') 
+            , '||', IFNULL(TRIM(CROSSDOCK_FLAG::text), '^^') 
+            , '||', IFNULL(TRIM(COPY_LOT_ATTRIBUTE_FLAG::text), '^^') 
+            , '||', IFNULL(TRIM(PARENT_CHILD_GENERATION_FLAG::text), '^^') 
+            , '||', IFNULL(TRIM(SOURCE_SUBINVENTORY::text), '^^') 
+            , '||', IFNULL(TRIM(LEGAL_ENTITY_ID::text), '^^') 
+            , '||', IFNULL(TRIM(GLOBAL_ATTRIBUTE_2::text), '^^') 
+            , '||', IFNULL(TRIM(CAPTURE_PICKING_EXCEPTION::text), '^^') 
+            , '||', IFNULL(TRIM(EAM_ENABLED_FLAG::text), '^^') 
+            , '||', IFNULL(TRIM(INTEGRATED_SYSTEM_CODE::text), '^^') 
+            , '||', IFNULL(TRIM(ROUND_REORDER_QTY_FLAG::text), '^^') 
+            , '||', IFNULL(TRIM(TIMEZONE_ID::text), '^^') 
+            , '||', IFNULL(TRIM(ATTRIBUTE_7::text), '^^') 
+            , '||', IFNULL(TRIM(GLOBAL_ATTRIBUTE_10::text), '^^') 
+            , '||', IFNULL(TRIM(STARTING_REVISION::text), '^^') 
+            , '||', IFNULL(TRIM(GLOBAL_ATTRIBUTE_6::text), '^^') 
+            , '||', IFNULL(TRIM(GLOBAL_ATTRIBUTE_11::text), '^^') 
+            , '||', IFNULL(TRIM(CARTONIZATION_FLAG::text), '^^') 
+            , '||', IFNULL(TRIM(LAST_UPDATE_LOGIN::text), '^^') 
+            , '||', IFNULL(TRIM(PICK_QTY_DEFAULT_REASON_ID::text), '^^') 
+            , '||', IFNULL(TRIM(AUTO_SERIAL_ALPHA_PREFIX::text), '^^') 
+            , '||', IFNULL(TRIM(ALLOW_DIFFERENT_STATUS::text), '^^') 
+            , '||', IFNULL(TRIM(GLOBAL_ATTRIBUTE_15::text), '^^') 
+            , '||', IFNULL(TRIM(ITEM_DEFINITION_ORG_ID::text), '^^') 
+            , '||', IFNULL(TRIM(ATTRIBUTE_DATE_3::text), '^^') 
+            , '||', IFNULL(TRIM(ATTRIBUTE_NUMBER_3::text), '^^') 
+            , '||', IFNULL(TRIM(ATTRIBUTE_NUMBER_8::text), '^^') 
+            , '||', IFNULL(TRIM(ATTRIBUTE_14::text), '^^') 
+            , '||', IFNULL(TRIM(ATTRIBUTE_DATE_1::text), '^^') 
+            , '||', IFNULL(TRIM(CHILD_LOT_NUMBER_LENGTH::text), '^^') 
+            , '||', IFNULL(TRIM(MANUAL_RECEIPT_EXP_AT_DEST::text), '^^') 
+            , '||', IFNULL(TRIM(ATTRIBUTE_DATE_5::text), '^^') 
+            , '||', IFNULL(TRIM(DEFAULT_LOCATOR_ORDER_VALUE::text), '^^') 
+            , '||', IFNULL(TRIM(INTERNAL_CUSTOMER_FLAG::text), '^^') 
+            , '||', IFNULL(TRIM(CREATED_BY::text), '^^') 
+            , '||', IFNULL(TRIM(PICK_SLIP_BATCH_SIZE::text), '^^') 
+            , '||', IFNULL(TRIM(ITEM_GROUPING_CODE::text), '^^') 
+            , '||', IFNULL(TRIM(GROUPING_JOB_ID::text), '^^') 
+            , '||', IFNULL(TRIM(AUTO_BREAKDOWN_ENABLED::text), '^^') 
+            , '||', IFNULL(TRIM(AUTO_DEL_ALLOC_FLAG::text), '^^') 
+            , '||', IFNULL(TRIM(ATTRIBUTE_12::text), '^^') 
+            , '||', IFNULL(TRIM(ATTRIBUTE_TIMESTAMP_5::text), '^^') 
+            , '||', IFNULL(TRIM(STANDARD_PACK_ENABLED::text), '^^') 
+            , '||', IFNULL(TRIM(SUPPLIER_ID::text), '^^') 
+            , '||', IFNULL(TRIM(ATTRIBUTE_3::text), '^^') 
+            , '||', IFNULL(TRIM(MAINT_ORGANIZATION_ID::text), '^^') 
+            , '||', IFNULL(TRIM(SOURCE_ORGANIZATION_ID::text), '^^') 
+            , '||', IFNULL(TRIM(PRE_FILL_PICKED_QTY::text), '^^') 
+            , '||', IFNULL(TRIM(TRADING_PARTNER_ORG_FLAG::text), '^^') 
+            , '||', IFNULL(TRIM(CONTRACT_MFG_FLAG::text), '^^') 
+            , '||', IFNULL(TRIM(FILL_KILL_SALES_ORDER_FLAG::text), '^^') 
+            , '||', IFNULL(TRIM(AUTO_LOT_ALPHA_PREFIX::text), '^^') 
+            , '||', IFNULL(TRIM(GLOBAL_ATTRIBUTE_13::text), '^^') 
+            , '||', IFNULL(TRIM(CHILD_LOT_ALPHA_PREFIX::text), '^^') 
+            , '||', IFNULL(TRIM(ENFORCE_LOCATOR_ALIS_UNQ_FLAG::text), '^^') 
+            , '||', IFNULL(TRIM(JOB_DEFINITION_PACKAGE::text), '^^') 
+            , '||', IFNULL(TRIM(GLOBAL_ATTRIBUTE_4::text), '^^') 
+            , '||', IFNULL(TRIM(ATTRIBUTE_10::text), '^^') 
+            , '||', IFNULL(TRIM(ATTRIBUTE_NUMBER_7::text), '^^') 
+            , '||', IFNULL(TRIM(STOCK_LOCATOR_CONTROL_CODE::text), '^^') 
+            , '||', IFNULL(TRIM(OBJECT_VERSION_NUMBER::text), '^^') 
+            , '||', IFNULL(TRIM(ATTRIBUTE_TIMESTAMP_3::text), '^^') 
+            , '||', IFNULL(TRIM(USE_CUR_ITEM_COST_FLAG::text), '^^') 
+            , '||', IFNULL(TRIM(GLOBAL_ATTRIBUTE_16::text), '^^') 
+            , '||', IFNULL(TRIM(SERIAL_NUMBER_TYPE::text), '^^') 
+            , '||', IFNULL(TRIM(SPECIAL_HNDLNG_OVRPK_FLAG::text), '^^') 
+            , '||', IFNULL(TRIM(GLOBAL_ATTRIBUTE_1::text), '^^') 
+            , '||', IFNULL(TRIM(ATTRIBUTE_5::text), '^^') 
+            , '||', IFNULL(TRIM(ATTRIBUTE_CATEGORY::text), '^^') 
+            , '||', IFNULL(TRIM(ATTRIBUTE_1::text), '^^') 
+            , '||', IFNULL(TRIM(ATTRIBUTE_NUMBER_4::text), '^^') 
+            , '||', IFNULL(TRIM(UCC_128_SUFFIX_FLAG::text), '^^') 
+            , '||', IFNULL(TRIM(PREGEN_PUTAWAY_TASKS_FLAG::text), '^^') 
+            , '||', IFNULL(TRIM(FILL_KILL_TRANSFER_ORDERS_FLAG::text), '^^') 
+            , '||', IFNULL(TRIM(FILL_KILL_MOVE_ORDER_FLAG::text), '^^') 
+            , '||', IFNULL(TRIM(LPN_SUFFIX::text), '^^') 
+            , '||', IFNULL(TRIM(LOT_NUMBER_LENGTH::text), '^^') 
+            , '||', IFNULL(TRIM(ATTRIBUTE_4::text), '^^') 
+            , '||', IFNULL(TRIM(DEFAULT_SUBINV_ORDER_VALUE::text), '^^') 
+            , '||', IFNULL(TRIM(SCHEDULE_ID::text), '^^') 
+            , '||', IFNULL(TRIM(ATTRIBUTE_DATE_4::text), '^^') 
+            , '||', IFNULL(TRIM(TIMEZONE_CODE::text), '^^') 
+            , '||', IFNULL(TRIM(ATTRIBUTE_NUMBER_9::text), '^^') 
+            , '||', IFNULL(TRIM(PARTY_ID::text), '^^') 
+            , '||', IFNULL(TRIM(PROJECT_REFERENCE_ENABLED::text), '^^') 
+            , '||', IFNULL(TRIM(DEFAULT_PUT_AWAY_RULE_ID::text), '^^') 
+            , '||', IFNULL(TRIM(GLOBAL_ATTRIBUTE_19::text), '^^') 
+            , '||', IFNULL(TRIM(WMS_ENABLED_FLAG::text), '^^') 
+            , '||', IFNULL(TRIM(GLOBAL_ATTRIBUTE_9::text), '^^') 
+            , '||', IFNULL(TRIM(DEFAULT_WMS_PICKING_RULE_ID::text), '^^') 
+            , '||', IFNULL(TRIM(ALLOW_NEG_ONHAND_CC_TXNS::text), '^^') 
+            , '||', IFNULL(TRIM(GLOBAL_ATTRIBUTE_12::text), '^^') 
+            , '||', IFNULL(TRIM(ALLOCATE_SERIAL_FLAG::text), '^^') 
+            , '||', IFNULL(TRIM(ATTRIBUTE_NUMBER_5::text), '^^') 
+            , '||', IFNULL(TRIM(LOT_NUMBER_UNIQUENESS::text), '^^') 
+            , '||', IFNULL(TRIM(CHILD_LOT_ZERO_PADDING_FLAG::text), '^^') 
+            , '||', IFNULL(TRIM(LOT_NUMBER_ZERO_PADDING::text), '^^') 
+            , '||', IFNULL(TRIM(DEFAULT_CARTON_RULE_ID::text), '^^') 
+            , '||', IFNULL(TRIM(ATTRIBUTE_TIMESTAMP_4::text), '^^') 
+            , '||', IFNULL(TRIM(GLOBAL_ATTRIBUTE_14::text), '^^') 
+            , '||', IFNULL(TRIM(MO_PICK_CONFIRM_REQUIRED::text), '^^') 
+            , '||', IFNULL(TRIM(LPN_STARTING_NUMBER::text), '^^') 
+            , '||', IFNULL(TRIM(ATTRIBUTE_DATE_2::text), '^^') 
+            , '||', IFNULL(TRIM(GLOBAL_ATTRIBUTE_CATEGORY::text), '^^') 
+            , '||', IFNULL(TRIM(REPLNSH_MOVE_ORDER_GROUPING::text), '^^') 
+            , '||', IFNULL(TRIM(GLOBAL_ATTRIBUTE_8::text), '^^') 
+            , '||', IFNULL(TRIM(ATTRIBUTE_6::text), '^^') 
+            , '||', IFNULL(TRIM(REQUEST_ID::text), '^^') 
+            , '||', IFNULL(TRIM(OVPK_TRANSFER_ORDERS_ENABLED::text), '^^') 
+            , '||', IFNULL(TRIM(FIFO_ORIG_RCPT_DATE_FLAG::text), '^^') 
+            , '||', IFNULL(TRIM(CREATE_LOT_UOM_CONVERSION::text), '^^') 
+            , '||', IFNULL(TRIM(GLOBAL_ATTRIBUTE_18::text), '^^') 
+            , '||', IFNULL(TRIM(PROJECT_CONTROL_LEVEL::text), '^^') 
+            , '||', IFNULL(TRIM(LOT_NUMBER_GENERATION::text), '^^') 
+            , '||', IFNULL(TRIM(ATTRIBUTE_TIMESTAMP_1::text), '^^') 
+            , '||', IFNULL(TRIM(REGENERATION_INTERVAL::text), '^^') 
+            , '||', IFNULL(TRIM(GLOBAL_ATTRIBUTE_5::text), '^^') 
+            , '||', IFNULL(TRIM(MFG_PLANT_FLAG::text), '^^') 
+            , '||', IFNULL(TRIM(START_AUTO_SERIAL_NUMBER::text), '^^') 
+            , '||', IFNULL(TRIM(SUPPLIER_SITE_ID::text), '^^') 
+            , '||', IFNULL(TRIM(MASTER_ORGANIZATION_ID::text), '^^') 
+            , '||', IFNULL(TRIM(TRACK_COUNTRY_OF_ORIGIN_FLAG::text), '^^') 
+            , '||', IFNULL(TRIM(DEFAULT_PICKING_RULE_ID::text), '^^') 
+            , '||', IFNULL(TRIM(DISTRIBUTED_ORGANIZATION_FLAG::text), '^^') 
+            , '||', IFNULL(TRIM(GLOBAL_ATTRIBUTE_7::text), '^^') 
+            , '||', IFNULL(TRIM(ATTRIBUTE_13::text), '^^') 
+            , '||', IFNULL(TRIM(LAST_UPDATED_BY::text), '^^') 
+            , '||', IFNULL(TRIM(LAST_UPDATE_DATE::text), '^^') 
+            , '||', IFNULL(TRIM(PM_COST_COLLECTION_ENABLED::text), '^^') 
+            , '||', IFNULL(TRIM(ATTRIBUTE_8::text), '^^') 
+            , '||', IFNULL(TRIM(TOTAL_LPN_LENGTH::text), '^^') 
+            , '||', IFNULL(TRIM(CUSTOMER_ACCOUNT_NUMBER::text), '^^') 
+            , '||', IFNULL(TRIM(PROFIT_CENTER_BU_ID::text), '^^') 
+            , '||', IFNULL(TRIM(KANBAN_CARD_PREFIX::text), '^^') 
+            , '||', IFNULL(TRIM(KANBAN_DOC_SEQ_ID::text), '^^') 
+            , '||', IFNULL(TRIM(KANBAN_CARD_START_NUMBER::text), '^^') 
+            , '||', IFNULL(TRIM(KANBAN_DOC_SEQ_CAT_CODE::text), '^^') 
+            , '||', IFNULL(TRIM(_FIVETRAN_DELETED::text), '^^') 
+        ), '^^||^^')))  as HASHDIFF
+FROM JOIN_RESULT

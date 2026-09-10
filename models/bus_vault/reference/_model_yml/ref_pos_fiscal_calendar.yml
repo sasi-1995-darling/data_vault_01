@@ -1,0 +1,14 @@
+version: 2
+
+models:
+  - name: ref_pos_fiscal_calendar
+    description: This is business vault reference model for pos customer fiscal Calendar
+    tests:
+      - 'dbt_constraints.primary_key:':
+          arguments:
+            column_names:
+              - datekey
+    columns:
+      - name: date
+        tests:
+          - not_null

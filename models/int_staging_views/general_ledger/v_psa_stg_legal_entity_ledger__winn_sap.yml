@@ -1,0 +1,28 @@
+version: 2
+models:
+- name: v_psa_stg_legal_entity_ledger__winn_sap
+  data_tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - BUKRS
+        - RLDNR
+        - LOAD_DTS
+      config:
+        severity: warn
+  columns:
+  - name: MANDT
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+  - name: BUKRS
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+  - name: RLDNR
+    data_tests:
+    - not_null:
+        config:
+          severity: warn

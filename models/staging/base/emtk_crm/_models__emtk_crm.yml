@@ -1,0 +1,5 @@
+version: 2
+
+models:
+  - name: base_sales_rep_territory_security_mapping
+    description: This is the base staging model to map a sales rep to a territory security code

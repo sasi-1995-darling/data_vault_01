@@ -1,0 +1,104 @@
+---- SRC LAYER ----
+WITH
+SRC_PBDOL          as ( SELECT ADJUSTMENT_ID, BASE_MATERIAL, BASE_MATERIAL_KEY, BKCC, CREATED_DATE_KEY, ITEM_KEY, ITEM_NUMBER, LINE_DOLLARS, LINE_QUANTITY, ORDER_HEADER_BK, ORDER_HEADER_KEY, ORDER_ID, ORDER_LINE_BK, ORDER_LINE_ID, ORDER_LINE_KEY, ORDER_LINE_NUMBER, ORIGIN, PRICE, REC_SRC, REFUND_LINE_RECORD_ID, SKU, STORE, VARIANT_ID FROM {{ ref('pb_dtc_order_line') }} as SRC  )
+
+/*
+SRC_PBDOL          as ( SELECT * FROM bus_vault.PB_DTC_ORDER_LINE )
+*/
+---- LOGIC LAYER ----
+
+, LOGIC_PBDOL as (
+    SELECT
+        ORDER_HEADER_KEY
+      , ORDER_HEADER_BK
+      , ORDER_ID
+      , ORDER_LINE_KEY
+      , ORDER_LINE_BK
+      , ORDER_LINE_ID
+      , ORDER_LINE_NUMBER
+      , REFUND_LINE_RECORD_ID
+      , ADJUSTMENT_ID
+      , BASE_MATERIAL_KEY
+      , BASE_MATERIAL
+      , ITEM_KEY
+      , ITEM_NUMBER
+      , SKU
+      , VARIANT_ID
+      , PRICE
+      , LINE_DOLLARS
+      , LINE_QUANTITY
+      , CREATED_DATE_KEY
+      , ORIGIN
+      , STORE
+      , REC_SRC
+      , BKCC
+    FROM SRC_PBDOL
+)
+---- RENAME LAYER ----
+
+, RENAME_PBDOL as (
+    SELECT
+        ORDER_HEADER_KEY
+      , ORDER_HEADER_BK
+      , ORDER_ID
+      , ORDER_LINE_KEY
+      , ORDER_LINE_BK
+      , ORDER_LINE_ID
+      , ORDER_LINE_NUMBER
+      , REFUND_LINE_RECORD_ID
+      , ADJUSTMENT_ID
+      , BASE_MATERIAL_KEY
+      , BASE_MATERIAL
+      , ITEM_KEY
+      , ITEM_NUMBER
+      , SKU
+      , VARIANT_ID
+      , PRICE
+      , LINE_DOLLARS
+      , LINE_QUANTITY
+      , CREATED_DATE_KEY
+      , ORIGIN
+      , STORE
+      , REC_SRC
+      , BKCC
+    FROM LOGIC_PBDOL
+)
+---- FILTER LAYER ----
+
+, FILTER_PBDOL as (
+    SELECT *
+    FROM RENAME_PBDOL
+)
+
+---- JOIN LAYER ----
+, JOIN_RESULT as (
+    SELECT *
+    FROM FILTER_PBDOL
+)
+
+---- FINAL LAYER ----
+SELECT
+          ORDER_HEADER_KEY
+        , ORDER_HEADER_BK
+        , ORDER_ID
+        , ORDER_LINE_KEY
+        , ORDER_LINE_BK
+        , ORDER_LINE_ID
+        , ORDER_LINE_NUMBER
+        , REFUND_LINE_RECORD_ID
+        , ADJUSTMENT_ID
+        , BASE_MATERIAL_KEY
+        , BASE_MATERIAL
+        , ITEM_KEY
+        , ITEM_NUMBER
+        , SKU
+        , VARIANT_ID
+        , PRICE
+        , LINE_DOLLARS
+        , LINE_QUANTITY
+        , CREATED_DATE_KEY
+        , ORIGIN
+        , STORE
+        , REC_SRC
+        , BKCC
+FROM JOIN_RESULT

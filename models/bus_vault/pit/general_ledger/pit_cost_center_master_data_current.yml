@@ -1,0 +1,9 @@
+version: 2
+models:
+  - name: pit_cost_center_master_data_current
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - COST_CENTER_MASTER_DATA_HK
+    columns: []

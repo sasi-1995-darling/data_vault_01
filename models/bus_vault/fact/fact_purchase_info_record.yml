@@ -1,0 +1,9 @@
+version: 2
+models:
+- name: fact_purchase_info_record
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - PURCHASING_INFO_RECORD_ORG_HK
+  columns: []

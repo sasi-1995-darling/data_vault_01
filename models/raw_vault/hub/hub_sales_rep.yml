@@ -1,0 +1,17 @@
+version: 2
+models:
+  - name: hub_sales_rep
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - SALES_REP_HK
+    columns:
+      - name: SALES_REP_HK
+        tests:
+          - unique:
+              config:
+                severity: warn
+          - not_null:
+              config:
+                severity: warn

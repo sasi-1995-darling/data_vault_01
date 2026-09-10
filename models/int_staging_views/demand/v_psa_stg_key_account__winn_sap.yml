@@ -1,0 +1,28 @@
+version: 2
+models:
+  - name: v_psa_stg_key_account__winn_sap
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          config:
+            severity: warn
+          arguments:
+            combination_of_columns:
+              - SPRAS
+              - KVGR1
+              - LOAD_DTS
+    columns:
+      - name: SPRAS
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: KVGR1
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: LOAD_DTS
+        tests:
+          - not_null:
+              config:
+                severity: warn

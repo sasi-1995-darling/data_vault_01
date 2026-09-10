@@ -1,0 +1,11 @@
+version: 2
+models:
+  - name: ref_profit_center_master_data_texts
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - LANGUAGE_KEY
+              - PROFIT_CENTER
+              - VALID_TO_DATE__YYYYMMDD
+              - CONTROLLING_AREA

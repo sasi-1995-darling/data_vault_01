@@ -1,0 +1,5 @@
+version: 2
+models:
+- name: v_psa_stg_flo_device_icd
+  data_tests: []
+  columns: []

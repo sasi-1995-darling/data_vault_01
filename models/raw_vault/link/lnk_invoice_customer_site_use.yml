@@ -1,0 +1,27 @@
+version: 2
+models:
+  - name: lnk_invoice_customer_site_use
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - INVOICE_BILL_TO_SITE_USE_HK
+    columns:
+      - name: INVOICE_BILL_TO_SITE_USE_HK
+        tests:
+          - unique:
+              config:
+                severity: warn
+          - not_null:
+              config:
+                severity: warn
+      - name: INVOICE_HK
+        tests:
+          - dbt_utils.relationships_where:
+              arguments:
+                to: ref( 'hub_invoice_header' )
+                field: INVOICE_HK
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'hub_invoice_header' )
+                pk_column_name: INVOICE_HK

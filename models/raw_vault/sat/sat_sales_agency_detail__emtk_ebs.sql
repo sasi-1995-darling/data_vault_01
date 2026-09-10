@@ -1,0 +1,26 @@
+{%- set source_model = "stg_sales_agency__emtk_ebs_sales" -%}
+{%- set src_pk = "sales_agency_hk" -%}
+{%- set src_hashdiff = "sales_agency_hdiff" -%}
+{%- set src_payload = [ 
+     'org_id',
+     'salesrep_number',
+     'salesrep_id',
+     'resource_id',
+     'last_update_date',
+     'last_updated_by',
+     'creation_date',
+     'created_by',
+     'last_update_login',
+     'name',
+     'start_date_active',
+     'end_date_active',
+     'email_address',
+     'object_version_number' ] -%}
+{%- set src_ldts = "load_dts" -%}
+{%- set src_source = "rec_src" -%}
+
+{{ automate_dv.sat(src_pk=src_pk, src_hashdiff=src_hashdiff,
+                   src_payload=src_payload, src_eff=none,
+                   src_ldts=src_ldts, src_source=src_source,
+                   source_model=source_model) }}
+

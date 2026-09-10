@@ -1,0 +1,82 @@
+---- SRC LAYER ----
+WITH
+SRC_LHU            as ( SELECT DELIVERY_HK, DELIVERY_LINE_HK, HANDLING_UNIT_HK, ITEM_HK, LNK_HANDLING_UNIT_CONTENT_HK, LOAD_DTS, PLANT_HK, REC_SRC FROM {{ ref('v_psa_stg_handling_unit_content__winn_sap') }} as SRC 
+                        QUALIFY (ROW_NUMBER() OVER(PARTITION BY LNK_HANDLING_UNIT_CONTENT_HK ORDER BY LOAD_DTS DESC))=1 )
+
+/*
+SRC_LHU            as ( SELECT * FROM STAGING.v_psa_stg_handling_unit_content__winn_sap )
+*/
+---- LOGIC LAYER ----
+
+, LOGIC_LHU as (
+    SELECT
+        LNK_HANDLING_UNIT_CONTENT_HK
+      , HANDLING_UNIT_HK
+      , ITEM_HK
+      , PLANT_HK
+      , DELIVERY_HK
+      , DELIVERY_LINE_HK
+      , LOAD_DTS
+      , REC_SRC
+    FROM SRC_LHU
+)
+---- RENAME LAYER ----
+
+, RENAME_LHU as (
+    SELECT
+        LNK_HANDLING_UNIT_CONTENT_HK
+      , HANDLING_UNIT_HK
+      , ITEM_HK
+      , PLANT_HK
+      , DELIVERY_HK
+      , DELIVERY_LINE_HK
+      , LOAD_DTS
+      , REC_SRC
+    FROM LOGIC_LHU
+)
+---- FILTER LAYER ----
+
+, FILTER_LHU as (
+    SELECT *
+    FROM RENAME_LHU
+)
+---- JOIN LAYER ----
+, JOIN_RESULT as (
+    SELECT * FROM FILTER_LHU
+)
+
+---- FINAL LAYER ----
+SELECT
+          LNK_HANDLING_UNIT_CONTENT_HK
+        , HANDLING_UNIT_HK
+        , ITEM_HK
+        , PLANT_HK
+        , DELIVERY_HK
+        , DELIVERY_LINE_HK
+        , LOAD_DTS
+        , REC_SRC
+FROM JOIN_RESULT
+{% if is_incremental() %}
+WHERE NOT EXISTS (
+    SELECT 1 
+    FROM {{ this }} existing
+    WHERE existing.LNK_HANDLING_UNIT_CONTENT_HK = JOIN_RESULT.LNK_HANDLING_UNIT_CONTENT_HK
+)
+{% endif %}
+--this is to consolidate records coming from 2 diff tables with the same bkcc
+QUALIFY (ROW_NUMBER() OVER(PARTITION BY LNK_HANDLING_UNIT_CONTENT_HK ORDER BY LOAD_DTS DESC))=1
+{% if not is_incremental() %}
+
+union all
+SELECT 
+ MD5_BINARY(GR.VALUE) AS LNK_HANDLING_UNIT_CONTENT_HK
+, MD5_BINARY(GR.VALUE) AS HANDLING_UNIT_HK
+, MD5_BINARY(GR.VALUE) AS ITEM_HK
+, MD5_BINARY(GR.VALUE) AS PLANT_HK
+, MD5_BINARY(GR.VALUE) AS DELIVERY_HK
+, MD5_BINARY(GR.VALUE) AS DELIVERY_LINE_HK
+, CONVERT_TIMEZONE('UTC','1900-01-01'::TIMESTAMP)  AS LOAD_DTS
+, 'USAZET.SNOWFLAKE.FBIN.DERIVED' AS REC_SRC
+FROM
+TABLE(strtok_split_to_table('0|-1|-2', '|')) AS GR
+{% endif %}

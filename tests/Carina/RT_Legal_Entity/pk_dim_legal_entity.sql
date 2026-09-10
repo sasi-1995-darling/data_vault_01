@@ -1,0 +1,1 @@
+   select * from ({{ primary_key_check('dim_legal_entity',['LEGAL_ENTITY_HK']) }}) 

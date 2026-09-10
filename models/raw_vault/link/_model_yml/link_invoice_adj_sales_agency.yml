@@ -1,0 +1,27 @@
+version: 2
+
+models:
+  - name: link_invoice_adj_sales_agency
+    description: This is the raw vault link model between invoice adjustment and sales agency
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - invoice_adj_sales_agency_hk
+      - dbt_constraints.foreign_key:
+          arguments:
+            fk_column_names:
+              - invoice_adjustment_hk
+            pk_table_name: ref('hub_invoice_adjustment')
+            pk_column_names:
+              - invoice_adjustment_hk
+      - dbt_constraints.foreign_key:
+          arguments:
+            fk_column_names:
+              - sales_agency_hk
+            pk_table_name: ref('hub_sales_agency')
+            pk_column_names:
+              - sales_agency_hk
+    config:
+      tags:
+        - emtek

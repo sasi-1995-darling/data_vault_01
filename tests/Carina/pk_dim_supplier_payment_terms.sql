@@ -1,0 +1,1 @@
+select * from ({{ primary_key_check('dim_supplier_payment_terms',['supplier_payment_term_hk']) }}) 

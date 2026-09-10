@@ -1,0 +1,399 @@
+# Multi-table integration test YAML config: v_psa_stg_po_item_mt__lrsn_psft
+# Tests multi-table (secondary LEFT JOIN) code generation path.
+#
+# Pattern modeled after production v_psa_stg_po_item__lrsn_psft.sql:
+# - Driver: ps_po_line (Fivetran ingestion, 5 data cols)
+# - Secondary: ps_po_hdr with QUALIFY dedup (provides VENDOR_ID → SUPPLIER_BK)
+# - BKCC cross join (auto-injected from bkcc_rec_src)
+# - Column collision: BUSINESS_UNIT exists in both → secondary prefixed
+# - HK: PO_ITEM_HK, PO_HEADER_HK, SUPPLIER_HK, LNK_PO_ITEM_HK
+#
+# Source: PSA_PROD.LRSN_PSFT_SYSADM.PS_PO_LINE + PS_PO_HDR
+# BK: CONCAT_WS('||', BUSINESS_UNIT, PO_ID, LINE_NBR) → PO_ITEM_BK
+# BKCC REC_SRC: USSDBR.ORCL.PSFTPRD.PS_PO_LINE
+#
+# NOTE: This is a synthetic test config — NOT deployed to production.
+
+schema_version: "1.0"
+
+filename: po_item_multi_table__lrsn_psft
+
+_pipeline_metadata:
+  bkcc_rec_src: "USSDBR.ORCL.PSFTPRD.PS_PO_LINE"
+  has_fivetran_deleted: true
+  has_psa_delete_ind: true
+  row_count: 250000
+  ingestion: fivetran
+
+models:
+  - layer: STG
+    derived_name: v_psa_stg_po_item_mt__lrsn_psft
+    short_name: po_item_mt__lrsn_psft
+    sources:
+      # Driver table
+      - source_schema: lrsn_psft_sysadm
+        source_table: ps_po_line
+        alias: S
+        source_layer_filter: ""
+        filter_conditions: ""
+        join_type: ""
+        parent_join_number: "1"
+        parent_table_join: ""
+        child_table_join: ""
+        target_schema: procurement
+      # Secondary table (header lookup)
+      - source_schema: lrsn_psft_sysadm
+        source_table: ps_po_hdr
+        alias: HDR
+        source_layer_filter: "QUALIFY 1 = ROW_NUMBER() OVER (PARTITION BY PO_ID, BUSINESS_UNIT ORDER BY _FIVETRAN_SYNCED DESC, PSA_LOAD_DTS DESC)"
+        filter_conditions: ""
+        join_type: "LEFT JOIN"
+        parent_join_number: "2"
+        parent_table_join: "PO_ID"
+        child_table_join: "HDR.HDR_PO_ID"
+        target_schema: procurement
+    columns:
+      # === BK column (composite) ===
+      - source_table: S
+        source_column: "(DERIVED)"
+        staging_column_name: PO_ITEM_BK
+        datatype: VARCHAR
+        hashdiff: ""
+        not_null: "yes"
+        unique: "COMPOSITE: PO_ITEM_BK, LOAD_DTS"
+        pk: ""
+        automated_logic: ""
+        manual_logic: "CONCAT_WS('||', COALESCE(BUSINESS_UNIT, ''), COALESCE(PO_ID, ''), COALESCE(LINE_NBR, ''))"
+        order: 1
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      # === Secondary BK: PO_HEADER_BK ===
+      - source_table: S
+        source_column: "(DERIVED)"
+        staging_column_name: PO_HEADER_BK
+        datatype: VARCHAR
+        hashdiff: ""
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: "CONCAT_WS('||', BUSINESS_UNIT, PO_ID)"
+        order: 2
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      # === Secondary BK: SUPPLIER_BK (from secondary table) ===
+      - source_table: S
+        source_column: "(DERIVED)"
+        staging_column_name: SUPPLIER_BK
+        datatype: VARCHAR
+        hashdiff: ""
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: "COALESCE(VENDOR_ID::TEXT, '')"
+        order: 3
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      # === LOAD_DTS ===
+      - source_table: S
+        source_column: "(DERIVED)"
+        staging_column_name: LOAD_DTS
+        datatype: TIMESTAMP
+        hashdiff: ""
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: "CONVERT_TIMEZONE('UTC', _FIVETRAN_SYNCED)"
+        order: 4
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      # === Driver data columns ===
+      - source_table: S
+        source_column: BUSINESS_UNIT
+        staging_column_name: BUSINESS_UNIT
+        datatype: VARCHAR
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 5
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: PO_ID
+        staging_column_name: PO_ID
+        datatype: VARCHAR
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 6
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: LINE_NBR
+        staging_column_name: LINE_NBR
+        datatype: VARCHAR
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: "COALESCE(LINE_NBR::TEXT, '')"
+        order: 7
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: CANCEL_STATUS
+        staging_column_name: CANCEL_STATUS
+        datatype: VARCHAR
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 8
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: UNIT_OF_MEASURE
+        staging_column_name: UNIT_OF_MEASURE
+        datatype: VARCHAR
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 9
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      # === Secondary table columns (from HDR) ===
+      - source_table: HDR
+        source_column: PO_ID
+        staging_column_name: HDR_PO_ID
+        datatype: VARCHAR
+        hashdiff: ""
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 10
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: HDR
+        source_column: VENDOR_ID
+        staging_column_name: VENDOR_ID
+        datatype: VARCHAR
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 11
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: HDR
+        source_column: BUSINESS_UNIT
+        staging_column_name: HDR_BUSINESS_UNIT
+        datatype: VARCHAR
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 12
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      # === Metadata columns ===
+      - source_table: S
+        source_column: _FIVETRAN_DELETED
+        staging_column_name: _FIVETRAN_DELETED
+        datatype: BOOLEAN
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 13
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: _FIVETRAN_SYNCED
+        staging_column_name: _FIVETRAN_SYNCED
+        datatype: TIMESTAMP_TZ
+        hashdiff: ""
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 14
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: PSA_LOAD_DTS
+        staging_column_name: PSA_LOAD_DTS
+        datatype: TIMESTAMP_LTZ
+        hashdiff: ""
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 15
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: PSA_DELETE_IND
+        staging_column_name: PSA_DELETE_IND
+        datatype: VARCHAR
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 16
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      # === Hash Keys ===
+      - source_table: ""
+        source_column: "(DERIVED)"
+        staging_column_name: PO_ITEM_HK
+        datatype: BINARY
+        hashdiff: ""
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: "HASH: BUSINESS_UNIT, PO_ID, LINE_NBR, BKCC"
+        order: 17
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: ""
+        source_column: "(DERIVED)"
+        staging_column_name: PO_HEADER_HK
+        datatype: BINARY
+        hashdiff: ""
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: "HASH: BUSINESS_UNIT, PO_ID, BKCC"
+        order: 18
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: ""
+        source_column: "(DERIVED)"
+        staging_column_name: SUPPLIER_HK
+        datatype: BINARY
+        hashdiff: ""
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: "HASH: VENDOR_ID, BKCC"
+        order: 19
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: ""
+        source_column: "(DERIVED)"
+        staging_column_name: LNK_PO_ITEM_HK
+        datatype: BINARY
+        hashdiff: ""
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: "HASH: PO_ID, LINE_NBR, VENDOR_ID, BUSINESS_UNIT"
+        order: 20
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      # === HASHDIFF ===
+      - source_table: ""
+        source_column: "(DERIVED)"
+        staging_column_name: HASHDIFF
+        datatype: BINARY
+        hashdiff: ""
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: "HASH: BUSINESS_UNIT, PO_ID, LINE_NBR, CANCEL_STATUS, UNIT_OF_MEASURE, VENDOR_ID, HDR_BUSINESS_UNIT, _FIVETRAN_DELETED, PSA_DELETE_IND"
+        order: 21
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""

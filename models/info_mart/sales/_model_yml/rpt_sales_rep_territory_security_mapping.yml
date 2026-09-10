@@ -1,0 +1,12 @@
+version: 2
+
+models:
+  - name: rpt_sales_rep_territory_security_mapping
+    description: Provides the relationship between a sales_rep's email and an associated territory code
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - sales_rep_territory_security_mapping_pk
+    config:
+      materialized: table

@@ -1,0 +1,82 @@
+{{ config(alias='dim_item_fbin') }}
+
+---- SRC LAYER ----
+WITH
+SRC_DIF            as ( SELECT ITEM_ID, ITEM_NUMBER, ITEM_TITLE, BASE_MATERIAL, ITEM_TYPE_CODE, ITEM_STATUS, BRAND, ITEM_CATEGORY, ITEM_SUB_CATEGORY, ITEM_CLASS, ITEM_SUB_CLASS, ITEM_PRODUCT_TYPE, BKCC, REC_SRC, ITEM_PRODUCT_LINE FROM {{ ref('dim_item_fbin') }} as SRC  )
+
+/*
+SRC_DIF            as ( SELECT * FROM BUS_VAULT.DIM_ITEM_FBIN )
+*/
+---- LOGIC LAYER ----
+
+, LOGIC_DIF as (
+    SELECT
+        ITEM_ID
+      , ITEM_NUMBER
+      , ITEM_TITLE
+      , BASE_MATERIAL
+      , ITEM_TYPE_CODE
+      , ITEM_STATUS
+      , BRAND
+      , ITEM_CATEGORY
+      , ITEM_SUB_CATEGORY
+      , ITEM_CLASS
+      , ITEM_SUB_CLASS
+      , ITEM_PRODUCT_TYPE
+      , BKCC
+      , REC_SRC
+      , ITEM_PRODUCT_LINE
+    FROM SRC_DIF
+)
+---- RENAME LAYER ----
+
+, RENAME_DIF as (
+    SELECT
+        ITEM_ID
+      , ITEM_NUMBER 
+      , ITEM_TITLE
+      , BASE_MATERIAL
+      , ITEM_TYPE_CODE
+      , ITEM_STATUS
+      , BRAND 
+      , ITEM_CATEGORY
+      , ITEM_SUB_CATEGORY
+      , ITEM_CLASS
+      , ITEM_SUB_CLASS
+      , ITEM_PRODUCT_TYPE
+      , BKCC 
+      , REC_SRC
+      , ITEM_PRODUCT_LINE
+    FROM LOGIC_DIF
+)
+---- FILTER LAYER ----
+
+, FILTER_DIF as (
+    SELECT *
+    FROM RENAME_DIF
+)
+
+---- JOIN LAYER ----
+, JOIN_RESULT as (
+    SELECT *
+    FROM FILTER_DIF
+)
+
+---- FINAL LAYER ----
+SELECT
+          ITEM_ID
+        , ITEM_NUMBER 
+        , ITEM_TITLE
+        , BASE_MATERIAL
+        , ITEM_TYPE_CODE
+        , ITEM_STATUS
+        , BRAND 
+        , ITEM_CATEGORY
+        , ITEM_SUB_CATEGORY
+        , ITEM_CLASS
+        , ITEM_SUB_CLASS
+        , ITEM_PRODUCT_TYPE
+        , BKCC 
+        , REC_SRC
+        , ITEM_PRODUCT_LINE
+FROM JOIN_RESULT

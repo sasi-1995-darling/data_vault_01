@@ -1,0 +1,92 @@
+version: 2
+
+models:
+  - name: base_plant_location__emtk_ebs_po
+    description: This is the base staging model from Emtek for hub_plant_location
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - organization_code
+              - location_code
+
+  - name: base_po_action__emtk_ebs_po
+    description: This is the base staging model from Emtek for msat_po_action
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - object_id
+              - action_code
+              - action_date
+              - sequence_num
+
+  - name: base_po_line__emtk_ebs_po
+    description: This is the base staging model from Emtek for lnk_po_line, hub_po_line, and sat_po_line_detail
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - po_line_id
+
+  - name: base_po_line_item_plant_location__emtk_ebs_po
+    description: This is the base staging model from Emtek for link_po_line_item_plant_location
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - po_line_id
+              - organization_code
+              - location_code
+              - org_id
+              - segment1
+
+  - name: base_po_line_shipment__emtk_ebs_po
+    description: This is the base staging model from Emtek for lnk_po_line_shipment, hub_po_line_shipment, and sat_po_line_shipment_detail
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - line_location_id
+
+  - name: base_po_line_transaction__emtk_ebs_po
+    description: This is the base staging model from Emtek for tlnk_po_line_transaction
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - transaction_id
+
+  - name: base_purchase_order__emtk_ebs_po
+    description: This is the base staging model from Emtek for lnk_po_supplier, hub_purchase_order, and sat_po_detail
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - poh_segment1
+              - org_id
+
+  - name: base_supplier__emtk_ebs_po
+    description: This is the base staging model from Emtek for hub_supplier and sat_supplier_detail
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - segment1
+
+  - name: base_supplier_site__emtk_ebs_po
+    description: This is the base staging model from Emtek for hub_supplier_site and sat_supplier_site_detail
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - vendor_site_id
+
+  - name: base_supplier_contact__emtk_ebs_po
+    description: This is the base staging model from Emtek for lnk_supplier_contact
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - segment1
+              - contact_point_id

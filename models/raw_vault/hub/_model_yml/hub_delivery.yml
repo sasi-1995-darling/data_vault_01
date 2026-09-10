@@ -1,0 +1,13 @@
+version: 2
+
+models:
+  - name: hub_delivery
+    description: This is the raw vault hub model for deliveries (currently from shipping invoices)
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - delivery_hk
+    config:
+      tags:
+        - emtek

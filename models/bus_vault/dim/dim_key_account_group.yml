@@ -1,0 +1,10 @@
+version: 2
+models:
+  - name: dim_key_account_group
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - KEY_ACCOUNT_GROUP_HK
+              - LANGUAGE_KEY
+    columns: []

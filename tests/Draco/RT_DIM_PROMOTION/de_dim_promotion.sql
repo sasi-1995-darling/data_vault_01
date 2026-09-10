@@ -1,0 +1,1 @@
+select * from ({{ data_exist('dim_promotion','US.EXCEL.RGM_PROMO.PROMO_FLOW_INPUT')}}) 

@@ -1,0 +1,27 @@
+version: 2
+models:
+  - name: v_psa_stg_purchasing_records__winn_sap
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          config:
+            severity: warn
+          arguments:
+            combination_of_columns:
+              - SUPPLIER_PURCHASING_ITEM_HK
+              - LOAD_DTS
+    columns:
+      - name: INFNR
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: MATNR
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: LIFNR
+        tests:
+          - not_null:
+              config:
+                severity: warn

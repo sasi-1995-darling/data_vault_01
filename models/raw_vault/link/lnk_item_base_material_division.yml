@@ -1,0 +1,32 @@
+version: 2
+models:
+- name: lnk_item_base_material_division
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - LNK_ITEM_BASE_MATERIAL_DIVISION_HK
+  - dbt_expectations.expect_table_row_count_to_be_between:
+      arguments:
+        min_value: 4
+      config:
+        severity: warn
+  columns:
+  - name: ITEM_HK
+    data_tests:
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'hub_item_v1' )
+          pk_column_name: ITEM_HK
+  - name: BASE_MATERIAL_HK
+    data_tests:
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'hub_base_material' )
+          pk_column_name: BASE_MATERIAL_HK
+  - name: DIVISION_HK
+    data_tests:
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'hub_division' )
+          pk_column_name: DIVISION_HK

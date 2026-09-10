@@ -1,0 +1,961 @@
+# End-to-end integration test YAML config: v_psa_stg_payment_terms_lines__fib_ocf
+# TRUE end-to-end test: NEW model that does NOT exist in production.
+# Tests full pipeline: Stage 1 YAML -> Stage 2 code gen -> Stage 3 compile/run/test.
+#
+# Source: PSA_PROD.OUTD_OCF_AP.AP_TERMS_LINES (51 columns, 83 rows)
+# BK: TERM_ID -> PAYMENT_TERM_BK
+# HASHDIFF: 45 data columns (all non-BK, non-metadata, non-technical)
+# BKCC REC_SRC: USCLOUD.ORCL.OCFPRD.AP_TERMS_LINES (BKCC: Jumping_River)
+# Domain: procurement (same as po_header, po_item, po_receipt fib_ocf models)
+#
+# Note: Oracle AP_TERMS_LINES natural PK is (TERM_ID, SEQUENCE_NUM).
+#       SEQUENCE_NUM is always 1.0 in this 83-row dataset, so TERM_ID alone suffices.
+
+schema_version: "1.0"
+
+filename: payment_terms_lines__fib_ocf
+
+models:
+  - layer: STG
+    derived_name: v_psa_stg_payment_terms_lines__fib_ocf
+    short_name: payment_terms_lines__fib_ocf
+    sources:
+      - source_schema: outd_ocf_ap
+        source_table: AP_TERMS_LINES
+        alias: S
+        source_layer_filter: ""
+        filter_conditions: ""
+        join_type: ""
+        parent_join_number: "1"
+        parent_table_join: ""
+        child_table_join: ""
+        target_schema: procurement
+    columns:
+      # === BK column (raw source retained + BK alias derived) ===
+      - source_table: S
+        source_column: TERM_ID
+        staging_column_name: TERM_ID
+        datatype: FLOAT
+        hashdiff: ""
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 1
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: TERM_ID
+        staging_column_name: PAYMENT_TERM_BK
+        datatype: FLOAT
+        hashdiff: ""
+        not_null: "yes"
+        unique: "COMPOSITE: PAYMENT_TERM_BK, LOAD_DTS"
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 2
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      # === LOAD_DTS (derived from PSA_LOAD_DTS) ===
+      - source_table: S
+        source_column: "(DERIVED)"
+        staging_column_name: LOAD_DTS
+        datatype: TIMESTAMP
+        hashdiff: ""
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: "CONVERT_TIMEZONE('UTC', PSA_LOAD_DTS)"
+        order: 2
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      # === Data columns (in HASHDIFF) ===
+      - source_table: S
+        source_column: SEQUENCE_NUM
+        staging_column_name: SEQUENCE_NUM
+        datatype: FLOAT
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 3
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: LAST_UPDATE_DATE
+        staging_column_name: LAST_UPDATE_DATE
+        datatype: TIMESTAMP
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 4
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: LAST_UPDATED_BY
+        staging_column_name: LAST_UPDATED_BY
+        datatype: VARCHAR
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 5
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: CREATION_DATE
+        staging_column_name: CREATION_DATE
+        datatype: TIMESTAMP
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 6
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: DISCOUNT_DAYS_3
+        staging_column_name: DISCOUNT_DAYS_3
+        datatype: FLOAT
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 7
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: DISCOUNT_DAY_OF_MONTH_3
+        staging_column_name: DISCOUNT_DAY_OF_MONTH_3
+        datatype: FLOAT
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 8
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: DISCOUNT_MONTHS_FORWARD_3
+        staging_column_name: DISCOUNT_MONTHS_FORWARD_3
+        datatype: FLOAT
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 9
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: ATTRIBUTE_CATEGORY
+        staging_column_name: ATTRIBUTE_CATEGORY
+        datatype: VARCHAR
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 10
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: DISCOUNT_PERCENT_3
+        staging_column_name: DISCOUNT_PERCENT_3
+        datatype: FLOAT
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 11
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: ATTRIBUTE_12
+        staging_column_name: ATTRIBUTE_12
+        datatype: VARCHAR
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 12
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: ATTRIBUTE_13
+        staging_column_name: ATTRIBUTE_13
+        datatype: VARCHAR
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 13
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: ATTRIBUTE_14
+        staging_column_name: ATTRIBUTE_14
+        datatype: VARCHAR
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 14
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: ATTRIBUTE_7
+        staging_column_name: ATTRIBUTE_7
+        datatype: VARCHAR
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 15
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: ATTRIBUTE_8
+        staging_column_name: ATTRIBUTE_8
+        datatype: VARCHAR
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 16
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: ATTRIBUTE_9
+        staging_column_name: ATTRIBUTE_9
+        datatype: VARCHAR
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 17
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: ATTRIBUTE_10
+        staging_column_name: ATTRIBUTE_10
+        datatype: VARCHAR
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 18
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: ATTRIBUTE_11
+        staging_column_name: ATTRIBUTE_11
+        datatype: VARCHAR
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 19
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: DISCOUNT_DAYS
+        staging_column_name: DISCOUNT_DAYS
+        datatype: FLOAT
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 20
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: DISCOUNT_DAY_OF_MONTH
+        staging_column_name: DISCOUNT_DAY_OF_MONTH
+        datatype: FLOAT
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 21
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: DISCOUNT_MONTHS_FORWARD
+        staging_column_name: DISCOUNT_MONTHS_FORWARD
+        datatype: FLOAT
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 22
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: DUE_DAY_OF_MONTH
+        staging_column_name: DUE_DAY_OF_MONTH
+        datatype: FLOAT
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 23
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: DISCOUNT_PERCENT
+        staging_column_name: DISCOUNT_PERCENT
+        datatype: FLOAT
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 24
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: DUE_MONTHS_FORWARD
+        staging_column_name: DUE_MONTHS_FORWARD
+        datatype: FLOAT
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 25
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: DUE_AMOUNT
+        staging_column_name: DUE_AMOUNT
+        datatype: FLOAT
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 26
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: DUE_DAYS
+        staging_column_name: DUE_DAYS
+        datatype: FLOAT
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 27
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: DISCOUNT_PERCENT_2
+        staging_column_name: DISCOUNT_PERCENT_2
+        datatype: FLOAT
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 28
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: DISCOUNT_DAYS_2
+        staging_column_name: DISCOUNT_DAYS_2
+        datatype: FLOAT
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 29
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: DISCOUNT_DAY_OF_MONTH_2
+        staging_column_name: DISCOUNT_DAY_OF_MONTH_2
+        datatype: FLOAT
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 30
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: ORA_SEED_SET_1
+        staging_column_name: ORA_SEED_SET_1
+        datatype: VARCHAR
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 31
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: ORA_SEED_SET_2
+        staging_column_name: ORA_SEED_SET_2
+        datatype: VARCHAR
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 32
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: ATTRIBUTE_1
+        staging_column_name: ATTRIBUTE_1
+        datatype: VARCHAR
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 33
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: ATTRIBUTE_2
+        staging_column_name: ATTRIBUTE_2
+        datatype: VARCHAR
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 34
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: CREATED_BY
+        staging_column_name: CREATED_BY
+        datatype: VARCHAR
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 35
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: LAST_UPDATE_LOGIN
+        staging_column_name: LAST_UPDATE_LOGIN
+        datatype: VARCHAR
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 36
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: DUE_PERCENT
+        staging_column_name: DUE_PERCENT
+        datatype: FLOAT
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 37
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: DISCOUNT_MONTHS_FORWARD_2
+        staging_column_name: DISCOUNT_MONTHS_FORWARD_2
+        datatype: FLOAT
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 38
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: ATTRIBUTE_3
+        staging_column_name: ATTRIBUTE_3
+        datatype: VARCHAR
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 39
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: ATTRIBUTE_4
+        staging_column_name: ATTRIBUTE_4
+        datatype: VARCHAR
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 40
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: ATTRIBUTE_5
+        staging_column_name: ATTRIBUTE_5
+        datatype: VARCHAR
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 41
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: ATTRIBUTE_6
+        staging_column_name: ATTRIBUTE_6
+        datatype: VARCHAR
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 42
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: SEED_DATA_SOURCE
+        staging_column_name: SEED_DATA_SOURCE
+        datatype: VARCHAR
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 43
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: FIXED_DATE
+        staging_column_name: FIXED_DATE
+        datatype: TIMESTAMP
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 44
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: CALENDAR
+        staging_column_name: CALENDAR
+        datatype: VARCHAR
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 45
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: OBJECT_VERSION_NUMBER
+        staging_column_name: OBJECT_VERSION_NUMBER
+        datatype: NUMBER
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 46
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: ATTRIBUTE_15
+        staging_column_name: ATTRIBUTE_15
+        datatype: VARCHAR
+        hashdiff: "yes"
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 47
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      # === Technical columns (NOT in HASHDIFF directly — flag-driven) ===
+      - source_table: S
+        source_column: _FIVETRAN_DELETED
+        staging_column_name: _FIVETRAN_DELETED
+        datatype: BOOLEAN
+        hashdiff: ""
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 48
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: _FIVETRAN_SYNCED
+        staging_column_name: _FIVETRAN_SYNCED
+        datatype: TIMESTAMP
+        hashdiff: ""
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 49
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      # === PSA metadata columns ===
+      - source_table: S
+        source_column: PSA_LOAD_DTS
+        staging_column_name: PSA_LOAD_DTS
+        datatype: TIMESTAMP
+        hashdiff: ""
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 50
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: PSA_RECORD_SOURCE
+        staging_column_name: PSA_RECORD_SOURCE
+        datatype: VARCHAR
+        hashdiff: ""
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 51
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: S
+        source_column: PSA_DELETE_IND
+        staging_column_name: PSA_DELETE_IND
+        datatype: VARCHAR
+        hashdiff: ""
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 52
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      # === BKCC columns (from cross join — alias A) ===
+      - source_table: A
+        source_column: REC_SRC
+        staging_column_name: REC_SRC
+        datatype: VARCHAR
+        hashdiff: ""
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 53
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      - source_table: A
+        source_column: BKCC
+        staging_column_name: BKCC
+        datatype: VARCHAR
+        hashdiff: ""
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: ""
+        order: 54
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      # === HK (deferred hash in FINAL layer) ===
+      - source_table: ""
+        source_column: "(DERIVED)"
+        staging_column_name: PAYMENT_TERM_HK
+        datatype: BINARY
+        hashdiff: ""
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: "HASH: TERM_ID, BKCC"
+        order: 55
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+      # === HASHDIFF placeholder ===
+      - source_table: ""
+        source_column: "(DERIVED)"
+        staging_column_name: HASHDIFF
+        datatype: BINARY
+        hashdiff: ""
+        not_null: ""
+        unique: ""
+        pk: ""
+        automated_logic: ""
+        manual_logic: "HASH: SEQUENCE_NUM, LAST_UPDATE_DATE, LAST_UPDATED_BY, CREATION_DATE, DISCOUNT_DAYS_3, DISCOUNT_DAY_OF_MONTH_3, DISCOUNT_MONTHS_FORWARD_3, ATTRIBUTE_CATEGORY, DISCOUNT_PERCENT_3, ATTRIBUTE_12, ATTRIBUTE_13, ATTRIBUTE_14, ATTRIBUTE_7, ATTRIBUTE_8, ATTRIBUTE_9, ATTRIBUTE_10, ATTRIBUTE_11, DISCOUNT_DAYS, DISCOUNT_DAY_OF_MONTH, DISCOUNT_MONTHS_FORWARD, DUE_DAY_OF_MONTH, DISCOUNT_PERCENT, DUE_MONTHS_FORWARD, DUE_AMOUNT, DUE_DAYS, DISCOUNT_PERCENT_2, DISCOUNT_DAYS_2, DISCOUNT_DAY_OF_MONTH_2, ORA_SEED_SET_1, ORA_SEED_SET_2, ATTRIBUTE_1, ATTRIBUTE_2, CREATED_BY, LAST_UPDATE_LOGIN, DUE_PERCENT, DISCOUNT_MONTHS_FORWARD_2, ATTRIBUTE_3, ATTRIBUTE_4, ATTRIBUTE_5, ATTRIBUTE_6, SEED_DATA_SOURCE, FIXED_DATE, CALENDAR, OBJECT_VERSION_NUMBER, ATTRIBUTE_15"
+        order: 56
+        remove_column: ""
+        set_default: ""
+        ghost_record: ""
+        scd: ""
+
+_pipeline_metadata:
+  bkcc_rec_src: "USCLOUD.ORCL.OCFPRD.AP_TERMS_LINES"
+  has_fivetran_deleted: true
+  has_psa_delete_ind: false
+  psa_delete_filter: false
+  null_bk_coalesced: false
+  large_volume: false
+  row_count: 83

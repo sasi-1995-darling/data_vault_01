@@ -1,0 +1,5 @@
+version: 2
+models:
+- name: dim_cost_center_master_data
+  tests: []
+  columns: []

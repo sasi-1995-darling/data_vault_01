@@ -1,0 +1,400 @@
+---- SRC LAYER ----
+WITH
+SRC_SITMTTGP       as ( SELECT * FROM {{ ref('v_psa_stg_item_master__tt_gp') }} as SRC 
+                         {% if is_incremental() %}
+                         WHERE SRC.LOAD_DTS > (SELECT DATEADD('HOUR', '-1', MAX(LOAD_DTS)) FROM {{this}})
+                         {% endif %}  )
+
+/*
+SRC_SITMTTGP       as ( SELECT * FROM STAGING.v_psa_stg_item_master__tt_gp )
+*/
+---- LOGIC LAYER ----
+
+, LOGIC_SITMTTGP as (
+    SELECT
+        ITEM_HK
+      , ITEMNMBR
+      , ITEMDESC
+      , NOTEINDX
+      , ITMSHNAM
+      , ITEMTYPE
+      , ITMGEDSC
+      , STNDCOST
+      , CURRCOST
+      , ITEMSHWT
+      , DECPLQTY
+      , DECPLCUR
+      , ITMTSHID
+      , TAXOPTNS
+      , IVIVINDX
+      , IVIVOFIX
+      , IVCOGSIX
+      , IVSLSIDX
+      , IVSLDSIX
+      , IVSLRNIX
+      , IVINUSIX
+      , IVINSVIX
+      , IVDMGIDX
+      , IVVARIDX
+      , DPSHPIDX
+      , PURPVIDX
+      , UPPVIDX
+      , IVRETIDX
+      , ASMVRIDX
+      , ITMCLSCD
+      , ITMTRKOP
+      , LOTTYPE
+      , KPERHIST
+      , KPTRXHST
+      , KPCALHST
+      , KPDSTHST
+      , ALWBKORD
+      , VCTNMTHD
+      , UOMSCHDL
+      , ALTITEM1
+      , ALTITEM2
+      , USCATVLS_1
+      , USCATVLS_2
+      , USCATVLS_3
+      , USCATVLS_4
+      , USCATVLS_5
+      , USCATVLS_6
+      , MSTRCDTY
+      , MODIFDT
+      , CREATDDT
+      , WRNTYDYS
+      , PRCLEVEL
+      , LOCNCODE
+      , PINFLIDX
+      , PURMCIDX
+      , IVINFIDX
+      , INVMCIDX
+      , CGSINFLX
+      , CGSMCIDX
+      , ITEMCODE
+      , TCC
+      , PRICEGROUP
+      , PRICMTHD
+      , PRCHSUOM
+      , SELNGUOM
+      , KTACCTSR
+      , LASTGENSN
+      , ABCCODE
+      , REVALUE_INVENTORY
+      , TOLERANCE_PERCENTAGE
+      , PURCHASE_ITEM_TAX_SCHEDU
+      , PURCHASE_TAX_OPTIONS
+      , ITMPLNNNGTYP
+      , STTSTCLVLPRCNTG
+      , CNTRYORGN
+      , INACTIVE
+      , MINSHELF1
+      , MINSHELF2
+      , INCLUDEINDP
+      , DEX_ROW_ID
+      , PSA_LOAD_DTS
+      , PSA_RECORD_SOURCE
+      , PSA_DELETE_IND
+      , LOAD_DTS
+      , REC_SRC
+      , HASHDIFF
+    FROM SRC_SITMTTGP
+)
+---- RENAME LAYER ----
+
+, RENAME_SITMTTGP as (
+    SELECT
+        ITEM_HK
+      , ITEMNMBR
+      , ITEMDESC
+      , NOTEINDX
+      , ITMSHNAM
+      , ITEMTYPE
+      , ITMGEDSC
+      , STNDCOST
+      , CURRCOST
+      , ITEMSHWT
+      , DECPLQTY
+      , DECPLCUR
+      , ITMTSHID
+      , TAXOPTNS
+      , IVIVINDX
+      , IVIVOFIX
+      , IVCOGSIX
+      , IVSLSIDX
+      , IVSLDSIX
+      , IVSLRNIX
+      , IVINUSIX
+      , IVINSVIX
+      , IVDMGIDX
+      , IVVARIDX
+      , DPSHPIDX
+      , PURPVIDX
+      , UPPVIDX
+      , IVRETIDX
+      , ASMVRIDX
+      , ITMCLSCD
+      , ITMTRKOP
+      , LOTTYPE
+      , KPERHIST
+      , KPTRXHST
+      , KPCALHST
+      , KPDSTHST
+      , ALWBKORD
+      , VCTNMTHD
+      , UOMSCHDL
+      , ALTITEM1
+      , ALTITEM2
+      , USCATVLS_1
+      , USCATVLS_2
+      , USCATVLS_3
+      , USCATVLS_4
+      , USCATVLS_5
+      , USCATVLS_6
+      , MSTRCDTY
+      , MODIFDT
+      , CREATDDT
+      , WRNTYDYS
+      , PRCLEVEL
+      , LOCNCODE
+      , PINFLIDX
+      , PURMCIDX
+      , IVINFIDX
+      , INVMCIDX
+      , CGSINFLX
+      , CGSMCIDX
+      , ITEMCODE
+      , TCC
+      , PRICEGROUP
+      , PRICMTHD
+      , PRCHSUOM
+      , SELNGUOM
+      , KTACCTSR
+      , LASTGENSN
+      , ABCCODE
+      , REVALUE_INVENTORY
+      , TOLERANCE_PERCENTAGE
+      , PURCHASE_ITEM_TAX_SCHEDU
+      , PURCHASE_TAX_OPTIONS
+      , ITMPLNNNGTYP
+      , STTSTCLVLPRCNTG
+      , CNTRYORGN
+      , INACTIVE
+      , MINSHELF1
+      , MINSHELF2
+      , INCLUDEINDP
+      , DEX_ROW_ID
+      , PSA_LOAD_DTS
+      , PSA_RECORD_SOURCE
+      , PSA_DELETE_IND
+      , LOAD_DTS
+      , REC_SRC
+      , HASHDIFF
+    FROM LOGIC_SITMTTGP
+)
+---- FILTER LAYER ----
+
+, FILTER_SITMTTGP as (
+    SELECT *
+    FROM RENAME_SITMTTGP
+)
+
+---- JOIN LAYER ----
+, JOIN_RESULT as (
+    SELECT *
+    FROM FILTER_SITMTTGP
+)
+
+---- FINAL LAYER ----
+SELECT
+          ITEM_HK
+        , ITEMNMBR
+        , ITEMDESC
+        , NOTEINDX
+        , ITMSHNAM
+        , ITEMTYPE
+        , ITMGEDSC
+        , STNDCOST
+        , CURRCOST
+        , ITEMSHWT
+        , DECPLQTY
+        , DECPLCUR
+        , ITMTSHID
+        , TAXOPTNS
+        , IVIVINDX
+        , IVIVOFIX
+        , IVCOGSIX
+        , IVSLSIDX
+        , IVSLDSIX
+        , IVSLRNIX
+        , IVINUSIX
+        , IVINSVIX
+        , IVDMGIDX
+        , IVVARIDX
+        , DPSHPIDX
+        , PURPVIDX
+        , UPPVIDX
+        , IVRETIDX
+        , ASMVRIDX
+        , ITMCLSCD
+        , ITMTRKOP
+        , LOTTYPE
+        , KPERHIST
+        , KPTRXHST
+        , KPCALHST
+        , KPDSTHST
+        , ALWBKORD
+        , VCTNMTHD
+        , UOMSCHDL
+        , ALTITEM1
+        , ALTITEM2
+        , USCATVLS_1
+        , USCATVLS_2
+        , USCATVLS_3
+        , USCATVLS_4
+        , USCATVLS_5
+        , USCATVLS_6
+        , MSTRCDTY
+        , MODIFDT
+        , CREATDDT
+        , WRNTYDYS
+        , PRCLEVEL
+        , LOCNCODE
+        , PINFLIDX
+        , PURMCIDX
+        , IVINFIDX
+        , INVMCIDX
+        , CGSINFLX
+        , CGSMCIDX
+        , ITEMCODE
+        , TCC
+        , PRICEGROUP
+        , PRICMTHD
+        , PRCHSUOM
+        , SELNGUOM
+        , KTACCTSR
+        , LASTGENSN
+        , ABCCODE
+        , REVALUE_INVENTORY
+        , TOLERANCE_PERCENTAGE
+        , PURCHASE_ITEM_TAX_SCHEDU
+        , PURCHASE_TAX_OPTIONS
+        , ITMPLNNNGTYP
+        , STTSTCLVLPRCNTG
+        , CNTRYORGN
+        , INACTIVE
+        , MINSHELF1
+        , MINSHELF2
+        , INCLUDEINDP
+        , DEX_ROW_ID
+        , PSA_LOAD_DTS
+        , PSA_RECORD_SOURCE
+        , PSA_DELETE_IND
+        , LOAD_DTS
+        , REC_SRC
+        , HASHDIFF
+FROM JOIN_RESULT
+{% if is_incremental() %}
+WHERE NOT EXISTS (
+    SELECT 1 
+    FROM {{ this }} existing
+    WHERE existing.ITEM_HK= JOIN_RESULT.ITEM_HK
+    AND existing.HASHDIFF = JOIN_RESULT.HASHDIFF
+)
+{% endif %}
+{% if not is_incremental() %}
+
+/* The following qualifier is implemented to prevent multiple loads of touched records during the initial build, such as multiple rows per HK and hashdiff. */
+qualify 1 = row_number() over (partition by ITEM_HK, DEX_ROW_ID, HASHDIFF order by PSA_LOAD_DTS)
+
+union all
+SELECT 
+MD5_BINARY(GR.VALUE) AS ITEM_HK,
+GR.VALUE::text AS ITEMNMBR,
+NULL AS ITEMDESC,
+NULL AS NOTEINDX,
+NULL AS ITMSHNAM,
+NULL AS ITEMTYPE,
+NULL AS ITMGEDSC,
+NULL AS STNDCOST,
+NULL AS CURRCOST,
+NULL AS ITEMSHWT,
+NULL AS DECPLQTY,
+NULL AS DECPLCUR,
+NULL AS ITMTSHID,
+NULL AS TAXOPTNS,
+NULL AS IVIVINDX,
+NULL AS IVIVOFIX,
+NULL AS IVCOGSIX,
+NULL AS IVSLSIDX,
+NULL AS IVSLDSIX,
+NULL AS IVSLRNIX,
+NULL AS IVINUSIX,
+NULL AS IVINSVIX,
+NULL AS IVDMGIDX,
+NULL AS IVVARIDX,
+NULL AS DPSHPIDX,
+NULL AS PURPVIDX,
+NULL AS UPPVIDX,
+NULL AS IVRETIDX,
+NULL AS ASMVRIDX,
+NULL AS ITMCLSCD,
+NULL AS ITMTRKOP,
+NULL AS LOTTYPE,
+NULL AS KPERHIST,
+NULL AS KPTRXHST,
+NULL AS KPCALHST,
+NULL AS KPDSTHST,
+NULL AS ALWBKORD,
+NULL AS VCTNMTHD,
+NULL AS UOMSCHDL,
+NULL AS ALTITEM1,
+NULL AS ALTITEM2,
+NULL AS USCATVLS_1,
+NULL AS USCATVLS_2,
+NULL AS USCATVLS_3,
+NULL AS USCATVLS_4,
+NULL AS USCATVLS_5,
+NULL AS USCATVLS_6,
+NULL AS MSTRCDTY,
+NULL AS MODIFDT,
+NULL AS CREATDDT,
+NULL AS WRNTYDYS,
+NULL AS PRCLEVEL,
+NULL AS LOCNCODE,
+NULL AS PINFLIDX,
+NULL AS PURMCIDX,
+NULL AS IVINFIDX,
+NULL AS INVMCIDX,
+NULL AS CGSINFLX,
+NULL AS CGSMCIDX,
+NULL AS ITEMCODE,
+NULL AS TCC,
+NULL AS PRICEGROUP,
+NULL AS PRICMTHD,
+NULL AS PRCHSUOM,
+NULL AS SELNGUOM,
+NULL AS KTACCTSR,
+NULL AS LASTGENSN,
+NULL AS ABCCODE,
+NULL AS REVALUE_INVENTORY,
+NULL AS TOLERANCE_PERCENTAGE,
+NULL AS PURCHASE_ITEM_TAX_SCHEDU,
+NULL AS PURCHASE_TAX_OPTIONS,
+NULL AS ITMPLNNNGTYP,
+NULL AS STTSTCLVLPRCNTG,
+NULL AS CNTRYORGN,
+NULL AS INACTIVE,
+NULL AS MINSHELF1,
+NULL AS MINSHELF2,
+NULL AS INCLUDEINDP,
+NULL AS DEX_ROW_ID,
+'1900-01-01'::TIMESTAMP AS PSA_LOAD_DTS,
+NULL AS PSA_RECORD_SOURCE,
+'N' AS PSA_DELETE_IND,
+CONVERT_TIMEZONE('UTC','1900-01-01'::TIMESTAMP) AS LOAD_DTS,
+'USAZET.SNOWFLAKE.FBIN.DERIVED' AS REC_SRC,
+''::BINARY AS HASHDIFF
+FROM
+TABLE(strtok_split_to_table('0|-1|-2', '|')) AS GR
+{% endif %}

@@ -1,0 +1,48 @@
+---- SRC LAYER ----
+WITH
+SRC_S              as ( SELECT * FROM {{ source('appbot_psa', 'APPLIST') }} as SRC 
+                        WHERE psa_delete_ind = 'N' ),
+SRC_BKCC          as ( SELECT BKCC, REC_SRC FROM {{ ref('ref_business_key_collision') }} WHERE rec_src = 'US.APPBOT.APPLIST' )
+
+/*
+SRC_S              as ( SELECT * FROM appbot_psa.APPLIST )
+SRC_BKCC          as ( SELECT BKCC, REC_SRC FROM RAW_VAULT.REF_BUSINESS_KEY_COLLISION WHERE rec_src = 'US.APPBOT.APPLIST' )
+*/
+---- LOGIC LAYER ----
+
+, LOGIC_S as (
+    SELECT
+        STORE                                                        as                                        RETAILER_BK
+      , CONVERT_TIMEZONE('UTC', PSA_LOAD_DTS)                        as                                           LOAD_DTS
+      , STORE_ID
+      , PSA_LOAD_DTS
+      , PSA_RECORD_SOURCE
+      , PSA_DELETE_IND
+    FROM SRC_S
+)
+
+---- JOIN LAYER ----
+, JOIN_RESULT as (
+    SELECT *
+    FROM LOGIC_S
+    INNER JOIN SRC_BKCC ON '1' = '1'
+)
+
+---- FINAL LAYER ----
+SELECT
+          RETAILER_BK
+        , LOAD_DTS
+        , STORE_ID
+        , PSA_LOAD_DTS
+        , PSA_RECORD_SOURCE
+        , PSA_DELETE_IND
+        , REC_SRC
+        , BKCC
+        , MD5_BINARY(UPPER(CONCAT_WS('||',
+          COALESCE(NULLIF(TRIM(CAST(RETAILER_BK as VARCHAR)),''), '^^')
+        , COALESCE(NULLIF(TRIM(CAST(BKCC as VARCHAR)),''), '^^')
+        ))) as RETAILER_HK
+        , MD5_BINARY(UPPER(NULLIF(CONCAT(
+              IFNULL(TRIM(STORE_ID::text), '^^') 
+        ), '^^||^^')))  as HASHDIFF
+FROM JOIN_RESULT

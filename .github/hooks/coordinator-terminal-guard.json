@@ -1,0 +1,6 @@
+{
+  "_comment_1": "Coordinator terminal blocking — currently INACTIVE.",
+  "_comment_2": "Populate the 'hooks' dict below to activate enforcement. The companion script (scripts/automation/hooks/coordinator_terminal_guard.py) is ready — this JSON is the one-flip activation path.",
+  "_comment_3": "Requires hook protocol support: fires in Claude Code CLI; inert in VS Code Copilot (no hook protocol). See AGENTS.md Hook Activation Matrix.",
+  "hooks": {}
+}

@@ -1,0 +1,11 @@
+version: 2
+models:
+- name: fact_device_telemetry_coverage_period
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - DEVICE_ID
+        - PERIOD_TYPE
+        - PERIOD_START_DATE_KEY
+  columns: []

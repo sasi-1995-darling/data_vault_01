@@ -1,0 +1,1006 @@
+---- SRC LAYER ----
+WITH
+SRC_PO_HDR         as ( SELECT ACCEPTANCE_DUE_DATE, ACCEPTANCE_REQUIRED_FLAG, ADVANCE_PAYMENT_IND, AGENT_ID, AGREEMENT_TYPE, AME_APPROVAL_ID, AME_TRANSACTION_TYPE, AMOUNT_LIMIT, APPROVAL_REQUIRED_FLAG, APPROVED_DATE, APPROVED_FLAG, ASSISTED_ACQUISITION_IND, ATTRIBUTE1, ATTRIBUTE10, ATTRIBUTE11, ATTRIBUTE12, ATTRIBUTE13, ATTRIBUTE14, ATTRIBUTE15, ATTRIBUTE2, ATTRIBUTE3, ATTRIBUTE4, ATTRIBUTE5, ATTRIBUTE6, ATTRIBUTE7, ATTRIBUTE8, ATTRIBUTE9, ATTRIBUTE_CATEGORY, AUTHORIZATION_STATUS, AUTO_SOURCING_FLAG, BILL_TO_LOCATION_ID, BLANKET_TOTAL_AMOUNT, CANCEL_FLAG, CAT_ADMIN_AUTH_ENABLED_FLAG, CBC_ACCOUNTING_DATE, CHANGE_REQUESTED_BY, CHANGE_SUMMARY, CLM_AMOUNT_RELEASED, CLM_AMT_SYNCED_TO_AGREEMENT, CLM_AWARD_ADMINISTRATOR, CLM_AWARD_TYPE, CLM_CLOSEOUT_STATUS, CLM_CONTRACT_FINANCE_CODE, CLM_CONTRACT_OFFICER, CLM_COTR_CONTACT, CLM_COTR_OFFICE, CLM_DEFAULT_DIST_FLAG, CLM_DOCUMENT_FORMAT, CLM_DOCUMENT_NUMBER, CLM_EDAGEN_DATE, CLM_EFFECTIVE_DATE, CLM_EXTERNAL_IDV, CLM_ISSUING_OFFICE, CLM_MAX_ORDER_AMOUNT, CLM_MIN_GUARANTEE_AWARD_AMT, CLM_MIN_GUAR_AWARD_AMT_PERCENT, CLM_MIN_ORDER_AMOUNT, CLM_MOD_ISSUING_OFFICE, CLM_NO_SIGNED_COPIES_TO_RETURN, CLM_PAYMENT_INSTR_CODE, CLM_PRIORITY_CODE, CLM_SOURCE_DOCUMENT_ID, CLM_SPECIAL_CONTRACT_TYPE, CLM_STANDARD_FORM, CLM_SUPPLIER_NAME, CLM_SUPPLIER_SITE_NAME, CLM_VENDOR_OFFER_NUMBER, CLOSED_CODE, CLOSED_DATE, COMMENTS, COMM_REV_NUM, CONFIRMING_ORDER_FLAG, CONSIGNED_CONSUMPTION_FLAG, CONSUME_REQ_DEMAND_FLAG, CONTERMS_ARTICLES_UPD_DATE, CONTERMS_DELIV_UPD_DATE, CONTERMS_EXIST_FLAG, CPA_REFERENCE, CREATED_BY, CREATED_LANGUAGE, CREATION_DATE, CURRENCY_CODE, DOCUMENT_CREATION_METHOD, DRAFT_ID, EDI_PROCESSED_FLAG, EDI_PROCESSED_STATUS, EMAIL_ADDRESS, ENABLED_FLAG, ENABLE_ALL_SITES, ENCUMBRANCE_REQUIRED_FLAG, END_DATE, END_DATE_ACTIVE, ENFORCE_TOTAL_AMT_IND, FAX, FIRM_DATE, FIRM_STATUS_LOOKUP_CODE, FOB_LOOKUP_CODE, FON_REF_ID, FREIGHT_TERMS_LOOKUP_CODE, FROM_HEADER_ID, FROM_TYPE_LOOKUP_CODE, FROZEN_FLAG, GLOBAL_AGREEMENT_FLAG, GLOBAL_ATTRIBUTE1, GLOBAL_ATTRIBUTE10, GLOBAL_ATTRIBUTE11, GLOBAL_ATTRIBUTE12, GLOBAL_ATTRIBUTE13, GLOBAL_ATTRIBUTE14, GLOBAL_ATTRIBUTE15, GLOBAL_ATTRIBUTE16, GLOBAL_ATTRIBUTE17, GLOBAL_ATTRIBUTE18, GLOBAL_ATTRIBUTE19, GLOBAL_ATTRIBUTE2, GLOBAL_ATTRIBUTE20, GLOBAL_ATTRIBUTE3, GLOBAL_ATTRIBUTE4, GLOBAL_ATTRIBUTE5, GLOBAL_ATTRIBUTE6, GLOBAL_ATTRIBUTE7, GLOBAL_ATTRIBUTE8, GLOBAL_ATTRIBUTE9, GLOBAL_ATTRIBUTE_CATEGORY, GOVERNMENT_CONTEXT, IGT_BUSINESS_TXN_ID, IGT_DOCUMENT_NUMBER, IGT_GTNC_NUMBER, IGT_STATUS, INTERFACE_SOURCE_CODE, LAST_UPDATED_BY, LAST_UPDATED_PROGRAM, LAST_UPDATE_DATE, LAST_UPDATE_LOGIN, LOCK_OWNER_ROLE, LOCK_OWNER_USER_ID, MIN_RELEASE_AMOUNT, MRC_RATE, MRC_RATE_DATE, MRC_RATE_TYPE, NOTE_TO_AUTHORIZER, NOTE_TO_RECEIVER, NOTE_TO_VENDOR, ORG_ID, OTM_RECOVERY_FLAG, OTM_STATUS_CODE, PAY_ON_CODE, PAY_WHEN_PAID, PCARD_ID, PENDING_SIGNATURE_FLAG, PO_HEADER_ID, PRICE_UPDATE_TOLERANCE, PRINTED_DATE, PRINT_COUNT, PROGRAM_APPLICATION_ID, PROGRAM_ID, PROGRAM_UPDATE_DATE, PSA_DELETE_IND, PSA_LOAD_DTS, PSA_RECORD_SOURCE, QUOTATION_CLASS_CODE, QUOTE_TYPE_LOOKUP_CODE, QUOTE_VENDOR_QUOTE_NUMBER, QUOTE_WARNING_DELAY, QUOTE_WARNING_DELAY_UNIT, RATE, RATE_DATE, RATE_TYPE, REFERENCE_NUM, REPLY_DATE, REPLY_METHOD_LOOKUP_CODE, REQUEST_ID, RETRO_PRICE_APPLY_UPDATES_FLAG, RETRO_PRICE_COMM_UPDATES_FLAG, REVISED_DATE, REVISION_NUM, RFQ_CLOSE_DATE, SEGMENT1, SEGMENT2, SEGMENT3, SEGMENT4, SEGMENT5, SHIPPING_CONTROL, SHIP_TO_LOCATION_ID, SHIP_VIA_LOOKUP_CODE, START_DATE, START_DATE_ACTIVE, STATUS_LOOKUP_CODE, STYLE_ID, SUBMIT_DATE, SUMMARY_FLAG, SUPPLIER_AUTH_ENABLED_FLAG, SUPPLIER_NOTIF_METHOD, SUPPLY_AGREEMENT_FLAG, TAX_ATTRIBUTE_UPDATE_CODE, TERMINATION_DAYS, TERMS_ID, TOTAL_REMAINING_AMT, TYPE_LOOKUP_CODE, UDA_TEMPLATE_DATE, UDA_TEMPLATE_ID, UMBRELLA_PROGRAM_ID, UPDATE_SOURCING_RULES_FLAG, USER_DOCUMENT_STATUS, USER_HOLD_FLAG, USSGL_TRANSACTION_CODE, VENDOR_CONTACT_ID, VENDOR_ID, VENDOR_ORDER_NUM, VENDOR_SITE_ID, WF_ITEM_KEY, WF_ITEM_TYPE, XML_CHANGE_SEND_DATE, XML_FLAG, XML_SEND_DATE, _FIVETRAN_DELETED, _FIVETRAN_ID, _FIVETRAN_SYNCED FROM {{ source('emtk_ebs_po', 'po_headers_all') }} as SRC  ),
+SRC_A              as ( SELECT BKCC, REC_SRC FROM {{ ref('ref_business_key_collision') }} as SRC  ),
+SRC_AP             as ( SELECT DESCRIPTION, TERM_ID FROM {{ source('emtk_ebs_ap', 'ap_terms_tl') }} as SRC 
+                        qualify 1= row_number()over(partition by term_id order by _fivetran_synced desc, psa_load_dts desc) ),
+SRC_sup            as ( SELECT SEGMENT1, VENDOR_ID FROM {{ source('emtk_ebs_ap', 'ap_suppliers') }} as SRC 
+                        qualify 1= row_number()over(partition by vendor_id order by _fivetran_synced desc, psa_load_dts desc) )
+
+/*
+SRC_PO_HDR         as ( SELECT * FROM emtk_ebs_po.po_headers_all )
+SRC_A              as ( SELECT * FROM raw_vault.ref_business_key_collision )
+SRC_AP             as ( SELECT * FROM emtk_ebs_ap.ap_terms_tl )
+SRC_sup            as ( SELECT * FROM emtk_ebs_ap.ap_suppliers )
+*/
+---- LOGIC LAYER ----
+
+, LOGIC_PO_HDR as (
+    SELECT
+        COALESCE(PO_HEADER_ID::TEXT,'')                              as                                       PO_HEADER_BK
+      , PO_HEADER_ID
+      , AGENT_ID
+      , TYPE_LOOKUP_CODE
+      , LAST_UPDATE_DATE
+      , LAST_UPDATED_BY
+      , SEGMENT1
+      , SUMMARY_FLAG
+      , ENABLED_FLAG
+      , SEGMENT2
+      , SEGMENT3
+      , SEGMENT4
+      , SEGMENT5
+      , START_DATE_ACTIVE
+      , END_DATE_ACTIVE
+      , LAST_UPDATE_LOGIN
+      , CREATION_DATE
+      , CREATED_BY
+      , VENDOR_ID
+      , VENDOR_SITE_ID
+      , VENDOR_CONTACT_ID
+      , SHIP_TO_LOCATION_ID
+      , BILL_TO_LOCATION_ID
+      , TERMS_ID
+      , SHIP_VIA_LOOKUP_CODE
+      , FOB_LOOKUP_CODE
+      , FREIGHT_TERMS_LOOKUP_CODE
+      , STATUS_LOOKUP_CODE
+      , CURRENCY_CODE
+      , RATE_TYPE
+      , RATE_DATE
+      , RATE
+      , FROM_HEADER_ID
+      , FROM_TYPE_LOOKUP_CODE
+      , START_DATE
+      , END_DATE
+      , BLANKET_TOTAL_AMOUNT
+      , AUTHORIZATION_STATUS
+      , REVISION_NUM
+      , REVISED_DATE
+      , APPROVED_FLAG
+      , APPROVED_DATE
+      , AMOUNT_LIMIT
+      , MIN_RELEASE_AMOUNT
+      , NOTE_TO_AUTHORIZER
+      , NOTE_TO_VENDOR
+      , NOTE_TO_RECEIVER
+      , PRINT_COUNT
+      , PRINTED_DATE
+      , VENDOR_ORDER_NUM
+      , CONFIRMING_ORDER_FLAG
+      , COMMENTS
+      , REPLY_DATE
+      , REPLY_METHOD_LOOKUP_CODE
+      , RFQ_CLOSE_DATE
+      , QUOTE_TYPE_LOOKUP_CODE
+      , QUOTATION_CLASS_CODE
+      , QUOTE_WARNING_DELAY_UNIT
+      , QUOTE_WARNING_DELAY
+      , QUOTE_VENDOR_QUOTE_NUMBER
+      , ACCEPTANCE_REQUIRED_FLAG
+      , ACCEPTANCE_DUE_DATE
+      , CLOSED_DATE
+      , USER_HOLD_FLAG
+      , APPROVAL_REQUIRED_FLAG
+      , CANCEL_FLAG
+      , FIRM_STATUS_LOOKUP_CODE
+      , FIRM_DATE
+      , FROZEN_FLAG
+      , SUPPLY_AGREEMENT_FLAG
+      , EDI_PROCESSED_FLAG
+      , EDI_PROCESSED_STATUS
+      , ATTRIBUTE_CATEGORY
+      , ATTRIBUTE1
+      , ATTRIBUTE2
+      , ATTRIBUTE3
+      , ATTRIBUTE4
+      , ATTRIBUTE5
+      , ATTRIBUTE6
+      , ATTRIBUTE7
+      , ATTRIBUTE8
+      , ATTRIBUTE9
+      , ATTRIBUTE10
+      , ATTRIBUTE11
+      , ATTRIBUTE12
+      , ATTRIBUTE13
+      , ATTRIBUTE14
+      , ATTRIBUTE15
+      , CLOSED_CODE
+      , USSGL_TRANSACTION_CODE
+      , GOVERNMENT_CONTEXT
+      , REQUEST_ID
+      , PROGRAM_APPLICATION_ID
+      , PROGRAM_ID
+      , PROGRAM_UPDATE_DATE
+      , ORG_ID
+      , GLOBAL_ATTRIBUTE_CATEGORY
+      , GLOBAL_ATTRIBUTE1
+      , GLOBAL_ATTRIBUTE2
+      , GLOBAL_ATTRIBUTE3
+      , GLOBAL_ATTRIBUTE4
+      , GLOBAL_ATTRIBUTE5
+      , GLOBAL_ATTRIBUTE6
+      , GLOBAL_ATTRIBUTE7
+      , GLOBAL_ATTRIBUTE8
+      , GLOBAL_ATTRIBUTE9
+      , GLOBAL_ATTRIBUTE10
+      , GLOBAL_ATTRIBUTE11
+      , GLOBAL_ATTRIBUTE12
+      , GLOBAL_ATTRIBUTE13
+      , GLOBAL_ATTRIBUTE14
+      , GLOBAL_ATTRIBUTE15
+      , GLOBAL_ATTRIBUTE16
+      , GLOBAL_ATTRIBUTE17
+      , GLOBAL_ATTRIBUTE18
+      , GLOBAL_ATTRIBUTE19
+      , GLOBAL_ATTRIBUTE20
+      , INTERFACE_SOURCE_CODE
+      , REFERENCE_NUM
+      , WF_ITEM_TYPE
+      , WF_ITEM_KEY
+      , MRC_RATE_TYPE
+      , MRC_RATE_DATE
+      , MRC_RATE
+      , PCARD_ID
+      , PRICE_UPDATE_TOLERANCE
+      , PAY_ON_CODE
+      , XML_FLAG
+      , XML_SEND_DATE
+      , XML_CHANGE_SEND_DATE
+      , GLOBAL_AGREEMENT_FLAG
+      , CONSIGNED_CONSUMPTION_FLAG
+      , CBC_ACCOUNTING_DATE
+      , CONSUME_REQ_DEMAND_FLAG
+      , CHANGE_REQUESTED_BY
+      , SHIPPING_CONTROL
+      , CONTERMS_EXIST_FLAG
+      , CONTERMS_ARTICLES_UPD_DATE
+      , CONTERMS_DELIV_UPD_DATE
+      , ENCUMBRANCE_REQUIRED_FLAG
+      , PENDING_SIGNATURE_FLAG
+      , CHANGE_SUMMARY
+      , DOCUMENT_CREATION_METHOD
+      , SUBMIT_DATE
+      , ENABLE_ALL_SITES
+      , CREATED_LANGUAGE
+      , CPA_REFERENCE
+      , LAST_UPDATED_PROGRAM
+      , OTM_STATUS_CODE
+      , OTM_RECOVERY_FLAG
+      , COMM_REV_NUM
+      , SUPPLIER_NOTIF_METHOD
+      , FAX
+      , EMAIL_ADDRESS
+      , RETRO_PRICE_COMM_UPDATES_FLAG
+      , RETRO_PRICE_APPLY_UPDATES_FLAG
+      , UPDATE_SOURCING_RULES_FLAG
+      , AUTO_SOURCING_FLAG
+      , LOCK_OWNER_ROLE
+      , LOCK_OWNER_USER_ID
+      , SUPPLIER_AUTH_ENABLED_FLAG
+      , CAT_ADMIN_AUTH_ENABLED_FLAG
+      , STYLE_ID
+      , TAX_ATTRIBUTE_UPDATE_CODE
+      , PAY_WHEN_PAID
+      , UDA_TEMPLATE_ID
+      , UDA_TEMPLATE_DATE
+      , USER_DOCUMENT_STATUS
+      , AME_APPROVAL_ID
+      , DRAFT_ID
+      , CLM_EFFECTIVE_DATE
+      , CLM_VENDOR_OFFER_NUMBER
+      , CLM_AWARD_ADMINISTRATOR
+      , CLM_NO_SIGNED_COPIES_TO_RETURN
+      , CLM_MIN_GUARANTEE_AWARD_AMT
+      , CLM_MIN_GUAR_AWARD_AMT_PERCENT
+      , CLM_MIN_ORDER_AMOUNT
+      , CLM_MAX_ORDER_AMOUNT
+      , CLM_AMT_SYNCED_TO_AGREEMENT
+      , CLM_AMOUNT_RELEASED
+      , CLM_EXTERNAL_IDV
+      , CLM_SUPPLIER_NAME
+      , CLM_SUPPLIER_SITE_NAME
+      , CLM_DOCUMENT_NUMBER
+      , CLM_SOURCE_DOCUMENT_ID
+      , CLM_ISSUING_OFFICE
+      , CLM_COTR_OFFICE
+      , CLM_COTR_CONTACT
+      , CLM_PRIORITY_CODE
+      , CLM_MOD_ISSUING_OFFICE
+      , CLM_STANDARD_FORM
+      , CLM_DOCUMENT_FORMAT
+      , AME_TRANSACTION_TYPE
+      , CLM_AWARD_TYPE
+      , CLM_CONTRACT_OFFICER
+      , CLM_CLOSEOUT_STATUS
+      , UMBRELLA_PROGRAM_ID
+      , FON_REF_ID
+      , CLM_DEFAULT_DIST_FLAG
+      , CLM_EDAGEN_DATE
+      , CLM_CONTRACT_FINANCE_CODE
+      , CLM_PAYMENT_INSTR_CODE
+      , CLM_SPECIAL_CONTRACT_TYPE
+      , IGT_DOCUMENT_NUMBER
+      , IGT_GTNC_NUMBER
+      , IGT_STATUS
+      , AGREEMENT_TYPE
+      , ASSISTED_ACQUISITION_IND
+      , ADVANCE_PAYMENT_IND
+      , ENFORCE_TOTAL_AMT_IND
+      , TERMINATION_DAYS
+      , TOTAL_REMAINING_AMT
+      , IGT_BUSINESS_TXN_ID
+      , _FIVETRAN_ID
+      , _FIVETRAN_DELETED
+      , _FIVETRAN_SYNCED
+      , PSA_LOAD_DTS
+      , PSA_RECORD_SOURCE
+      , PSA_DELETE_IND
+      , CONVERT_TIMEZONE('UTC', _FIVETRAN_SYNCED)                    as                                           LOAD_DTS
+    FROM SRC_PO_HDR
+)
+
+, LOGIC_A as (
+    SELECT
+        REC_SRC
+      , BKCC
+    FROM SRC_A
+)
+
+, LOGIC_AP as (
+    SELECT
+        DESCRIPTION                                                  as                                   TERM_DESCRIPTION
+      , TERM_ID
+    FROM SRC_AP
+)
+
+, LOGIC_sup as (
+    SELECT
+        VENDOR_ID                                                    as                                      SUP_VENDOR_ID
+      , SEGMENT1                                                     as                                       SUP_SEGMENT1
+    FROM SRC_sup
+)
+---- RENAME LAYER ----
+
+, RENAME_PO_HDR as (
+    SELECT
+        PO_HEADER_BK
+      , PO_HEADER_ID
+      , AGENT_ID
+      , TYPE_LOOKUP_CODE
+      , LAST_UPDATE_DATE
+      , LAST_UPDATED_BY
+      , SEGMENT1
+      , SUMMARY_FLAG
+      , ENABLED_FLAG
+      , SEGMENT2
+      , SEGMENT3
+      , SEGMENT4
+      , SEGMENT5
+      , START_DATE_ACTIVE
+      , END_DATE_ACTIVE
+      , LAST_UPDATE_LOGIN
+      , CREATION_DATE
+      , CREATED_BY
+      , VENDOR_ID
+      , VENDOR_SITE_ID
+      , VENDOR_CONTACT_ID
+      , SHIP_TO_LOCATION_ID
+      , BILL_TO_LOCATION_ID
+      , TERMS_ID
+      , SHIP_VIA_LOOKUP_CODE
+      , FOB_LOOKUP_CODE
+      , FREIGHT_TERMS_LOOKUP_CODE
+      , STATUS_LOOKUP_CODE
+      , CURRENCY_CODE
+      , RATE_TYPE
+      , RATE_DATE
+      , RATE
+      , FROM_HEADER_ID
+      , FROM_TYPE_LOOKUP_CODE
+      , START_DATE
+      , END_DATE
+      , BLANKET_TOTAL_AMOUNT
+      , AUTHORIZATION_STATUS
+      , REVISION_NUM
+      , REVISED_DATE
+      , APPROVED_FLAG
+      , APPROVED_DATE
+      , AMOUNT_LIMIT
+      , MIN_RELEASE_AMOUNT
+      , NOTE_TO_AUTHORIZER
+      , NOTE_TO_VENDOR
+      , NOTE_TO_RECEIVER
+      , PRINT_COUNT
+      , PRINTED_DATE
+      , VENDOR_ORDER_NUM
+      , CONFIRMING_ORDER_FLAG
+      , COMMENTS
+      , REPLY_DATE
+      , REPLY_METHOD_LOOKUP_CODE
+      , RFQ_CLOSE_DATE
+      , QUOTE_TYPE_LOOKUP_CODE
+      , QUOTATION_CLASS_CODE
+      , QUOTE_WARNING_DELAY_UNIT
+      , QUOTE_WARNING_DELAY
+      , QUOTE_VENDOR_QUOTE_NUMBER
+      , ACCEPTANCE_REQUIRED_FLAG
+      , ACCEPTANCE_DUE_DATE
+      , CLOSED_DATE
+      , USER_HOLD_FLAG
+      , APPROVAL_REQUIRED_FLAG
+      , CANCEL_FLAG
+      , FIRM_STATUS_LOOKUP_CODE
+      , FIRM_DATE
+      , FROZEN_FLAG
+      , SUPPLY_AGREEMENT_FLAG
+      , EDI_PROCESSED_FLAG
+      , EDI_PROCESSED_STATUS
+      , ATTRIBUTE_CATEGORY
+      , ATTRIBUTE1
+      , ATTRIBUTE2
+      , ATTRIBUTE3
+      , ATTRIBUTE4
+      , ATTRIBUTE5
+      , ATTRIBUTE6
+      , ATTRIBUTE7
+      , ATTRIBUTE8
+      , ATTRIBUTE9
+      , ATTRIBUTE10
+      , ATTRIBUTE11
+      , ATTRIBUTE12
+      , ATTRIBUTE13
+      , ATTRIBUTE14
+      , ATTRIBUTE15
+      , CLOSED_CODE
+      , USSGL_TRANSACTION_CODE
+      , GOVERNMENT_CONTEXT
+      , REQUEST_ID
+      , PROGRAM_APPLICATION_ID
+      , PROGRAM_ID
+      , PROGRAM_UPDATE_DATE
+      , ORG_ID
+      , GLOBAL_ATTRIBUTE_CATEGORY
+      , GLOBAL_ATTRIBUTE1
+      , GLOBAL_ATTRIBUTE2
+      , GLOBAL_ATTRIBUTE3
+      , GLOBAL_ATTRIBUTE4
+      , GLOBAL_ATTRIBUTE5
+      , GLOBAL_ATTRIBUTE6
+      , GLOBAL_ATTRIBUTE7
+      , GLOBAL_ATTRIBUTE8
+      , GLOBAL_ATTRIBUTE9
+      , GLOBAL_ATTRIBUTE10
+      , GLOBAL_ATTRIBUTE11
+      , GLOBAL_ATTRIBUTE12
+      , GLOBAL_ATTRIBUTE13
+      , GLOBAL_ATTRIBUTE14
+      , GLOBAL_ATTRIBUTE15
+      , GLOBAL_ATTRIBUTE16
+      , GLOBAL_ATTRIBUTE17
+      , GLOBAL_ATTRIBUTE18
+      , GLOBAL_ATTRIBUTE19
+      , GLOBAL_ATTRIBUTE20
+      , INTERFACE_SOURCE_CODE
+      , REFERENCE_NUM
+      , WF_ITEM_TYPE
+      , WF_ITEM_KEY
+      , MRC_RATE_TYPE
+      , MRC_RATE_DATE
+      , MRC_RATE
+      , PCARD_ID
+      , PRICE_UPDATE_TOLERANCE
+      , PAY_ON_CODE
+      , XML_FLAG
+      , XML_SEND_DATE
+      , XML_CHANGE_SEND_DATE
+      , GLOBAL_AGREEMENT_FLAG
+      , CONSIGNED_CONSUMPTION_FLAG
+      , CBC_ACCOUNTING_DATE
+      , CONSUME_REQ_DEMAND_FLAG
+      , CHANGE_REQUESTED_BY
+      , SHIPPING_CONTROL
+      , CONTERMS_EXIST_FLAG
+      , CONTERMS_ARTICLES_UPD_DATE
+      , CONTERMS_DELIV_UPD_DATE
+      , ENCUMBRANCE_REQUIRED_FLAG
+      , PENDING_SIGNATURE_FLAG
+      , CHANGE_SUMMARY
+      , DOCUMENT_CREATION_METHOD
+      , SUBMIT_DATE
+      , ENABLE_ALL_SITES
+      , CREATED_LANGUAGE
+      , CPA_REFERENCE
+      , LAST_UPDATED_PROGRAM
+      , OTM_STATUS_CODE
+      , OTM_RECOVERY_FLAG
+      , COMM_REV_NUM
+      , SUPPLIER_NOTIF_METHOD
+      , FAX
+      , EMAIL_ADDRESS
+      , RETRO_PRICE_COMM_UPDATES_FLAG
+      , RETRO_PRICE_APPLY_UPDATES_FLAG
+      , UPDATE_SOURCING_RULES_FLAG
+      , AUTO_SOURCING_FLAG
+      , LOCK_OWNER_ROLE
+      , LOCK_OWNER_USER_ID
+      , SUPPLIER_AUTH_ENABLED_FLAG
+      , CAT_ADMIN_AUTH_ENABLED_FLAG
+      , STYLE_ID
+      , TAX_ATTRIBUTE_UPDATE_CODE
+      , PAY_WHEN_PAID
+      , UDA_TEMPLATE_ID
+      , UDA_TEMPLATE_DATE
+      , USER_DOCUMENT_STATUS
+      , AME_APPROVAL_ID
+      , DRAFT_ID
+      , CLM_EFFECTIVE_DATE
+      , CLM_VENDOR_OFFER_NUMBER
+      , CLM_AWARD_ADMINISTRATOR
+      , CLM_NO_SIGNED_COPIES_TO_RETURN
+      , CLM_MIN_GUARANTEE_AWARD_AMT
+      , CLM_MIN_GUAR_AWARD_AMT_PERCENT
+      , CLM_MIN_ORDER_AMOUNT
+      , CLM_MAX_ORDER_AMOUNT
+      , CLM_AMT_SYNCED_TO_AGREEMENT
+      , CLM_AMOUNT_RELEASED
+      , CLM_EXTERNAL_IDV
+      , CLM_SUPPLIER_NAME
+      , CLM_SUPPLIER_SITE_NAME
+      , CLM_DOCUMENT_NUMBER
+      , CLM_SOURCE_DOCUMENT_ID
+      , CLM_ISSUING_OFFICE
+      , CLM_COTR_OFFICE
+      , CLM_COTR_CONTACT
+      , CLM_PRIORITY_CODE
+      , CLM_MOD_ISSUING_OFFICE
+      , CLM_STANDARD_FORM
+      , CLM_DOCUMENT_FORMAT
+      , AME_TRANSACTION_TYPE
+      , CLM_AWARD_TYPE
+      , CLM_CONTRACT_OFFICER
+      , CLM_CLOSEOUT_STATUS
+      , UMBRELLA_PROGRAM_ID
+      , FON_REF_ID
+      , CLM_DEFAULT_DIST_FLAG
+      , CLM_EDAGEN_DATE
+      , CLM_CONTRACT_FINANCE_CODE
+      , CLM_PAYMENT_INSTR_CODE
+      , CLM_SPECIAL_CONTRACT_TYPE
+      , IGT_DOCUMENT_NUMBER
+      , IGT_GTNC_NUMBER
+      , IGT_STATUS
+      , AGREEMENT_TYPE
+      , ASSISTED_ACQUISITION_IND
+      , ADVANCE_PAYMENT_IND
+      , ENFORCE_TOTAL_AMT_IND
+      , TERMINATION_DAYS
+      , TOTAL_REMAINING_AMT
+      , IGT_BUSINESS_TXN_ID
+      , _FIVETRAN_ID
+      , _FIVETRAN_DELETED
+      , _FIVETRAN_SYNCED
+      , PSA_LOAD_DTS
+      , PSA_RECORD_SOURCE
+      , PSA_DELETE_IND
+      , LOAD_DTS
+    FROM LOGIC_PO_HDR
+)
+
+, RENAME_AP as (
+    SELECT
+        TERM_DESCRIPTION
+      , TERM_ID
+    FROM LOGIC_AP
+)
+
+, RENAME_A as (
+    SELECT
+        REC_SRC
+      , BKCC
+    FROM LOGIC_A
+)
+
+, RENAME_sup as (
+    SELECT
+        SUP_VENDOR_ID
+      , SUP_SEGMENT1
+    FROM LOGIC_sup
+)
+---- FILTER LAYER ----
+
+, FILTER_PO_HDR as (
+    SELECT *
+    FROM RENAME_PO_HDR
+)
+
+, FILTER_A as (
+    SELECT *
+    FROM RENAME_A
+    WHERE rec_src = 'USWIOC.ORCL.EBSEMTK.PO_HEADERS_ALL'
+)
+
+, FILTER_AP as (
+    SELECT *
+    FROM RENAME_AP
+)
+
+, FILTER_sup as (
+    SELECT *
+    FROM RENAME_sup
+)
+
+---- JOIN LAYER ----
+, JOIN_RESULT as (
+    SELECT *
+    FROM FILTER_PO_HDR
+    INNER JOIN FILTER_A
+        ON '1' = '1'
+    LEFT JOIN FILTER_AP
+        ON FILTER_PO_HDR.TERMS_ID = FILTER_AP.TERM_ID
+    LEFT JOIN FILTER_sup
+        ON FILTER_PO_HDR.VENDOR_ID = SUP_VENDOR_ID
+)
+
+---- FINAL LAYER ----
+SELECT
+          PO_HEADER_BK
+        , PO_HEADER_ID
+        , AGENT_ID
+        , TYPE_LOOKUP_CODE
+        , LAST_UPDATE_DATE
+        , LAST_UPDATED_BY
+        , SEGMENT1
+        , SUMMARY_FLAG
+        , ENABLED_FLAG
+        , SEGMENT2
+        , SEGMENT3
+        , SEGMENT4
+        , SEGMENT5
+        , START_DATE_ACTIVE
+        , END_DATE_ACTIVE
+        , LAST_UPDATE_LOGIN
+        , CREATION_DATE
+        , CREATED_BY
+        , VENDOR_ID
+        , VENDOR_SITE_ID
+        , VENDOR_CONTACT_ID
+        , SHIP_TO_LOCATION_ID
+        , BILL_TO_LOCATION_ID
+        , TERMS_ID
+        , SHIP_VIA_LOOKUP_CODE
+        , FOB_LOOKUP_CODE
+        , FREIGHT_TERMS_LOOKUP_CODE
+        , STATUS_LOOKUP_CODE
+        , CURRENCY_CODE
+        , RATE_TYPE
+        , RATE_DATE
+        , RATE
+        , FROM_HEADER_ID
+        , FROM_TYPE_LOOKUP_CODE
+        , START_DATE
+        , END_DATE
+        , BLANKET_TOTAL_AMOUNT
+        , AUTHORIZATION_STATUS
+        , REVISION_NUM
+        , REVISED_DATE
+        , APPROVED_FLAG
+        , APPROVED_DATE
+        , AMOUNT_LIMIT
+        , MIN_RELEASE_AMOUNT
+        , NOTE_TO_AUTHORIZER
+        , NOTE_TO_VENDOR
+        , NOTE_TO_RECEIVER
+        , PRINT_COUNT
+        , PRINTED_DATE
+        , VENDOR_ORDER_NUM
+        , CONFIRMING_ORDER_FLAG
+        , COMMENTS
+        , REPLY_DATE
+        , REPLY_METHOD_LOOKUP_CODE
+        , RFQ_CLOSE_DATE
+        , QUOTE_TYPE_LOOKUP_CODE
+        , QUOTATION_CLASS_CODE
+        , QUOTE_WARNING_DELAY_UNIT
+        , QUOTE_WARNING_DELAY
+        , QUOTE_VENDOR_QUOTE_NUMBER
+        , ACCEPTANCE_REQUIRED_FLAG
+        , ACCEPTANCE_DUE_DATE
+        , CLOSED_DATE
+        , USER_HOLD_FLAG
+        , APPROVAL_REQUIRED_FLAG
+        , CANCEL_FLAG
+        , FIRM_STATUS_LOOKUP_CODE
+        , FIRM_DATE
+        , FROZEN_FLAG
+        , SUPPLY_AGREEMENT_FLAG
+        , EDI_PROCESSED_FLAG
+        , EDI_PROCESSED_STATUS
+        , ATTRIBUTE_CATEGORY
+        , ATTRIBUTE1
+        , ATTRIBUTE2
+        , ATTRIBUTE3
+        , ATTRIBUTE4
+        , ATTRIBUTE5
+        , ATTRIBUTE6
+        , ATTRIBUTE7
+        , ATTRIBUTE8
+        , ATTRIBUTE9
+        , ATTRIBUTE10
+        , ATTRIBUTE11
+        , ATTRIBUTE12
+        , ATTRIBUTE13
+        , ATTRIBUTE14
+        , ATTRIBUTE15
+        , CLOSED_CODE
+        , USSGL_TRANSACTION_CODE
+        , GOVERNMENT_CONTEXT
+        , REQUEST_ID
+        , PROGRAM_APPLICATION_ID
+        , PROGRAM_ID
+        , PROGRAM_UPDATE_DATE
+        , ORG_ID
+        , GLOBAL_ATTRIBUTE_CATEGORY
+        , GLOBAL_ATTRIBUTE1
+        , GLOBAL_ATTRIBUTE2
+        , GLOBAL_ATTRIBUTE3
+        , GLOBAL_ATTRIBUTE4
+        , GLOBAL_ATTRIBUTE5
+        , GLOBAL_ATTRIBUTE6
+        , GLOBAL_ATTRIBUTE7
+        , GLOBAL_ATTRIBUTE8
+        , GLOBAL_ATTRIBUTE9
+        , GLOBAL_ATTRIBUTE10
+        , GLOBAL_ATTRIBUTE11
+        , GLOBAL_ATTRIBUTE12
+        , GLOBAL_ATTRIBUTE13
+        , GLOBAL_ATTRIBUTE14
+        , GLOBAL_ATTRIBUTE15
+        , GLOBAL_ATTRIBUTE16
+        , GLOBAL_ATTRIBUTE17
+        , GLOBAL_ATTRIBUTE18
+        , GLOBAL_ATTRIBUTE19
+        , GLOBAL_ATTRIBUTE20
+        , INTERFACE_SOURCE_CODE
+        , REFERENCE_NUM
+        , WF_ITEM_TYPE
+        , WF_ITEM_KEY
+        , MRC_RATE_TYPE
+        , MRC_RATE_DATE
+        , MRC_RATE
+        , PCARD_ID
+        , PRICE_UPDATE_TOLERANCE
+        , PAY_ON_CODE
+        , XML_FLAG
+        , XML_SEND_DATE
+        , XML_CHANGE_SEND_DATE
+        , GLOBAL_AGREEMENT_FLAG
+        , CONSIGNED_CONSUMPTION_FLAG
+        , CBC_ACCOUNTING_DATE
+        , CONSUME_REQ_DEMAND_FLAG
+        , CHANGE_REQUESTED_BY
+        , SHIPPING_CONTROL
+        , CONTERMS_EXIST_FLAG
+        , CONTERMS_ARTICLES_UPD_DATE
+        , CONTERMS_DELIV_UPD_DATE
+        , ENCUMBRANCE_REQUIRED_FLAG
+        , PENDING_SIGNATURE_FLAG
+        , CHANGE_SUMMARY
+        , DOCUMENT_CREATION_METHOD
+        , SUBMIT_DATE
+        , ENABLE_ALL_SITES
+        , CREATED_LANGUAGE
+        , CPA_REFERENCE
+        , LAST_UPDATED_PROGRAM
+        , OTM_STATUS_CODE
+        , OTM_RECOVERY_FLAG
+        , COMM_REV_NUM
+        , SUPPLIER_NOTIF_METHOD
+        , FAX
+        , EMAIL_ADDRESS
+        , RETRO_PRICE_COMM_UPDATES_FLAG
+        , RETRO_PRICE_APPLY_UPDATES_FLAG
+        , UPDATE_SOURCING_RULES_FLAG
+        , AUTO_SOURCING_FLAG
+        , LOCK_OWNER_ROLE
+        , LOCK_OWNER_USER_ID
+        , SUPPLIER_AUTH_ENABLED_FLAG
+        , CAT_ADMIN_AUTH_ENABLED_FLAG
+        , STYLE_ID
+        , TAX_ATTRIBUTE_UPDATE_CODE
+        , PAY_WHEN_PAID
+        , UDA_TEMPLATE_ID
+        , UDA_TEMPLATE_DATE
+        , USER_DOCUMENT_STATUS
+        , AME_APPROVAL_ID
+        , DRAFT_ID
+        , CLM_EFFECTIVE_DATE
+        , CLM_VENDOR_OFFER_NUMBER
+        , CLM_AWARD_ADMINISTRATOR
+        , CLM_NO_SIGNED_COPIES_TO_RETURN
+        , CLM_MIN_GUARANTEE_AWARD_AMT
+        , CLM_MIN_GUAR_AWARD_AMT_PERCENT
+        , CLM_MIN_ORDER_AMOUNT
+        , CLM_MAX_ORDER_AMOUNT
+        , CLM_AMT_SYNCED_TO_AGREEMENT
+        , CLM_AMOUNT_RELEASED
+        , CLM_EXTERNAL_IDV
+        , CLM_SUPPLIER_NAME
+        , CLM_SUPPLIER_SITE_NAME
+        , CLM_DOCUMENT_NUMBER
+        , CLM_SOURCE_DOCUMENT_ID
+        , CLM_ISSUING_OFFICE
+        , CLM_COTR_OFFICE
+        , CLM_COTR_CONTACT
+        , CLM_PRIORITY_CODE
+        , CLM_MOD_ISSUING_OFFICE
+        , CLM_STANDARD_FORM
+        , CLM_DOCUMENT_FORMAT
+        , AME_TRANSACTION_TYPE
+        , CLM_AWARD_TYPE
+        , CLM_CONTRACT_OFFICER
+        , CLM_CLOSEOUT_STATUS
+        , UMBRELLA_PROGRAM_ID
+        , FON_REF_ID
+        , CLM_DEFAULT_DIST_FLAG
+        , CLM_EDAGEN_DATE
+        , CLM_CONTRACT_FINANCE_CODE
+        , CLM_PAYMENT_INSTR_CODE
+        , CLM_SPECIAL_CONTRACT_TYPE
+        , IGT_DOCUMENT_NUMBER
+        , IGT_GTNC_NUMBER
+        , IGT_STATUS
+        , AGREEMENT_TYPE
+        , ASSISTED_ACQUISITION_IND
+        , ADVANCE_PAYMENT_IND
+        , ENFORCE_TOTAL_AMT_IND
+        , TERMINATION_DAYS
+        , TOTAL_REMAINING_AMT
+        , IGT_BUSINESS_TXN_ID
+        , TERM_DESCRIPTION
+        , /*To handle the optional null default for the Hash key generation and to match with the Ghost Key Hash value */
+IFF(SUP_SEGMENT1 IS NULL, '-2', CONCAT_WS('||', SUP_SEGMENT1, BKCC)) as DRVD_SUPPLIER_BKCC
+        , /*To handle the optional null default for the Hash key generation and to match with the Ghost Key Hash value */
+IFF(SUP_SEGMENT1 IS NULL, '-2', CONCAT_WS('||',SUP_SEGMENT1,VENDOR_SITE_ID,BKCC)) as DRVD_SUPPLIER_SITE_BKCC
+        , _FIVETRAN_ID
+        , _FIVETRAN_DELETED
+        , _FIVETRAN_SYNCED
+        , PSA_LOAD_DTS
+        , PSA_RECORD_SOURCE
+        , PSA_DELETE_IND
+        , LOAD_DTS
+        , REC_SRC
+        , BKCC
+        , MD5_BINARY(UPPER(CONCAT_WS('||',
+          COALESCE(NULLIF(TRIM(CAST(PO_HEADER_ID as VARCHAR)),''), '^^')
+        , COALESCE(NULLIF(TRIM(CAST(BKCC as VARCHAR)),''), '^^')
+        ))) as PO_HEADER_HK
+        , MD5_BINARY(UPPER(CONCAT_WS('||',
+          COALESCE(NULLIF(TRIM(CAST(DRVD_SUPPLIER_BKCC as VARCHAR)),''), '^^')
+        ))) as SUPPLIER_HK
+        , MD5_BINARY(UPPER(CONCAT_WS('||',
+          COALESCE(NULLIF(TRIM(CAST(DRVD_SUPPLIER_SITE_BKCC as VARCHAR)),''), '^^')
+        ))) as SUPPLIER_SITE_HK
+        , MD5_BINARY(UPPER(CONCAT_WS('||',
+          COALESCE(NULLIF(TRIM(CAST(PO_HEADER_ID as VARCHAR)),''), '^^')
+        , COALESCE(NULLIF(TRIM(CAST(SUP_SEGMENT1 as VARCHAR)),''), '^^')
+        , COALESCE(NULLIF(TRIM(CAST(VENDOR_SITE_ID as VARCHAR)),''), '^^')
+        , COALESCE(NULLIF(TRIM(CAST(BKCC as VARCHAR)),''), '^^')
+        ))) as LNK_PO_HEADER_SUPPLIER_SITE_HK
+        , MD5_BINARY(UPPER(NULLIF(CONCAT(
+              IFNULL(TRIM(AGENT_ID::text), '^^') 
+            , '||', IFNULL(TRIM(TYPE_LOOKUP_CODE::text), '^^') 
+            , '||', IFNULL(TRIM(LAST_UPDATE_DATE::text), '^^') 
+            , '||', IFNULL(TRIM(LAST_UPDATED_BY::text), '^^') 
+            , '||', IFNULL(TRIM(SEGMENT1::text), '^^') 
+            , '||', IFNULL(TRIM(SUMMARY_FLAG::text), '^^') 
+            , '||', IFNULL(TRIM(ENABLED_FLAG::text), '^^') 
+            , '||', IFNULL(TRIM(SEGMENT2::text), '^^') 
+            , '||', IFNULL(TRIM(SEGMENT3::text), '^^') 
+            , '||', IFNULL(TRIM(SEGMENT4::text), '^^') 
+            , '||', IFNULL(TRIM(SEGMENT5::text), '^^') 
+            , '||', IFNULL(TRIM(START_DATE_ACTIVE::text), '^^') 
+            , '||', IFNULL(TRIM(END_DATE_ACTIVE::text), '^^') 
+            , '||', IFNULL(TRIM(LAST_UPDATE_LOGIN::text), '^^') 
+            , '||', IFNULL(TRIM(CREATION_DATE::text), '^^') 
+            , '||', IFNULL(TRIM(CREATED_BY::text), '^^') 
+            , '||', IFNULL(TRIM(VENDOR_ID::text), '^^') 
+            , '||', IFNULL(TRIM(VENDOR_SITE_ID::text), '^^') 
+            , '||', IFNULL(TRIM(VENDOR_CONTACT_ID::text), '^^') 
+            , '||', IFNULL(TRIM(SHIP_TO_LOCATION_ID::text), '^^') 
+            , '||', IFNULL(TRIM(BILL_TO_LOCATION_ID::text), '^^') 
+            , '||', IFNULL(TRIM(TERMS_ID::text), '^^') 
+            , '||', IFNULL(TRIM(SHIP_VIA_LOOKUP_CODE::text), '^^') 
+            , '||', IFNULL(TRIM(FOB_LOOKUP_CODE::text), '^^') 
+            , '||', IFNULL(TRIM(FREIGHT_TERMS_LOOKUP_CODE::text), '^^') 
+            , '||', IFNULL(TRIM(STATUS_LOOKUP_CODE::text), '^^') 
+            , '||', IFNULL(TRIM(CURRENCY_CODE::text), '^^') 
+            , '||', IFNULL(TRIM(RATE_TYPE::text), '^^') 
+            , '||', IFNULL(TRIM(RATE_DATE::text), '^^') 
+            , '||', IFNULL(TRIM(RATE::text), '^^') 
+            , '||', IFNULL(TRIM(FROM_HEADER_ID::text), '^^') 
+            , '||', IFNULL(TRIM(FROM_TYPE_LOOKUP_CODE::text), '^^') 
+            , '||', IFNULL(TRIM(START_DATE::text), '^^') 
+            , '||', IFNULL(TRIM(END_DATE::text), '^^') 
+            , '||', IFNULL(TRIM(BLANKET_TOTAL_AMOUNT::text), '^^') 
+            , '||', IFNULL(TRIM(AUTHORIZATION_STATUS::text), '^^') 
+            , '||', IFNULL(TRIM(REVISION_NUM::text), '^^') 
+            , '||', IFNULL(TRIM(REVISED_DATE::text), '^^') 
+            , '||', IFNULL(TRIM(APPROVED_FLAG::text), '^^') 
+            , '||', IFNULL(TRIM(APPROVED_DATE::text), '^^') 
+            , '||', IFNULL(TRIM(AMOUNT_LIMIT::text), '^^') 
+            , '||', IFNULL(TRIM(MIN_RELEASE_AMOUNT::text), '^^') 
+            , '||', IFNULL(TRIM(NOTE_TO_AUTHORIZER::text), '^^') 
+            , '||', IFNULL(TRIM(NOTE_TO_VENDOR::text), '^^') 
+            , '||', IFNULL(TRIM(NOTE_TO_RECEIVER::text), '^^') 
+            , '||', IFNULL(TRIM(PRINT_COUNT::text), '^^') 
+            , '||', IFNULL(TRIM(PRINTED_DATE::text), '^^') 
+            , '||', IFNULL(TRIM(VENDOR_ORDER_NUM::text), '^^') 
+            , '||', IFNULL(TRIM(CONFIRMING_ORDER_FLAG::text), '^^') 
+            , '||', IFNULL(TRIM(COMMENTS::text), '^^') 
+            , '||', IFNULL(TRIM(REPLY_DATE::text), '^^') 
+            , '||', IFNULL(TRIM(REPLY_METHOD_LOOKUP_CODE::text), '^^') 
+            , '||', IFNULL(TRIM(RFQ_CLOSE_DATE::text), '^^') 
+            , '||', IFNULL(TRIM(QUOTE_TYPE_LOOKUP_CODE::text), '^^') 
+            , '||', IFNULL(TRIM(QUOTATION_CLASS_CODE::text), '^^') 
+            , '||', IFNULL(TRIM(QUOTE_WARNING_DELAY_UNIT::text), '^^') 
+            , '||', IFNULL(TRIM(QUOTE_WARNING_DELAY::text), '^^') 
+            , '||', IFNULL(TRIM(QUOTE_VENDOR_QUOTE_NUMBER::text), '^^') 
+            , '||', IFNULL(TRIM(ACCEPTANCE_REQUIRED_FLAG::text), '^^') 
+            , '||', IFNULL(TRIM(ACCEPTANCE_DUE_DATE::text), '^^') 
+            , '||', IFNULL(TRIM(CLOSED_DATE::text), '^^') 
+            , '||', IFNULL(TRIM(USER_HOLD_FLAG::text), '^^') 
+            , '||', IFNULL(TRIM(APPROVAL_REQUIRED_FLAG::text), '^^') 
+            , '||', IFNULL(TRIM(CANCEL_FLAG::text), '^^') 
+            , '||', IFNULL(TRIM(FIRM_STATUS_LOOKUP_CODE::text), '^^') 
+            , '||', IFNULL(TRIM(FIRM_DATE::text), '^^') 
+            , '||', IFNULL(TRIM(FROZEN_FLAG::text), '^^') 
+            , '||', IFNULL(TRIM(SUPPLY_AGREEMENT_FLAG::text), '^^') 
+            , '||', IFNULL(TRIM(EDI_PROCESSED_FLAG::text), '^^') 
+            , '||', IFNULL(TRIM(EDI_PROCESSED_STATUS::text), '^^') 
+            , '||', IFNULL(TRIM(ATTRIBUTE_CATEGORY::text), '^^') 
+            , '||', IFNULL(TRIM(ATTRIBUTE1::text), '^^') 
+            , '||', IFNULL(TRIM(ATTRIBUTE2::text), '^^') 
+            , '||', IFNULL(TRIM(ATTRIBUTE3::text), '^^') 
+            , '||', IFNULL(TRIM(ATTRIBUTE4::text), '^^') 
+            , '||', IFNULL(TRIM(ATTRIBUTE5::text), '^^') 
+            , '||', IFNULL(TRIM(ATTRIBUTE6::text), '^^') 
+            , '||', IFNULL(TRIM(ATTRIBUTE7::text), '^^') 
+            , '||', IFNULL(TRIM(ATTRIBUTE8::text), '^^') 
+            , '||', IFNULL(TRIM(ATTRIBUTE9::text), '^^') 
+            , '||', IFNULL(TRIM(ATTRIBUTE10::text), '^^') 
+            , '||', IFNULL(TRIM(ATTRIBUTE11::text), '^^') 
+            , '||', IFNULL(TRIM(ATTRIBUTE12::text), '^^') 
+            , '||', IFNULL(TRIM(ATTRIBUTE13::text), '^^') 
+            , '||', IFNULL(TRIM(ATTRIBUTE14::text), '^^') 
+            , '||', IFNULL(TRIM(ATTRIBUTE15::text), '^^') 
+            , '||', IFNULL(TRIM(CLOSED_CODE::text), '^^') 
+            , '||', IFNULL(TRIM(USSGL_TRANSACTION_CODE::text), '^^') 
+            , '||', IFNULL(TRIM(GOVERNMENT_CONTEXT::text), '^^') 
+            , '||', IFNULL(TRIM(REQUEST_ID::text), '^^') 
+            , '||', IFNULL(TRIM(PROGRAM_APPLICATION_ID::text), '^^') 
+            , '||', IFNULL(TRIM(PROGRAM_ID::text), '^^') 
+            , '||', IFNULL(TRIM(PROGRAM_UPDATE_DATE::text), '^^') 
+            , '||', IFNULL(TRIM(ORG_ID::text), '^^') 
+            , '||', IFNULL(TRIM(GLOBAL_ATTRIBUTE_CATEGORY::text), '^^') 
+            , '||', IFNULL(TRIM(GLOBAL_ATTRIBUTE1::text), '^^') 
+            , '||', IFNULL(TRIM(GLOBAL_ATTRIBUTE2::text), '^^') 
+            , '||', IFNULL(TRIM(GLOBAL_ATTRIBUTE3::text), '^^') 
+            , '||', IFNULL(TRIM(GLOBAL_ATTRIBUTE4::text), '^^') 
+            , '||', IFNULL(TRIM(GLOBAL_ATTRIBUTE5::text), '^^') 
+            , '||', IFNULL(TRIM(GLOBAL_ATTRIBUTE6::text), '^^') 
+            , '||', IFNULL(TRIM(GLOBAL_ATTRIBUTE7::text), '^^') 
+            , '||', IFNULL(TRIM(GLOBAL_ATTRIBUTE8::text), '^^') 
+            , '||', IFNULL(TRIM(GLOBAL_ATTRIBUTE9::text), '^^') 
+            , '||', IFNULL(TRIM(GLOBAL_ATTRIBUTE10::text), '^^') 
+            , '||', IFNULL(TRIM(GLOBAL_ATTRIBUTE11::text), '^^') 
+            , '||', IFNULL(TRIM(GLOBAL_ATTRIBUTE12::text), '^^') 
+            , '||', IFNULL(TRIM(GLOBAL_ATTRIBUTE13::text), '^^') 
+            , '||', IFNULL(TRIM(GLOBAL_ATTRIBUTE14::text), '^^') 
+            , '||', IFNULL(TRIM(GLOBAL_ATTRIBUTE15::text), '^^') 
+            , '||', IFNULL(TRIM(GLOBAL_ATTRIBUTE16::text), '^^') 
+            , '||', IFNULL(TRIM(GLOBAL_ATTRIBUTE17::text), '^^') 
+            , '||', IFNULL(TRIM(GLOBAL_ATTRIBUTE18::text), '^^') 
+            , '||', IFNULL(TRIM(GLOBAL_ATTRIBUTE19::text), '^^') 
+            , '||', IFNULL(TRIM(GLOBAL_ATTRIBUTE20::text), '^^') 
+            , '||', IFNULL(TRIM(INTERFACE_SOURCE_CODE::text), '^^') 
+            , '||', IFNULL(TRIM(REFERENCE_NUM::text), '^^') 
+            , '||', IFNULL(TRIM(WF_ITEM_TYPE::text), '^^') 
+            , '||', IFNULL(TRIM(WF_ITEM_KEY::text), '^^') 
+            , '||', IFNULL(TRIM(MRC_RATE_TYPE::text), '^^') 
+            , '||', IFNULL(TRIM(MRC_RATE_DATE::text), '^^') 
+            , '||', IFNULL(TRIM(MRC_RATE::text), '^^') 
+            , '||', IFNULL(TRIM(PCARD_ID::text), '^^') 
+            , '||', IFNULL(TRIM(PRICE_UPDATE_TOLERANCE::text), '^^') 
+            , '||', IFNULL(TRIM(PAY_ON_CODE::text), '^^') 
+            , '||', IFNULL(TRIM(XML_FLAG::text), '^^') 
+            , '||', IFNULL(TRIM(XML_SEND_DATE::text), '^^') 
+            , '||', IFNULL(TRIM(XML_CHANGE_SEND_DATE::text), '^^') 
+            , '||', IFNULL(TRIM(GLOBAL_AGREEMENT_FLAG::text), '^^') 
+            , '||', IFNULL(TRIM(CONSIGNED_CONSUMPTION_FLAG::text), '^^') 
+            , '||', IFNULL(TRIM(CBC_ACCOUNTING_DATE::text), '^^') 
+            , '||', IFNULL(TRIM(CONSUME_REQ_DEMAND_FLAG::text), '^^') 
+            , '||', IFNULL(TRIM(CHANGE_REQUESTED_BY::text), '^^') 
+            , '||', IFNULL(TRIM(SHIPPING_CONTROL::text), '^^') 
+            , '||', IFNULL(TRIM(CONTERMS_EXIST_FLAG::text), '^^') 
+            , '||', IFNULL(TRIM(CONTERMS_ARTICLES_UPD_DATE::text), '^^') 
+            , '||', IFNULL(TRIM(CONTERMS_DELIV_UPD_DATE::text), '^^') 
+            , '||', IFNULL(TRIM(ENCUMBRANCE_REQUIRED_FLAG::text), '^^') 
+            , '||', IFNULL(TRIM(PENDING_SIGNATURE_FLAG::text), '^^') 
+            , '||', IFNULL(TRIM(CHANGE_SUMMARY::text), '^^') 
+            , '||', IFNULL(TRIM(DOCUMENT_CREATION_METHOD::text), '^^') 
+            , '||', IFNULL(TRIM(SUBMIT_DATE::text), '^^') 
+            , '||', IFNULL(TRIM(ENABLE_ALL_SITES::text), '^^') 
+            , '||', IFNULL(TRIM(CREATED_LANGUAGE::text), '^^') 
+            , '||', IFNULL(TRIM(CPA_REFERENCE::text), '^^') 
+            , '||', IFNULL(TRIM(LAST_UPDATED_PROGRAM::text), '^^') 
+            , '||', IFNULL(TRIM(OTM_STATUS_CODE::text), '^^') 
+            , '||', IFNULL(TRIM(OTM_RECOVERY_FLAG::text), '^^') 
+            , '||', IFNULL(TRIM(COMM_REV_NUM::text), '^^') 
+            , '||', IFNULL(TRIM(SUPPLIER_NOTIF_METHOD::text), '^^') 
+            , '||', IFNULL(TRIM(FAX::text), '^^') 
+            , '||', IFNULL(TRIM(EMAIL_ADDRESS::text), '^^') 
+            , '||', IFNULL(TRIM(RETRO_PRICE_COMM_UPDATES_FLAG::text), '^^') 
+            , '||', IFNULL(TRIM(RETRO_PRICE_APPLY_UPDATES_FLAG::text), '^^') 
+            , '||', IFNULL(TRIM(UPDATE_SOURCING_RULES_FLAG::text), '^^') 
+            , '||', IFNULL(TRIM(AUTO_SOURCING_FLAG::text), '^^') 
+            , '||', IFNULL(TRIM(LOCK_OWNER_ROLE::text), '^^') 
+            , '||', IFNULL(TRIM(LOCK_OWNER_USER_ID::text), '^^') 
+            , '||', IFNULL(TRIM(SUPPLIER_AUTH_ENABLED_FLAG::text), '^^') 
+            , '||', IFNULL(TRIM(CAT_ADMIN_AUTH_ENABLED_FLAG::text), '^^') 
+            , '||', IFNULL(TRIM(STYLE_ID::text), '^^') 
+            , '||', IFNULL(TRIM(TAX_ATTRIBUTE_UPDATE_CODE::text), '^^') 
+            , '||', IFNULL(TRIM(PAY_WHEN_PAID::text), '^^') 
+            , '||', IFNULL(TRIM(UDA_TEMPLATE_ID::text), '^^') 
+            , '||', IFNULL(TRIM(UDA_TEMPLATE_DATE::text), '^^') 
+            , '||', IFNULL(TRIM(USER_DOCUMENT_STATUS::text), '^^') 
+            , '||', IFNULL(TRIM(AME_APPROVAL_ID::text), '^^') 
+            , '||', IFNULL(TRIM(DRAFT_ID::text), '^^') 
+            , '||', IFNULL(TRIM(CLM_EFFECTIVE_DATE::text), '^^') 
+            , '||', IFNULL(TRIM(CLM_VENDOR_OFFER_NUMBER::text), '^^') 
+            , '||', IFNULL(TRIM(CLM_AWARD_ADMINISTRATOR::text), '^^') 
+            , '||', IFNULL(TRIM(CLM_NO_SIGNED_COPIES_TO_RETURN::text), '^^') 
+            , '||', IFNULL(TRIM(CLM_MIN_GUARANTEE_AWARD_AMT::text), '^^') 
+            , '||', IFNULL(TRIM(CLM_MIN_GUAR_AWARD_AMT_PERCENT::text), '^^') 
+            , '||', IFNULL(TRIM(CLM_MIN_ORDER_AMOUNT::text), '^^') 
+            , '||', IFNULL(TRIM(CLM_MAX_ORDER_AMOUNT::text), '^^') 
+            , '||', IFNULL(TRIM(CLM_AMT_SYNCED_TO_AGREEMENT::text), '^^') 
+            , '||', IFNULL(TRIM(CLM_AMOUNT_RELEASED::text), '^^') 
+            , '||', IFNULL(TRIM(CLM_EXTERNAL_IDV::text), '^^') 
+            , '||', IFNULL(TRIM(CLM_SUPPLIER_NAME::text), '^^') 
+            , '||', IFNULL(TRIM(CLM_SUPPLIER_SITE_NAME::text), '^^') 
+            , '||', IFNULL(TRIM(CLM_DOCUMENT_NUMBER::text), '^^') 
+            , '||', IFNULL(TRIM(CLM_SOURCE_DOCUMENT_ID::text), '^^') 
+            , '||', IFNULL(TRIM(CLM_ISSUING_OFFICE::text), '^^') 
+            , '||', IFNULL(TRIM(CLM_COTR_OFFICE::text), '^^') 
+            , '||', IFNULL(TRIM(CLM_COTR_CONTACT::text), '^^') 
+            , '||', IFNULL(TRIM(CLM_PRIORITY_CODE::text), '^^') 
+            , '||', IFNULL(TRIM(CLM_MOD_ISSUING_OFFICE::text), '^^') 
+            , '||', IFNULL(TRIM(CLM_STANDARD_FORM::text), '^^') 
+            , '||', IFNULL(TRIM(CLM_DOCUMENT_FORMAT::text), '^^') 
+            , '||', IFNULL(TRIM(AME_TRANSACTION_TYPE::text), '^^') 
+            , '||', IFNULL(TRIM(CLM_AWARD_TYPE::text), '^^') 
+            , '||', IFNULL(TRIM(CLM_CONTRACT_OFFICER::text), '^^') 
+            , '||', IFNULL(TRIM(CLM_CLOSEOUT_STATUS::text), '^^') 
+            , '||', IFNULL(TRIM(UMBRELLA_PROGRAM_ID::text), '^^') 
+            , '||', IFNULL(TRIM(FON_REF_ID::text), '^^') 
+            , '||', IFNULL(TRIM(CLM_DEFAULT_DIST_FLAG::text), '^^') 
+            , '||', IFNULL(TRIM(CLM_EDAGEN_DATE::text), '^^') 
+            , '||', IFNULL(TRIM(CLM_CONTRACT_FINANCE_CODE::text), '^^') 
+            , '||', IFNULL(TRIM(CLM_PAYMENT_INSTR_CODE::text), '^^') 
+            , '||', IFNULL(TRIM(CLM_SPECIAL_CONTRACT_TYPE::text), '^^') 
+            , '||', IFNULL(TRIM(IGT_DOCUMENT_NUMBER::text), '^^') 
+            , '||', IFNULL(TRIM(IGT_GTNC_NUMBER::text), '^^') 
+            , '||', IFNULL(TRIM(IGT_STATUS::text), '^^') 
+            , '||', IFNULL(TRIM(AGREEMENT_TYPE::text), '^^') 
+            , '||', IFNULL(TRIM(ASSISTED_ACQUISITION_IND::text), '^^') 
+            , '||', IFNULL(TRIM(ADVANCE_PAYMENT_IND::text), '^^') 
+            , '||', IFNULL(TRIM(ENFORCE_TOTAL_AMT_IND::text), '^^') 
+            , '||', IFNULL(TRIM(TERMINATION_DAYS::text), '^^') 
+            , '||', IFNULL(TRIM(TOTAL_REMAINING_AMT::text), '^^') 
+            , '||', IFNULL(TRIM(IGT_BUSINESS_TXN_ID::text), '^^') 
+            , '||', IFNULL(TRIM(TERM_DESCRIPTION::text), '^^') 
+            , '||', IFNULL(TRIM(_FIVETRAN_DELETED::text), '^^') 
+            , '||', IFNULL(TRIM(PSA_DELETE_IND::text), '^^') 
+        ), '^^||^^')))  as HASHDIFF
+FROM JOIN_RESULT

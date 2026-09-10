@@ -1,0 +1,1 @@
+select * from ({{ row_uniqueness('dim_device_account_location_subscription') }}) 

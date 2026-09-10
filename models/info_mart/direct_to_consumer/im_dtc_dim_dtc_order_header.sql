@@ -1,0 +1,123 @@
+{{ config(alias='dim_dtc_order_header') }}
+---- SRC LAYER ----
+WITH
+SRC_dim_ordhd      as ( SELECT ADJUSTMENT, BILLING_CITY, BILLING_COUNTRY, BILLING_STATE, BILLING_ZIP, CANCELLED_DATE__YYYYMMDD, CONSUMER_BK, 
+                        CONSUMER_KEY, CREATED_DATE_KEY, CUSTOMER_BK, CUSTOMER_ID, CUSTOMER_KEY, DISCOUNTS, FINANCIAL_STATUS, FULFILLMENT_STATUS, 
+                        ORDER_DOLLARS, ORDER_HEADER_BK, ORDER_HEADER_KEY, ORDER_ID, ORDER_SUBTOTAL_DOLLARS, ORDER_TAX, SHIPPING, SHIPPING_CITY, 
+                        SHIPPING_COUNTRY, SHIPPING_STATE, SHIPPING_ZIP, STORE, UPDATED_DATE__YYYYMMDD FROM {{ ref('dim_dtc_order_header') }} as SRC  )
+
+/*
+SRC_dim_ordhd      as ( SELECT * FROM bus_vault.dim_dtc_order_header )
+*/
+---- LOGIC LAYER ----
+
+, LOGIC_dim_ordhd as (
+    SELECT
+        ORDER_HEADER_KEY
+      , ORDER_HEADER_BK
+      , ORDER_ID
+      , CUSTOMER_KEY
+      , CUSTOMER_BK
+      , CUSTOMER_ID
+      , CONSUMER_KEY
+      , CONSUMER_BK
+      , FINANCIAL_STATUS
+      , FULFILLMENT_STATUS
+      , ORDER_DOLLARS
+      , ORDER_SUBTOTAL_DOLLARS
+      , ORDER_TAX
+      , SHIPPING
+      , DISCOUNTS
+      , ADJUSTMENT
+      , SHIPPING_CITY
+      , SHIPPING_STATE
+      , SHIPPING_COUNTRY
+      , SHIPPING_ZIP
+      , BILLING_CITY
+      , BILLING_STATE
+      , BILLING_COUNTRY
+      , BILLING_ZIP
+      , CREATED_DATE_KEY
+      , UPDATED_DATE__YYYYMMDD
+      , CANCELLED_DATE__YYYYMMDD
+      , STORE
+    FROM SRC_dim_ordhd
+)
+---- RENAME LAYER ----
+
+, RENAME_dim_ordhd as (
+    SELECT
+        ORDER_HEADER_KEY
+      , ORDER_HEADER_BK
+      , ORDER_ID
+      , CUSTOMER_KEY
+      , CUSTOMER_BK
+      , CUSTOMER_ID
+      , CONSUMER_KEY
+      , CONSUMER_BK
+      , FINANCIAL_STATUS
+      , FULFILLMENT_STATUS
+      , ORDER_DOLLARS
+      , ORDER_SUBTOTAL_DOLLARS
+      , ORDER_TAX
+      , SHIPPING
+      , DISCOUNTS
+      , ADJUSTMENT
+      , SHIPPING_CITY
+      , SHIPPING_STATE
+      , SHIPPING_COUNTRY
+      , SHIPPING_ZIP
+      , BILLING_CITY
+      , BILLING_STATE
+      , BILLING_COUNTRY
+      , BILLING_ZIP
+      , CREATED_DATE_KEY
+      , UPDATED_DATE__YYYYMMDD
+      , CANCELLED_DATE__YYYYMMDD
+      , STORE
+    FROM LOGIC_dim_ordhd
+)
+---- FILTER LAYER ----
+
+, FILTER_dim_ordhd as (
+    SELECT *
+    FROM RENAME_dim_ordhd
+)
+
+---- JOIN LAYER ----
+, JOIN_RESULT as (
+    SELECT *
+    FROM FILTER_dim_ordhd
+)
+
+---- FINAL LAYER ----
+SELECT
+          ORDER_HEADER_KEY
+        , ORDER_HEADER_BK
+        , ORDER_ID
+        , CUSTOMER_KEY
+        , CUSTOMER_BK
+        , CUSTOMER_ID
+        , CONSUMER_KEY
+        , CONSUMER_BK
+        , FINANCIAL_STATUS
+        , FULFILLMENT_STATUS
+        , ORDER_DOLLARS
+        , ORDER_SUBTOTAL_DOLLARS
+        , ORDER_TAX
+        , SHIPPING
+        , DISCOUNTS
+        , ADJUSTMENT
+        , SHIPPING_CITY
+        , SHIPPING_STATE
+        , SHIPPING_COUNTRY
+        , SHIPPING_ZIP
+        , BILLING_CITY
+        , BILLING_STATE
+        , BILLING_COUNTRY
+        , BILLING_ZIP
+        , CREATED_DATE_KEY
+        , UPDATED_DATE__YYYYMMDD
+        , CANCELLED_DATE__YYYYMMDD
+        , STORE
+FROM JOIN_RESULT

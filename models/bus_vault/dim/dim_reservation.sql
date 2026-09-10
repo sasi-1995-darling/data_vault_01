@@ -1,0 +1,56 @@
+---- SRC LAYER ----
+WITH
+SRC_D              as ( SELECT BKCC, REC_SRC, RESERVATION_BK, RESERVATION_HK, RESERVATION_ID, MOVEMENT_TYPE_CODE, RESERVATION_CREATION FROM {{ ref('pit_reservation') }} as SRC  )
+
+/*
+SRC_D              as ( SELECT * FROM BUS_VAULT.pit_reservation )
+*/
+---- LOGIC LAYER ----
+
+, LOGIC_D as (
+    SELECT
+        RESERVATION_BK
+      , RESERVATION_HK
+      , RESERVATION_ID
+      , MOVEMENT_TYPE_CODE
+      , RESERVATION_CREATION
+      , REC_SRC
+      , BKCC
+    FROM SRC_D
+)
+---- RENAME LAYER ----
+
+, RENAME_D as (
+    SELECT
+        RESERVATION_BK
+      , RESERVATION_HK
+      , RESERVATION_ID
+      , MOVEMENT_TYPE_CODE
+      , RESERVATION_CREATION
+      , REC_SRC
+      , BKCC
+    FROM LOGIC_D
+)
+---- FILTER LAYER ----
+
+, FILTER_D as (
+    SELECT *
+    FROM RENAME_D
+)
+
+---- JOIN LAYER ----
+, JOIN_RESULT as (
+    SELECT *
+    FROM FILTER_D
+)
+
+---- FINAL LAYER ----
+SELECT
+          RESERVATION_BK
+        , RESERVATION_HK
+        , RESERVATION_ID
+        , MOVEMENT_TYPE_CODE
+        , RESERVATION_CREATION
+        , REC_SRC
+        , BKCC
+FROM JOIN_RESULT

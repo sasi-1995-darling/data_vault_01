@@ -1,0 +1,34 @@
+version: 2
+
+models:
+  - name: link_po_line_item_plant_location
+    description: This is the raw vault link model between po line, item, and plant location
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - po_line_item_plant_location_hk
+      - dbt_constraints.foreign_key:
+          arguments:
+            fk_column_names:
+              - po_line_hk
+            pk_table_name: ref('hub_po_line')
+            pk_column_names:
+              - po_line_hk
+      - dbt_constraints.foreign_key:
+          arguments:
+            fk_column_names:
+              - plant_location_hk
+            pk_table_name: ref('hub_plant_location')
+            pk_column_names:
+              - plant_location_hk
+      - dbt_constraints.foreign_key:
+          arguments:
+            fk_column_names:
+              - item_hk
+            pk_table_name: ref('hub_item')
+            pk_column_names:
+              - item_hk
+    config:
+      tags:
+        - emtek

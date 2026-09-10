@@ -1,0 +1,19 @@
+version: 2
+models:
+- name: lnk_serial_number_assignment
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - LNK_SERIAL_NUMBER_HU_ASSIGNMENT_HK
+  - dbt_expectations.expect_table_row_count_to_be_between:
+      arguments:
+        min_value: 4
+      config:
+        severity: warn
+  columns:
+  - name: LNK_SERIAL_NUMBER_HU_ASSIGNMENT_HK
+    data_tests:
+    - not_null:
+        config:
+          severity: warn

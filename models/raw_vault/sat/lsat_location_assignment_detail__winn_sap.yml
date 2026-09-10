@@ -1,0 +1,28 @@
+version: 2
+models:
+- name: lsat_location_assignment_detail__winn_sap
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - LNK_LOCATION_ASSIGNMENT_DETAIL_HK
+        - LOAD_DTS
+      config:
+        severity: warn
+  - dbt_expectations.expect_table_row_count_to_be_between:
+      arguments:
+        min_value: 4
+      config:
+        severity: warn
+  columns:
+  - name: LNK_LOCATION_ASSIGNMENT_DETAIL_HK
+    data_tests:
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'lnk_location_assignment_detail' )
+          pk_column_name: LNK_LOCATION_ASSIGNMENT_DETAIL_HK
+        config:
+          severity: warn
+  config:
+    tags:
+      - lsat

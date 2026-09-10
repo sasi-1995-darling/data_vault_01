@@ -1,0 +1,10 @@
+version: 2
+models:
+  - name: im_dim_competitive_product
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - COMPETITIVE_PRODUCT_BK
+              - RETAILER_BK
+    columns: []

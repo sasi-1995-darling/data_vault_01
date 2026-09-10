@@ -1,0 +1,50 @@
+version: 2
+models:
+  - name: v_psa_stg_sales__amazon
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          config:
+            severity: warn
+          arguments:
+            combination_of_columns:
+              - REPORT_END_DATE
+              - ASIN
+              - VENDORCENTRAL_ACCOUNT
+              - CUSTOMER_RETURNS
+              - LOAD_DTS
+    columns:
+      - name: STORE_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: STORE_BK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: LOAD_DTS
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: REPORT_END_DATE
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: VENDORCENTRAL_ACCOUNT
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: ASIN
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: CUSTOMER_RETURNS
+        tests:
+          - not_null:
+              config:
+                severity: warn

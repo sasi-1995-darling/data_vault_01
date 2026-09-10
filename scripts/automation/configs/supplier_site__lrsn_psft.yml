@@ -1,0 +1,2019 @@
+schema_version: '1.0'
+filename: v_psa_stg_supplier_site__lrsn_psft
+_pipeline_metadata:
+  bkcc_rec_src: USSDBR.ORCL.PSFTPRD.PS_VENDOR_LOC
+  has_fivetran_deleted: true
+  has_psa_delete_ind: true
+  psa_delete_filter: false
+  null_bk_coalesced: false
+  large_volume: false
+  row_count: 1448140
+  volume_tier: normal
+  load_dts_derivation: CONVERT_TIMEZONE('UTC', _FIVETRAN_SYNCED)
+  grain_valid: true
+  hub_model_name: hub_supplier_site_v2
+  hub_use_watermark: false
+  hub_full_refresh: false
+  lnk_model_names:
+  - lnk_supplier_site_payment_term
+  lnk_use_watermark: false
+  lnk_full_refresh: false
+  sat_model_names:
+  - msat_supplier_site__lrsn_psft
+  sat_use_watermark: false
+  sat_full_refresh_false: false
+  sat_cluster_by: false
+models:
+- layer: STG
+  derived_name: v_psa_stg_supplier_site__lrsn_psft
+  short_name: supplier_site__lrsn_psft
+  sources:
+  - source_schema: lrsn_psft_sysadm
+    source_table: ps_vendor_loc
+    alias: SRC
+  columns:
+  - source_table: SRC
+    source_column: VNDR_LOC
+    staging_column_name: VNDR_LOC
+    datatype: TEXT
+    hashdiff: ''
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: ps_vendor_loc
+    source_column: VNDR_LOC
+    datatype: TEXT
+    staging_column_name: SUPPLIER_SITE_BK
+    hashdiff: ''
+    unique: 'COMPOSITE: SUPPLIER_SITE_BK, VENDOR_ID, VNDR_LOC, SETID, EFFDT, LOAD_DTS'
+    not_null: 'yes'
+    manual_logic: ''
+  - source_table: SRC
+    source_column: (DERIVED)
+    staging_column_name: LOAD_DTS
+    datatype: TIMESTAMP
+    hashdiff: ''
+    not_null: ''
+    unique: ''
+    manual_logic: CONVERT_TIMEZONE('UTC', _FIVETRAN_SYNCED)
+  - source_table: SRC
+    source_column: SETID
+    staging_column_name: SETID
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: VENDOR_ID
+    staging_column_name: VENDOR_ID
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: VENDOR_ID
+    staging_column_name: SUPPLIER_BK
+    datatype: TEXT
+    hashdiff: ''
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: EFFDT
+    staging_column_name: EFFDT
+    datatype: DATE
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: EFF_STATUS
+    staging_column_name: EFF_STATUS
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: CURRENCY_CD
+    staging_column_name: CURRENCY_CD
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: CUR_RT_TYPE
+    staging_column_name: CUR_RT_TYPE
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: FREIGHT_TERMS
+    staging_column_name: FREIGHT_TERMS
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: SHIP_TYPE_ID
+    staging_column_name: SHIP_TYPE_ID
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: DISP_METHOD
+    staging_column_name: DISP_METHOD
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: PYMNT_TERMS_CD
+    staging_column_name: PYMNT_TERMS_CD
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: MATCH_OPT_FLG
+    staging_column_name: MATCH_OPT_FLG
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: MATCH_CNTRL_ID
+    staging_column_name: MATCH_CNTRL_ID
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: MATCH_OPT
+    staging_column_name: MATCH_OPT
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: ERS_ACTION
+    staging_column_name: ERS_ACTION
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: ERS_FLAG
+    staging_column_name: ERS_FLAG
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: VCHR_APPRVL_FLG
+    staging_column_name: VCHR_APPRVL_FLG
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: BUSPROCNAME
+    staging_column_name: BUSPROCNAME
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: APPR_RULE_SET
+    staging_column_name: APPR_RULE_SET
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: BUYER_ID
+    staging_column_name: BUYER_ID
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: REMIT_SETID
+    staging_column_name: REMIT_SETID
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: REMIT_VENDOR
+    staging_column_name: REMIT_VENDOR
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: REMIT_LOC
+    staging_column_name: REMIT_LOC
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: REMIT_ADDR_SEQ_NUM
+    staging_column_name: REMIT_ADDR_SEQ_NUM
+    datatype: NUMBER
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: ADDR_SEQ_NUM_ORDR
+    staging_column_name: ADDR_SEQ_NUM_ORDR
+    datatype: NUMBER
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: PRICE_SETID
+    staging_column_name: PRICE_SETID
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: PRICE_VENDOR
+    staging_column_name: PRICE_VENDOR
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: PRICE_LOC
+    staging_column_name: PRICE_LOC
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: RETURN_VENDOR
+    staging_column_name: RETURN_VENDOR
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: RET_ADDR_SEQ_NUM
+    staging_column_name: RET_ADDR_SEQ_NUM
+    datatype: NUMBER
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: DST_CNTRL_ID
+    staging_column_name: DST_CNTRL_ID
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: PREFERRED_LANGUAGE
+    staging_column_name: PREFERRED_LANGUAGE
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: RFQ_DISP_MTHD
+    staging_column_name: RFQ_DISP_MTHD
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: CNTRCT_DISP_MTHD
+    staging_column_name: CNTRCT_DISP_MTHD
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: PRIMARY_VENDOR
+    staging_column_name: PRIMARY_VENDOR
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: PRIM_ADDR_SEQ_NUM
+    staging_column_name: PRIM_ADDR_SEQ_NUM
+    datatype: NUMBER
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: SHIPTO_ID
+    staging_column_name: SHIPTO_ID
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: SUT_BASE_ID
+    staging_column_name: SUT_BASE_ID
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: SALETX_TOL_AMT
+    staging_column_name: SALETX_TOL_AMT
+    datatype: NUMBER
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: SALETX_TOL_CUR_CD
+    staging_column_name: SALETX_TOL_CUR_CD
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: SALETX_TOL_PCT
+    staging_column_name: SALETX_TOL_PCT
+    datatype: NUMBER
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: SALETX_TOL_RT_TYPE
+    staging_column_name: SALETX_TOL_RT_TYPE
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: SALETX_CD_ERS
+    staging_column_name: SALETX_CD_ERS
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: SALES_USE_TX_FLG
+    staging_column_name: SALES_USE_TX_FLG
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: AUTO_ASN_FLG
+    staging_column_name: AUTO_ASN_FLG
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: SALETX_TOL_FLG
+    staging_column_name: SALETX_TOL_FLG
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: SHIP_LOC_FLG
+    staging_column_name: SHIP_LOC_FLG
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: WTHD_CD
+    staging_column_name: WTHD_CD
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: WTHD_SW
+    staging_column_name: WTHD_SW
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: DOC_TYPE
+    staging_column_name: DOC_TYPE
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: DOC_TYPE_FLG
+    staging_column_name: DOC_TYPE_FLG
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: RTV_DISPATCH_METH
+    staging_column_name: RTV_DISPATCH_METH
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: RTV_NOTIFY_METH
+    staging_column_name: RTV_NOTIFY_METH
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: RTV_DEBIT_OPT
+    staging_column_name: RTV_DEBIT_OPT
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: VNDR_SBI_FLG
+    staging_column_name: VNDR_SBI_FLG
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: SBI_APPROVAL_FLG
+    staging_column_name: SBI_APPROVAL_FLG
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: ACCOUNT
+    staging_column_name: ACCOUNT
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: ALTACCT
+    staging_column_name: ALTACCT
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: DEPTID
+    staging_column_name: DEPTID
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: OPERATING_UNIT
+    staging_column_name: OPERATING_UNIT
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: PRODUCT
+    staging_column_name: PRODUCT
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: FUND_CODE
+    staging_column_name: FUND_CODE
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: CLASS_FLD
+    staging_column_name: CLASS_FLD
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: PROGRAM_CODE
+    staging_column_name: PROGRAM_CODE
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: BUDGET_REF
+    staging_column_name: BUDGET_REF
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: AFFILIATE
+    staging_column_name: AFFILIATE
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: AFFILIATE_INTRA1
+    staging_column_name: AFFILIATE_INTRA1
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: AFFILIATE_INTRA2
+    staging_column_name: AFFILIATE_INTRA2
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: CHARTFIELD1
+    staging_column_name: CHARTFIELD1
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: CHARTFIELD2
+    staging_column_name: CHARTFIELD2
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: CHARTFIELD3
+    staging_column_name: CHARTFIELD3
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: PROJECT_ID
+    staging_column_name: PROJECT_ID
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: CONSIGNED_FLAG
+    staging_column_name: CONSIGNED_FLAG
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: VCHR_CONSIGN_OPT
+    staging_column_name: VCHR_CONSIGN_OPT
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: BANK_ACCT_SEQ_NBR
+    staging_column_name: BANK_ACCT_SEQ_NBR
+    datatype: NUMBER
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: ACCT_TEMPL_FLG
+    staging_column_name: ACCT_TEMPL_FLG
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: PAY_TRM_BSE_DT_DFT
+    staging_column_name: PAY_TRM_BSE_DT_DFT
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: RECV_ONLY_MTCH_FLG
+    staging_column_name: RECV_ONLY_MTCH_FLG
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: VCHR_MTCH_ADJ_DFLT
+    staging_column_name: VCHR_MTCH_ADJ_DFLT
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: ERS_INV_DT_OPT
+    staging_column_name: ERS_INV_DT_OPT
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: ERS_INV_DT_DFLT
+    staging_column_name: ERS_INV_DT_DFLT
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: ERS_TAX_TYPE_DFLT
+    staging_column_name: ERS_TAX_TYPE_DFLT
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: ERS_TAX_CD_OPT
+    staging_column_name: ERS_TAX_CD_OPT
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: LAST_SBI_NUM
+    staging_column_name: LAST_SBI_NUM
+    datatype: NUMBER
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: SBI_DOC_DFLT
+    staging_column_name: SBI_DOC_DFLT
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: SBI_PRINT_OPT
+    staging_column_name: SBI_PRINT_OPT
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: VCHR_TAX_ADJ_DFT
+    staging_column_name: VCHR_TAX_ADJ_DFT
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: RTV_VCHR_ADJ_DFLT
+    staging_column_name: RTV_VCHR_ADJ_DFLT
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: VAT_SUSPENSION_FLG
+    staging_column_name: VAT_SUSPENSION_FLG
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: VAT_ROUND_RULE
+    staging_column_name: VAT_ROUND_RULE
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: REPL_DISP_METHOD
+    staging_column_name: REPL_DISP_METHOD
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: VNDR_UPN_FLG
+    staging_column_name: VNDR_UPN_FLG
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: DISP_CO_FLAG
+    staging_column_name: DISP_CO_FLAG
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: DATE_CALC_BASIS
+    staging_column_name: DATE_CALC_BASIS
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: PAY_SCHEDULE_TYPE
+    staging_column_name: PAY_SCHEDULE_TYPE
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: FEDERAL_INDICATOR
+    staging_column_name: FEDERAL_INDICATOR
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: TRADING_PARTNER
+    staging_column_name: TRADING_PARTNER
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: ALC
+    staging_column_name: ALC
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: WORKFLOW_OPT
+    staging_column_name: WORKFLOW_OPT
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: PHYSICAL_NATURE
+    staging_column_name: PHYSICAL_NATURE
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: VAT_SVC_PERFRM_FLG
+    staging_column_name: VAT_SVC_PERFRM_FLG
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: ULTIMATE_USE_CD
+    staging_column_name: ULTIMATE_USE_CD
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: ADDR_SEQ_NUM_SHFR
+    staging_column_name: ADDR_SEQ_NUM_SHFR
+    datatype: NUMBER
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: POA_REQUIRED
+    staging_column_name: POA_REQUIRED
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: ACK_ALERT_DISP
+    staging_column_name: ACK_ALERT_DISP
+    datatype: NUMBER
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: ACK_ALERT_SHIP
+    staging_column_name: ACK_ALERT_SHIP
+    datatype: NUMBER
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: POA_CO_REQUIRED
+    staging_column_name: POA_CO_REQUIRED
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: POA_TOL_FLAG
+    staging_column_name: POA_TOL_FLAG
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: POA_SCHED_EARLY
+    staging_column_name: POA_SCHED_EARLY
+    datatype: NUMBER
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: POA_SCHED_LATE
+    staging_column_name: POA_SCHED_LATE
+    datatype: NUMBER
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: POA_QTY_OVER
+    staging_column_name: POA_QTY_OVER
+    datatype: NUMBER
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: POA_QTY_UNDER
+    staging_column_name: POA_QTY_UNDER
+    datatype: NUMBER
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: POA_PRICE_OVER
+    staging_column_name: POA_PRICE_OVER
+    datatype: NUMBER
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: POA_PRICE_UNDER
+    staging_column_name: POA_PRICE_UNDER
+    datatype: NUMBER
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: CC_ACCEPT_CC
+    staging_column_name: CC_ACCEPT_CC
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: CC_DISP_OPTION
+    staging_column_name: CC_DISP_OPTION
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: CC_ALLOW_OVERRIDE
+    staging_column_name: CC_ALLOW_OVERRIDE
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: CC_SECURITY_ID
+    staging_column_name: CC_SECURITY_ID
+    datatype: NUMBER
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: CC_USE_FLAG
+    staging_column_name: CC_USE_FLAG
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: MATCH_DELAY_FLG
+    staging_column_name: MATCH_DELAY_FLG
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: MATCH_DELAY_DAYS
+    staging_column_name: MATCH_DELAY_DAYS
+    datatype: NUMBER
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: DISBURSING_OFFICE
+    staging_column_name: DISBURSING_OFFICE
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: GEN_1099_RPT
+    staging_column_name: GEN_1099_RPT
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: SPLIT_PO_BY_SHIPTO
+    staging_column_name: SPLIT_PO_BY_SHIPTO
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: SPEEDCHART_KEY
+    staging_column_name: SPEEDCHART_KEY
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: ACCOUNT_CODE
+    staging_column_name: ACCOUNT_CODE
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: UPN_TYPE_CD
+    staging_column_name: UPN_TYPE_CD
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: DAYS_HRS_AFTER
+    staging_column_name: DAYS_HRS_AFTER
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: DAYS_HRS_BEFORE
+    staging_column_name: DAYS_HRS_BEFORE
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: COMMENTS_2000
+    staging_column_name: COMMENTS_2000
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: _FIVETRAN_ID
+    staging_column_name: _FIVETRAN_ID
+    datatype: TEXT
+    hashdiff: ''
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: _FIVETRAN_DELETED
+    staging_column_name: _FIVETRAN_DELETED
+    datatype: BOOLEAN
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: _FIVETRAN_SYNCED
+    staging_column_name: _FIVETRAN_SYNCED
+    datatype: TIMESTAMP_TZ
+    hashdiff: ''
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: PSA_LOAD_DTS
+    staging_column_name: PSA_LOAD_DTS
+    datatype: TIMESTAMP_LTZ
+    hashdiff: ''
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: PSA_RECORD_SOURCE
+    staging_column_name: PSA_RECORD_SOURCE
+    datatype: TEXT
+    hashdiff: ''
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: PSA_DELETE_IND
+    staging_column_name: PSA_DELETE_IND
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC_BKCC
+    source_column: BKCC
+    staging_column_name: BKCC
+    datatype: TEXT
+    hashdiff: ''
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC_BKCC
+    source_column: REC_SRC
+    staging_column_name: REC_SRC
+    datatype: TEXT
+    hashdiff: ''
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: ''
+    source_column: (DERIVED)
+    staging_column_name: SUPPLIER_SITE_HK
+    datatype: BINARY
+    hashdiff: ''
+    not_null: ''
+    unique: ''
+    manual_logic: 'HASH: VENDOR_ID, VNDR_LOC, BKCC'
+  - source_table: ''
+    source_column: (DERIVED)
+    staging_column_name: HASHDIFF
+    datatype: BINARY
+    hashdiff: ''
+    not_null: ''
+    unique: ''
+    manual_logic: 'HASH: SETID, VENDOR_ID, EFFDT, EFF_STATUS, CURRENCY_CD, CUR_RT_TYPE,
+      FREIGHT_TERMS, SHIP_TYPE_ID, DISP_METHOD, PYMNT_TERMS_CD, MATCH_OPT_FLG, MATCH_CNTRL_ID,
+      MATCH_OPT, ERS_ACTION, ERS_FLAG, VCHR_APPRVL_FLG, BUSPROCNAME, APPR_RULE_SET,
+      BUYER_ID, REMIT_SETID, REMIT_VENDOR, REMIT_LOC, REMIT_ADDR_SEQ_NUM, ADDR_SEQ_NUM_ORDR,
+      PRICE_SETID, PRICE_VENDOR, PRICE_LOC, RETURN_VENDOR, RET_ADDR_SEQ_NUM, DST_CNTRL_ID,
+      PREFERRED_LANGUAGE, RFQ_DISP_MTHD, CNTRCT_DISP_MTHD, PRIMARY_VENDOR, PRIM_ADDR_SEQ_NUM,
+      SHIPTO_ID, SUT_BASE_ID, SALETX_TOL_AMT, SALETX_TOL_CUR_CD, SALETX_TOL_PCT, SALETX_TOL_RT_TYPE,
+      SALETX_CD_ERS, SALES_USE_TX_FLG, AUTO_ASN_FLG, SALETX_TOL_FLG, SHIP_LOC_FLG,
+      WTHD_CD, WTHD_SW, DOC_TYPE, DOC_TYPE_FLG, RTV_DISPATCH_METH, RTV_NOTIFY_METH,
+      RTV_DEBIT_OPT, VNDR_SBI_FLG, SBI_APPROVAL_FLG, ACCOUNT, ALTACCT, DEPTID, OPERATING_UNIT,
+      PRODUCT, FUND_CODE, CLASS_FLD, PROGRAM_CODE, BUDGET_REF, AFFILIATE, AFFILIATE_INTRA1,
+      AFFILIATE_INTRA2, CHARTFIELD1, CHARTFIELD2, CHARTFIELD3, PROJECT_ID, CONSIGNED_FLAG,
+      VCHR_CONSIGN_OPT, BANK_ACCT_SEQ_NBR, ACCT_TEMPL_FLG, PAY_TRM_BSE_DT_DFT, RECV_ONLY_MTCH_FLG,
+      VCHR_MTCH_ADJ_DFLT, ERS_INV_DT_OPT, ERS_INV_DT_DFLT, ERS_TAX_TYPE_DFLT, ERS_TAX_CD_OPT,
+      LAST_SBI_NUM, SBI_DOC_DFLT, SBI_PRINT_OPT, VCHR_TAX_ADJ_DFT, RTV_VCHR_ADJ_DFLT,
+      VAT_SUSPENSION_FLG, VAT_ROUND_RULE, REPL_DISP_METHOD, VNDR_UPN_FLG, DISP_CO_FLAG,
+      DATE_CALC_BASIS, PAY_SCHEDULE_TYPE, FEDERAL_INDICATOR, TRADING_PARTNER, ALC,
+      WORKFLOW_OPT, PHYSICAL_NATURE, VAT_SVC_PERFRM_FLG, ULTIMATE_USE_CD, ADDR_SEQ_NUM_SHFR,
+      POA_REQUIRED, ACK_ALERT_DISP, ACK_ALERT_SHIP, POA_CO_REQUIRED, POA_TOL_FLAG,
+      POA_SCHED_EARLY, POA_SCHED_LATE, POA_QTY_OVER, POA_QTY_UNDER, POA_PRICE_OVER,
+      POA_PRICE_UNDER, CC_ACCEPT_CC, CC_DISP_OPTION, CC_ALLOW_OVERRIDE, CC_SECURITY_ID,
+      CC_USE_FLAG, MATCH_DELAY_FLG, MATCH_DELAY_DAYS, DISBURSING_OFFICE, GEN_1099_RPT,
+      SPLIT_PO_BY_SHIPTO, SPEEDCHART_KEY, ACCOUNT_CODE, UPN_TYPE_CD, DAYS_HRS_AFTER,
+      DAYS_HRS_BEFORE, COMMENTS_2000, _FIVETRAN_DELETED, PSA_DELETE_IND'
+- layer: HUB
+  derived_name: hub_supplier_site_v2
+  short_name: SUPPLIER_SITE
+  sources:
+  - source_schema: int_staging_views
+    source_table: v_psa_stg_supplier_site__lrsn_psft
+    alias: SRC
+    source_layer_filter: QUALIFY (ROW_NUMBER() OVER(PARTITION BY SUPPLIER_SITE_HK
+      ORDER BY LOAD_DTS)) = 1
+    final_layer_filter: "{% if is_incremental() %}\nWHERE NOT EXISTS (\n    SELECT\
+      \ 1\n    FROM {{ this }} existing\n    WHERE existing.SUPPLIER_SITE_HK = JOIN_RESULT.SUPPLIER_SITE_HK\n\
+      )\n{% endif %}\n/* Safety dedup \u2014 matches production hub pattern */\nqualify\
+      \ 1 = row_number() over (partition by SUPPLIER_SITE_BK, BKCC order by LOAD_DTS)"
+    target_schema: raw_vault
+    model_config: ''
+    qualify_order_by: ''
+  columns:
+  - source_table: SRC
+    source_column: SUPPLIER_SITE_HK
+    staging_column_name: SUPPLIER_SITE_HK
+    datatype: BINARY
+    pk: 'PK: SUPPLIER_SITE_HK'
+    ghost_record: hash
+  - source_table: SRC
+    source_column: SUPPLIER_SITE_BK
+    staging_column_name: SUPPLIER_SITE_BK
+    datatype: TEXT
+    ghost_record: value_text
+  - source_table: SRC
+    source_column: SUPPLIER_BK
+    staging_column_name: SUPPLIER_BK
+    datatype: TEXT
+    ghost_record: value_text
+  - source_table: SRC
+    source_column: LOAD_DTS
+    staging_column_name: LOAD_DTS
+    datatype: TIMESTAMP_NTZ
+    ghost_record: load_dts
+  - source_table: SRC
+    source_column: BKCC
+    staging_column_name: BKCC
+    datatype: TEXT
+    ghost_record: bkcc
+  - source_table: SRC
+    source_column: REC_SRC
+    staging_column_name: REC_SRC
+    datatype: TEXT
+    ghost_record: rec_src
+- layer: LNK
+  derived_name: lnk_supplier_site_payment_term
+  short_name: SUPPLIER_SITE_PAYMENT_TERM
+  sources:
+  - source_schema: int_staging_views
+    source_table: v_psa_stg_supplier_site__lrsn_psft
+    alias: SRC
+    source_layer_filter: QUALIFY (ROW_NUMBER() OVER(PARTITION BY LNK_SUPPLIER_SITE_PAYMENT_TERM_HK
+      ORDER BY LOAD_DTS)) = 1
+    final_layer_filter: "{% if is_incremental() %}\nWHERE NOT EXISTS (\n    SELECT\
+      \ 1\n    FROM {{ this }} existing\n    WHERE existing.LNK_SUPPLIER_SITE_PAYMENT_TERM_HK\
+      \ = JOIN_RESULT.LNK_SUPPLIER_SITE_PAYMENT_TERM_HK\n)\n{% endif %}"
+    target_schema: raw_vault
+    model_config: ''
+    qualify_order_by: LOAD_DTS
+  columns:
+  - source_table: SRC
+    source_column: LNK_SUPPLIER_SITE_PAYMENT_TERM_HK
+    staging_column_name: LNK_SUPPLIER_SITE_PAYMENT_TERM_HK
+    datatype: BINARY
+    pk: 'PK: LNK_SUPPLIER_SITE_PAYMENT_TERM_HK'
+    ghost_record: hash
+  - source_table: SRC
+    source_column: SUPPLIER_HK
+    staging_column_name: SUPPLIER_HK
+    datatype: BINARY
+    ghost_record: hash
+  - source_table: SRC
+    source_column: SUPPLIER_SITE_HK
+    staging_column_name: SUPPLIER_SITE_HK
+    datatype: BINARY
+    ghost_record: hash
+  - source_table: SRC
+    source_column: PAYMENT_TERM_HK
+    staging_column_name: PAYMENT_TERM_HK
+    datatype: BINARY
+    ghost_record: hash
+  - source_table: SRC
+    source_column: LOAD_DTS
+    staging_column_name: LOAD_DTS
+    datatype: TIMESTAMP_NTZ
+    ghost_record: load_dts
+  - source_table: SRC
+    source_column: REC_SRC
+    staging_column_name: REC_SRC
+    datatype: TEXT
+    ghost_record: rec_src
+- layer: MSAT
+  derived_name: msat_supplier_site__lrsn_psft
+  short_name: supplier_site__lrsn_psft
+  sources:
+  - source_schema: int_staging_views
+    source_table: v_psa_stg_supplier_site__lrsn_psft
+    alias: SRC
+    source_layer_filter: ''
+    final_layer_filter: "{% if is_incremental() %}\nWHERE NOT EXISTS (\n    SELECT\
+      \ 1\n    FROM {{ this }} existing\n    WHERE existing.SUPPLIER_SITE_HK = JOIN_RESULT.SUPPLIER_SITE_HK\n\
+      \      AND existing.SETID = JOIN_RESULT.SETID\n      AND existing.EFFDT = JOIN_RESULT.EFFDT\n\
+      \      AND existing.HASHDIFF = JOIN_RESULT.HASHDIFF\n)\n{% endif %}"
+    target_schema: raw_vault
+    model_config: ''
+    qualify_order_by: ''
+  columns:
+  - source_table: SRC
+    source_column: SUPPLIER_SITE_HK
+    staging_column_name: SUPPLIER_SITE_HK
+    datatype: BINARY
+    pk: 'PK: SUPPLIER_SITE_HK, SETID, EFFDT, LOAD_DTS'
+    ghost_record: hash
+    relationship: HUB_SUPPLIER_SITE_V2.SUPPLIER_SITE_HK
+  - source_table: SRC
+    source_column: VNDR_LOC
+    staging_column_name: VNDR_LOC
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: SETID
+    staging_column_name: SETID
+    datatype: TEXT
+    ghost_record: value_text
+  - source_table: SRC
+    source_column: EFFDT
+    staging_column_name: EFFDT
+    datatype: DATE
+    ghost_record: value_text
+  - source_table: SRC
+    source_column: VENDOR_ID
+    staging_column_name: VENDOR_ID
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: EFF_STATUS
+    staging_column_name: EFF_STATUS
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: CURRENCY_CD
+    staging_column_name: CURRENCY_CD
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: CUR_RT_TYPE
+    staging_column_name: CUR_RT_TYPE
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: FREIGHT_TERMS
+    staging_column_name: FREIGHT_TERMS
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: SHIP_TYPE_ID
+    staging_column_name: SHIP_TYPE_ID
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: DISP_METHOD
+    staging_column_name: DISP_METHOD
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: PYMNT_TERMS_CD
+    staging_column_name: PYMNT_TERMS_CD
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: MATCH_OPT_FLG
+    staging_column_name: MATCH_OPT_FLG
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: MATCH_CNTRL_ID
+    staging_column_name: MATCH_CNTRL_ID
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: MATCH_OPT
+    staging_column_name: MATCH_OPT
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: ERS_ACTION
+    staging_column_name: ERS_ACTION
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: ERS_FLAG
+    staging_column_name: ERS_FLAG
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: VCHR_APPRVL_FLG
+    staging_column_name: VCHR_APPRVL_FLG
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: BUSPROCNAME
+    staging_column_name: BUSPROCNAME
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: APPR_RULE_SET
+    staging_column_name: APPR_RULE_SET
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: BUYER_ID
+    staging_column_name: BUYER_ID
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: REMIT_SETID
+    staging_column_name: REMIT_SETID
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: REMIT_VENDOR
+    staging_column_name: REMIT_VENDOR
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: REMIT_LOC
+    staging_column_name: REMIT_LOC
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: REMIT_ADDR_SEQ_NUM
+    staging_column_name: REMIT_ADDR_SEQ_NUM
+    datatype: NUMBER
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: ADDR_SEQ_NUM_ORDR
+    staging_column_name: ADDR_SEQ_NUM_ORDR
+    datatype: NUMBER
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: PRICE_SETID
+    staging_column_name: PRICE_SETID
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: PRICE_VENDOR
+    staging_column_name: PRICE_VENDOR
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: PRICE_LOC
+    staging_column_name: PRICE_LOC
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: RETURN_VENDOR
+    staging_column_name: RETURN_VENDOR
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: RET_ADDR_SEQ_NUM
+    staging_column_name: RET_ADDR_SEQ_NUM
+    datatype: NUMBER
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: DST_CNTRL_ID
+    staging_column_name: DST_CNTRL_ID
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: PREFERRED_LANGUAGE
+    staging_column_name: PREFERRED_LANGUAGE
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: RFQ_DISP_MTHD
+    staging_column_name: RFQ_DISP_MTHD
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: CNTRCT_DISP_MTHD
+    staging_column_name: CNTRCT_DISP_MTHD
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: PRIMARY_VENDOR
+    staging_column_name: PRIMARY_VENDOR
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: PRIM_ADDR_SEQ_NUM
+    staging_column_name: PRIM_ADDR_SEQ_NUM
+    datatype: NUMBER
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: SHIPTO_ID
+    staging_column_name: SHIPTO_ID
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: SUT_BASE_ID
+    staging_column_name: SUT_BASE_ID
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: SALETX_TOL_AMT
+    staging_column_name: SALETX_TOL_AMT
+    datatype: NUMBER
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: SALETX_TOL_CUR_CD
+    staging_column_name: SALETX_TOL_CUR_CD
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: SALETX_TOL_PCT
+    staging_column_name: SALETX_TOL_PCT
+    datatype: NUMBER
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: SALETX_TOL_RT_TYPE
+    staging_column_name: SALETX_TOL_RT_TYPE
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: SALETX_CD_ERS
+    staging_column_name: SALETX_CD_ERS
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: SALES_USE_TX_FLG
+    staging_column_name: SALES_USE_TX_FLG
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: AUTO_ASN_FLG
+    staging_column_name: AUTO_ASN_FLG
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: SALETX_TOL_FLG
+    staging_column_name: SALETX_TOL_FLG
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: SHIP_LOC_FLG
+    staging_column_name: SHIP_LOC_FLG
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: WTHD_CD
+    staging_column_name: WTHD_CD
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: WTHD_SW
+    staging_column_name: WTHD_SW
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: DOC_TYPE
+    staging_column_name: DOC_TYPE
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: DOC_TYPE_FLG
+    staging_column_name: DOC_TYPE_FLG
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: RTV_DISPATCH_METH
+    staging_column_name: RTV_DISPATCH_METH
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: RTV_NOTIFY_METH
+    staging_column_name: RTV_NOTIFY_METH
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: RTV_DEBIT_OPT
+    staging_column_name: RTV_DEBIT_OPT
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: VNDR_SBI_FLG
+    staging_column_name: VNDR_SBI_FLG
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: SBI_APPROVAL_FLG
+    staging_column_name: SBI_APPROVAL_FLG
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: ACCOUNT
+    staging_column_name: ACCOUNT
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: ALTACCT
+    staging_column_name: ALTACCT
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: DEPTID
+    staging_column_name: DEPTID
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: OPERATING_UNIT
+    staging_column_name: OPERATING_UNIT
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: PRODUCT
+    staging_column_name: PRODUCT
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: FUND_CODE
+    staging_column_name: FUND_CODE
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: CLASS_FLD
+    staging_column_name: CLASS_FLD
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: PROGRAM_CODE
+    staging_column_name: PROGRAM_CODE
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: BUDGET_REF
+    staging_column_name: BUDGET_REF
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: AFFILIATE
+    staging_column_name: AFFILIATE
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: AFFILIATE_INTRA1
+    staging_column_name: AFFILIATE_INTRA1
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: AFFILIATE_INTRA2
+    staging_column_name: AFFILIATE_INTRA2
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: CHARTFIELD1
+    staging_column_name: CHARTFIELD1
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: CHARTFIELD2
+    staging_column_name: CHARTFIELD2
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: CHARTFIELD3
+    staging_column_name: CHARTFIELD3
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: PROJECT_ID
+    staging_column_name: PROJECT_ID
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: CONSIGNED_FLAG
+    staging_column_name: CONSIGNED_FLAG
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: VCHR_CONSIGN_OPT
+    staging_column_name: VCHR_CONSIGN_OPT
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: BANK_ACCT_SEQ_NBR
+    staging_column_name: BANK_ACCT_SEQ_NBR
+    datatype: NUMBER
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: ACCT_TEMPL_FLG
+    staging_column_name: ACCT_TEMPL_FLG
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: PAY_TRM_BSE_DT_DFT
+    staging_column_name: PAY_TRM_BSE_DT_DFT
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: RECV_ONLY_MTCH_FLG
+    staging_column_name: RECV_ONLY_MTCH_FLG
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: VCHR_MTCH_ADJ_DFLT
+    staging_column_name: VCHR_MTCH_ADJ_DFLT
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: ERS_INV_DT_OPT
+    staging_column_name: ERS_INV_DT_OPT
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: ERS_INV_DT_DFLT
+    staging_column_name: ERS_INV_DT_DFLT
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: ERS_TAX_TYPE_DFLT
+    staging_column_name: ERS_TAX_TYPE_DFLT
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: ERS_TAX_CD_OPT
+    staging_column_name: ERS_TAX_CD_OPT
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: LAST_SBI_NUM
+    staging_column_name: LAST_SBI_NUM
+    datatype: NUMBER
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: SBI_DOC_DFLT
+    staging_column_name: SBI_DOC_DFLT
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: SBI_PRINT_OPT
+    staging_column_name: SBI_PRINT_OPT
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: VCHR_TAX_ADJ_DFT
+    staging_column_name: VCHR_TAX_ADJ_DFT
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: RTV_VCHR_ADJ_DFLT
+    staging_column_name: RTV_VCHR_ADJ_DFLT
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: VAT_SUSPENSION_FLG
+    staging_column_name: VAT_SUSPENSION_FLG
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: VAT_ROUND_RULE
+    staging_column_name: VAT_ROUND_RULE
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: REPL_DISP_METHOD
+    staging_column_name: REPL_DISP_METHOD
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: VNDR_UPN_FLG
+    staging_column_name: VNDR_UPN_FLG
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: DISP_CO_FLAG
+    staging_column_name: DISP_CO_FLAG
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: DATE_CALC_BASIS
+    staging_column_name: DATE_CALC_BASIS
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: PAY_SCHEDULE_TYPE
+    staging_column_name: PAY_SCHEDULE_TYPE
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: FEDERAL_INDICATOR
+    staging_column_name: FEDERAL_INDICATOR
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: TRADING_PARTNER
+    staging_column_name: TRADING_PARTNER
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: ALC
+    staging_column_name: ALC
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: WORKFLOW_OPT
+    staging_column_name: WORKFLOW_OPT
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: PHYSICAL_NATURE
+    staging_column_name: PHYSICAL_NATURE
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: VAT_SVC_PERFRM_FLG
+    staging_column_name: VAT_SVC_PERFRM_FLG
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: ULTIMATE_USE_CD
+    staging_column_name: ULTIMATE_USE_CD
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: ADDR_SEQ_NUM_SHFR
+    staging_column_name: ADDR_SEQ_NUM_SHFR
+    datatype: NUMBER
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: POA_REQUIRED
+    staging_column_name: POA_REQUIRED
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: ACK_ALERT_DISP
+    staging_column_name: ACK_ALERT_DISP
+    datatype: NUMBER
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: ACK_ALERT_SHIP
+    staging_column_name: ACK_ALERT_SHIP
+    datatype: NUMBER
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: POA_CO_REQUIRED
+    staging_column_name: POA_CO_REQUIRED
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: POA_TOL_FLAG
+    staging_column_name: POA_TOL_FLAG
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: POA_SCHED_EARLY
+    staging_column_name: POA_SCHED_EARLY
+    datatype: NUMBER
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: POA_SCHED_LATE
+    staging_column_name: POA_SCHED_LATE
+    datatype: NUMBER
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: POA_QTY_OVER
+    staging_column_name: POA_QTY_OVER
+    datatype: NUMBER
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: POA_QTY_UNDER
+    staging_column_name: POA_QTY_UNDER
+    datatype: NUMBER
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: POA_PRICE_OVER
+    staging_column_name: POA_PRICE_OVER
+    datatype: NUMBER
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: POA_PRICE_UNDER
+    staging_column_name: POA_PRICE_UNDER
+    datatype: NUMBER
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: CC_ACCEPT_CC
+    staging_column_name: CC_ACCEPT_CC
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: CC_DISP_OPTION
+    staging_column_name: CC_DISP_OPTION
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: CC_ALLOW_OVERRIDE
+    staging_column_name: CC_ALLOW_OVERRIDE
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: CC_SECURITY_ID
+    staging_column_name: CC_SECURITY_ID
+    datatype: NUMBER
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: CC_USE_FLAG
+    staging_column_name: CC_USE_FLAG
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: MATCH_DELAY_FLG
+    staging_column_name: MATCH_DELAY_FLG
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: MATCH_DELAY_DAYS
+    staging_column_name: MATCH_DELAY_DAYS
+    datatype: NUMBER
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: DISBURSING_OFFICE
+    staging_column_name: DISBURSING_OFFICE
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: GEN_1099_RPT
+    staging_column_name: GEN_1099_RPT
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: SPLIT_PO_BY_SHIPTO
+    staging_column_name: SPLIT_PO_BY_SHIPTO
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: SPEEDCHART_KEY
+    staging_column_name: SPEEDCHART_KEY
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: ACCOUNT_CODE
+    staging_column_name: ACCOUNT_CODE
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: UPN_TYPE_CD
+    staging_column_name: UPN_TYPE_CD
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: DAYS_HRS_AFTER
+    staging_column_name: DAYS_HRS_AFTER
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: DAYS_HRS_BEFORE
+    staging_column_name: DAYS_HRS_BEFORE
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: COMMENTS_2000
+    staging_column_name: COMMENTS_2000
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: PSA_DELETE_IND
+    staging_column_name: PSA_DELETE_IND
+    datatype: TEXT
+    ghost_record: psa_delete_ind
+  - source_table: SRC
+    source_column: PSA_LOAD_DTS
+    staging_column_name: PSA_LOAD_DTS
+    datatype: TIMESTAMP
+    ghost_record: psa_load_dts
+  - source_table: SRC
+    source_column: PSA_RECORD_SOURCE
+    staging_column_name: PSA_RECORD_SOURCE
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: _FIVETRAN_SYNCED
+    staging_column_name: _FIVETRAN_SYNCED
+    datatype: TIMESTAMP_TZ
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: _FIVETRAN_ID
+    staging_column_name: _FIVETRAN_ID
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: _FIVETRAN_DELETED
+    staging_column_name: _FIVETRAN_DELETED
+    datatype: BOOLEAN
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: LOAD_DTS
+    staging_column_name: LOAD_DTS
+    datatype: TIMESTAMP_NTZ
+    ghost_record: load_dts
+  - source_table: SRC
+    source_column: REC_SRC
+    staging_column_name: REC_SRC
+    datatype: TEXT
+    ghost_record: rec_src
+  - source_table: SRC
+    source_column: BKCC
+    staging_column_name: BKCC
+    datatype: TEXT
+    ghost_record: bkcc
+  - source_table: SRC
+    source_column: HASHDIFF
+    staging_column_name: HASHDIFF
+    datatype: BINARY
+    ghost_record: hashdiff

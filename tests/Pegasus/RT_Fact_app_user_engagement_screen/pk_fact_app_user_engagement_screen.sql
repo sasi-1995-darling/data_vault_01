@@ -1,0 +1,1 @@
+select * from ({{ primary_key_check('fact_app_user_engagement_screen',['CONSUMER_BK', 'SCREEN_NAME','SCREEN_TRACKING_ID','SCREEN_TRAIT_ID','PLATFORM']) }}) 

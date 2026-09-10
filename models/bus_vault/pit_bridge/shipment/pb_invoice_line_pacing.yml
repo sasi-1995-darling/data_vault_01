@@ -1,0 +1,9 @@
+version: 2
+models:
+- name: pb_invoice_line_pacing
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - INVOICE_LINE_PACING_LHK
+  columns: []

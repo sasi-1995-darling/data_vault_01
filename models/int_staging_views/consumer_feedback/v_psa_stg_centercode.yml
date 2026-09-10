@@ -1,0 +1,45 @@
+version: 2
+models:
+  - name: v_psa_stg_centercode
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          config:
+            severity: warn
+          arguments:
+            combination_of_columns:
+              - FORM_BK
+              - PROJECT_BK
+              - ORDINAL_POSITION
+              - RESPONSE_ORDINAL
+              - LOAD_DTS
+    columns:
+      - name: FORM_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: FORM_BK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: PROJECT_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: PROJECT_BK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: LOAD_DTS
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: FORM_PROJECT_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn

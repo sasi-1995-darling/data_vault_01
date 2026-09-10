@@ -1,0 +1,23 @@
+version: 2
+models:
+- name: sat_shipment__winn_sap
+  tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - SHIPMENT_HK
+        - LOAD_DTS
+  - dbt_expectations.expect_table_row_count_to_be_between:
+      arguments:
+        min_value: 4
+      config:
+        severity: warn
+  columns:
+  - name: SHIPMENT_HK
+    description: "Hash key for Shipment Hub - Foreign key to HUB_SHIPMENT"
+    tests:
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref('hub_shipment')
+          pk_column_name: SHIPMENT_HK    
+

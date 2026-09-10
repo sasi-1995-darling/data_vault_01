@@ -1,0 +1,13 @@
+version: 2
+
+models:
+  - name: fact_invoice_line
+    description: Sales fact for sales invoice line
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - fact_invoice_line_pk
+    config:
+      tags:
+        - emtek

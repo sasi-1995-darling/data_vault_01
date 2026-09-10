@@ -1,0 +1,79 @@
+version: 2
+models:
+  - name: sat_cost_totals_for_external_postings__winn_sap
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - COST_TOTALS_FOR_EXTERNAL_POSTINGS_HK
+              - LOAD_DTS
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          config:
+            severity: warn
+          arguments:
+            min_value: 4
+    columns:
+      - name: COST_TOTALS_FOR_EXTERNAL_POSTINGS_HK
+        tests:
+          - dbt_utils.relationships_where:
+              arguments:
+                to: ref( 'lnk_cost_totals_for_external_postings' )
+                field: COST_TOTALS_FOR_EXTERNAL_POSTINGS_HK
+          - not_null:
+              config:
+                severity: warn
+      - name: OBJECT_NUMBER_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: FISCAL_PERIOD_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: COST_VALUE_TYPE_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: COST_VERSION_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: COST_ELEMENT_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: ORIGIN_GROUP_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: COST_BUSINESS_TRANSACTION_TYPE_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: LEGAL_ENTITY_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: CURRENCY_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: TRADING_PARTNER_BUSINESS_AREA_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: DEBIT_CREDIT_INDICATOR_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn

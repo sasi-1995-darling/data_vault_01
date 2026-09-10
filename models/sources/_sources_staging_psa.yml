@@ -1,0 +1,4394 @@
+version: 2
+sources:
+- name: amazon_sp_ft
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: amazon_sp_ft
+  tables:
+  - name: item_summary
+    description: ""
+  - name: item_vendor_detail
+    description: ""
+- name: amazon_us
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: amazon_us
+  tables:
+  - name: winn_avc_inventory_view
+    description: ""
+  - name: winn_avc_netppm_view
+    description: ""
+  - name: winn_avc_sales_view
+    description: ""
+  - name: winn_avc_traffic_view
+    description: ""
+- name: amazon_vc
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: amazon_vc
+  tables:
+  - name: cross_ref
+    description: ""
+  - name: inventory
+    description: ""
+  - name: netppm
+    description: "This table contains records of performance metrics, specifically net profit per product."
+  - name: report_dates
+    description: ""
+  - name: sales
+    description: ""
+  - name: sales_with_dtypes_20240122
+    description: ""
+  - name: traffic
+    description: ""
+- name: appbot
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: appbot
+  tables:
+  - name: applist
+    description: "the table contains records of applications, each with an identifier\
+      \ and name. the records indicate if the application is authenticated and supports\
+      \ translation. additionally, details about the application's store, store id,\
+      \ icon, and load date are included."
+  - name: ratings
+    description: ""
+  - name: reviews
+    description: ""
+
+- name: brg
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: brg
+  tables:
+  - name: brg_sell_in_dollar_volume
+    description: ""
+  - name: brg_unit_volume
+    description: ""
+- name: dataverse_crm
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: dataverse_crm
+  tables:
+  - name: account
+    description: ""
+  - name: contact
+    description: ""
+  - name: fbin_salesrep
+    description: ""
+  - name: fbin_salesrepagencytocontact
+    description: ""
+  - name: stringmap
+    description: ""
+- name: delighted_hydra
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: delighted_hydra
+  tables:
+  - name: person
+    description: ""
+  - name: response
+    description: ""
+- name: delighted_naboo
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: delighted_naboo
+  tables:
+  - name: person
+    description: ""
+  - name: response
+    description: ""
+- name: delighted_sws
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: delighted_sws
+  tables:
+  - name: person
+    description: ""
+  - name: question
+    description: ""
+  - name: response
+    description: ""
+  - name: response_answer
+    description: ""
+  - name: response_answer_selection
+    description: ""
+  - name: response_note
+    description: ""
+  - name: response_tag
+    description: ""
+- name: delighted_vak
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: delighted_vak
+  tables:
+  - name: person
+    description: ""
+  - name: response
+    description: ""
+- name: delighted_yale
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: delighted_yale
+  tables:
+  - name: person
+    description: ""
+  - name: response
+    description: ""
+  - name: response_note
+    description: ""
+  - name: response_tag
+    description: ""
+- name: email_pos
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: email_pos
+  tables:
+  - name: aaronco
+    description: ""
+  - name: activeplumbing
+    description: ""
+  - name: afsupply
+    description: ""
+  - name: briggs
+    description: ""
+  - name: broedell
+    description: ""
+  - name: build
+    description: ""
+  - name: connorco
+    description: ""
+  - name: crawfordsupply
+    description: ""
+  - name: creggercompany
+    description: ""
+  - name: famous_supply
+    description: ""
+  - name: first_supply
+    description: ""
+  - name: fivetran_audit
+    description: ""
+  - name: generalplumbingsupply
+    description: ""
+  - name: grovesupplyinc
+    description: ""
+  - name: hm_wallace
+    description: ""
+  - name: kellersupply
+    description: ""
+  - name: lowesprosupply
+    description: ""
+  - name: mountainland
+    description: ""
+  - name: northeastern
+    description: ""
+  - name: phac
+    description: ""
+  - name: plumbers_supply
+    description: ""
+  - name: plumbing_distributors
+    description: ""
+  - name: profitero_categories_ml_out
+    description: ""
+  - name: rampart
+    description: ""
+  - name: rf_fager
+    description: ""
+  - name: southwest_plumbing
+    description: ""
+  - name: standardplumbing
+    description: ""
+  - name: thedistributionpoint
+    description: ""
+  - name: tsomerville
+    description: ""
+  - name: vpsupply
+    description: ""
+  - name: wesco
+    description: ""
+  - name: wholesale_plumbing
+    description: ""
+  - name: wmf_meyer
+    description: ""
+  - name: woolsupply
+    description: ""
+- name: emtk_ebs_ap
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: emtk_ebs_ap
+  tables:
+  - name: ap_suppliers
+    description: ""
+  - name: ap_supplier_sites_all
+    description: ""
+  - name: ap_terms_lines
+    description: ""
+  - name: ap_terms_tl
+    description: ""
+  - name: financials_system_params_all
+    description: ""
+  - name: ap_invoices_all
+    description: ""
+  - name: ap_invoice_lines_all
+    description: ""
+- name: emtk_ebs_applsys
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: emtk_ebs_applsys
+  tables:
+  - name: fnd_lookup_values
+    description: ""
+- name: emtk_ebs_ar
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: emtk_ebs_ar
+  tables:
+  - name: hz_contact_points
+    description: ""
+  - name: hz_cust_accounts
+    description: ""
+  - name: hz_cust_acct_sites_all
+    description: ""
+  - name: hz_cust_site_uses_all
+    description: ""
+  - name: hz_locations
+    description: ""
+  - name: hz_parties
+    description: ""
+  - name: hz_party_sites
+    description: ""
+  - name: ra_customer_trx_all
+    description: ""
+  - name: ra_customer_trx_lines_all
+    description: ""
+  - name: ra_cust_trx_types_all
+    description: ""
+  - name: ra_salesrep_territories
+    description: ""
+  - name: ra_territories
+    description: ""
+- name: emtk_ebs_a_views
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: emtk_ebs_a_views
+  tables:
+  - name: mtl_categories
+    description: ""
+  - name: mtl_categories_vl
+    description: ""
+- name: emtk_ebs_bom
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: emtk_ebs_bom
+  tables:
+  - name: cst_cost_types
+    description: ""
+  - name: cst_item_costs
+    description: ""
+- name: emtk_ebs_gl
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: emtk_ebs_gl
+  tables:
+  - name: gl_code_combinations
+    description: ""
+  - name: xla_glt_1408412
+    description: ""
+  - name: xla_glt_1408413
+    description: ""
+  - name: xla_glt_1408414
+    description: ""
+  - name: xla_glt_1408415
+    description: ""
+  - name: xla_glt_1408416
+    description: ""
+  - name: xla_glt_1408417
+    description: ""
+  - name: xla_glt_1408418
+    description: ""
+  - name: xla_glt_1408419
+    description: ""
+  - name: xla_glt_1408421
+    description: ""
+  - name: xla_glt_1409403
+    description: ""
+  - name: xla_glt_1409404
+    description: ""
+  - name: xla_glt_1409405
+    description: ""
+  - name: xla_glt_1409406
+    description: ""
+  - name: xla_glt_1409411
+    description: ""
+- name: emtk_ebs_hr
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: emtk_ebs_hr
+  tables:
+  - name: hr_all_organization_units
+    description: ""
+  - name: hr_locations_all
+    description: ""
+  - name: hr_organization_information
+    description: ""
+  - name: per_all_people_f
+    description: ""
+- name: emtk_ebs_inv
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: emtk_ebs_inv
+  tables:
+  - name: mtl_categories_b
+    description: ""
+  - name: mtl_categories_tl
+    description: ""
+  - name: mtl_category_sets_b
+    description: ""
+  - name: mtl_category_sets_tl
+    description: ""
+  - name: mtl_item_categories
+    description: ""
+  - name: mtl_material_transactions
+    description: ""
+    config:
+      loaded_at_field: PSA_LOAD_DTS
+      freshness:
+        warn_after: {count: 3, period: day}
+        error_after: {count: 4, period: day}
+
+
+  - name: mtl_parameters
+    description: ""
+  - name: mtl_system_items_b
+    description: ""
+  - name: mtl_system_items_tl
+    description: ""
+  - name: mtl_uom_conversions
+    description: ""
+- name: emtk_ebs_jtf
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: emtk_ebs_jtf
+  tables:
+  - name: jtf_rs_groups_b
+    description: ""
+  - name: jtf_rs_groups_tl
+    description: ""
+  - name: jtf_rs_group_members
+    description: ""
+  - name: jtf_rs_salesreps
+    description: ""
+- name: emtk_ebs_po
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: emtk_ebs_po
+  tables:
+  - name: po_action_history
+    description: ""
+  - name: po_distributions_all
+    description: ""
+  - name: po_headers_all
+    description: ""
+  - name: po_lines_all
+    description: ""
+  - name: po_line_locations_all
+    description: ""
+  - name: rcv_shipment_headers
+    description: ""
+  - name: rcv_shipment_lines
+    description: ""
+  - name: rcv_transactions
+    description: ""
+- name: emtk_ebs_wsh
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: emtk_ebs_wsh
+  tables:
+  - name: wsh_delivery_assignments
+    description: ""
+  - name: wsh_delivery_details
+    description: ""
+- name: emtk_ebs_xxcus
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: emtk_ebs_xxcus
+  tables:
+  - name: xx_customer_accounts
+    description: ""
+  - name: xx_sales_rep
+    description: ""
+- name: emtk_files
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: emtk_files
+  tables:
+  - name: luxury_hardware_bath
+    description: ""
+  - name: luxury_hardware_cabinet
+    description: ""
+- name: ferguson
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: ferguson
+  tables:
+  - name: fei_product_code_hofr_sap_xref
+    description: ""
+  - name: fei_product_code_moen_sap_xref
+    description: ""
+  - name: fivetran_audit
+    description: ""
+  - name: hofr_gross_price
+    description: ""
+  - name: hofr_m_3_a
+    description: ""
+  - name: hofr_m_3_a_new
+    description: ""
+  - name: hofr_m_3_a_new_grove
+    description: ""
+  - name: hofr_usfs_fei_xref
+    description: ""
+  - name: moen_build_returns
+    description: ""
+  - name: moen_m_3_a
+    description: ""
+  - name: moen_m_3_a_new
+    description: ""
+  - name: moen_m_3_a_new_cfg
+    description: ""
+  - name: moen_m_3_a_new_grove
+    description: ""
+  - name: moen_usfs_fei_xref
+    description: ""
+  - name: ff_ferguson_branch_index
+    description: ""
+  - name: ref_ferguson_moen_gross_price_new_structure
+    description: ""
+- name: smartsheet__nonworkspace_sheets
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: smartsheet__nonworkspace_sheets
+  tables:
+  - name: category_assignment_cross_sheet_106904244146052
+    description: ""
+  - name: new_hierarchy_assignment_request_processing_5073596788461444
+    description: ""
+  - name: sourcing_tm_hierarchy_3965509561175940
+    description: ""
+- name: ff_direct_spend_src_ctg
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: ff_direct_spend_src_ctg
+  tables:
+  - name: ff_direct_spend_cat_src
+    description: ""
+  - name: ff_direct_spend_email_name_xref
+    description: ""
+  - name: ff_direct_spend_cat_src_incr
+    description: ""
+  - name: ff_item_src_cat_leader_xref
+    description: ""
+- name: flo_telemetry
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: flo_telemetry
+  tables:
+  - name: flo_device_daily
+    description: ""
+  - name: flodetect_events_device_daily_agg
+    description: ""
+  - name: flodetect_events_device_daily_agg_v
+    description: ""
+  - name: flodetect_events_s3
+    description: ""
+- name: data_prod_device_inventory_public
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: data_prod_device_inventory_public
+  tables:
+  - name: device_info
+    description: ""    
+- name: flo_dynamodb
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: flo_dynamodb
+  tables:
+  - name: prod_account
+    description: ""
+  - name: prod_account_subscription
+    description: ""
+  - name: prod_icd
+    description: ""
+  - name: prod_icdlog
+    description: ""
+  - name: prod_location
+    description: ""
+  - name: prod_migration
+    description: ""
+  - name: prod_onboarding_log
+    description: ""
+  - name: prod_subscription
+    description: ""
+  - name: prod_user
+    description: ""
+  - name: prod_user_account_group_role
+    description: ""
+  - name: prod_user_account_role
+    description: ""
+  - name: prod_user_detail
+    description: ""
+  - name: prod_user_location_role
+    description: ""
+  - name: prod_alert_feedback
+    description: ""
+- name: ft_bazaarvoice_prod
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: ft_bazaarvoice_prod
+  tables:
+  - name: product
+    description: ""
+  - name: product_category
+    description: ""
+  - name: review
+    description: ""
+  - name: review_client_response
+    description: ""
+- name: flo_pg_device_service
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: flo_pg_device_service
+  tables:
+  - name: devices
+    description: ""
+    
+- name: ft_bazaarvoice_yale
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: ft_bazaarvoice_yale
+  tables:
+  - name: product
+    description: ""
+  - name: product_category
+    description: ""
+  - name: review
+    description: ""
+  - name: review_client_response
+    description: ""
+- name: gross_pos_forecast
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: gross_pos_forecast
+  tables:
+  - name: forecast_template
+    description: ""
+- name: hofr_eclipse
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: hofr_eclipse
+  tables:
+  - name: eclipse_sap_cust_xref
+    description: ""
+  - name: hofr_us_sales
+    description: ""
+- name: home_depot
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: home_depot
+  tables:
+  - name: fiscal_calendar
+    description: ""
+  - name: hdca_askuity_inventory
+    description: ""
+  - name: hdca_askuity_master_itemattributes
+    description: ""
+  - name: hdca_askuity_master_storeattributes
+    description: ""
+  - name: hdca_askuity_pos
+    description: ""
+  - name: hd_askuity_inventory
+    description: ""
+  - name: hd_askuity_inventory_20240301
+    description: ""
+  - name: hd_askuity_master_itemattributes
+    description: ""
+  - name: hd_askuity_master_pog
+    description: ""
+  - name: hd_askuity_master_storeattributes
+    description: ""
+  - name: hd_askuity_pos
+    description: ""
+  - name: hd_askuity_pos_20240301
+    description: ""
+  - name: location
+    description: ""
+  - name: sku_forecast
+    description: ""
+  - name: hd_askuity_master_pog_weekly
+    description: ""
+- name: home_depot_pro
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: home_depot_pro
+  tables:
+  - name: hd_pro_tmlc_pos
+    description: ""
+  - name: hd_pro_tmlc_pos_history
+    description: ""
+  - name: hd_pro_tmlc_pos_location_xref
+    description: ""
+- name: home_depot_us
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: home_depot_us
+  tables:
+  - name: location
+    description: ""
+- name: lodging_econometrics
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: lodging_econometrics
+  tables:
+  - name: lodging_econometrics
+    description: ""
+- name: logging
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: logging
+  tables:
+  - name: managed_schemas
+    description: ""
+  - name: managed_tables
+    description: ""
+  - name: stream_consume_sink
+    description: ""
+  - name: sync_log
+    description: "table for tracking psa sync procedures execution status and errors"
+- name: lowes_ft
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: lowes_ft
+  tables:
+  - name: sales_inventory_masterlock_missing_vpp
+    description: ""
+- name: lowes_us
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: lowes_us
+  tables:
+  - name: fivetran_audit
+    description: ""
+  - name: location
+    description: ""
+- name: lowes_vpp
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: lowes_vpp
+  tables:
+  - name: customer_returns
+    description: ""
+  - name: item_information_report
+    description: ""
+  - name: lowes_moen_cross_reference
+    description: ""
+  - name: lowes_moen_us_pos_inv
+    description: ""
+  - name: omni_report
+    description: ""
+  - name: sales_inventory
+    description: ""
+  - name: sales_inventory_bkp_20230502
+    description: ""
+  - name: sales_inventory_larson
+    description: ""
+  - name: sales_inventory_masterlock
+    description: ""
+  - name: sales_inventory_moen
+    description: ""
+  - name: sales_inventory_thermatru
+    description: ""
+  - name: lowes_stocked_stores_all
+    description: ""
+- name: lowes_xref
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: lowes_xref
+  tables:
+  - name: lowes_larson_cross_reference_v_1
+    description: ""
+  - name: lowes_moen_cross_reference
+    description: ""
+  - name: lowes_tmlc_cross_reference
+    description: ""
+  - name: lowes_thermatru_cross_reference  
+- name: lrsn_psft_sysadm
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: lrsn_psft_sysadm
+  tables:
+  - name: psxlatdefn
+    description: ""
+  - name: psxlatitem
+    description: ""
+  - name: ps_bi_hdr
+    description: ""
+  - name: ps_bi_ivc_form
+    description: ""
+  - name: ps_bi_line
+    description: ""
+  - name: ps_bus_unit_tbl_fs
+    description: ""
+  - name: ps_bus_unit_tbl_in
+    description: ""
+  - name: ps_bu_items_inv
+    description: ""
+  - name: ps_cp_opt_detl
+    description: ""
+  - name: ps_cp_opt_hdr
+    description: ""
+  - name: ps_cust_cgrp_lnk
+    description: ""
+  - name: ps_hold_cd
+    description: ""
+  - name: ps_inv_items
+    description: ""
+  - name: ps_in_demand
+    description: ""
+  - name: ps_in_demand_addr
+    description: ""
+  - name: ps_in_demand_bi
+    description: ""
+  - name: ps_itm_cat_tbl
+    description: ""
+  - name: ps_itm_vendor_loc
+    description: "Item Vendor Location details for Larson"
+  - name: ps_location_tbl
+    description: ""
+  - name: ps_l_corpmodel_lov
+    description: ""
+  - name: ps_l_corp_aliasgrp
+    description: ""
+  - name: ps_l_corp_model
+    description: ""
+  - name: ps_l_cust_grp_lu
+    description: ""
+  - name: ps_l_ord_header
+    description: ""
+  - name: ps_l_price
+    description: ""
+  - name: ps_l_prod_grp_lu
+    description: ""
+  - name: ps_l_prod_grp_tbl
+    description: ""
+  - name: ps_l_rep_cust
+    description: ""
+  - name: ps_l_salesman_info
+    description: ""
+  - name: ps_l_sales_history
+    description: ""
+  - name: ps_l_sp_prod
+    description: ""
+  - name: ps_l_state_grp
+    description: ""
+  - name: ps_master_item_tbl
+    description: ""
+  - name: ps_ord_group
+    description: ""
+  - name: ps_ord_header
+    description: ""
+  - name: ps_ord_hold
+    description: ""
+  - name: ps_ord_line
+    description: ""
+  - name: ps_ord_schedule
+    description: ""
+  - name: ps_physical_inv
+    description: ""
+  - name: ps_pl_item_attrib
+    description: ""
+  - name: ps_po_hdr
+    description: ""
+  - name: ps_po_line
+    description: ""    
+  - name: ps_po_line_ship
+    description: ""
+  - name: ps_prod_item
+    description: ""
+  - name: ps_pymt_trms_dscnt
+    description: ""
+  - name: ps_pymt_trms_hdr
+    description: ""
+  - name: ps_pymt_trms_net
+    description: ""
+  - name: ps_pymt_trms_time
+    description: ""
+  - name: ps_reason_cd
+    description: ""
+  - name: ps_recv_hdr
+    description: ""
+  - name: ps_recv_ln_ship
+    description: ""
+    config:
+      loaded_at_field: PSA_LOAD_DTS
+      freshness:
+        warn_after: {count: 3, period: day}
+        error_after: {count: 4, period: day}
+
+
+  - name: ps_setid_tbl
+    description: ""
+  - name: ps_sf_comp_list
+    description: ""
+  - name: ps_sf_prdnid_headr
+    description: ""
+  - name: ps_sf_prdn_area
+    description: ""
+  - name: ps_sf_prdn_area_it
+    description: ""
+  - name: ps_transaction_inv
+    description: ""
+  - name: ps_vendor
+    description: ""
+  - name: ps_vendor_addr
+    description: ""
+  - name: ps_vendor_loc
+    description: ""
+- name: mdm_supplier
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: mdm_supplier
+  tables:
+  - name: outbound_supplier
+    description: ""
+  - name: outbound_supplier_xref
+    description: ""
+  - name: outbound_supplier_site
+    description: ""
+  - name: outbound_supplier_site_email
+    description: ""
+  - name: outbound_supplier_site_phone
+    description: ""
+  - name: outbound_supplier_org_id
+    description: ""
+- name: menards
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: menards
+  tables:
+  - name: item_traits
+    description: ""
+  - name: location_lookup
+    description: ""
+  - name: menards_store_history
+    description: ""
+  - name: moen_cross_reference
+    description: ""
+  - name: moen_sales_and_inventory_history
+    description: ""
+  - name: sales_and_inventory
+    description: ""
+  - name: sales_by_type
+    description: ""
+- name: menards_ft
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: menards_ft
+  tables:
+  - name: menards_larson_pos
+    description: ""
+  - name: menards_larson_xref
+    description: ""
+  - name: menards_moen_sales_inventory
+    description: ""
+- name: mlc_ascp
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: mlc_ascp
+  tables:
+  - name: msc_demands
+    description: ""
+  - name: msc_exception_details
+    description: ""
+  - name: msc_full_pegging
+    description: ""
+  - name: msc_safety_stocks
+    description: ""
+  - name: msc_supplies
+    description: ""
+  - name: msc_system_items
+    description: ""
+  - name: msc_trading_partners
+    description: ""
+  - name: msc_trading_partner_sites
+    description: ""
+- name: ml_ascp_dev_applsys
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: ml_ascp_dev_applsys
+  tables:
+  - name: fivetran_audit
+    description: ""
+  - name: fnd_lookup_values
+    description: ""
+- name: ml_ascp_dev_msc
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: ml_ascp_dev_msc
+  tables:
+  - name: fivetran_audit
+    description: ""
+  - name: msc_demands
+    description: ""
+  - name: msc_dmd_scn_metrics
+    description: ""
+  - name: msc_exception_details
+    description: ""
+  - name: msc_full_pegging
+    description: ""
+  - name: msc_item_categories
+    description: ""
+  - name: msc_plans
+    description: ""
+  - name: msc_process_effectivity
+    description: ""
+  - name: msc_safety_stocks
+    description: ""
+  - name: msc_supplies
+    description: ""
+  - name: msc_system_items
+    description: ""
+- name: ml_ascp_prod_applsys
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: ml_ascp_prod_applsys
+  tables:
+  - name: fivetran_audit
+    description: ""
+  - name: fnd_lookup_values
+    description: ""
+- name: ml_ascp_prod_msc
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: ml_ascp_prod_msc
+  tables:
+  - name: fivetran_audit
+    description: ""
+  - name: msc_demands
+    description: ""
+  - name: msc_dmd_scn_metrics
+    description: ""
+  - name: msc_exception_details
+    description: ""
+  - name: msc_full_pegging
+    description: ""
+  - name: msc_item_categories
+    description: ""
+  - name: msc_plans
+    description: ""
+  - name: msc_process_effectivity
+    description: ""
+  - name: msc_safety_stocks
+    description: ""
+  - name: msc_supplies
+    description: ""
+  - name: msc_system_items
+    description: ""
+- name: ml_ebs_ap
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: ml_ebs_ap
+  tables:
+  - name: ap_invoices_all
+    description: ""
+  - name: ap_invoice_distributions_all
+    description: ""
+  - name: ap_invoice_payments_all
+    description: ""
+  - name: ap_payment_schedules_all
+    description: ""
+  - name: ap_suppliers
+    description: ""
+  - name: ap_supplier_sites_all
+    description: ""
+  - name: ap_system_parameters_all
+    description: ""
+  - name: ap_terms_lines
+    description: ""
+  - name: ap_terms_tl
+    description: ""
+  - name: fivetran_audit
+    description: ""
+  - name: ap_invoice_lines_all
+    description: ""
+- name: ml_ebs_applsys
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: ml_ebs_applsys
+  tables:
+  - name: fivetran_audit
+    description: ""
+  - name: fnd_flex_values_tl
+    description: ""
+  - name: fnd_id_flex_segments
+    description: ""
+- name: ml_ebs_ar
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: ml_ebs_ar
+  tables:
+  - name: ar_adjustments_all
+    description: ""
+  - name: ar_memo_lines_all_b
+    description: ""
+  - name: ar_memo_lines_all_tl
+    description: ""
+  - name: ar_payment_schedules_all
+    description: ""
+  - name: ar_receivables_trx_all
+    description: ""
+  - name: fivetran_audit
+    description: ""
+  - name: hz_contact_points
+    description: ""
+  - name: hz_customer_profiles
+    description: ""
+  - name: hz_cust_accounts
+    description: ""
+  - name: hz_cust_account_roles
+    description: ""
+  - name: hz_cust_acct_sites_all
+    description: ""
+  - name: hz_cust_profile_amts
+    description: ""
+  - name: hz_cust_profile_classes
+    description: ""
+  - name: hz_cust_site_uses_all
+    description: ""
+  - name: hz_locations
+    description: ""
+  - name: hz_parties
+    description: ""
+  - name: hz_party_relationships
+    description: ""
+  - name: hz_party_sites
+    description: ""
+  - name: hz_relationships
+    description: ""
+  - name: ra_batch_sources_all
+    description: ""
+  - name: ra_customer_trx_all
+    description: ""
+  - name: ra_customer_trx_lines_all
+    description: ""
+  - name: ra_cust_trx_line_gl_dist_all
+    description: ""
+  - name: ra_cust_trx_line_salesreps_all
+    description: ""
+- name: ml_ebs_bolinf
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: ml_ebs_bolinf
+  tables:
+  - name: fivetran_audit
+    description: ""
+  - name: mlc_lookups
+    description: ""
+  - name: mlc_system_items
+    description: ""
+- name: ml_ebs_bom
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: ml_ebs_bom
+  tables:
+  - name: bom_components_b
+    description: ""
+  - name: bom_departments
+    description: ""
+  - name: bom_operational_routings
+    description: ""
+  - name: bom_operation_sequences
+    description: ""
+  - name: bom_structures_b
+    description: ""
+  - name: cst_cost_elements
+    description: ""
+  - name: cst_cost_types
+    description: ""
+  - name: cst_elemental_costs
+    description: ""
+  - name: cst_item_costs
+    description: ""
+  - name: cst_standard_costs
+    description: ""
+  - name: fivetran_audit
+    description: ""
+- name: ml_ebs_ego
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: ml_ebs_ego
+  tables:
+  - name: ego_mtl_sy_items_ext_b
+    description: ""
+- name: ml_ebs_gl
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: ml_ebs_gl
+  tables:
+  - name: fivetran_audit
+    description: ""
+  - name: gl_code_combinations
+    description: ""
+  - name: gl_daily_rates
+    description: ""
+  - name: gl_ledgers
+    description: ""
+  - name: gl_periods
+    description: ""
+- name: ml_ebs_hr
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: ml_ebs_hr
+  tables:
+  - name: fivetran_audit
+    description: ""
+  - name: hr_all_organization_units
+    description: ""
+  - name: hr_all_organization_units_tl
+    description: ""
+  - name: hr_locations_all
+    description: ""
+  - name: hr_organization_information
+    description: ""
+  - name: per_all_people_f
+    description: ""
+- name: ml_ebs_inv
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: ml_ebs_inv
+  tables:
+  - name: fivetran_audit
+    description: ""
+  - name: mtl_categories_b
+    description: ""
+  - name: mtl_categories_tl
+    description: ""
+  - name: mtl_category_accounts
+    description: ""
+  - name: mtl_category_sets_b
+    description: ""
+  - name: mtl_category_sets_tl
+    description: ""
+  - name: mtl_item_categories
+    description: ""
+  - name: mtl_item_locations
+    description: ""
+  - name: mtl_material_transactions
+    description: ""
+    config:
+      loaded_at_field: PSA_LOAD_DTS
+      freshness:
+        warn_after: {count: 3, period: day}
+        error_after: {count: 4, period: day}
+
+
+
+
+  - name: mtl_parameters
+    description: ""
+  - name: mtl_reservations
+    description: ""
+  - name: mtl_secondary_inventories
+    description: ""
+  - name: mtl_system_items_b
+    description: ""
+  - name: mtl_system_items_tl
+    description: ""
+  - name: mtl_transaction_lot_numbers
+    description: ""
+  - name: mtl_transaction_types
+    description: ""
+  - name: mtl_units_of_measure_tl
+    description: ""
+- name: ml_ebs_ont
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: ml_ebs_ont
+  tables:
+  - name: oe_order_headers_all
+    description: ""
+  - name: oe_order_lines_all
+    description: ""
+  - name: oe_price_adjustments
+    description: ""
+  - name: oe_transaction_types_tl
+    description: ""
+- name: ml_ebs_po
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: ml_ebs_po
+  tables:
+  - name: fivetran_audit
+    description: ""
+  - name: po_agents
+    description: ""
+  - name: po_distributions_all
+    description: ""
+  - name: po_document_types_all_tl
+    description: ""
+  - name: po_headers_all
+    description: ""
+  - name: po_lines_all
+    description: ""
+  - name: po_line_locations_all
+    description: ""
+  - name: po_line_types_b
+    description: ""
+  - name: po_line_types_tl
+    description: ""
+  - name: po_location_associations_all
+    description: ""
+  - name: po_vendor_sites_obs
+    description: ""
+  - name: rcv_shipment_headers
+    description: ""
+  - name: rcv_shipment_lines
+    description: ""
+  - name: rcv_transactions
+    description: ""
+- name: moen_hofr_facebook_ads
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: moen_hofr_facebook_ads
+  tables:
+  - name: account_history
+    description: ""
+  - name: adset_schedule
+    description: ""
+  - name: ad_campaign_issues_info
+    description: ""
+  - name: ad_conversion
+    description: ""
+  - name: ad_group_issues_info
+    description: ""
+  - name: ad_history
+    description: ""
+  - name: ad_image_history
+    description: ""
+  - name: ad_recommendation
+    description: ""
+  - name: ad_set_attribution
+    description: ""
+  - name: ad_set_custom_audience
+    description: ""
+  - name: ad_set_history
+    description: ""
+  - name: ad_tracking
+    description: ""
+  - name: ad_video_history
+    description: ""
+  - name: campaign_history
+    description: ""
+  - name: campaign_label
+    description: ""
+  - name: creative_history
+    description: ""
+  - name: custom_audience_history
+    description: ""
+  - name: custom_conversion_history
+    description: ""
+  - name: custom_insight_report
+    description: ""
+  - name: custom_insight_report_actions
+    description: ""
+  - name: custom_insight_report_action_values
+    description: ""
+  - name: custom_insight_report_conversions
+    description: ""
+  - name: custom_insight_report_outbound_clicks
+    description: ""
+  - name: custom_insight_report_unique_actions
+    description: ""
+  - name: custom_insight_report_unique_outbound_clicks
+    description: ""
+  - name: custom_insight_report_video_30_sec_watched_actions
+    description: ""
+  - name: custom_insight_report_video_play_actions
+    description: ""
+  - name: custom_insight_report_video_p_100_watched_actions
+    description: ""
+  - name: custom_insight_report_video_p_95_watched_actions
+    description: ""
+  - name: custom_insight_report_video_thruplay_watched_actions
+    description: ""
+  - name: fivetran_audit
+    description: ""
+  - name: frequency_control
+    description: ""
+  - name: label_history
+    description: ""
+  - name: lookalike_origin
+    description: ""
+  - name: pacing_type
+    description: ""
+  - name: reach_frequency
+    description: ""
+  - name: targeting_optimization_types
+    description: ""
+- name: moen_partner_reporting
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: moen_partner_reporting
+  tables:
+  - name: flo_swd_partner_devices
+    description: ""
+  - name: flo_sws_partner_devices
+    description: ""
+- name: outd_ocf_ar
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: outd_ocf_ar
+  tables:
+  - name: ar_payment_schedules_all
+    description: ""
+  - name: hz_customer_profiles_f
+    description: ""
+  - name: hz_customer_profiles_f_
+    description: ""
+  - name: hz_cust_profile_amts_f
+    description: ""
+  - name: hz_cust_profile_amts_f_
+    description: ""
+  - name: hz_cust_profile_classes
+    description: ""
+  - name: hz_cust_profile_classes_
+    description: ""
+  - name: hz_cust_prof_class_amts
+    description: ""
+  - name: hz_cust_prof_class_amts_
+    description: ""
+  - name: ra_batches_all
+    description: ""
+  - name: ra_batch_sources_all
+    description: ""
+  - name: ra_customer_trx_all
+    description: ""
+  - name: ra_customer_trx_lines_all
+    description: ""
+  - name: ra_cust_trx_line_gl_dist_all
+    description: ""
+  - name: ra_cust_trx_line_salesreps_all
+    description: ""
+  - name: ra_cust_trx_types_all
+    description: ""
+  - name: ra_terms_b
+    description: ""
+  - name: ra_terms_lines
+    description: ""
+  - name: ra_terms_tl
+    description: ""
+- name: outd_ocf_ap
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: outd_ocf_ap
+  tables:
+  - name: ap_terms_lines
+    description: ""
+  - name: ap_terms_tl
+    description: ""
+  - name: ap_invoices_all
+    description: ""
+  - name: ap_invoice_lines_all
+    description: ""
+- name: outd_ocf_po
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: outd_ocf_po
+  tables:
+  - name: po_headers_all
+    description: ""
+  - name: po_lines_all
+    description: ""
+  - name: po_line_locations_all
+    description: ""
+- name: outd_ocf_cmr
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: outd_ocf_cmr
+  tables:
+  - name: cmr_accrual_summary
+    description: ""
+  - name: cmr_accrual_txns
+    description: ""
+  - name: cmr_accr_reconc_dtls
+    description: ""
+  - name: cmr_accr_reconc_headers
+    description: ""
+  - name: cmr_accr_reconc_summary
+    description: ""
+  - name: cmr_asn_intransit_amts
+    description: ""
+  - name: cmr_asn_intransit_amts_int
+    description: ""
+  - name: cmr_asn_ownership_rules
+    description: ""
+  - name: cmr_asn_summary
+    description: ""
+  - name: cmr_cst_staging_int
+    description: ""
+- name: outd_ocf_ego
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: outd_ocf_ego
+  tables:
+  - name: ego_audit_mig_attr_data
+    description: ""
+  - name: ego_item_eff_b
+    description: ""
+  - name: ego_item_eff_tl
+    description: ""
+- name: outd_ocf_egp
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: outd_ocf_egp
+  tables:
+  - name: egp_categories_b
+    description: ""
+  - name: egp_categories_tl
+    description: ""
+  - name: egp_category_sets_b
+    description: ""
+  - name: egp_category_sets_tl
+    description: ""
+  - name: egp_es_picker_applications
+    description: ""
+  - name: egp_item_cat_assignments
+    description: ""
+  - name: egp_item_classes_b
+    description: ""
+  - name: egp_item_classes_tl
+    description: ""
+  - name: egp_item_relationships_b
+    description: ""
+  - name: egp_system_items_b
+    description: ""
+  - name: egp_system_items_tl
+    description: ""
+- name: outd_ocf_hz
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: outd_ocf_hz
+  tables:
+  - name: hz_cust_accounts
+    description: ""
+  - name: hz_cust_acct_sites_all
+    description: ""
+  - name: hz_cust_site_uses_all
+    description: ""
+  - name: hz_parties
+    description: ""
+  - name: jtf_rs_rep_managers_cf_ss
+    description: ""
+  - name: jtf_rs_rep_managers_ss
+    description: ""
+- name: outd_ocf_inv
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: outd_ocf_inv
+  tables:
+  - name: inv_item_locations
+    description: ""
+  - name: inv_license_plate_numbers
+    description: ""
+  - name: inv_material_txns
+    description: ""
+    config:
+      loaded_at_field: PSA_LOAD_DTS
+      freshness:
+        warn_after: {count: 3, period: day}
+        error_after: {count: 4, period: day}
+  - name: inv_onhand_actions
+    description: ""
+  - name: inv_org_parameters
+    description: ""
+  - name: inv_rfid_configurations
+    description: ""
+  - name: inv_rfid_devices
+    description: ""
+  - name: inv_rfid_device_processes
+    description: ""
+  - name: inv_rfid_events
+    description: ""
+  - name: inv_rfid_event_actions
+    description: ""
+  - name: inv_rfid_tag_mappings
+    description: ""
+  - name: inv_rule_config_headers
+    description: ""
+  - name: inv_rule_config_lines
+    description: ""
+  - name: inv_rule_parameters
+    description: ""
+  - name: inv_shortage_item_details
+    description: ""
+  - name: inv_transaction_types_b
+    description: ""
+  - name: inv_transaction_types_tl
+    description: ""
+
+- name: outd_ocf_poz
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: outd_ocf_poz
+  tables:
+  - name: poz_suppliers
+    description: ""
+  - name: poz_supplier_sites_all_m
+    description: ""
+
+- name: outd_ocf_rcv
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: outd_ocf_rcv
+  tables:
+    - name: rcv_transactions
+      description: ""
+- name: outd_ocf_xle
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: outd_ocf_xle
+  tables:
+  - name: xle_entity_profiles
+    description: ""
+- name: profitero
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: profitero
+  tables:
+  - name: brands
+    description: ""
+  - name: categories
+    description: ""
+  - name: categories_products
+    description: ""
+  - name: category_sales
+    description: ""
+  - name: customer_products
+    description: ""
+  - name: glance_views
+    description: ""
+  - name: placement
+    description: ""
+  - name: price_availability_history
+    description: ""
+  - name: products
+    description: ""
+  - name: product_content
+    description: ""
+  - name: product_ratings
+    description: ""
+  - name: rankings
+    description: ""
+  - name: ranking_products
+    description: ""
+  - name: retailers
+    description: ""
+  - name: reviews
+    description: ""
+  - name: sales
+    description: ""
+  - name: sns_categories
+    description: ""
+  - name: sns_products
+    description: ""
+- name: profitero_fiberon
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: profitero_fiberon
+  tables:
+  - name: brands
+    description: ""
+  - name: categories
+    description: ""
+  - name: categories_products
+    description: ""
+  - name: customer_products
+    description: ""
+  - name: placement
+    description: ""
+  - name: price_availability_history
+    description: ""
+  - name: products
+    description: ""
+  - name: product_content
+    description: ""
+  - name: product_ratings
+    description: ""
+  - name: rankings
+    description: ""
+  - name: ranking_products
+    description: ""
+  - name: retailers
+    description: ""
+  - name: reviews
+    description: ""
+- name: profitero_fypon
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: profitero_fypon
+  tables:
+  - name: brands
+    description: ""
+  - name: categories
+    description: ""
+  - name: categories_products
+    description: ""
+  - name: customer_products
+    description: ""
+  - name: placement
+    description: ""
+  - name: price_availability_history
+    description: ""
+  - name: products
+    description: ""
+  - name: product_content
+    description: ""
+  - name: product_ratings
+    description: ""
+  - name: rankings
+    description: ""
+  - name: ranking_products
+    description: ""
+  - name: retailers
+    description: ""
+  - name: reviews
+    description: ""
+- name: profitero_larson
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: profitero_larson
+  tables:
+  - name: brands
+    description: ""
+  - name: categories
+    description: ""
+  - name: categories_products
+    description: ""
+  - name: customer_products
+    description: ""
+  - name: placement
+    description: ""
+  - name: price_availability_history
+    description: ""
+  - name: products
+    description: ""
+  - name: product_content
+    description: ""
+  - name: product_ratings
+    description: ""
+  - name: rankings
+    description: ""
+  - name: ranking_products
+    description: ""
+  - name: retailers
+    description: ""
+  - name: reviews
+    description: ""
+- name: profitero_security
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: profitero_security
+  tables:
+  - name: brands
+    description: ""
+  - name: categories
+    description: ""
+  - name: categories_products
+    description: ""
+  - name: category_sales
+    description: ""
+  - name: customer_products
+    description: ""
+  - name: glance_views
+    description: ""
+  - name: placement
+    description: ""
+  - name: price_availability_history
+    description: ""
+  - name: products
+    description: ""
+  - name: product_content
+    description: ""
+  - name: product_ratings
+    description: ""
+  - name: rankings
+    description: ""
+  - name: ranking_products
+    description: ""
+  - name: retailers
+    description: ""
+  - name: reviews
+    description: ""
+  - name: sales
+    description: ""
+  - name: sns_categories
+    description: ""
+  - name: sns_products
+    description: ""
+- name: profitero_thermatru
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: profitero_thermatru
+  tables:
+  - name: brands
+    description: ""
+  - name: categories
+    description: ""
+  - name: categories_products
+    description: ""
+  - name: customer_products
+    description: ""
+  - name: placement
+    description: ""
+  - name: price_availability_history
+    description: ""
+  - name: products
+    description: ""
+  - name: product_content
+    description: ""
+  - name: product_ratings
+    description: ""
+  - name: rankings
+    description: ""
+  - name: ranking_products
+    description: ""
+  - name: retailers
+    description: ""
+  - name: reviews
+    description: ""
+- name: reddit_ads
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: reddit_ads
+  tables:
+  - name: account_conversions_report
+    description: ""
+  - name: account_report
+    description: ""
+  - name: ad
+    description: ""
+  - name: ad_conversions_report
+    description: ""
+  - name: ad_group
+    description: ""
+  - name: ad_group_conversions_report
+    description: ""
+  - name: ad_group_report
+    description: ""
+  - name: ad_report
+    description: ""
+  - name: business_account
+    description: ""
+  - name: campaign
+    description: ""
+  - name: campaign_conversions_report
+    description: ""
+  - name: campaign_country_conversions_report
+    description: ""
+  - name: campaign_country_report
+    description: ""
+  - name: campaign_report
+    description: ""
+  - name: community
+    description: ""
+  - name: geolocation
+    description: ""
+  - name: interest
+    description: ""
+  - name: post_conversions_report
+    description: ""
+  - name: post_report
+    description: ""
+  - name: targeting_community
+    description: ""
+  - name: targeting_device
+    description: ""
+  - name: targeting_geolocation
+    description: ""
+  - name: targeting_interest
+    description: ""
+  - name: targeting_keyword
+    description: ""
+  - name: targeting_placement
+    description: ""
+  - name: time_zone
+    description: ""
+- name: reddit_ads_moen
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: reddit_ads_moen
+  tables:
+  - name: account
+    description: ""
+  - name: account_conversions_report
+    description: ""
+  - name: account_report
+    description: ""
+  - name: ad
+    description: ""
+  - name: ad_conversions_report
+    description: ""
+  - name: ad_group
+    description: ""
+  - name: ad_group_conversions_report
+    description: ""
+  - name: ad_group_report
+    description: ""
+  - name: ad_report
+    description: ""
+  - name: campaign
+    description: ""
+  - name: campaign_conversions_report
+    description: ""
+  - name: campaign_country_conversions_report
+    description: ""
+  - name: campaign_country_report
+    description: ""
+  - name: campaign_report
+    description: ""
+  - name: community
+    description: ""
+  - name: custom_ad_interest_report_moen
+    description: ""
+  - name: fivetran_audit
+    description: ""
+  - name: geolocation
+    description: ""
+  - name: interest
+    description: ""
+  - name: post_conversions_report
+    description: ""
+  - name: post_report
+    description: ""
+  - name: targeting_community
+    description: ""
+  - name: targeting_device
+    description: ""
+  - name: targeting_geolocation
+    description: ""
+  - name: targeting_interest
+    description: ""
+  - name: targeting_keyword
+    description: ""
+  - name: targeting_placement
+    description: ""
+  - name: time_zone
+    description: ""
+- name: reference
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: reference
+  tables:
+  - name: insurance_partner_name
+    description: ""
+  - name: ref_installer
+    description: "Static installer lookup — maps INSTALLER_YA_TAG to INSTALLER_NAME (3 rows)"
+  - name: frontdoor_orderid_installdates
+    description: ""
+  - name: frontdoor_order_status_v_2
+    description: ""
+  - name: frontdoor_problem_orders_masking
+    description: "FrontDoor problem orders requiring LASTMODIFIED masking."
+  - name: frontdoor_status_map
+    description: ""
+  - name: alarm
+    description: ""
+  - name: dim_categories
+    description: ""
+  - name: yipit_granular_products_monthly_v3_paleturquoisebrook_view
+    description: ""
+  - name: flat_file_connected_products_classification_for_sentiment_moen_apps
+    description: ""
+  - name: flat_file_connected_products_classification_for_sentiment_moen_physical
+    description: ""
+  - name: flat_file_connected_products_classification_for_sentiment_yale_combined
+    description: ""
+  - name: flo_mfg_serial_device_id_map
+    description: ""
+  - name: flo_shopify_email_serial_device_id_map
+    description: ""
+  - name: frontdoor_order_tag_xref
+    description: ""
+  - name: hd_fiberon_cross_ref
+    description: ""
+  - name: hd_tmlc_cross_ref
+    description: ""
+  - name: ref_brand
+    description: ""
+  - name: ref_brand_appbot
+    description: ""
+  - name: ref_date_fbin
+    description: ""
+  - name: ref_date_fiscal_445
+    description: ""
+  - name: ref_date_pos_lowes
+    description: ""
+  - name: ref_product_delighted
+    description: ""
+  - name: ref_product_simplesat
+    description: ""
+  - name: sap_bw_pos_gross_price
+    description: ""
+  - name: sap_bw_pos_gross_price_bkp_20240321
+    description: ""
+  - name: target_retailer
+    description: ""
+  - name: tmlc_category_map
+    description: ""
+  - name: winn_virtual_bundles
+    description: ""
+  - name: ref_test_email_pattern
+    description: ""
+- name: rgm_pos_extract
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: rgm_pos_extract
+  tables:
+  - name: fivetran_audit
+    description: ""
+  - name: lowes_us_moen
+    description: ""
+- name: sap_bw
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: sap_bw
+  tables:
+  - name: azcopa
+    description: ""
+  - name: azinput
+    description: ""
+  - name: bi0_pcust_sales
+    description: ""
+  - name: bi0_pmaterial
+    description: ""
+  - name: bi0_pmat_sales
+    description: ""
+  - name: bi0_tbus_area
+    description: ""
+  - name: bi0_tcust_group
+    description: ""
+  - name: bi0_tdistr_chan
+    description: ""
+  - name: bi0_tdivision
+    description: ""
+  - name: bi0_tmaterial
+    description: ""
+  - name: bi0_tmatl_type
+    description: ""
+  - name: bi0_tmat_type
+    description: ""
+  - name: bi0_tord_reason
+    description: ""
+  - name: bi0_tplant
+    description: ""
+  - name: bi0_treason_rej
+    description: ""
+  - name: bi0_tsales_org
+    description: ""
+  - name: bic_azad_mb522
+    description: ""
+  - name: bic_azcpsls100
+    description: ""
+  - name: bic_azfcdadso2
+    description: ""
+  - name: bic_azfcdadso2_bkp_20230321
+    description: ""
+  - name: bic_azinput00
+    description: ""
+  - name: bic_azmat_mov00
+    description: ""
+  - name: bic_tzarch
+    description: ""
+  - name: bic_tzarchdet
+    description: ""
+  - name: bic_tzbusunown
+    description: ""
+  - name: bic_tzprodgrp
+    description: ""
+  - name: bic_tzzapoacct
+    description: ""
+  - name: bic_tzzcpf
+    description: ""
+  - name: bic_tzzdtp
+    description: ""
+  - name: bic_tzzfin
+    description: ""
+  - name: bic_tzzlin
+    description: ""
+  - name: bic_tzzpltfm
+    description: ""
+  - name: bic_tzzprctygr
+    description: ""
+  - name: bic_tzzrmarea
+    description: ""
+  - name: bic_zrepcatgt
+    description: ""
+  - name: sales_coupon
+    description: ""
+  - name: sales_forecast
+    description: ""
+  - name: sales_order
+    description: ""
+  - name: sales_order_inc
+    description: ""
+  - name: sales_order_inc_20230112
+    description: ""
+- name: sap_c4c_prd
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: sap_c4c_prd
+  tables:
+  - name: api_extract_log
+    description: ""
+  - name: corporateaccountzaccounttier_kutcollection
+    description: ""
+  - name: registeredproductcollection
+    description: ""
+  - name: servicerequestpartyrolecodecollection
+    description: ""
+- name: qualitypod_sp
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: qualitypod_sp
+  tables:
+  - name: QLIKVIEW_EXTERNAL_CLAIM_DATA_FILE_SHEET_1
+    description: "External Claims Data Flat File"
+- name: sap_ecc_prd
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: sap_ecc_prd
+  tables:
+  - name: z_equi
+    description: ""
+  - name: z_equz
+    description: ""
+  - name: z_a017
+    description: "material info record (plant-specific)"
+  - name: z_a017_merge
+    description: ""
+  - name: z_a018
+    description: "material info record"
+  - name: z_a018_merge
+    description: ""
+  - name: z_adr6
+    description: "e-mail addresses (business address services)"
+  - name: z_adr6_merge
+    description: ""
+  - name: z_adrc
+    description: "addresses (business address services)"
+  - name: z_adrc_merge
+    description: ""
+  - name: z_aeoi
+    description: ""
+  - name: z_aeoi_merge
+    description: ""
+  - name: z_afko
+    description: "Order Header Data PP Orders"
+  - name: z_afko_merge
+    description: ""   
+  - name: z_afpo
+    description: "Order item"
+  - name: z_afpo_merge
+    description: ""    
+  - name: z_afru
+    description: ""
+  - name: z_aufk
+    description: "Order master data"
+  - name: z_aufk_merge
+    description: ""  
+  - name: z_ausp
+    description: "characteristic values"
+  - name: z_ausp_merge
+    description: ""
+  - name: z_but000
+    description: "bp: general data i"
+  - name: z_but000_merge
+    description: ""
+  - name: z_but050
+    description: "bp relationships/role definitions: general data"
+  - name: z_but050_merge
+    description: ""
+  - name: z_cosp
+    description: "CO Object: Cost Totals for External Postings"
+  - name: z_cosp_merge
+    description: ""
+  - name: z_cosl
+    description: "CO Object: Activity Type Totals"
+  - name: z_cosl_merge
+    description: ""
+  - name: z_c519
+    description: "general ledger subset 1(Material)"
+  - name: z_c520
+    description: "general ledger subset 2(SoldTo)"
+  - name: z_c521
+    description: "general ledger subset 3(SalesDoc)"
+  - name: z_cabn
+    description: "characteristic"
+  - name: z_cabn_merge
+    description: ""
+  - name: z_crhd
+    description: "Work Center Header"
+  - name: z_crhd_merge
+    description: ""
+  - name: z_csks
+    description: "cost center master data"
+  - name: z_csks_merge
+    description: ""
+  - name: z_cska
+    description: "Cost Elements (Data Dependent on Chart of Accounts)"
+  - name: z_cska_merge
+    description: ""
+  - name: z_cskb
+    description: "Cost Elements (Data Dependent on Controlling Area)"
+  - name: z_cskb_merge
+    description: ""
+  - name: z_cskt
+    description: "cost center texts"
+  - name: z_cskt_merge
+    description: ""
+  - name: z_coep
+    description: "CO Object Line Items (by period)"
+  - name: z_coep_merge
+    description: ""
+  - name: z_ce1new4
+    description: "copa - moen operating concern"
+  - name: z_ce1new4_merge
+    description: ""
+  - name: z_cepct
+    description: "profit center texts"
+  - name: z_cepct_merge
+  - name: z_csla
+    description: "Activity master"
+  - name: z_csla_merge
+    description: ""
+  - name: z_cslt
+    description: "Activity type texts"
+  - name: z_cslt_merge
+    description: ""
+  - name: z_dd07t
+    description: "Texts for Domain Fixed Values"
+  - name: z_rkpf
+    description: "Document Header: Reservation"
+  - name: z_resb
+    description: "Document Line Item: Reservation"
+  - name: z_eban
+    description: "purchase requisition"
+  - name: z_eban_merge
+    description: ""
+  - name: z_eina
+    description: "purchasing info record: general data"
+  - name: z_eina_merge
+    description: ""
+  - name: z_eine
+    description: "purchasing info record: purchasing organization data"
+  - name: z_eine_merge
+    description: ""
+  - name: z_ekbe
+    description: "history per purchasing document"
+    config:
+      loaded_at_field: PSA_LOAD_DTS
+      freshness:
+        warn_after: {count: 3, period: day}
+        error_after: {count: 4, period: day}
+
+
+
+  - name: z_ekbe_merge
+    description: ""
+  - name: z_eket
+    description: "scheduling agreement schedule lines"
+  - name: z_eket_merge
+    description: ""
+  - name: z_ekko
+    description: "purchasing document header"
+  - name: z_ekko_merge
+    description: ""
+  - name: z_ekpo
+    description: "purchasing document item"
+  - name: z_ekpo_merge
+    description: ""
+  - name: z_glpca
+    description: "EC-PCA: Actual Line Items"
+  - name: z_glpca_merge
+    description: ""
+  - name: z_glpct
+    description: "EC-PCA: Totals Table"
+  - name: z_glpct_merge
+    description: ""
+  - name: z_ihpa
+    description: "plant maintenance: partners"
+  - name: z_iloa
+    description: "pm object location and account assignment"
+  - name: z_kakt
+    description: "Capacity Description"
+  - name: z_kape
+    description: "Capacity unit of measure allocation"
+  - name: z_kazy
+    description: "Interval of Available Capacity"
+  - name: z_kape_merge
+    description: ""
+  - name: z_kako
+    description: "capacity header segment"
+  - name: z_kako_merge
+    description: ""
+  - name: z_keko
+    description: "product costing - header data"
+  - name: z_keko_merge
+    description: ""
+  - name: z_keph
+    description: "product costing: cost components for cost of goods mfd"
+  - name: z_keph_merge
+    description: ""
+  - name: z_kna1
+    description: "customer master - general data"
+  - name: z_kna1_merge
+    description: ""
+  - name: z_knmt
+    description: "customer-material info record data table"
+  - name: z_knmt_merge
+    description: ""
+  - name: z_knvv
+    description: "customer master - sales data"
+  - name: z_knvv_merge
+    description: ""
+  - name: z_konp
+    description: "conditions (item)"
+  - name: z_konp_merge
+    description: ""
+  - name: z_lfa1
+    description: "vendor master (general section)"
+  - name: z_lfa1_merge
+    description: ""
+  - name: z_lfm1
+    description: "vendor master record purchasing organization data"
+  - name: z_lfm1_merge
+    description: ""
+  - name: z_likp
+    description: "sales doc: delivery header"
+  - name: z_likp_merge
+    description: ""
+  - name: z_lips
+    description: "sd document: delivery: item data"
+  - name: z_lips_merge
+    description: ""
+  - name: z_makt
+    description: "material descriptions"
+  - name: z_makt_merge
+    description: ""
+  - name: z_mapl
+    description: "assignment of task lists to materials"    
+  - name: z_mara
+    description: "general material data"
+  - name: z_mara_merge
+    description: ""
+  - name: z_marc
+    description: "plant data for material"
+  - name: z_marc_merge
+    description: ""
+  - name: z_mard
+    description: "material - storage location data"
+  - name: z_mard_merge
+    description: ""
+  - name: z_marm
+    description: "units of measure for material"
+  - name: z_marm_merge
+    description: ""
+  - name: z_mbew
+    description: "Material Valuation"
+  - name: z_mkal
+    description: "production versions of material"
+  - name: z_mkal_merge
+    description: ""
+  - name: z_mvke
+    description: "material - sales data"
+  - name: z_mvke_merge
+    description: ""
+  - name: z_mseg
+    description: "material"
+  - name: z_mseg_merge
+    description: ""
+  - name: z_objk
+    description: "plant maintenance object list"
+  - name: z_objk_merge
+    description: ""
+  - name: z_plas
+    description: "task list - selection of operations/activities"     
+  - name: z_plaf
+    description: "planned order"
+  - name: z_plaf_merge
+    description: ""
+  - name: z_plko
+    description: "task list - header"    
+  - name: z_plpo
+    description: "task list - operation/activity"      
+  - name: z_pvkt
+    description: "supply area short text"
+  - name: z_pvkt_merge
+    description: ""
+  - name: z_qmel
+    description: "quality notification"
+  - name: z_qmfe
+    description: "quality notification - items"
+  - name: z_qmih
+    description: "quality message - maintenance data excerpt"
+  - name: z_qmma
+    description: "quality notification - activities"
+  - name: z_qmsm
+    description: "quality notification - tasks"
+  - name: z_qmur
+    description: "quality notification - causes"
+  - name: z_rdtx
+    description: "short text describing the rounding profile"
+  - name: z_rdtx_merge
+    description: ""
+  - name: z_ser06
+    description: "document header for serial numbers for handling unit-content"
+  - name: z_ser06_merge
+    description: ""
+  - name: z_sflight
+    description: ""
+  - name: z_skat
+    description: "g/l account master record (chart of accounts: description)"
+  - name: z_skat_merge
+    description: ""
+  - name: z_t001
+    description: "company codes"
+  - name: z_t001k
+    description: "valuation area"
+  - name: z_t001k_merge
+    description: ""
+  - name: z_t001l
+    description: "storage locations"
+  - name: z_t001l_merge
+    description: ""
+  - name: z_t001s
+    description: "accounting clerks"
+  - name: z_t001s_merge
+    description: ""
+  - name: z_t001w
+    description: "plant"
+  - name: z_t001w_merge
+    description: ""
+  - name: z_t001_merge
+    description: ""
+  - name: z_t002
+    description: "language keys (component bc-i18)"
+  - name: z_t002_merge
+    description: ""
+  - name: z_t002t
+    description: "Language Key Texts"
+  - name: z_t002t_merge
+    description: ""
+  - name: z_t005
+    description: "countries"
+  - name: z_t005e
+    description: "county"
+  - name: z_t005e_merge
+    description: ""
+  - name: z_t005g
+    description: "city"
+  - name: z_t005g_merge
+    description: ""
+  - name: z_t005r
+    description: "country keys for the withholding tax: names"
+  - name: z_t005r_merge
+    description: ""
+  - name: z_t005s
+    description: "region (province) key"
+  - name: z_t005s_merge
+    description: ""
+  - name: z_t005t
+    description: "country names"
+  - name: z_t005t_merge
+    description: ""
+  - name: z_t005u
+    description: "region key: texts"
+  - name: z_t005u_merge
+    description: ""
+  - name: z_t005_merge
+    description: ""
+  - name: z_t006
+    description: ""
+  - name: z_t006a
+    description: "unit of measure text"
+  - name: z_t006a_merge
+    description: ""
+  - name: z_t006_merge
+    description: ""
+  - name: z_t008
+    description: "blocking reasons for automatic payment transcations"
+  - name: z_t008t
+    description: "blocking reason names in automatic payment trans."
+  - name: z_t008t_merge
+    description: ""
+  - name: z_t008_merge
+    description: ""
+  - name: z_t009t
+    description: "fiscal year variant names"
+  - name: z_t009t_merge
+    description: ""
+  - name: z_t012t
+    description: "house bank account names"
+  - name: z_t012t_merge
+    description: ""
+  - name: z_t015w
+    description: "instruction keys"
+  - name: z_t015w_merge
+    description: ""
+  - name: z_t016
+    description: "industries"
+  - name: z_t016_merge
+    description: ""
+  - name: z_t023
+    description: "material groups"
+  - name: z_t023t
+    description: "material group descriptions"
+  - name: z_t023t_merge
+    description: ""
+  - name: z_t023_merge
+    description: ""
+  - name: z_t024
+    description: "purchasing groups"
+  - name: z_t024d
+    description: "mrp controllers"
+  - name: z_t024d_merge
+    description: ""
+  - name: z_t024e
+    description: "purchasing organizations"
+  - name: z_t024e_merge
+    description: ""
+  - name: z_t024f
+    description: "production supervisor"
+  - name: z_t024f_merge
+    description: ""
+  - name: z_t024_merge
+    description: ""
+  - name: z_t035
+    description: "planning groups"
+  - name: z_t035t
+    description: "planning group texts"
+  - name: z_t035t_merge
+    description: ""
+  - name: z_t035_merge
+    description: ""
+  - name: z_t042f
+    description: "payment method supplements"
+  - name: z_t042f_merge
+    description: ""
+  - name: z_t043gt
+    description: "name of business partner's tolerance groups"
+  - name: z_t043gt_merge
+    description: ""
+  - name: z_t048k
+    description: "indicator for periodic account statements"
+  - name: z_t048k_merge
+    description: ""
+  - name: z_t049l
+    description: "lockboxes at our house banks"
+  - name: z_t049l_merge
+    description: ""
+  - name: z_t052
+    description: ""
+  - name: z_t052u
+    description: "own explanations for terms of payment"
+  - name: z_t052u_merge
+    description: ""
+  - name: z_t053v
+    description: "reason code conversion version"
+  - name: z_t053v_merge
+    description: ""
+  - name: z_t056x
+    description: "text table for interest indicators"
+  - name: z_t056x_merge
+    description: ""
+  - name: z_t057
+    description: "preference indicator"
+  - name: z_t057_merge
+    description: ""
+  - name: z_t059b
+    description: "withholding tax classes for vendors: names"
+  - name: z_t059b_merge
+    description: ""
+  - name: z_t059q
+    description: "withholding tax"
+  - name: z_t059q_merge
+    description: ""
+  - name: z_t077d
+    description: "customer account groups"
+  - name: z_t077d_merge
+    description: ""
+  - name: z_t077y
+    description: "account group names (table t077k)"
+  - name: z_t077y_merge
+    description: ""
+  - name: z_t134
+    description: "material types"
+  - name: z_t134t
+    description: "material type descriptions"
+  - name: z_t134t_merge
+    description: ""
+  - name: z_t134_merge
+    description: ""
+  - name: z_t141
+    description: "material status attributes"
+  - name: z_t141t
+    description: "material status description"
+  - name: z_t141t_merge
+    description: ""
+  - name: z_t141_merge
+    description: ""
+  - name: z_t149t
+    description: "global valuation category descriptions"
+  - name: z_t149t_merge
+    description: ""
+  - name: z_t156t
+    description: "movement type text"
+  - name: z_t156t_merge
+    description: ""
+  - name: z_t163l
+    description: "confirmation control keys"
+  - name: z_t163l_merge
+    description: ""
+  - name: z_t163s
+    description: "description for release creation profile"
+  - name: z_t163s_merge
+    description: ""
+  - name: z_t169l
+    description: "vendor-specific parameters for invoice verification"
+  - name: z_t169l_merge
+    description: ""
+  - name: z_t171
+    description: "customers: sales districts"
+  - name: z_t171_merge
+    description: ""
+  - name: z_t188
+    description: "conditions: groups for customer classifications"
+  - name: z_t188_merge
+    description: ""
+  - name: z_t25a0
+    description: "combined reason code text"
+  - name: z_t25a0_merge
+    description: ""
+  - name: z_t25a1
+    description: "type of sale text"
+  - name: z_t25a1_merge
+    description: ""
+  - name: z_t377p_t
+    description: "serial number management profiles text"
+  - name: z_t377p_t_merge
+    description: ""
+  - name: z_t401t
+    description: "mrp profile descriptions"
+  - name: z_t401t_merge
+    description: ""
+  - name: z_t411t
+    description: "task list usage descriptions"
+  - name: z_t411t_merge
+    description: ""
+  - name: z_t416t
+    description: "bom usage texts"
+  - name: z_t416t_merge
+    description: ""
+  - name: z_t434h
+    description: "stock determination group text"
+  - name: z_t434h_merge
+    description: ""
+  - name: z_t437r
+    description: "repetitive manufacturing profile text"
+  - name: z_t437r_merge
+    description: ""
+  - name: z_t438s
+    description: "range of coverage profile texts"
+  - name: z_t438s_merge
+    description: ""
+  - name: z_t438t
+    description: "mrp description"
+  - name: z_t438t_merge
+    description: ""
+  - name: z_t438w
+    description: "period profile for safety time text"
+  - name: z_t438w_merge
+    description: ""
+  - name: z_t438x
+    description: "mrp group text"
+  - name: z_t438x_merge
+    description: ""
+  - name: z_t439g
+    description: "ppplanning periods: header table"
+  - name: z_t439g_merge
+    description: ""
+  - name: z_t439h
+    description: "pp planning periods: long texts"
+  - name: z_t439h_merge
+    description: ""
+  - name: z_t439t
+    description: "lot-sizing procedures text"
+  - name: z_t439t_merge
+    description: ""
+  - name: Z_T457P
+    description: "Text Table for Order Types in the Planned Order"
+  - name: Z_T457P_merge
+    description: ""
+  - name: z_t460a
+    description: "special procurement key"
+  - name: z_t460a_merge
+    description: ""
+  - name: z_t460t
+    description: "special procurement keys text"
+  - name: z_t460t_merge
+    description: ""
+  - name: z_t461x
+    description: "planning strategy group text"
+  - name: z_t461x_merge
+    description: ""
+  - name: z_t499s
+    description: "Location"
+  - name: z_t499s_merge
+    description: ""
+  - name: z_t604t
+    description: "commodity code/import code no. description"
+  - name: z_t604t_merge
+    description: ""
+  - name: z_t615
+    description: "foreign trade: customs offices"
+  - name: z_t615_merge
+    description: ""
+  - name: z_t618
+    description: "foreign trade: modes of transport"
+  - name: z_t618_merge
+    description: ""
+  - name: z_t685t
+    description: "conditions: types: texts"
+  - name: z_t685t_merge
+    description: ""
+  - name: z_t777o
+    description: "object type texts"
+  - name: z_t777o_merge
+    description: ""
+  - name: z_t777p
+    description: "plan versions text"
+  - name: z_t777p_merge
+    description: ""
+  - name: z_t880
+    description: "global company data (for kons ledger)"
+  - name: z_t880_merge
+    description: ""
+  - name: z_t881
+    description: "Ledger Master"
+  - name: z_t881_merge
+    description: ""
+  - name: z_t881t
+    description: "FI-SL Ledger text"
+  - name: z_t881t_merge
+    description: ""
+  - name: z_t882
+    description: "Company Code/Ledger Assignment"
+  - name: z_t882_merge
+    description: ""
+  - name: z_tbrc
+    description: "industry code (customer master)"
+  - name: z_tbrc_merge
+    description: ""
+  - name: z_tbrg
+    description: "authorization groups"
+  - name: z_tbrg_merge
+    description: ""
+  - name: z_tca02
+    description: "task list types text"
+  - name: z_tca02_merge
+    description: ""
+  - name: z_tca09
+    description: "task list applications"
+  - name: z_tca09_merge
+    description: ""
+  - name: z_tckh3
+    description: "cost components"
+  - name: z_tckh3_merge
+    description: ""
+  - name: z_tco43t
+    description: "production scheduler profile text"
+  - name: z_tco43t_merge
+    description: ""
+  - name: z_tcurr
+    description: "exchange rates"
+  - name: z_tcurr_merge
+    description: ""
+  - name: z_crtx
+    description: "Text for the Work Center or Production Resource Tool"
+  - name: z_crtx_merge
+    description: ""
+  - name: z_crca
+    description: "Work Center Capacity Allocation"
+  - name: z_crca_merge
+    description: ""
+  - name: z_tc23t
+    description: "Language-dependent texts for Usage Key"
+  - name: z_tc24
+    description: "Person responsible for the work center"
+  - name: z_tc25
+    description: "Work center formulas"
+  - name: z_tc25t
+    description: "Work center formulas Text"
+  - name: z_tc30t
+    description: "Text for the work center category"
+  - name: z_tc20
+    description: "formula parameters"
+  - name: z_tc20_merge
+    description: ""
+  - name: z_tc20t
+    description: "text for parameter ID"
+  - name: z_tc20t_merge
+    description: ""           
+  - name: z_tfact
+    description: "factory calendar texts"
+  - name: z_tfact_merge
+    description: ""
+  - name: z_tgsbt
+    description: "business area names"
+  - name: z_tgsbt_merge
+    description: ""
+  - name: z_tinc
+    description: "customers: incoterms"
+  - name: z_tinc_merge
+    description: ""
+  - name: z_tka01
+    description: "Controlling Area"
+  - name: z_tka01_merge
+    description: ""
+  - name: z_tkv02
+    description: "variance key name"
+  - name: z_tkv02_merge
+    description: ""
+  - name: z_tlgrt
+    description: "routes: loading groups: texts"
+  - name: z_tlgrt_merge
+    description: ""
+  - name: z_tmabct
+    description: "abc indicator text"
+  - name: z_tmabct_merge
+    description: ""
+  - name: z_tmatt
+    description: "Machine types text"    
+  - name: z_tmbwt
+    description: "source of supply keys"
+  - name: z_tmbwt_merge
+    description: ""
+  - name: z_tmfgt
+    description: "material freight groups: descriptions"
+  - name: z_tmfgt_merge
+    description: ""
+  - name: z_tkkh1
+    description: ""
+  - name: z_tkkh1_merge
+    description: ""
+  - name: z_onr00
+    description: ""
+  - name: z_onr00_merge
+    description: ""
+  - name: z_tmkk
+    description: "group for calculation schema (vendor)"
+  - name: z_tmkk_merge
+    description: ""
+  - name: z_tmvft
+    description: "availability check control: texts"
+  - name: z_tmvft_merge
+    description: ""
+  - name: z_tpar
+    description: "business partner: functions"
+  - name: z_tpar_merge
+    description: ""
+  - name: z_tprio
+    description: "customers: delivery priorities"
+  - name: z_tprio_merge
+    description: ""
+  - name: z_tq02b
+    description: "qm system"
+  - name: z_tq02b_merge
+    description: ""
+  - name: z_tq02t
+    description: "qm system description"
+  - name: z_tq02t_merge
+    description: ""
+  - name: z_tq04s
+    description: "qm block functions : texts"
+  - name: z_tq04s_merge
+    description: ""
+  - name: z_tq05t
+    description: "certificate types text"
+  - name: z_tq05t_merge
+    description: ""
+  - name: z_tq08t
+    description: "qm procurement keys text"
+  - name: z_tq08t_merge
+    description: ""
+  - name: z_tq80
+    description: "notification types"
+  - name: z_tsadv
+    description: "international versions of addresses"
+  - name: z_tsadv_merge
+    description: ""
+  - name: z_tsfg
+    description: "forwarding agent freight group"
+  - name: z_tsfg_merge
+    description: ""
+  - name: z_tskd
+    description: "customer taxes"
+  - name: z_tskd_merge
+    description: ""
+  - name: z_tspat
+    description: "division - text"
+  - name: z_tspat_merge
+    description: ""
+  - name: z_ttxj
+    description: "check table for tax jurisdiction"
+  - name: z_ttxjt
+    description: "text table for tax jurisdiction"
+  - name: z_ttxjt_merge
+    description: ""
+  - name: z_ttxj_merge
+    description: ""
+  - name: z_tvagt
+    description: "sales rejection reason - text"
+  - name: z_tvagt_merge
+    description: ""
+  - name: z_tvakt
+    description: "sales document types: texts"
+  - name: z_tvakt_merge
+    description: ""
+  - name: z_tvast
+    description: "sales document blocking reasons: texts"
+  - name: z_tvast_merge
+    description: ""
+  - name: z_tvaut
+    description: "sales order reason - text"
+  - name: z_tvaut_merge
+    description: ""
+  - name: z_tvbur
+    description: "organizational unit: sales offices"
+  - name: z_tvbur_merge
+    description: ""
+  - name: z_tvbvk
+    description: "organizational unit: sales groups per sales office"
+  - name: z_tvbvk_merge
+    description: ""
+  - name: z_tvfs
+    description: "billing: reasons for blocking"
+  - name: z_tvfs_merge
+    description: ""
+  - name: z_tvkd
+    description: "customer pricing procedures"
+  - name: z_tvkd_merge
+    description: ""
+  - name: z_tvko
+    description: "organizational unit: sales organizations"
+  - name: z_tvko_merge
+    description: ""
+  - name: z_tvkot
+    description: "Sales Organizations: Texts"
+  - name: z_tvkot_merge
+    description: ""
+  - name: z_tvkwz
+    description: "org.unit: allowed plants per sales organization"
+  - name: z_tvkwz_merge
+    description: ""
+  - name: z_tvsak
+    description: "special processing indicator"
+  - name: z_tvsak_merge
+    description: ""
+  - name: z_tvsb
+    description: "shipping conditions"
+  - name: z_tvsb_merge
+    description: ""
+  - name: z_tvtw
+    description: "organizational unit: distribution channels"
+  - name: z_tvtwt
+    description: "distribution channel - text"
+  - name: z_tvtwt_merge
+    description: ""
+  - name: z_tvtw_merge
+    description: ""
+  - name: z_tvv1
+    description: "customer group 1"
+  - name: z_tvv1t
+    description: "customer group 1 - text"
+  - name: z_tvv1t_merge
+    description: ""
+  - name: z_tvv1_merge
+    description: ""
+  - name: z_tvv2
+    description: "customer group 2"
+  - name: z_tvv2_merge
+    description: ""
+  - name: z_tvv2t
+    description: "customer group 2 - Description"
+  - name: z_tvv2t_merge
+    description: ""
+  - name: z_tvv3
+    description: "customer group 3"
+  - name: z_tvv3_merge
+    description: ""
+  - name: z_tvv4
+    description: "customer group 4"
+  - name: z_tvv4_merge
+    description: ""
+  - name: z_twbo1
+    description: "customizing table for opt. po-based load building profiles"
+  - name: z_twbo1_merge
+    description: ""
+  - name: z_twmeg
+    description: "unit of measure group"
+  - name: z_twmeg_merge
+    description: ""
+  - name: z_twsgt
+    description: "is-r service level text"
+  - name: z_twsgt_merge
+    description: ""
+  - name: z_twvmo
+    description: "control profiles for transferring material data to vendor"
+  - name: z_twvmo_merge
+    description: ""
+  - name: z_tzgr
+    description: "grouping rules for automatic payments"
+  - name: z_tzgr_merge
+    description: ""
+  - name: z_tzone
+    description: "customers: regional zones"
+  - name: z_tzone_merge
+    description: ""
+  - name: z_tzun
+    description: "rules for 'allocation' field layout"
+  - name: z_tzunt
+    description: "assignment rule names"
+  - name: z_tzunt_merge
+    description: ""
+  - name: z_tzun_merge
+    description: ""
+  - name: z_usr03
+    description: "User address data"
+  - name: z_usr03_merge
+    description: ""
+  - name: z_vbak
+    description: "sales document: header data"
+  - name: z_vbak_merge
+    description: ""
+  - name: z_vbap
+    description: "sales document: item data"
+  - name: z_vbap_merge
+    description: ""
+  - name: z_vbbe
+    description: "sales requirements: individual records"
+  - name: z_vbbe_merge
+    description: ""
+  - name: z_vbep
+    description: "sales document: schedule line data"
+  - name: z_vbep_merge
+    description: ""
+  - name: z_vbfa
+    description: "sales document flow"
+  - name: z_vbfa_merge
+    description: ""
+  - name: z_vbkd
+    description: "sales document: business data"
+  - name: z_vbkd_merge
+    description: ""
+  - name: z_vbpa
+    description: "sales document: partner"
+  - name: z_vbpa_merge
+    description: ""
+  - name: z_vbrk
+    description: " billing: header data"
+  - name: z_vbrk_merge
+    description: ""
+  - name: z_cepc
+    description: " Profit Center Master Data Table"
+  - name: z_cepc_merge
+    description: ""
+  - name: z_coss
+    description: "CO Object: Cost Totals for Internal Postings"
+  - name: z_coss_merge
+    description: ""
+  - name: z_cosr
+    description: "CO Object: Statistical Key Figure Totals"
+  - name: z_cosr_merge
+    description: ""
+  - name: z_bkpf
+    description: " Accounting Document Header"
+  - name: z_bkpf_merge
+    description: ""
+  - name: z_ska1
+    description: "g/l chart of accounts"
+  - name: z_skb1
+    description: "g/l company code"
+  - name: z_skb1_merge
+    description: ""
+  - name: z_bseg
+    description: "accounting document segment"
+  - name: z_vbrp
+    description: "billing: item data"
+  - name: z_vbrp_merge
+    description: ""
+  - name: z_vbuk
+    description: "header status"
+  - name: z_vbuk_merge
+    description: ""
+  - name: z_vbup
+    description: "sales document: item status"
+  - name: z_vbup_merge
+    description: ""
+  - name: z_vbwf08
+    description: "release groups"
+  - name: z_vbwf08_merge
+    description: ""
+  - name: z_vepo
+    description: "packing: handling unit item (contents)"
+  - name: z_vepo_merge
+    description: ""
+  - name: z_vttk
+    description: "shipment headers"
+  - name: z_vttk_merge
+    description: ""
+  - name: z_vttp
+    description: "shipment item"
+  - name: z_vttp_merge
+    description: ""
+  - name: z_vtts
+    description: "shipment stage"
+  - name: z_wrft_cons_procgt
+    description: "seasonal procurement: name of consignment control"
+  - name: z_wrft_cons_procgt_merge
+    description: ""
+  - name: z_zapo_ctm
+    description: "apo ctm relevance text"
+  - name: z_zapo_ctm_merge
+    description: ""
+  - name: z_zapo_heurheur
+    description: "apo heuristics text"
+  - name: z_zapo_heurheur_merge
+    description: ""
+  - name: z_zapo_peg_strat
+    description: "pegging strategy text"
+  - name: z_zapo_peg_strat_merge
+    description: ""
+  - name: z_zapo_rrptype
+    description: "apo pp/ds planning text"
+  - name: z_zapo_rrptype_merge
+    description: ""
+  - name: z_zapo_ss_method
+    description: "safety stock method text"
+  - name: z_zapo_ss_method_merge
+    description: ""
+  - name: z_zapo_target_meth
+    description: "target stock level method text"
+  - name: z_zapo_target_meth_merge
+    description: ""
+  - name: z_zarchdett
+    description: "architecture detail text"
+  - name: z_zarchdett_merge
+    description: ""
+  - name: z_zarcht
+    description: ""
+  - name: z_zarcht_merge
+    description: ""
+  - name: z_zbrandtab
+    description: "brand descriptions"
+  - name: z_zbrandtab_merge
+    description: ""
+  - name: z_zbusinessunit
+    description: ""
+  - name: z_zbusinessunitt
+    description: ""
+  - name: z_zbusinessunitt_merge
+    description: ""
+  - name: z_zbusinessunit_merge
+    description: ""
+  - name: z_zbwfiscalpr
+    description: "fiscal period tables"
+  - name: z_zbwfiscalpr_merge
+    description: ""
+  - name: z_zbw_cmrcat
+    description: "bw: customer category cross reference"
+  - name: z_zbw_cmrcat_merge
+    description: ""
+  - name: z_zbw_prtyp
+    description: "bw: cross reference table for price typ"
+  - name: z_zbw_prtyp_merge
+    description: ""
+  - name: z_zc4c_so_link
+    description: "c4c sales order to ticket link"
+  - name: z_zc4c_so_link_merge
+    description: ""
+  - name: z_zcmpfamt
+    description: "competitor product families"
+  - name: z_zcmpfamt_merge
+    description: ""
+  - name: z_zdemandplt
+    description: "moen inventory profile"
+  - name: z_zdemandplt_merge
+    description: ""
+  - name: z_zdw_s600
+    description: "daily input analysis"
+  - name: z_zdw_s600_merge
+    description: ""
+  - name: z_zevent_servlevel
+    description: "service level summary program"
+  - name: z_zevent_servlevel_merge
+    description: ""
+  - name: z_zflo_serialnos
+    description: "flo serial numbers by outbound delivery"
+  - name: z_zflo_serialnos_merge
+    description: ""
+  - name: z_ziommreason
+    description: "io min max reason description"
+  - name: z_ziommreason_merge
+    description: ""
+  - name: z_zmanssreason
+    description: "manual safety stock reason code"
+  - name: z_zmanssreason_merge
+    description: ""
+  - name: z_zmarkett
+    description: "market descriptions"
+  - name: z_zmarkett_merge
+    description: ""
+  - name: z_zmrplines_000
+    description: "mrp table - list version 000"
+  - name: z_zmrplines_000_merge
+    description: ""
+  - name: z_znohandlest
+    description: "number of handles text"
+  - name: z_znohandlest_merge
+    description: ""
+  - name: z_zoptypet
+    description: "operation type text"
+  - name: z_zoptypet_merge
+    description: ""
+  - name: z_zopt_relt
+    description: "voyager relevance text"
+  - name: z_zopt_relt_merge
+    description: ""
+  - name: z_zpbusownert
+    description: ""
+  - name: z_zpbusownert_merge
+    description: ""
+  - name: z_zpdlvt
+    description: "product level descriptions"
+  - name: z_zpdlvt_merge
+    description: ""
+  - name: z_zpdtpt
+    description: "product type descriptions"
+  - name: z_zpdtpt_merge
+    description: ""
+  - name: z_zper_spl_prof
+    description: "period split profile text"
+  - name: z_zper_spl_prof_merge
+    description: ""
+  - name: z_zpfin
+    description: "product finish description"
+  - name: z_zpfint
+    description: "product finish texts"
+  - name: z_zpfint_merge
+    description: ""
+  - name: z_zpfin_merge
+    description: ""
+  - name: z_zphan
+    description: ""
+  - name: z_zphant
+    description: "product handle descriptions"
+  - name: z_zphant_merge
+    description: ""
+  - name: z_zphan_merge
+    description: ""
+  - name: z_zplin
+    description: "product line description"
+  - name: z_zplint
+    description: "product line description"
+  - name: z_zplint_merge
+    description: ""
+  - name: z_zplin_merge
+    description: ""
+  - name: z_zplt
+    description: ""
+  - name: z_zpltt
+    description: "platform description"
+  - name: z_zpltt_merge
+    description: ""
+  - name: z_zplt_merge
+    description: ""
+  - name: z_zppmit
+    description: "product pmi code descriptions"
+  - name: z_zppmit_merge
+    description: ""
+  - name: z_zppproj
+    description: "project header"
+  - name: z_zppprojcomp
+    description: "project components"
+  - name: z_zppprojcomp_merge
+    description: ""
+  - name: z_zppproj_merge
+    description: ""
+  - name: z_zpqtpt
+    description: "quality part type table"
+  - name: z_zpqtpt_merge
+    description: ""
+  - name: z_zproduction_bom
+    description: "production bom's"
+  - name: z_zproduction_bom_merge
+    description: ""
+  - name: z_zprod_vitality
+    description: "product vitality text"
+  - name: z_zprod_vitality_merge
+    description: ""
+  - name: z_zprom
+    description: "product room descriptions"
+  - name: z_zprom_merge
+    description: ""
+  - name: z_zpsegt
+    description: "product segment descriptions"
+  - name: z_zpsegt_merge
+    description: ""
+  - name: z_zptg
+    description: ""
+  - name: z_zptgk
+    description: ""
+  - name: z_zptgkt
+    description: "product group descriptions"
+  - name: z_zptgkt_merge
+    description: ""
+  - name: z_zptgk_merge
+    description: ""
+  - name: z_zptgt
+    description: "price type group descriptions"
+  - name: z_zptgt_merge
+    description: ""
+  - name: z_zptg_merge
+    description: ""
+  - name: z_zptk
+    description: ""
+  - name: z_zptk_merge
+    description: ""
+  - name: z_zptypt
+    description: "price type description"
+  - name: z_zptypt_merge
+    description: ""
+  - name: z_zpwstt
+    description: "water contact descriptions"
+  - name: z_zpwstt_merge
+    description: ""
+  - name: z_zrepcatgt
+    description: ""
+  - name: z_zrepcatgt_merge
+    description: ""
+  - name: z_zrmarea
+    description: ""
+  - name: z_zrmareat
+    description: "room/area (check table for mara-zzrmarea)"
+  - name: z_zrmareat_merge
+    description: ""
+  - name: z_zrmarea_merge
+    description: ""
+  - name: z_zrptmatnr
+    description: "reporting material x-ref"
+  - name: z_zrptmatnr_merge
+    description: ""
+  - name: z_zservlevel
+    description: "service level summary program"
+  - name: z_zservlevel_merge
+    description: ""
+  - name: z_zsl_source
+    description: "stainless source"
+  - name: z_zsl_source_merge
+    description: ""
+  - name: z_zt005f
+    description: "county: texts"
+  - name: z_zt005f_merge
+    description: ""
+  - name: z_zt005g
+    description: "continent: texts"
+  - name: z_zt005g_merge
+    description: ""
+  - name: z_ztrans_provider
+    description: "transportation providers"
+  - name: z_ztrans_provider_merge
+    description: ""
+  - name: z_zvalvetypet
+    description: "valve type description"
+  - name: z_zvalvetypet_merge
+    description: ""
+  - name: z_zvendgrp
+    description: "vendor grouping keys"
+  - name: z_zvendgrp_merge
+    description: ""
+  - name: z_zvfiscalpq
+    description: "fiscal period date table"
+  - name: z_zvfiscalpq_merge
+    description: ""
+  - name: z_zvfiscalpr
+    description: "fiscal period"
+  - name: z_zvfiscalpr_merge
+    description: ""
+  - name: z_zvinstall
+    description: "table storing flo installation confirmation"
+  - name: z_zvinstall_merge
+    description: ""
+  - name: z_zvt_open_deliv
+    description: "open deliveries"
+  - name: z_zvt_open_deliv_merge
+    description: ""
+  - name: z_zvt_open_orders
+    description: "open orders"
+  - name: z_zvt_open_orders_merge
+    description: ""
+  - name: z_zvt_rims_carcode
+    description: "rims carrier code table"
+  - name: z_zvt_rims_carcode_merge
+    description: ""
+  - name: z_zvt_unbill_deliv
+    description: "unbilled deliveries"
+  - name: z_zvt_unbill_deliv_merge
+    description: ""
+  - name: z_zztea
+    description: "team code master table for customer service"
+  - name: z_stko
+    description: "bill of material"
+  - name: z_stzu
+    description: "bill of material permanent"
+  - name: z_stas
+    description: "bill of material item selection" 
+  - name: z_stpo
+    description: "bill of material item"         
+  - name: z_mast
+    description: "bill of material link"  
+  - name: z_zztea_merge
+    description: ""
+  - name: z_t156ht
+    description: "Main Text for Movement Type"
+  - name: z_t158w
+    description: "Long Text for Transaction/Event Type"
+  - name: z_t148
+    description: "Special Stock Indicator"
+  - name: z_t148t
+    description: "Special Stock Indicator text"
+  - name: z_tc27t
+    description: "Text for the capacity planner group"
+  - name: z_tc26t
+    description: "Description of the capacity category"
+  - name: z_tj01
+    description: "Business Transactions"
+  - name: z_cobk
+    description: "CO Object: Document Header"
+  - name: z_tfkb
+    description: "Functional areas"
+  - name: z_rbkp
+    description: ""
+  - name: z_rseg
+    description: ""
+- name: sap_mktg_cloud
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: sap_mktg_cloud
+  tables:
+  - name: bic_tzconfunc
+    description: ""
+  - name: bic_tzintsts
+    description: ""
+  - name: bic_tzmktapevt
+    description: ""
+  - name: bic_tzmktcnty
+    description: ""
+  - name: bic_tzmktdept
+    description: ""
+  - name: bic_tzmktdtorg
+    description: ""
+  - name: bic_tzmktdvcev
+    description: ""
+  - name: bic_tzmktdwtyp
+    description: ""
+  - name: bic_tzmktedu
+    description: ""
+  - name: bic_tzmktgen
+    description: ""
+  - name: bic_tzmkthmown
+    description: ""
+  - name: bic_tzmktlang
+    description: ""
+  - name: bic_tzmktoleng
+    description: ""
+  - name: bic_tzmktpttyp
+    description: ""
+  - name: bic_tzmktreg
+    description: ""
+  - name: bic_tzmktsod
+    description: ""
+  - name: bic_tzvalidsts
+    description: ""
+  - name: campaigns
+    description: ""
+  - name: campaigns_bw
+    description: ""
+  - name: contacts
+    description: ""
+  - name: contacts_bkp_20230712
+    description: ""
+  - name: interactions
+    description: ""
+  - name: product_interactions
+    description: ""
+- name: sentiment
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: sentiment
+  tables:
+  - name: invalid_reviews
+    description: ""
+  - name: sentiment_category_mapping
+    description: ""
+  - name: sentiment_output
+    description: ""
+  - name: sentiment_subcategory_mapping
+    description: ""
+  - name: sentiment_tag_mapping
+    description: ""
+- name: stock_market
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: stock_market
+  tables:
+  - name: tsm_lowes_us
+    description: ""
+- name: tt_e21prd_e21trubis
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: tt_e21prd_e21trubis
+  tables:
+  - name: apvndcatg
+    description: ""
+  - name: apvndmail
+    description: ""
+  - name: apvndmstr
+    description: ""
+  - name: apvndstatd
+    description: ""
+  - name: apvndstath
+    description: ""
+  - name: apvndtype
+    description: ""
+  - name: arsalesman
+    description: ""
+  - name: branch
+    description: ""
+  - name: busarea
+    description: ""
+  - name: busarea_region
+    description: ""
+  - name: ccmstr
+    description: ""
+  - name: cntry_code_conversion
+    description: ""
+  - name: corp_link
+    description: ""
+  - name: corp_parent
+    description: ""
+  - name: custgroup
+    description: ""
+  - name: custline
+    description: ""
+  - name: glchart
+    description: ""
+  - name: glmoaccts
+    description: ""
+  - name: glpermstr
+    description: ""
+  - name: invhead
+    description: ""
+  - name: invitem
+    description: ""
+  - name: oesrcjrnl
+    description: ""
+  - name: orderfrom
+    description: ""
+  - name: ordhead
+    description: ""
+  - name: orditem
+    description: ""
+  - name: partgrp
+    description: ""
+  - name: partmstr
+    description: ""
+  - name: partsgrp
+    description: ""
+  - name: partsgrp2
+    description: ""
+  - name: partsgrp3
+    description: ""
+  - name: parttype
+    description: ""
+  - name: pohead
+    description: ""
+  - name: poitem
+    description: ""
+    config:
+      loaded_at_field: PSA_LOAD_DTS
+      freshness:
+        warn_after: {count: 3, period: day}
+        error_after: {count: 4, period: day}
+  - name: posetup
+    description: ""
+  - name: region
+    description: ""
+  - name: shiphead
+    description: ""
+  - name: shipitem
+    description: ""
+  - name: vendinvd
+    description: ""
+  - name: vendinvln
+    description: ""
+  - name: vendpart
+    description: ""
+  - name: whsprmstr
+    description: ""
+  - name: whsvendmtx
+    description: ""
+  - name: whsvendpart
+    description: ""
+  - name: apvndterm
+    description: ""
+- name: tt_gpd
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: tt_gpd
+  tables:
+  - name: dbo_ext00101
+    description: ""
+  - name: dbo_iv00101
+    description: ""
+  - name: dbo_iv00102
+    description: ""
+  - name: dbo_iv00103
+    description: ""
+  - name: dbo_iv00107
+    description: ""
+  - name: dbo_iv00108
+    description: ""
+  - name: dbo_iv40202
+    description: ""
+  - name: dbo_iv40400
+    description: ""
+  - name: dbo_iv40600
+    description: ""
+  - name: dbo_iv40700
+    description: ""
+  - name: dbo_pcf00200
+    description: ""
+  - name: dbo_pcf10630
+    description: ""
+  - name: dbo_pm00100
+    description: ""
+  - name: dbo_pm00200
+    description: ""
+  - name: dbo_pm00300
+    description: ""
+  - name: dbo_pop00101
+    description: ""
+  - name: dbo_pop10100
+    description: ""
+  - name: dbo_pop10110
+    description: ""
+  - name: dbo_pop10500
+    description: ""
+    config:
+      loaded_at_field: PSA_LOAD_DTS
+      freshness:
+        warn_after: {count: 3, period: day}
+        error_after: {count: 4, period: day}
+  - name: dbo_pop10600
+    description: ""
+  - name: dbo_pop30100
+    description: ""
+  - name: dbo_pop30110
+    description: ""
+  - name: dbo_pop30300
+    description: ""
+  - name: dbo_pop30310
+    description: ""
+  - name: dbo_rm00101
+    description: ""
+  - name: dbo_rm00102
+    description: ""
+  - name: dbo_sop10100
+    description: ""
+  - name: dbo_sop10200
+    description: ""
+  - name: dbo_sop30200
+    description: ""
+  - name: dbo_sop30300
+    description: ""
+  - name: dbo_tx00101
+    description: ""
+  - name: dbo_xtbd10120
+    description: ""
+  - name: dbo_sy03300
+    description: ""
+- name: zipcode_crosswalk
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: zipcode_crosswalk
+  tables:
+  - name: cbsa
+    description: ""
+  - name: cbsa_zip
+    description: ""
+  - name: county
+    description: ""
+  - name: county_zip
+    description: ""
+  - name: tract_zip
+    description: ""
+  - name: zip_cbsa
+    description: ""
+  - name: zip_county
+    description: ""
+  - name: zip_tract
+    description: ""
+- name: centercode
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: centercode
+  tables:
+  - name: centercode_data
+    description: ""
+  - name: centercode_fields
+    description: ""
+- name: amazon_xref
+  description: bronze amazon tmlc ss xref data
+  database: psa_{{env_var('DBT_SOURCE_ENV')}}
+  schema: amazon_xref
+  tables:
+    - name: amazon_tmlc_ss_latest_xref
+      description: "Amazon TMLC SS Latest xref"
+- name: ios_moen
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: ios_moen
+  tables:
+  - name: account_linking_attempt
+    description: ""
+  - name: add_action
+    description: ""
+  - name: alert_action
+    description: ""
+  - name: alert_viewed
+    description: ""
+  - name: application_backgrounded
+    description: ""
+  - name: application_crashed
+    description: ""
+  - name: application_installed
+    description: ""
+  - name: application_opened
+    description: ""
+  - name: application_updated
+    description: ""
+  - name: device_action
+    description: ""
+  - name: device_added
+    description: ""
+  - name: device_viewed
+    description: ""
+  - name: email_consent_updated
+    description: ""
+  - name: identifies
+    description: ""
+  - name: inspiration_tapped
+    description: ""
+  - name: login_attempt
+    description: ""
+  - name: login_success
+    description: ""
+  - name: notification_updated
+    description: ""
+  - name: preset_added
+    description: ""
+  - name: product_registered
+    description: ""
+  - name: push_consent_updated
+    description: ""
+  - name: push_notification_received
+    description: ""
+  - name: push_notification_tapped
+    description: ""
+  - name: screens
+    description: ""
+  - name: signup_success
+    description: ""
+  - name: tracks
+    description: ""
+  - name: users
+    description: ""
+  - name: voice_linking_attempt
+    description: ""
+- name: android
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: android
+  tables:
+  - name: tracks
+    description: ""
+  - name: screens
+    description: ""
+- name: ios
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: ios
+  tables:
+  - name: tracks
+    description: ""
+  - name: screens
+    description: ""
+- name: android_moen
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: android_moen
+  tables:
+  - name: account_linking_attempt
+    description: ""
+  - name: account_linking_success
+    description: ""
+  - name: add_action
+    description: ""
+  - name: alert_action
+    description: ""
+  - name: alert_viewed
+    description: ""
+  - name: application_backgrounded
+    description: ""
+  - name: application_crashed
+    description: ""
+  - name: application_installed
+    description: ""
+  - name: application_opened
+    description: ""
+  - name: application_updated
+    description: ""
+  - name: device_action
+    description: ""
+  - name: device_viewed
+    description: ""
+  - name: email_consent_updated
+    description: ""
+  - name: identifies
+    description: ""
+  - name: inspiration_tapped
+    description: ""
+  - name: login_attempt
+    description: ""
+  - name: login_success
+    description: ""
+  - name: notification_updated
+    description: ""
+  - name: preset_added
+    description: ""
+  - name: product_registered
+    description: ""
+  - name: push_consent_updated
+    description: ""
+  - name: push_notification_received
+    description: ""
+  - name: push_notification_tapped
+    description: ""
+  - name: screens
+    description: ""
+  - name: signup_success
+    description: ""
+  - name: tracks
+    description: ""
+  - name: users
+    description: ""
+  - name: voice_linking_attempt
+    description: ""
+- name: custom_fivetran_lowes_vpp_stocked_stores
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: custom_fivetran_lowes_vpp_stocked_stores
+  tables:
+  - name: stocked_stores_all
+    description: ""
+- name: stripe_flosense
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: stripe_flosense
+  tables:
+  - name: account
+    description: ""
+  - name: apple_pay_domain
+    description: ""
+  - name: balance_transaction
+    description: ""
+  - name: bank_account
+    description: ""
+  - name: card
+    description: ""
+  - name: charge
+    description: ""
+  - name: coupon
+    description: ""
+  - name: credit_note
+    description: ""
+  - name: credit_note_line_item
+    description: ""
+  - name: customer
+    description: ""
+  - name: customer_balance_transaction
+    description: ""
+  - name: customer_discount
+    description: ""
+  - name: discount
+    description: ""
+  - name: dispute
+    description: ""
+  - name: dispute_balance_transaction
+    description: ""
+  - name: early_fraud_warning
+    description: ""
+  - name: fee
+    description: ""
+  - name: file
+    description: ""
+  - name: file_link
+    description: ""
+  - name: invoice
+    description: ""
+  - name: invoice_discount
+    description: ""
+  - name: invoice_item
+    description: ""
+  - name: invoice_line_item
+    description: ""
+  - name: payment_intent
+    description: ""
+  - name: payment_method
+    description: ""
+  - name: payment_method_card
+    description: ""
+  - name: payout
+    description: ""
+  - name: payout_balance_transaction
+    description: ""
+  - name: plan
+    description: ""
+  - name: price
+    description: ""
+  - name: product
+    description: ""
+  - name: refund
+    description: ""
+  - name: setup_attempt
+    description: ""
+  - name: setup_intent
+    description: ""
+  - name: source
+    description: ""
+  - name: subscription_discount
+    description: ""
+  - name: subscription_history
+    description: ""
+  - name: subscription_item
+    description: ""
+  - name: upcoming_invoice
+    description: ""
+  - name: upcoming_invoice_line_item
+    description: ""
+  - name: usage_record
+    description: ""
+- name: google_analytics_4_moen_dtc_historical
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: google_analytics_4_moen_dtc_historical
+  tables:
+  - name: traffic_acquisition_session_default_channel_grouping_report
+    description: ""
+  - name: properties
+    description: ""
+- name: google_analytics_4_moen_dtc
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: google_analytics_4_moen_dtc
+  tables:
+  - name: traffic_acquisition_session_default_channel_grouping_report
+    description: ""
+  - name: properties
+    description: ""
+  - name: accounts
+    description: ""
+- name: shopify_moen
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: shopify_moen
+  tables:
+  - name: ORDER
+    quoting:
+      database: false
+      schema: false
+      identifier: true
+  - name: product_variant
+    description: ""
+  - name: fulfillment
+    description: ""
+  - name: order_adjustment
+    description: ""
+  - name: order_line
+    description: ""
+  - name: order_tag
+    description: ""
+  - name: order_line_refund
+    description: ""
+  - name: refund
+    description: ""
+  - name: discount_application
+    description: ""
+- name: datavations
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: datavations
+  tables:
+  - name: main_weekly_vw
+- name: mdm_product_category
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: mdm_product_category
+  tables:
+  - name: outbound_item_product_category
+    description: "MDM Informatica Item Product Category Reference data"
+- name: simplesat
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: simplesat
+  tables:
+  - name: answer
+  - name: survey
+  - name: response
+  - name: question
+  - name: question_rule
+- name: home_depot_ft_psa
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: custom_fivetran_home_depot_askuity_sdk
+  description: Schema for Custom Fivetran SDK connector for HD Askuity
+  tables:
+  - name: vendor_drill_store_attr_data_us
+  - name: vendor_drill_pos_data_us
+  - name: vendor_drill_inv_data_us
+  - name: vendor_drill_dc_inv_data_with_store_us
+- name: notification_api
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: notification_api
+  tables:
+  - name: cleaned_flo_prod_notification_api_incident
+    description: ""
+- name: databricks_integration
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: databricks_integration
+  tables:
+    - name: dt_cleaned_hyd_shadow
+      description: ""
+    - name: dt_cleaned_nab_shadow
+      description: ""
+    - name: dt_cleaned_vak_shadow
+      description: ""
+- name: smartwater
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: smartwater
+  tables:
+    - name: cleaned_ddb_moen_prod_smartwater_device_prod
+      description: ""
+    - name: cleaned_ddb_moen_prod_smartwater_user_prod
+      description: ""
+- name: amazon_xref_prd
+  description: prod amazon xref data
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: amazon_xref
+  tables:
+    - name: amazon_moen_catalog_hist
+      description: 'amazon_moen_catalog_hist'
+- name: custom_fivetran_appbot_sdk
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: custom_fivetran_appbot_sdk
+  tables:
+    - name: apps
+      description: ""
+    - name: ratings
+      description: ""
+    - name: reviews
+      description: ""
+- name: custom_fivetran_lowes_vpp_sales_inventory
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: custom_fivetran_lowes_vpp_sales_inventory
+  tables:
+    - name: sales_inventory_larson
+      description: ""
+    - name: sales_inventory_masterlock
+      description: ""
+    - name: sales_inventory_moen
+      description: ""
+    - name: sales_inventory_thermatru
+      description: ""
+- name: profitero_share_moen
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: profitero_share_moen
+  tables:
+    - name: dim_account_category
+      description: ""
+    - name: dim_account_product
+      description: ""
+    - name: dim_account_product_category
+      description: ""
+    - name: dim_amz_category
+      description: ""
+    - name: dim_amz_category_sale
+      description: ""
+    - name: dim_amz_product
+      description: ""
+    - name: dim_amz_product_sale
+      description: ""
+    - name: dim_amz_product_view
+      description: ""
+    - name: dim_brand
+      description: ""
+    - name: dim_category_product
+      description: ""
+    - name: dim_date
+      description: ""
+    - name: dim_keyword
+      description: ""
+    - name: dim_product_attribute
+      description: ""
+    - name: dim_product_content
+      description: ""
+    - name: dim_product_history
+      description: ""
+    - name: dim_product_rating
+      description: ""
+    - name: dim_product_review
+      description: ""
+    - name: dim_retailer
+      description: ""
+    - name: dim_retailer_category
+      description: ""
+    - name: dim_retailer_location
+      description: ""
+    - name: dim_retailer_product
+      description: ""
+    - name: dim_review
+      description: ""
+    - name: dim_search_product
+      description: "" 
+    - name: fact_account_retailer_product
+      description: ""  
+    - name: fact_product_score
+      description: ""
+- name: profitero_share_fiberon
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: profitero_share_fiberon
+  tables:
+    - name: dim_account_category
+      description: ""
+    - name: dim_account_product
+      description: ""
+    - name: dim_account_product_category
+      description: ""
+    - name: dim_amz_category
+      description: ""
+    - name: dim_amz_category_sale
+      description: ""
+    - name: dim_amz_product
+      description: ""
+    - name: dim_amz_product_sale
+      description: ""
+    - name: dim_amz_product_view
+      description: ""
+    - name: dim_brand
+      description: ""
+    - name: dim_category_product
+      description: ""
+    - name: dim_date
+      description: ""
+    - name: dim_keyword
+      description: ""
+    - name: dim_product_attribute
+      description: ""
+    - name: dim_product_content
+      description: ""
+    - name: dim_product_history
+      description: ""
+    - name: dim_product_rating
+      description: ""
+    - name: dim_product_review
+      description: ""
+    - name: dim_retailer
+      description: ""
+    - name: dim_retailer_category
+      description: ""
+    - name: dim_retailer_location
+      description: ""
+    - name: dim_retailer_product
+      description: ""
+    - name: dim_review
+      description: ""
+    - name: dim_search_product
+      description: "" 
+    - name: fact_account_retailer_product
+      description: ""  
+    - name: fact_product_score
+      description: ""
+- name: profitero_share_fypon
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: profitero_share_fypon
+  tables:
+    - name: dim_account_category
+      description: ""
+    - name: dim_account_product
+      description: ""
+    - name: dim_account_product_category
+      description: ""
+    - name: dim_amz_category
+      description: ""
+    - name: dim_amz_category_sale
+      description: ""
+    - name: dim_amz_product
+      description: ""
+    - name: dim_amz_product_sale
+      description: ""
+    - name: dim_amz_product_view
+      description: ""
+    - name: dim_brand
+      description: ""
+    - name: dim_category_product
+      description: ""
+    - name: dim_date
+      description: ""
+    - name: dim_keyword
+      description: ""
+    - name: dim_product_attribute
+      description: ""
+    - name: dim_product_content
+      description: ""
+    - name: dim_product_history
+      description: ""
+    - name: dim_product_rating
+      description: ""
+    - name: dim_product_review
+      description: ""
+    - name: dim_retailer
+      description: ""
+    - name: dim_retailer_category
+      description: ""
+    - name: dim_retailer_location
+      description: ""
+    - name: dim_retailer_product
+      description: ""
+    - name: dim_review
+      description: ""
+    - name: dim_search_product
+      description: "" 
+    - name: fact_account_retailer_product
+      description: ""  
+    - name: fact_product_score
+      description: ""
+- name: profitero_share_larson
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: profitero_share_larson
+  tables:
+    - name: dim_account_category
+      description: ""
+    - name: dim_account_product
+      description: ""
+    - name: dim_account_product_category
+      description: ""
+    - name: dim_amz_category
+      description: ""
+    - name: dim_amz_category_sale
+      description: ""
+    - name: dim_amz_product
+      description: ""
+    - name: dim_amz_product_sale
+      description: ""
+    - name: dim_amz_product_view
+      description: ""
+    - name: dim_brand
+      description: ""
+    - name: dim_category_product
+      description: ""
+    - name: dim_date
+      description: ""
+    - name: dim_keyword
+      description: ""
+    - name: dim_product_attribute
+      description: ""
+    - name: dim_product_content
+      description: ""
+    - name: dim_product_history
+      description: ""
+    - name: dim_product_rating
+      description: ""
+    - name: dim_product_review
+      description: ""
+    - name: dim_retailer
+      description: ""
+    - name: dim_retailer_category
+      description: ""
+    - name: dim_retailer_location
+      description: ""
+    - name: dim_retailer_product
+      description: ""
+    - name: dim_review
+      description: ""
+    - name: dim_search_product
+      description: "" 
+    - name: fact_account_retailer_product
+      description: ""  
+    - name: fact_product_score
+      description: ""
+- name: profitero_share_master_lock
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: profitero_share_master_lock
+  tables:
+    - name: dim_account_category
+      description: ""
+    - name: dim_account_product
+      description: ""
+    - name: dim_account_product_category
+      description: ""
+    - name: dim_amz_category
+      description: ""
+    - name: dim_amz_category_sale
+      description: ""
+    - name: dim_amz_product
+      description: ""
+    - name: dim_amz_product_sale
+      description: ""
+    - name: dim_amz_product_view
+      description: ""
+    - name: dim_brand
+      description: ""
+    - name: dim_category_product
+      description: ""
+    - name: dim_date
+      description: ""
+    - name: dim_keyword
+      description: ""
+    - name: dim_product_attribute
+      description: ""
+    - name: dim_product_content
+      description: ""
+    - name: dim_product_history
+      description: ""
+    - name: dim_product_rating
+      description: ""
+    - name: dim_product_review
+      description: ""
+    - name: dim_retailer
+      description: ""
+    - name: dim_retailer_category
+      description: ""
+    - name: dim_retailer_location
+      description: ""
+    - name: dim_retailer_product
+      description: ""
+    - name: dim_review
+      description: ""
+    - name: dim_search_product
+      description: "" 
+    - name: fact_account_retailer_product
+      description: ""  
+    - name: fact_product_score
+      description: ""
+- name: profitero_share_thermatru
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: profitero_share_thermatru
+  tables:
+    - name: dim_account_category
+      description: ""
+    - name: dim_account_product
+      description: ""
+    - name: dim_account_product_category
+      description: ""
+    - name: dim_amz_category
+      description: ""
+    - name: dim_amz_category_sale
+      description: ""
+    - name: dim_amz_product
+      description: ""
+    - name: dim_amz_product_sale
+      description: ""
+    - name: dim_amz_product_view
+      description: ""
+    - name: dim_brand
+      description: ""
+    - name: dim_category_product
+      description: ""
+    - name: dim_date
+      description: ""
+    - name: dim_keyword
+      description: ""
+    - name: dim_product_attribute
+      description: ""
+    - name: dim_product_content
+      description: ""
+    - name: dim_product_history
+      description: ""
+    - name: dim_product_rating
+      description: ""
+    - name: dim_product_review
+      description: ""
+    - name: dim_retailer
+      description: ""
+    - name: dim_retailer_category
+      description: ""
+    - name: dim_retailer_location
+      description: ""
+    - name: dim_retailer_product
+      description: ""
+    - name: dim_review
+      description: ""
+    - name: dim_search_product
+      description: "" 
+    - name: fact_account_retailer_product
+      description: ""  
+    - name: fact_product_score
+      description: ""
+- name: amazon_sp_ft_mlock
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: amazon_sp_ft_mlock
+  tables:
+  - name: net_pure_product_margin_report_daily
+    description: ""
+  - name: vendor_traffic_report_daily
+    description: ""
+  - name: vendor_sales_manufacturing_retail_asin_report_daily
+    description: ""
+  - name: vendor_inventory_manufacturing_retail_asin_report_daily
+    description: ""
+  - name: vendor_forecasting_retail_report
+    description: "vendor forecasting data"
+- name: amazon_sp_ft_moen_anaheim  
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: amazon_sp_ft_moen_anaheim
+  tables:
+  - name: net_pure_product_margin_report_daily
+    description: ""
+  - name: vendor_sales_manufacturing_retail_asin_report_daily
+    description: ""
+  - name: vendor_traffic_report_daily
+    description: "vendor traffic details"
+  - name: vendor_inventory_manufacturing_retail_asin_report_daily
+    description: "vendor inventory manufacturing retail ASIN report daily data" 
+  - name: vendor_forecasting_retail_report
+    description: "vendor forecasting data"
+- name: amazon_sp_ft_moen_inc
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: amazon_sp_ft_moen_inc
+  tables:
+  - name: net_pure_product_margin_report_daily
+    description: ""
+  - name: vendor_traffic_report_daily
+    description: ""
+  - name: vendor_sales_manufacturing_retail_asin_report_daily
+    description: ""
+  - name: vendor_inventory_manufacturing_retail_asin_report_daily
+    description: ""
+  - name: vendor_retail_procurement_order
+    description: "vendor procurement order data"
+  - name: vendor_retail_procurement_order_status
+    description: "vendor procurement order status data"
+  - name: vendor_retail_procurement_order_item
+    description: "vendor procurement order item data"
+  - name: vendor_retail_procurement_order_item_status
+    description: "vendor procurement order item status data"
+  - name: acknowledgement_status_details
+    description: "acknowledgement status details"
+  - name: vendor_sales_sourcing_retail_asin_report_daily
+    description: "report that provides daily ASIN-level"
+  - name: item_summary
+    description: "item summary data"
+  - name: vendor_forecasting_retail_report
+    description: "vendor forecasting data"    
+- name: amazon_sp_ft_sentrysafe
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: amazon_sp_ft_sentrysafe
+  tables:
+  - name: net_pure_product_margin_report_daily
+    description: ""
+  - name: vendor_traffic_report_daily
+    description: ""
+  - name: vendor_sales_manufacturing_retail_asin_report_daily
+    description: ""
+  - name: vendor_inventory_manufacturing_retail_asin_report_daily
+    description: ""
+- name: amazon_sp_ft_yale
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: amazon_sp_ft_yale
+  tables:
+  - name: net_pure_product_margin_report_daily
+    description: ""
+  - name: vendor_traffic_report_daily
+    description: ""
+  - name: vendor_sales_manufacturing_retail_asin_report_daily
+    description: ""
+  - name: vendor_inventory_manufacturing_retail_asin_report_daily
+    description: ""
+- name: pos_ref
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: pos
+  tables:
+  - name: retail_sellthrough_phases
+    description: ""
+- name: rgm_promotion
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: rgm_promotion
+  tables:
+  - name: retailer_key_account_group_xref
+    description: ""
+  - name: promo_flow_input
+    description: ""
+  - name: predicted
+    description: ""
+- name: sap_bw_prd
+  description: "SAP BW Tables Pulled From Snowflake EDP.Bronze"
+  database: psa_prod
+  schema: sap_bw_prd
+  tables:
+    - name: z_zapopland
+      description: 'z_zapopland'
+    - name: z_zapoplanm
+      description: 'z_zapoplanm'
+    - name: z_zfcdadso
+      description: 'z_zfcdadso'
+- name: incoming_pos
+  database: psa_prod
+  description: Datavations pos and item data
+  schema: incoming_pos
+  tables:
+    - name: main_weekly
+    - name: item
+- name: prive_moen
+  description: "subscription info"
+  database: psa_prod
+  schema: prive_moen
+  tables:
+    - name: orders
+      description: 'orders'
+    - name: subscriber
+      description: 'subscriber' 
+    - name: subscription
+      description: 'subscription'
+- name: custom_fivetran_smartsheet_flo_insurance_partner
+  description: "insurance partner info"
+  database: psa_prod
+  schema: custom_fivetran_smartsheet_flo_insurance_partner
+  tables:
+    - name: insurance_partner_name
+      description: 'insurance_partner_name'
+- name: simplesat_yale
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  schema: simplesat_yale
+  tables:
+  - name: answer
+  - name: survey
+  - name: response
+  - name: question
+  - name: question_rule

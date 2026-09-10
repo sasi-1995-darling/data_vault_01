@@ -1,0 +1,93 @@
+version: 2
+models:
+  - name: v_psa_stg_cost_activity_type_total__winn_sap
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          config:
+            severity: warn
+          arguments:
+            combination_of_columns:
+              - LEDNR
+              - OBJNR
+              - GJAHR
+              - WRTTP
+              - VERSN
+              - VRGNG
+              - PERBL
+              - LOAD_DTS
+    columns:
+      - name: MANDT
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: LEDNR
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: OBJNR
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: GJAHR
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: WRTTP
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: VERSN
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: VRGNG
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: PERBL
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: LEDGER_BK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: OBJECT_NUMBER_BK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: FISCAL_YEAR_BK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: COST_VALUE_TYPE_BK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: COST_VERSION_BK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: COST_TRANSACTION_TYPE_BK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: PERIOD_BLOCK_BK
+        tests:
+          - not_null:
+              config:
+                severity: warn

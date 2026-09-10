@@ -1,0 +1,9 @@
+version: 2
+models:
+- name: ref_gl_account_texts__winn_sap
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - CHART_OF_ACCOUNTS
+        - GL_ACCOUNT_NUMBER

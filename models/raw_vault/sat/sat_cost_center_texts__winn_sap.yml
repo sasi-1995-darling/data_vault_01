@@ -1,0 +1,41 @@
+version: 2
+models:
+  - name: sat_cost_center_texts__winn_sap
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - COST_CENTER_TEXTS_HK
+              - LOAD_DTS
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          config:
+            severity: warn
+          arguments:
+            min_value: 4
+    columns:
+      - name: COST_CENTER_TEXTS_HK
+        tests:
+          - dbt_utils.relationships_where:
+              arguments:
+                to: ref( 'hub_cost_center_texts' )
+                field: COST_CENTER_TEXTS_HK
+      - name: LANGUAGE_KEY_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: CONTROLLING_AREA_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: COST_CENTER_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: VALID_TO_DATE_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn

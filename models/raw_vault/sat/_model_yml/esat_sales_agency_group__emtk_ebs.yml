@@ -1,0 +1,9 @@
+version: 2
+
+models:
+  - name: esat_sales_agency_group__emtk_ebs
+    description: This table tracks the current active relationship in link_sales_agency_group.
+    config:
+      tags:
+        - emtek
+        - ebs

@@ -1,0 +1,43 @@
+version: 2
+models:
+  - name: ref_sat_item_class__fib_ocf
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - ITEM_CLASS_BK
+              - LOAD_DTS
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          config:
+            severity: warn
+          arguments:
+            min_value: 4
+    columns:
+      - name: ITEM_CLASS_BK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+          - dbt_utils.relationships_where:
+              arguments:
+                to: ref( 'ref_hub_item_class' )
+                field: ITEM_CLASS_BK
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'ref_hub_item_class' )
+                pk_column_name: ITEM_CLASS_BK
+      - name: LOAD_DTS
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: REC_SRC
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: HASHDIFF
+        tests:
+          - not_null:
+              config:
+                severity: warn

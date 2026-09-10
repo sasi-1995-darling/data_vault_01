@@ -1,0 +1,20 @@
+version: 2
+models:
+- name: sat_competitive_products__winn_profitero_share
+  data_tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - COMPETITIVE_PRODUCT_HK
+        - PRODUCT_ID
+        - LOAD_DTS
+  - dbt_constraints.foreign_key:
+      arguments:
+        fk_column_names: [COMPETITIVE_PRODUCT_HK]
+        pk_table_name: ref('hub_competitive_product')
+        pk_column_name: COMPETITIVE_PRODUCT_HK
+  - dbt_expectations.expect_table_row_count_to_be_between:
+      arguments:
+        min_value: 4
+      config:
+        severity: warn

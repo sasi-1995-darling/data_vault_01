@@ -1,0 +1,175 @@
+---- SRC LAYER ----
+WITH
+SRC_S              as ( SELECT * FROM {{ source('stripe_flosense', 'DISPUTE') }} as SRC 
+                        WHERE psa_delete_ind = 'N' ),
+SRC_BKCC          as ( SELECT BKCC, REC_SRC FROM {{ ref('ref_business_key_collision') }} WHERE rec_src = 'US.STRIPE_FLOSENSE.DISPUTE' )
+
+/*
+SRC_S              as ( SELECT * FROM stripe_flosense.DISPUTE )
+SRC_BKCC          as ( SELECT BKCC, REC_SRC FROM RAW_VAULT.REF_BUSINESS_KEY_COLLISION WHERE rec_src = 'US.STRIPE_FLOSENSE.DISPUTE' )
+*/
+---- LOGIC LAYER ----
+
+, LOGIC_S as (
+    SELECT
+        ID                                                           as                                         DISPUTE_BK
+      , CONVERT_TIMEZONE('UTC', PSA_LOAD_DTS)                        as                                           LOAD_DTS
+      , CONNECTED_ACCOUNT_ID
+      , AMOUNT
+      , BALANCE_TRANSACTION
+      , CREATED
+      , CURRENCY
+      , EVIDENCE_ACCESS_ACTIVITY_LOG
+      , EVIDENCE_BILLING_ADDRESS
+      , EVIDENCE_CANCELLATION_POLICY
+      , EVIDENCE_CANCELLATION_POLICY_DISCLOSURE
+      , EVIDENCE_CANCELLATION_REBUTTAL
+      , EVIDENCE_CUSTOMER_COMMUNICATION
+      , EVIDENCE_CUSTOMER_EMAIL_ADDRESS
+      , EVIDENCE_CUSTOMER_NAME
+      , EVIDENCE_CUSTOMER_PURCHASE_IP
+      , EVIDENCE_CUSTOMER_SIGNATURE
+      , EVIDENCE_DUPLICATE_CHARGE_DOCUMENTATION
+      , EVIDENCE_DUPLICATE_CHARGE_EXPLANATION
+      , EVIDENCE_DUPLICATE_CHARGE_ID
+      , EVIDENCE_PRODUCT_DESCRIPTION
+      , EVIDENCE_RECEIPT
+      , EVIDENCE_REFUND_POLICY
+      , EVIDENCE_REFUND_POLICY_DISCLOSURE
+      , EVIDENCE_REFUND_REFUSAL_EXPLANATION
+      , EVIDENCE_SERVICE_DATE
+      , EVIDENCE_SERVICE_DOCUMENTATION
+      , EVIDENCE_SHIPPING_ADDRESS
+      , EVIDENCE_SHIPPING_CARRIER
+      , EVIDENCE_SHIPPING_DATE
+      , EVIDENCE_SHIPPING_DOCUMENTATION
+      , EVIDENCE_SHIPPING_TRACKING_NUMBER
+      , EVIDENCE_UNCATEGORIZED_FILE
+      , EVIDENCE_UNCATEGORIZED_TEXT
+      , EVIDENCE_DETAILS_DUE_BY
+      , EVIDENCE_DETAILS_HAS_EVIDENCE
+      , EVIDENCE_DETAILS_PAST_DUE
+      , EVIDENCE_DETAILS_SUBMISSION_COUNT
+      , IS_CHARGE_REFUNDABLE
+      , LIVEMODE
+      , REASON
+      , STATUS
+      , CHARGE_ID
+      , _FIVETRAN_DELETED
+      , _FIVETRAN_SYNCED                                             as                                    FIVETRAN_SYNCED
+      , METADATA
+      , PSA_LOAD_DTS
+      , PSA_RECORD_SOURCE
+      , PSA_DELETE_IND
+    FROM SRC_S
+)
+
+---- JOIN LAYER ----
+, JOIN_RESULT as (
+    SELECT *
+    FROM LOGIC_S
+    INNER JOIN SRC_BKCC ON '1' = '1'
+)
+
+---- FINAL LAYER ----
+SELECT
+          DISPUTE_BK
+        , LOAD_DTS
+        , CONNECTED_ACCOUNT_ID
+        , AMOUNT
+        , BALANCE_TRANSACTION
+        , CREATED
+        , CURRENCY
+        , EVIDENCE_ACCESS_ACTIVITY_LOG
+        , EVIDENCE_BILLING_ADDRESS
+        , EVIDENCE_CANCELLATION_POLICY
+        , EVIDENCE_CANCELLATION_POLICY_DISCLOSURE
+        , EVIDENCE_CANCELLATION_REBUTTAL
+        , EVIDENCE_CUSTOMER_COMMUNICATION
+        , EVIDENCE_CUSTOMER_EMAIL_ADDRESS
+        , EVIDENCE_CUSTOMER_NAME
+        , EVIDENCE_CUSTOMER_PURCHASE_IP
+        , EVIDENCE_CUSTOMER_SIGNATURE
+        , EVIDENCE_DUPLICATE_CHARGE_DOCUMENTATION
+        , EVIDENCE_DUPLICATE_CHARGE_EXPLANATION
+        , EVIDENCE_DUPLICATE_CHARGE_ID
+        , EVIDENCE_PRODUCT_DESCRIPTION
+        , EVIDENCE_RECEIPT
+        , EVIDENCE_REFUND_POLICY
+        , EVIDENCE_REFUND_POLICY_DISCLOSURE
+        , EVIDENCE_REFUND_REFUSAL_EXPLANATION
+        , EVIDENCE_SERVICE_DATE
+        , EVIDENCE_SERVICE_DOCUMENTATION
+        , EVIDENCE_SHIPPING_ADDRESS
+        , EVIDENCE_SHIPPING_CARRIER
+        , EVIDENCE_SHIPPING_DATE
+        , EVIDENCE_SHIPPING_DOCUMENTATION
+        , EVIDENCE_SHIPPING_TRACKING_NUMBER
+        , EVIDENCE_UNCATEGORIZED_FILE
+        , EVIDENCE_UNCATEGORIZED_TEXT
+        , EVIDENCE_DETAILS_DUE_BY
+        , EVIDENCE_DETAILS_HAS_EVIDENCE
+        , EVIDENCE_DETAILS_PAST_DUE
+        , EVIDENCE_DETAILS_SUBMISSION_COUNT
+        , IS_CHARGE_REFUNDABLE
+        , LIVEMODE
+        , REASON
+        , STATUS
+        , CHARGE_ID
+        , _FIVETRAN_DELETED
+        , FIVETRAN_SYNCED
+        , METADATA
+        , PSA_LOAD_DTS
+        , PSA_RECORD_SOURCE
+        , PSA_DELETE_IND
+        , REC_SRC
+        , BKCC
+        , MD5_BINARY(UPPER(CONCAT_WS('||',
+          COALESCE(NULLIF(TRIM(CAST(DISPUTE_BK as VARCHAR)),''), '^^')
+        , COALESCE(NULLIF(TRIM(CAST(BKCC as VARCHAR)),''), '^^')
+        ))) as DISPUTE_HK
+        , MD5_BINARY(UPPER(NULLIF(CONCAT(
+              IFNULL(TRIM(CONNECTED_ACCOUNT_ID::text), '^^') 
+            , '||', IFNULL(TRIM(AMOUNT::text), '^^') 
+            , '||', IFNULL(TRIM(BALANCE_TRANSACTION::text), '^^') 
+            , '||', IFNULL(TRIM(CREATED::text), '^^') 
+            , '||', IFNULL(TRIM(CURRENCY::text), '^^') 
+            , '||', IFNULL(TRIM(EVIDENCE_ACCESS_ACTIVITY_LOG::text), '^^') 
+            , '||', IFNULL(TRIM(EVIDENCE_BILLING_ADDRESS::text), '^^') 
+            , '||', IFNULL(TRIM(EVIDENCE_CANCELLATION_POLICY::text), '^^') 
+            , '||', IFNULL(TRIM(EVIDENCE_CANCELLATION_POLICY_DISCLOSURE::text), '^^') 
+            , '||', IFNULL(TRIM(EVIDENCE_CANCELLATION_REBUTTAL::text), '^^') 
+            , '||', IFNULL(TRIM(EVIDENCE_CUSTOMER_COMMUNICATION::text), '^^') 
+            , '||', IFNULL(TRIM(EVIDENCE_CUSTOMER_EMAIL_ADDRESS::text), '^^') 
+            , '||', IFNULL(TRIM(EVIDENCE_CUSTOMER_NAME::text), '^^') 
+            , '||', IFNULL(TRIM(EVIDENCE_CUSTOMER_PURCHASE_IP::text), '^^') 
+            , '||', IFNULL(TRIM(EVIDENCE_CUSTOMER_SIGNATURE::text), '^^') 
+            , '||', IFNULL(TRIM(EVIDENCE_DUPLICATE_CHARGE_DOCUMENTATION::text), '^^') 
+            , '||', IFNULL(TRIM(EVIDENCE_DUPLICATE_CHARGE_EXPLANATION::text), '^^') 
+            , '||', IFNULL(TRIM(EVIDENCE_DUPLICATE_CHARGE_ID::text), '^^') 
+            , '||', IFNULL(TRIM(EVIDENCE_PRODUCT_DESCRIPTION::text), '^^') 
+            , '||', IFNULL(TRIM(EVIDENCE_RECEIPT::text), '^^') 
+            , '||', IFNULL(TRIM(EVIDENCE_REFUND_POLICY::text), '^^') 
+            , '||', IFNULL(TRIM(EVIDENCE_REFUND_POLICY_DISCLOSURE::text), '^^') 
+            , '||', IFNULL(TRIM(EVIDENCE_REFUND_REFUSAL_EXPLANATION::text), '^^') 
+            , '||', IFNULL(TRIM(EVIDENCE_SERVICE_DATE::text), '^^') 
+            , '||', IFNULL(TRIM(EVIDENCE_SERVICE_DOCUMENTATION::text), '^^') 
+            , '||', IFNULL(TRIM(EVIDENCE_SHIPPING_ADDRESS::text), '^^') 
+            , '||', IFNULL(TRIM(EVIDENCE_SHIPPING_CARRIER::text), '^^') 
+            , '||', IFNULL(TRIM(EVIDENCE_SHIPPING_DATE::text), '^^') 
+            , '||', IFNULL(TRIM(EVIDENCE_SHIPPING_DOCUMENTATION::text), '^^') 
+            , '||', IFNULL(TRIM(EVIDENCE_SHIPPING_TRACKING_NUMBER::text), '^^') 
+            , '||', IFNULL(TRIM(EVIDENCE_UNCATEGORIZED_FILE::text), '^^') 
+            , '||', IFNULL(TRIM(EVIDENCE_UNCATEGORIZED_TEXT::text), '^^') 
+            , '||', IFNULL(TRIM(EVIDENCE_DETAILS_DUE_BY::text), '^^') 
+            , '||', IFNULL(TRIM(EVIDENCE_DETAILS_HAS_EVIDENCE::text), '^^') 
+            , '||', IFNULL(TRIM(EVIDENCE_DETAILS_PAST_DUE::text), '^^') 
+            , '||', IFNULL(TRIM(EVIDENCE_DETAILS_SUBMISSION_COUNT::text), '^^') 
+            , '||', IFNULL(TRIM(IS_CHARGE_REFUNDABLE::text), '^^') 
+            , '||', IFNULL(TRIM(LIVEMODE::text), '^^') 
+            , '||', IFNULL(TRIM(REASON::text), '^^') 
+            , '||', IFNULL(TRIM(STATUS::text), '^^') 
+            , '||', IFNULL(TRIM(CHARGE_ID::text), '^^') 
+            , '||', IFNULL(TRIM(_FIVETRAN_DELETED::text), '^^') 
+        ), '^^||^^')))  as HASHDIFF
+FROM JOIN_RESULT

@@ -1,0 +1,22 @@
+version: 2
+models:
+  - name: sat_distribution_channel__winn_sap
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - DISTRIBUTION_CHANNEL_HK
+              - SPRAS
+              - LOAD_DTS
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          config:
+            severity: warn
+          arguments:
+            min_value: 4
+    columns:
+      - name: DISTRIBUTION_CHANNEL_HK
+        tests:
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'hub_distribution_channel' )
+                pk_column_name: DISTRIBUTION_CHANNEL_HK

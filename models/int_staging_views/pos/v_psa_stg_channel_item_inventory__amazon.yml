@@ -1,0 +1,14 @@
+version: 2
+models:
+- name: v_psa_stg_channel_item_inventory__amazon
+  data_tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - REPORT_END_DATE
+        - ASIN
+        - VENDORCENTRAL_ACCOUNT
+        - LOAD_DTS
+      config:
+        severity: warn
+  columns: []

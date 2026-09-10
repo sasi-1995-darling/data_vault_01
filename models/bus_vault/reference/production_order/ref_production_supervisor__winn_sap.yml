@@ -1,0 +1,11 @@
+version: 2
+models:
+- name: ref_production_supervisor__winn_sap
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - PLANT_BK
+        - PRODUCTION_SUPERVISOR
+        - LOAD_DTS
+  columns: []

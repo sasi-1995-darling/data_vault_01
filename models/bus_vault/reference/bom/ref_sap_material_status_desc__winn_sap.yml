@@ -1,0 +1,10 @@
+version: 2
+models:
+  - name: ref_sap_material_status_desc__winn_sap
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - MATERIAL_STATUS_CODE
+              - LOAD_DTS
+    columns: []

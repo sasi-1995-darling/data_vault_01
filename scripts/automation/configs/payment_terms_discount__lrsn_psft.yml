@@ -1,0 +1,316 @@
+schema_version: '1.0'
+filename: v_psa_stg_payment_terms_discount__lrsn_psft
+_pipeline_metadata:
+  bkcc_rec_src: USSDBR.ORCL.PSFTPRD.PS_PYMT_TRMS_DSCNT
+  has_fivetran_deleted: true
+  has_psa_delete_ind: true
+  psa_delete_filter: false
+  null_bk_coalesced: false
+  large_volume: false
+  row_count: 62
+  volume_tier: normal
+  load_dts_derivation: CONVERT_TIMEZONE('UTC', _FIVETRAN_SYNCED)
+  grain_valid: true
+  sat_model_names:
+  - msat_payment_term_discount__lrsn_psft
+  sat_use_watermark: false
+  sat_full_refresh_false: false
+  sat_cluster_by: false
+models:
+- layer: STG
+  derived_name: v_psa_stg_payment_terms_discount__lrsn_psft
+  short_name: payment_terms_discount__lrsn_psft
+  sources:
+  - source_schema: lrsn_psft_sysadm
+    source_table: ps_pymt_trms_dscnt
+    alias: SRC
+  columns:
+  - source_table: SRC
+    source_column: PYMNT_TERMS_CD
+    staging_column_name: PYMNT_TERMS_CD
+    datatype: TEXT
+    hashdiff: ''
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: PYMNT_TERMS_CD
+    datatype: TEXT
+    staging_column_name: PAYMENT_TERM_BK
+    hashdiff: ''
+    unique: 'COMPOSITE: PAYMENT_TERM_BK, SETID, EFFDT, NET_TRMS_SEQ_NBR, LOAD_DTS'
+    not_null: 'yes'
+    manual_logic: ''
+  - source_table: SRC
+    source_column: (DERIVED)
+    staging_column_name: LOAD_DTS
+    datatype: TIMESTAMP
+    hashdiff: ''
+    not_null: ''
+    unique: ''
+    manual_logic: CONVERT_TIMEZONE('UTC', _FIVETRAN_SYNCED)
+  - source_table: SRC
+    source_column: SETID
+    staging_column_name: SETID
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: EFFDT
+    staging_column_name: EFFDT
+    datatype: DATE
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: NET_TRMS_SEQ_NBR
+    staging_column_name: NET_TRMS_SEQ_NBR
+    datatype: NUMBER
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: DSCNT_TRMS_SEQ_NBR
+    staging_column_name: DSCNT_TRMS_SEQ_NBR
+    datatype: NUMBER
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: DSCNT_TRMS_TIME_ID
+    staging_column_name: DSCNT_TRMS_TIME_ID
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: TERMS_ADJUST_DAYS
+    staging_column_name: TERMS_ADJUST_DAYS
+    datatype: NUMBER
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: DSCNT_TRMS_PERCENT
+    staging_column_name: DSCNT_TRMS_PERCENT
+    datatype: NUMBER
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: DSCNT_TRMS_AMOUNT
+    staging_column_name: DSCNT_TRMS_AMOUNT
+    datatype: NUMBER
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: _FIVETRAN_ID
+    staging_column_name: _FIVETRAN_ID
+    datatype: TEXT
+    hashdiff: ''
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: _FIVETRAN_DELETED
+    staging_column_name: _FIVETRAN_DELETED
+    datatype: BOOLEAN
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: _FIVETRAN_SYNCED
+    staging_column_name: _FIVETRAN_SYNCED
+    datatype: TIMESTAMP_TZ
+    hashdiff: ''
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: PSA_LOAD_DTS
+    staging_column_name: PSA_LOAD_DTS
+    datatype: TIMESTAMP_LTZ
+    hashdiff: ''
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: PSA_RECORD_SOURCE
+    staging_column_name: PSA_RECORD_SOURCE
+    datatype: TEXT
+    hashdiff: ''
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: PSA_DELETE_IND
+    staging_column_name: PSA_DELETE_IND
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC_BKCC
+    source_column: BKCC
+    staging_column_name: BKCC
+    datatype: TEXT
+    hashdiff: ''
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC_BKCC
+    source_column: REC_SRC
+    staging_column_name: REC_SRC
+    datatype: TEXT
+    hashdiff: ''
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: ''
+    source_column: (DERIVED)
+    staging_column_name: PAYMENT_TERM_HK
+    datatype: BINARY
+    hashdiff: ''
+    not_null: ''
+    unique: ''
+    manual_logic: 'HASH: PYMNT_TERMS_CD, BKCC'
+  - source_table: ''
+    source_column: (DERIVED)
+    staging_column_name: HASHDIFF
+    datatype: BINARY
+    hashdiff: ''
+    not_null: ''
+    unique: ''
+    manual_logic: 'HASH: SETID, EFFDT, NET_TRMS_SEQ_NBR, DSCNT_TRMS_SEQ_NBR, DSCNT_TRMS_TIME_ID,
+      TERMS_ADJUST_DAYS, DSCNT_TRMS_PERCENT, DSCNT_TRMS_AMOUNT, _FIVETRAN_DELETED,
+      PSA_DELETE_IND'
+- layer: MSAT
+  derived_name: msat_payment_term_discount__lrsn_psft
+  short_name: payment_terms_discount__lrsn_psft
+  sources:
+  - source_schema: int_staging_views
+    source_table: v_psa_stg_payment_terms_discount__lrsn_psft
+    alias: SRC
+    source_layer_filter: ''
+    final_layer_filter: "{% if is_incremental() %}\nWHERE NOT EXISTS (\n    SELECT\
+      \ 1\n    FROM {{ this }} existing\n    WHERE existing.PAYMENT_TERM_HK = JOIN_RESULT.PAYMENT_TERM_HK\n\
+      \      AND existing.SETID = JOIN_RESULT.SETID\n      AND existing.EFFDT = JOIN_RESULT.EFFDT\n\
+      \      AND existing.NET_TRMS_SEQ_NBR = JOIN_RESULT.NET_TRMS_SEQ_NBR\n      AND\
+      \ existing.HASHDIFF = JOIN_RESULT.HASHDIFF\n)\n{% endif %}"
+    target_schema: raw_vault
+    model_config: ''
+    qualify_order_by: ''
+  columns:
+  - source_table: SRC
+    source_column: PAYMENT_TERM_HK
+    staging_column_name: PAYMENT_TERM_HK
+    datatype: BINARY
+    pk: 'PK: PAYMENT_TERM_HK, SETID, EFFDT, NET_TRMS_SEQ_NBR, LOAD_DTS'
+    ghost_record: hash
+    relationship: HUB_PAYMENT_TERMS.PAYMENT_TERM_HK
+  - source_table: SRC
+    source_column: PYMNT_TERMS_CD
+    staging_column_name: PYMNT_TERMS_CD
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: SETID
+    staging_column_name: SETID
+    datatype: TEXT
+    ghost_record: value_text
+  - source_table: SRC
+    source_column: EFFDT
+    staging_column_name: EFFDT
+    datatype: DATE
+    ghost_record: value_text
+  - source_table: SRC
+    source_column: NET_TRMS_SEQ_NBR
+    staging_column_name: NET_TRMS_SEQ_NBR
+    datatype: NUMBER
+    ghost_record: value_number
+  - source_table: SRC
+    source_column: DSCNT_TRMS_SEQ_NBR
+    staging_column_name: DSCNT_TRMS_SEQ_NBR
+    datatype: NUMBER
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: DSCNT_TRMS_TIME_ID
+    staging_column_name: DSCNT_TRMS_TIME_ID
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: TERMS_ADJUST_DAYS
+    staging_column_name: TERMS_ADJUST_DAYS
+    datatype: NUMBER
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: DSCNT_TRMS_PERCENT
+    staging_column_name: DSCNT_TRMS_PERCENT
+    datatype: NUMBER
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: DSCNT_TRMS_AMOUNT
+    staging_column_name: DSCNT_TRMS_AMOUNT
+    datatype: NUMBER
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: PSA_DELETE_IND
+    staging_column_name: PSA_DELETE_IND
+    datatype: TEXT
+    ghost_record: psa_delete_ind
+  - source_table: SRC
+    source_column: PSA_LOAD_DTS
+    staging_column_name: PSA_LOAD_DTS
+    datatype: TIMESTAMP
+    ghost_record: psa_load_dts
+  - source_table: SRC
+    source_column: PSA_RECORD_SOURCE
+    staging_column_name: PSA_RECORD_SOURCE
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: _FIVETRAN_SYNCED
+    staging_column_name: _FIVETRAN_SYNCED
+    datatype: TIMESTAMP_TZ
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: _FIVETRAN_ID
+    staging_column_name: _FIVETRAN_ID
+    datatype: TEXT
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: _FIVETRAN_DELETED
+    staging_column_name: _FIVETRAN_DELETED
+    datatype: BOOLEAN
+    ghost_record: 'null'
+  - source_table: SRC
+    source_column: LOAD_DTS
+    staging_column_name: LOAD_DTS
+    datatype: TIMESTAMP_NTZ
+    ghost_record: load_dts
+  - source_table: SRC
+    source_column: REC_SRC
+    staging_column_name: REC_SRC
+    datatype: TEXT
+    ghost_record: rec_src
+  - source_table: SRC
+    source_column: BKCC
+    staging_column_name: BKCC
+    datatype: TEXT
+    ghost_record: bkcc
+  - source_table: SRC
+    source_column: HASHDIFF
+    staging_column_name: HASHDIFF
+    datatype: BINARY
+    ghost_record: hashdiff

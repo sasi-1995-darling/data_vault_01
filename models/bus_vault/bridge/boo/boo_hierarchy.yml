@@ -1,0 +1,22 @@
+# models/bus_vault/bridge/bridge_boo_hierarchy.yml
+version: 2
+
+models:
+  - name: bridge_boo_hierarchy
+    columns:
+      - name: LNK_PLANT_TASKLIST_ITEM_ASSIGNMENT_HK
+        tests:
+          - not_null
+      - name: parent_op_hk
+        tests:
+          - not_null
+      - name: child_op_hk
+        tests:
+          - not_null
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - LNK_PLANT_TASKLIST_ITEM_ASSIGNMENT_HK
+              - parent_op_hk
+              - child_op_hk

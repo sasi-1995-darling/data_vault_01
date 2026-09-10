@@ -1,0 +1,15 @@
+version: 2
+
+models:
+  - name: hub_customer
+    description: This is the raw vault hub model for customers
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - customer_hk
+    config:
+      tags:
+        - emtek
+        - mlc_ebs
+        - tt_e21

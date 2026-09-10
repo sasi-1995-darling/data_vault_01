@@ -1,0 +1,16 @@
+version: 2
+models:
+  - name: fact_installer_order
+    description: "Fact view: thin wrapper on pb_installer_order. All INSTALLATION_FLAG=TRUE installer orders with partner classification, Zigpoll metadata, and exclusion flags."
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - ORDER_ID
+              - SKU
+              - ORDER_LINE_ID
+              - GRAIN_KEY
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          arguments:
+            min_value: 4
+    columns: []

@@ -1,0 +1,18 @@
+version: 2
+
+models:
+  - name: sat_pos_product_customer__hd_askuity
+    description: This is the raw vault satellite model for pos product customer for home depot
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - product_customer_hk
+              - load_dts
+      - dbt_constraints.foreign_key:
+          arguments:
+            fk_column_names:
+              - customer_location_hk
+            pk_table_name: ref('hub_customer_location')
+            pk_column_names:
+              - customer_location_hk

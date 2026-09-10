@@ -1,0 +1,11 @@
+version: 2
+models:
+  - name: ref_pos_customer_zip__ferguson_moen_xref
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - ZIP_CODE
+              - MOEN_CUSTOMER_ID
+              - LOAD_DTS
+    columns: []

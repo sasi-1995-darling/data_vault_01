@@ -1,0 +1,13 @@
+version: 2
+models:
+  - name: pb_item_details__datavations
+    description: >
+      PIT Bridge table (materialized as table) for Datavations item detail attributes.
+      Grain: one row per COMPETITIVE_PRODUCT_HK (latest LOAD_DTS via QUALIFY).
+      Captures descriptive item attributes: ITEM_NAME, ITEM_ID, BRAND, STORE_ITEM_ID.
+    data_tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - COMPETITIVE_PRODUCT_HK
+    columns: []

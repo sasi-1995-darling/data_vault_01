@@ -1,0 +1,89 @@
+version: 2
+
+models:
+  - name: link_rating_application_appbot
+    description: This is the raw vault link model between appbot application and rating
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - link_rating_applist_details_hk
+      - dbt_constraints.foreign_key:
+          arguments:
+            fk_column_names:
+              - rating_hk
+            pk_table_name: ref('hub_rating__appbot_api')
+            pk_column_names:
+              - rating_hk
+      - dbt_constraints.foreign_key:
+          arguments:
+            fk_column_names:
+              - application_hk
+            pk_table_name: ref('hub_application__appbot_api')
+            pk_column_names:
+              - application_hk
+  - name: link_review_application_appbot
+    description: This is the raw vault link model between appbot application and review
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - link_review_applist_details_hk
+      - dbt_constraints.foreign_key:
+          arguments:
+            fk_column_names:
+              - review_hk
+            pk_table_name: ref('hub_review__appbot_api')
+            pk_column_names:
+              - review_hk
+      - dbt_constraints.foreign_key:
+          arguments:
+            fk_column_names:
+              - application_hk
+            pk_table_name: ref('hub_application__appbot_api')
+            pk_column_names:
+              - application_hk
+
+  - name: link_review_brand_appbot
+    description: This is the raw vault link model between appbot review and hub brand
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - link_review_brand_hk
+      - dbt_constraints.foreign_key:
+          arguments:
+            fk_column_names:
+              - review_hk
+            pk_table_name: ref('hub_review__appbot_api')
+            pk_column_names:
+              - review_hk
+      - dbt_constraints.foreign_key:
+          arguments:
+            fk_column_names:
+              - brand_hk
+            pk_table_name: ref('hub_brand')
+            pk_column_names:
+              - brand_hk
+
+  - name: link_rating_brand_appbot
+    description: This is the raw vault link model between appbot rating and hub brand
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - link_rating_brand_hk
+      - dbt_constraints.foreign_key:
+          arguments:
+            fk_column_names:
+              - rating_hk
+            pk_table_name: ref('hub_rating__appbot_api')
+            pk_column_names:
+              - rating_hk
+      - dbt_constraints.foreign_key:
+          arguments:
+            fk_column_names:
+              - brand_hk
+            pk_table_name: ref('hub_brand')
+            pk_column_names:
+              - brand_hk

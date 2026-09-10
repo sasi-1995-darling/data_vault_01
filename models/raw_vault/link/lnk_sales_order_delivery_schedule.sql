@@ -1,0 +1,92 @@
+---- SRC LAYER ----
+WITH
+SRC_VBEP           as ( SELECT CUSTOMER_BILLTO_HK, CUSTOMER_SHIPTO_HK, CUSTOMER_SOLDTO_HK, ETENR, ITEM_HK, 
+                        LOAD_DTS, ORDER_HEADER_HK, ORDER_LINE_HK, REC_SRC, SO_ITEM_LHK FROM {{ ref('v_psa_stg_sales_order_item_scheduled_shipping__winn_sap') }} as SRC 
+                        QUALIFY (ROW_NUMBER() OVER(PARTITION BY SO_ITEM_LHK, ETENR ORDER BY LOAD_DTS ))=1 )
+
+/*
+SRC_VBEP           as ( SELECT * FROM STAGING.v_psa_stg_sales_order_item_scheduled_shipping__winn_sap )
+*/
+---- LOGIC LAYER ----
+
+, LOGIC_VBEP as (
+    SELECT
+        SO_ITEM_LHK
+      , ORDER_HEADER_HK
+      , ORDER_LINE_HK
+      , ITEM_HK
+      , CUSTOMER_SOLDTO_HK
+      , CUSTOMER_BILLTO_HK
+      , CUSTOMER_SHIPTO_HK
+      , ETENR
+      , LOAD_DTS
+      , REC_SRC
+    FROM SRC_VBEP
+)
+---- RENAME LAYER ----
+
+, RENAME_VBEP as (
+    SELECT
+        SO_ITEM_LHK
+      , ORDER_HEADER_HK
+      , ORDER_LINE_HK
+      , ITEM_HK
+      , CUSTOMER_SOLDTO_HK
+      , CUSTOMER_BILLTO_HK
+      , CUSTOMER_SHIPTO_HK
+      , ETENR
+      , LOAD_DTS
+      , REC_SRC
+    FROM LOGIC_VBEP
+)
+---- FILTER LAYER ----
+
+, FILTER_VBEP as (
+    SELECT *
+    FROM RENAME_VBEP
+)
+
+---- JOIN LAYER ----
+, JOIN_RESULT as (
+    SELECT *
+    FROM FILTER_VBEP
+)
+
+---- FINAL LAYER ----
+SELECT
+          SO_ITEM_LHK
+        , ORDER_HEADER_HK
+        , ORDER_LINE_HK
+        , ITEM_HK
+        , CUSTOMER_SOLDTO_HK
+        , CUSTOMER_BILLTO_HK
+        , CUSTOMER_SHIPTO_HK
+        , ETENR
+        , LOAD_DTS
+        , REC_SRC
+FROM JOIN_RESULT
+{% if is_incremental() %}
+WHERE NOT EXISTS (
+    SELECT 1 
+    FROM {{ this }} existing
+    WHERE existing.SO_ITEM_LHK = JOIN_RESULT.SO_ITEM_LHK
+      AND existing.ETENR = JOIN_RESULT.ETENR
+)
+{% endif %}
+{% if not is_incremental() %}
+
+union all
+SELECT 
+MD5_BINARY(GR.VALUE) AS SO_ITEM_LHK,
+MD5_BINARY(GR.VALUE) AS ORDER_HEADER_HK,
+MD5_BINARY(GR.VALUE) AS ORDER_LINE_HK,
+MD5_BINARY(GR.VALUE) AS ITEM_HK,
+MD5_BINARY(GR.VALUE) AS CUSTOMER_SOLDTO_HK,
+MD5_BINARY(GR.VALUE) AS CUSTOMER_BILLTO_HK,
+MD5_BINARY(GR.VALUE) AS CUSTOMER_SHIPTO_HK,
+GR.VALUE :: text AS ETENR,
+CONVERT_TIMEZONE('UTC','1900-01-01'::TIMESTAMP) AS LOAD_DTS,
+'USAZET.SNOWFLAKE.FBIN.DERIVED' AS REC_SRC
+FROM
+TABLE(strtok_split_to_table('0|-1|-2', '|')) AS GR
+{% endif %}

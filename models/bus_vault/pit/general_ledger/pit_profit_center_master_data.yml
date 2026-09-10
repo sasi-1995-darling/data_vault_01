@@ -1,0 +1,8 @@
+version: 2
+models:
+  - name: pit_profit_center_master_data
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - OBJECT_NUMBER_HK

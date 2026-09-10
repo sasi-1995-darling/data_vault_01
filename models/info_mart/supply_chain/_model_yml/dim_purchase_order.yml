@@ -1,0 +1,13 @@
+version: 2
+
+models:
+  - name: dim_purchase_order
+    description: Supply chain dimension table for purchase orders
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - dim_purchase_order_pk
+    config:
+      tags:
+        - emtek

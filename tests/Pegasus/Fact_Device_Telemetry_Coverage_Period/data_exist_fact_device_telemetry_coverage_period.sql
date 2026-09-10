@@ -1,0 +1,1 @@
+select * from ({{ data_exist('fact_device_telemetry_coverage_period','US.FLO_TELEMETRY.FLO_DEVICE_DAILY')}}) 

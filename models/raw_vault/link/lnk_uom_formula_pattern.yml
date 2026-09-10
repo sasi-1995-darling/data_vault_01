@@ -1,0 +1,20 @@
+version: 2
+models:
+- name: lnk_uom_formula_pattern
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - LNK_UOM_FORMULA_PATTERN_HK
+  - dbt_expectations.expect_table_row_count_to_be_between:
+      arguments:
+        min_value: 4
+      config:
+        severity: warn
+  columns:
+  - name: UOM_HK
+    data_tests:
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'hub_uom' )
+          pk_column_name: UOM_HK

@@ -1,0 +1,90 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(.venv/bin/python3 scripts/automation/pipeline_orchestrator.py *)",
+      "Bash(.venv/bin/python3 -m pytest *)",
+      "Bash(dbt compile *)",
+      "Bash(dbt run *)",
+      "Bash(dbt test *)",
+      "Bash(dbt build *)",
+      "Bash(git status)",
+      "Bash(git diff *)",
+      "Bash(git log *)",
+      "Bash(bash scripts/sync_skills.sh)",
+      "Read(**)"
+    ],
+    "deny": [
+      "Write(models/int_staging_views/*/v_psa_stg_*)",
+      "Write(models/raw_vault/hub/hub_*)",
+      "Write(models/raw_vault/link/lnk_*)",
+      "Write(models/raw_vault/link/link_*)",
+      "Write(models/raw_vault/link/tlink_*)",
+      "Write(models/raw_vault/sat/sat_*)",
+      "Write(models/raw_vault/sat/lsat_*)",
+      "Write(models/raw_vault/sat/msat_*)",
+      "Write(models/raw_vault/sat/lmsat_*)",
+      "Write(models/raw_vault/sat/esat_*)",
+      "Write(models/raw_vault/sat/rsat_*)",
+      "Write(.env)",
+      "Write(.env.*)",
+      "Write(.vscode/mcp.json)",
+      "Bash(rm -rf *)",
+      "Bash(git push --force *)",
+      "Bash(cat .vscode/mcp.json)",
+      "Bash(cat .env*)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit|Bash|Read",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".venv/bin/python3 scripts/automation/hooks/pre_tool_guard.py",
+            "timeout": 10,
+            "statusMessage": "Checking pipeline orchestrator state..."
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash scripts/automation/hooks/post_write_compile_check.sh",
+            "timeout": 30,
+            "async": true,
+            "statusMessage": "Auto-validating written file..."
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash scripts/automation/hooks/session_start_digest.sh",
+            "timeout": 10,
+            "statusMessage": "Loading recent lessons and pipeline state..."
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash scripts/automation/hooks/session_stop_summary.sh",
+            "timeout": 10,
+            "statusMessage": "Saving session summary..."
+          }
+        ]
+      }
+    ]
+  }
+}

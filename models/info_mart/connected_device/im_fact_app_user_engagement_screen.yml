@@ -1,0 +1,11 @@
+version: 2
+models:
+- name: im_fact_app_user_engagement_screen
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - CONSUMER_BK
+        - SCREEN_ACTION_TS
+        - SCREEN_NAME
+  columns: []

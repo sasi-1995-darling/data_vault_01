@@ -1,0 +1,70 @@
+---- SRC LAYER ----
+WITH
+SRC_QMUR           as ( SELECT QUALITY_CAUSES_HK , QUALITY_CAUSES_BK , LOAD_DTS , REC_SRC , BKCC FROM {{ ref('v_psa_stg_quality_causes') }} as SRC 
+                        QUALIFY (ROW_NUMBER() OVER(PARTITION BY QUALITY_CAUSES_BK ORDER BY LOAD_DTS ))=1 )
+
+/*
+SRC_QMUR           as ( SELECT * FROM STAGING.V_PSA_STG_QUALITY_CAUSES )
+*/
+---- LOGIC LAYER ----
+
+, LOGIC_QMUR as (
+    SELECT
+        QUALITY_CAUSES_HK
+      , QUALITY_CAUSES_BK
+      , LOAD_DTS
+      , REC_SRC
+      , BKCC
+    FROM SRC_QMUR
+)
+---- RENAME LAYER ----
+
+, RENAME_QMUR as (
+    SELECT
+        QUALITY_CAUSES_HK
+      , QUALITY_CAUSES_BK
+      , LOAD_DTS
+      , REC_SRC
+      , BKCC
+    FROM LOGIC_QMUR
+)
+---- FILTER LAYER ----
+
+, FILTER_QMUR as (
+    SELECT *
+    FROM RENAME_QMUR
+)
+
+---- JOIN LAYER ----
+, JOIN_RESULT as (
+    SELECT *
+    FROM FILTER_QMUR
+)
+
+---- FINAL LAYER ----
+SELECT
+          QUALITY_CAUSES_HK
+        , QUALITY_CAUSES_BK
+        , LOAD_DTS
+        , REC_SRC
+        , BKCC
+FROM JOIN_RESULT
+{% if is_incremental() %}
+WHERE NOT EXISTS (
+    SELECT 1 
+    FROM {{ this }} existing
+    WHERE existing.QUALITY_CAUSES_HK = JOIN_RESULT.QUALITY_CAUSES_HK
+)
+{% endif %}
+ QUALIFY ROW_NUMBER() OVER(PARTITION BY QUALITY_CAUSES_BK, BKCC ORDER BY LOAD_DTS)=1
+{% if not is_incremental() %}
+union all
+
+SELECT MD5_BINARY(GR.VALUE)  QUALITY_CAUSES_HK
+, GR.VALUE  AS QUALITY_CAUSES_BK
+, CONVERT_TIMEZONE('UTC','1900-01-01')  as LOAD_DTS 
+, 'USAZET.SNOWFLAKE.FBIN.DERIVED' AS REC_SRC
+, DECODE(GR.VALUE, 0, 'GHOST RECORD-SYSTEM', -1, 'GHOST RECORD-nullkey-required', -2, 'GHOST RECORD-nullkey-optional')  AS BKCC
+FROM
+TABLE(strtok_split_to_table('0|-1|-2', '|')) AS GR
+{% endif %}

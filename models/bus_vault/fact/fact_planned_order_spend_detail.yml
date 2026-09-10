@@ -1,0 +1,11 @@
+version: 2
+models:
+  - name: fact_planned_order_spend_detail
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          config:
+            severity: warn
+          arguments:
+            combination_of_columns:
+              - PLANNED_ORDER_HK
+    columns: []

@@ -1,0 +1,469 @@
+---- SRC LAYER ----
+WITH
+SRC_SGLDISTML      as ( SELECT * FROM {{ ref('v_psa_stg_invoice_line_gl_dist__ml_ebs') }} as SRC 
+                         {% if is_incremental() %}
+                         WHERE SRC.LOAD_DTS > (SELECT DATEADD('HOUR', '-1', MAX(LOAD_DTS)) FROM {{this}})
+                         {% endif %}  )
+
+/*
+SRC_SGLDISTML      as ( SELECT * FROM STAGING.v_psa_stg_invoice_line_gl_dist__ml_ebs )
+*/
+---- LOGIC LAYER ----
+
+, LOGIC_SGLDISTML as (
+    SELECT
+        INVOICE_LINE_HK
+      , CUST_TRX_LINE_GL_DIST_ID
+      , CUSTOMER_TRX_LINE_ID
+      , ORG_ID
+      , GLOBAL_ATTRIBUTE10
+      , LAST_UPDATE_DATE
+      , PROGRAM_ID
+      , GLOBAL_ATTRIBUTE5
+      , USER_GENERATED_FLAG
+      , GLOBAL_ATTRIBUTE4
+      , GLOBAL_ATTRIBUTE7
+      , GLOBAL_ATTRIBUTE6
+      , GLOBAL_ATTRIBUTE1
+      , AMOUNT
+      , GLOBAL_ATTRIBUTE3
+      , GLOBAL_ATTRIBUTE2
+      , POSTING_CONTROL_ID
+      , RA_POST_LOOP_NUMBER
+      , GLOBAL_ATTRIBUTE9
+      , GLOBAL_ATTRIBUTE8
+      , CREATED_BY
+      , ATTRIBUTE3
+      , LAST_UPDATED_BY
+      , ATTRIBUTE2
+      , ATTRIBUTE1
+      , MRC_ACCTD_AMOUNT
+      , CREATION_DATE
+      , ATTRIBUTE9
+      , MRC_GL_POSTED_DATE
+      , ATTRIBUTE8
+      , ATTRIBUTE7
+      , POST_REQUEST_ID
+      , USSGL_TRANSACTION_CODE
+      , ATTRIBUTE6
+      , GL_DATE
+      , PROGRAM_UPDATE_DATE
+      , REC_OFFSET_FLAG
+      , ATTRIBUTE5
+      , GL_POSTED_DATE
+      , ATTRIBUTE4
+      , ACCOUNT_CLASS
+      , ATTRIBUTE_CATEGORY
+      , PROGRAM_APPLICATION_ID
+      , EVENT_ID
+      , ATTRIBUTE10
+      , ATTRIBUTE14
+      , ATTRIBUTE13
+      , LATEST_REC_FLAG
+      , ATTRIBUTE12
+      , MRC_ACCOUNT_CLASS
+      , ATTRIBUTE11
+      , SET_OF_BOOKS_ID
+      , COMMENTS
+      , COLLECTED_TAX_CCID
+      , REQUEST_ID
+      , GLOBAL_ATTRIBUTE30
+      , GLOBAL_ATTRIBUTE28
+      , GLOBAL_ATTRIBUTE29
+      , CCID_CHANGE_FLAG
+      , GLOBAL_ATTRIBUTE26
+      , GLOBAL_ATTRIBUTE27
+      , COLLECTED_TAX_CONCAT_SEG
+      , GLOBAL_ATTRIBUTE24
+      , GLOBAL_ATTRIBUTE25
+      , GLOBAL_ATTRIBUTE22
+      , MRC_AMOUNT
+      , CODE_COMBINATION_ID
+      , GLOBAL_ATTRIBUTE23
+      , ROUNDING_CORRECTION_FLAG
+      , ACCOUNT_SET_FLAG
+      , CONCATENATED_SEGMENTS
+      , CUSTOMER_TRX_ID
+      , GLOBAL_ATTRIBUTE20
+      , ACCTD_AMOUNT
+      , GLOBAL_ATTRIBUTE21
+      , REV_ADJ_CLASS_TEMP
+      , LAST_UPDATE_LOGIN
+      , REVENUE_ADJUSTMENT_ID
+      , CUST_TRX_LINE_SALESREP_ID
+      , GLOBAL_ATTRIBUTE_CATEGORY
+      , GLOBAL_ATTRIBUTE17
+      , GLOBAL_ATTRIBUTE18
+      , GLOBAL_ATTRIBUTE15
+      , GLOBAL_ATTRIBUTE16
+      , MRC_POSTING_CONTROL_ID
+      , GLOBAL_ATTRIBUTE13
+      , GLOBAL_ATTRIBUTE14
+      , MRC_CUSTOMER_TRX_ID
+      , PERCENT
+      , GLOBAL_ATTRIBUTE11
+      , GLOBAL_ATTRIBUTE12
+      , ORIGINAL_GL_DATE
+      , ATTRIBUTE15
+      , COGS_REQUEST_ID
+      , GLOBAL_ATTRIBUTE19
+      , _FIVETRAN_DELETED
+      , _FIVETRAN_ID
+      , _FIVETRAN_SYNCED
+      , PSA_LOAD_DTS
+      , PSA_RECORD_SOURCE
+      , PSA_DELETE_IND
+      , LOAD_DTS
+      , REC_SRC
+      , HASHDIFF
+    FROM SRC_SGLDISTML
+)
+---- RENAME LAYER ----
+
+, RENAME_SGLDISTML as (
+    SELECT
+        INVOICE_LINE_HK
+      , CUST_TRX_LINE_GL_DIST_ID
+      , CUSTOMER_TRX_LINE_ID
+      , ORG_ID
+      , GLOBAL_ATTRIBUTE10
+      , LAST_UPDATE_DATE
+      , PROGRAM_ID
+      , GLOBAL_ATTRIBUTE5
+      , USER_GENERATED_FLAG
+      , GLOBAL_ATTRIBUTE4
+      , GLOBAL_ATTRIBUTE7
+      , GLOBAL_ATTRIBUTE6
+      , GLOBAL_ATTRIBUTE1
+      , AMOUNT
+      , GLOBAL_ATTRIBUTE3
+      , GLOBAL_ATTRIBUTE2
+      , POSTING_CONTROL_ID
+      , RA_POST_LOOP_NUMBER
+      , GLOBAL_ATTRIBUTE9
+      , GLOBAL_ATTRIBUTE8
+      , CREATED_BY
+      , ATTRIBUTE3
+      , LAST_UPDATED_BY
+      , ATTRIBUTE2
+      , ATTRIBUTE1
+      , MRC_ACCTD_AMOUNT
+      , CREATION_DATE
+      , ATTRIBUTE9
+      , MRC_GL_POSTED_DATE
+      , ATTRIBUTE8
+      , ATTRIBUTE7
+      , POST_REQUEST_ID
+      , USSGL_TRANSACTION_CODE
+      , ATTRIBUTE6
+      , GL_DATE
+      , PROGRAM_UPDATE_DATE
+      , REC_OFFSET_FLAG
+      , ATTRIBUTE5
+      , GL_POSTED_DATE
+      , ATTRIBUTE4
+      , ACCOUNT_CLASS
+      , ATTRIBUTE_CATEGORY
+      , PROGRAM_APPLICATION_ID
+      , EVENT_ID
+      , ATTRIBUTE10
+      , ATTRIBUTE14
+      , ATTRIBUTE13
+      , LATEST_REC_FLAG
+      , ATTRIBUTE12
+      , MRC_ACCOUNT_CLASS
+      , ATTRIBUTE11
+      , SET_OF_BOOKS_ID
+      , COMMENTS
+      , COLLECTED_TAX_CCID
+      , REQUEST_ID
+      , GLOBAL_ATTRIBUTE30
+      , GLOBAL_ATTRIBUTE28
+      , GLOBAL_ATTRIBUTE29
+      , CCID_CHANGE_FLAG
+      , GLOBAL_ATTRIBUTE26
+      , GLOBAL_ATTRIBUTE27
+      , COLLECTED_TAX_CONCAT_SEG
+      , GLOBAL_ATTRIBUTE24
+      , GLOBAL_ATTRIBUTE25
+      , GLOBAL_ATTRIBUTE22
+      , MRC_AMOUNT
+      , CODE_COMBINATION_ID
+      , GLOBAL_ATTRIBUTE23
+      , ROUNDING_CORRECTION_FLAG
+      , ACCOUNT_SET_FLAG
+      , CONCATENATED_SEGMENTS
+      , CUSTOMER_TRX_ID
+      , GLOBAL_ATTRIBUTE20
+      , ACCTD_AMOUNT
+      , GLOBAL_ATTRIBUTE21
+      , REV_ADJ_CLASS_TEMP
+      , LAST_UPDATE_LOGIN
+      , REVENUE_ADJUSTMENT_ID
+      , CUST_TRX_LINE_SALESREP_ID
+      , GLOBAL_ATTRIBUTE_CATEGORY
+      , GLOBAL_ATTRIBUTE17
+      , GLOBAL_ATTRIBUTE18
+      , GLOBAL_ATTRIBUTE15
+      , GLOBAL_ATTRIBUTE16
+      , MRC_POSTING_CONTROL_ID
+      , GLOBAL_ATTRIBUTE13
+      , GLOBAL_ATTRIBUTE14
+      , MRC_CUSTOMER_TRX_ID
+      , PERCENT
+      , GLOBAL_ATTRIBUTE11
+      , GLOBAL_ATTRIBUTE12
+      , ORIGINAL_GL_DATE
+      , ATTRIBUTE15
+      , COGS_REQUEST_ID
+      , GLOBAL_ATTRIBUTE19
+      , _FIVETRAN_DELETED
+      , _FIVETRAN_ID
+      , _FIVETRAN_SYNCED
+      , PSA_LOAD_DTS
+      , PSA_RECORD_SOURCE
+      , PSA_DELETE_IND
+      , LOAD_DTS
+      , REC_SRC
+      , HASHDIFF
+    FROM LOGIC_SGLDISTML
+)
+---- FILTER LAYER ----
+
+, FILTER_SGLDISTML as (
+    SELECT *
+    FROM RENAME_SGLDISTML
+)
+
+---- JOIN LAYER ----
+, JOIN_RESULT as (
+    SELECT *
+    FROM FILTER_SGLDISTML
+)
+
+---- FINAL LAYER ----
+SELECT
+          INVOICE_LINE_HK
+        , CUST_TRX_LINE_GL_DIST_ID
+        , CUSTOMER_TRX_LINE_ID
+        , ORG_ID
+        , GLOBAL_ATTRIBUTE10
+        , LAST_UPDATE_DATE
+        , PROGRAM_ID
+        , GLOBAL_ATTRIBUTE5
+        , USER_GENERATED_FLAG
+        , GLOBAL_ATTRIBUTE4
+        , GLOBAL_ATTRIBUTE7
+        , GLOBAL_ATTRIBUTE6
+        , GLOBAL_ATTRIBUTE1
+        , AMOUNT
+        , GLOBAL_ATTRIBUTE3
+        , GLOBAL_ATTRIBUTE2
+        , POSTING_CONTROL_ID
+        , RA_POST_LOOP_NUMBER
+        , GLOBAL_ATTRIBUTE9
+        , GLOBAL_ATTRIBUTE8
+        , CREATED_BY
+        , ATTRIBUTE3
+        , LAST_UPDATED_BY
+        , ATTRIBUTE2
+        , ATTRIBUTE1
+        , MRC_ACCTD_AMOUNT
+        , CREATION_DATE
+        , ATTRIBUTE9
+        , MRC_GL_POSTED_DATE
+        , ATTRIBUTE8
+        , ATTRIBUTE7
+        , POST_REQUEST_ID
+        , USSGL_TRANSACTION_CODE
+        , ATTRIBUTE6
+        , GL_DATE
+        , PROGRAM_UPDATE_DATE
+        , REC_OFFSET_FLAG
+        , ATTRIBUTE5
+        , GL_POSTED_DATE
+        , ATTRIBUTE4
+        , ACCOUNT_CLASS
+        , ATTRIBUTE_CATEGORY
+        , PROGRAM_APPLICATION_ID
+        , EVENT_ID
+        , ATTRIBUTE10
+        , ATTRIBUTE14
+        , ATTRIBUTE13
+        , LATEST_REC_FLAG
+        , ATTRIBUTE12
+        , MRC_ACCOUNT_CLASS
+        , ATTRIBUTE11
+        , SET_OF_BOOKS_ID
+        , COMMENTS
+        , COLLECTED_TAX_CCID
+        , REQUEST_ID
+        , GLOBAL_ATTRIBUTE30
+        , GLOBAL_ATTRIBUTE28
+        , GLOBAL_ATTRIBUTE29
+        , CCID_CHANGE_FLAG
+        , GLOBAL_ATTRIBUTE26
+        , GLOBAL_ATTRIBUTE27
+        , COLLECTED_TAX_CONCAT_SEG
+        , GLOBAL_ATTRIBUTE24
+        , GLOBAL_ATTRIBUTE25
+        , GLOBAL_ATTRIBUTE22
+        , MRC_AMOUNT
+        , CODE_COMBINATION_ID
+        , GLOBAL_ATTRIBUTE23
+        , ROUNDING_CORRECTION_FLAG
+        , ACCOUNT_SET_FLAG
+        , CONCATENATED_SEGMENTS
+        , CUSTOMER_TRX_ID
+        , GLOBAL_ATTRIBUTE20
+        , ACCTD_AMOUNT
+        , GLOBAL_ATTRIBUTE21
+        , REV_ADJ_CLASS_TEMP
+        , LAST_UPDATE_LOGIN
+        , REVENUE_ADJUSTMENT_ID
+        , CUST_TRX_LINE_SALESREP_ID
+        , GLOBAL_ATTRIBUTE_CATEGORY
+        , GLOBAL_ATTRIBUTE17
+        , GLOBAL_ATTRIBUTE18
+        , GLOBAL_ATTRIBUTE15
+        , GLOBAL_ATTRIBUTE16
+        , MRC_POSTING_CONTROL_ID
+        , GLOBAL_ATTRIBUTE13
+        , GLOBAL_ATTRIBUTE14
+        , MRC_CUSTOMER_TRX_ID
+        , PERCENT
+        , GLOBAL_ATTRIBUTE11
+        , GLOBAL_ATTRIBUTE12
+        , ORIGINAL_GL_DATE
+        , ATTRIBUTE15
+        , COGS_REQUEST_ID
+        , GLOBAL_ATTRIBUTE19
+        , _FIVETRAN_DELETED
+        , _FIVETRAN_ID
+        , _FIVETRAN_SYNCED
+        , PSA_LOAD_DTS
+        , PSA_RECORD_SOURCE
+        , PSA_DELETE_IND
+        , LOAD_DTS
+        , REC_SRC
+        , HASHDIFF
+FROM JOIN_RESULT
+{% if is_incremental() %}
+WHERE NOT EXISTS (
+    SELECT 1 
+    FROM {{ this }} existing
+    WHERE existing.INVOICE_LINE_HK = JOIN_RESULT.INVOICE_LINE_HK 
+AND existing.CUST_TRX_LINE_GL_DIST_ID = JOIN_RESULT.CUST_TRX_LINE_GL_DIST_ID
+    AND existing.HASHDIFF = JOIN_RESULT.HASHDIFF
+)
+{% endif %} 
+{% if not is_incremental() %}
+/*the following qualify is to restrict multiple loads of touched records during the initial build. Ex: multiple row per hk, hashdiff */
+qualify 1= row_number()over(partition by INVOICE_LINE_HK ,CUST_TRX_LINE_GL_DIST_ID, HASHDIFF order by PSA_LOAD_DTS)
+union all
+    SELECT              MD5_BINARY(GR.VALUE) AS INVOICE_LINE_HK
+    ,    GR.VALUE::NUMBER as  CUST_TRX_LINE_GL_DIST_ID
+    ,    GR.VALUE::NUMBER as  CUSTOMER_TRX_LINE_ID
+    , null as ORG_ID
+    , null as GLOBAL_ATTRIBUTE10
+    , null as LAST_UPDATE_DATE
+    , null as PROGRAM_ID
+    , null as GLOBAL_ATTRIBUTE5
+    , null as USER_GENERATED_FLAG
+    , null as GLOBAL_ATTRIBUTE4
+    , null as GLOBAL_ATTRIBUTE7
+    , null as GLOBAL_ATTRIBUTE6
+    , null as GLOBAL_ATTRIBUTE1
+    , null as AMOUNT
+    , null as GLOBAL_ATTRIBUTE3
+    , null as GLOBAL_ATTRIBUTE2
+    , null as POSTING_CONTROL_ID
+    , null as RA_POST_LOOP_NUMBER
+    , null as GLOBAL_ATTRIBUTE9
+    , null as GLOBAL_ATTRIBUTE8
+    , null as CREATED_BY
+    , null as ATTRIBUTE3
+    , null as LAST_UPDATED_BY
+    , null as ATTRIBUTE2
+    , null as ATTRIBUTE1
+    , null as MRC_ACCTD_AMOUNT
+    , null as CREATION_DATE
+    , null as ATTRIBUTE9
+    , null as MRC_GL_POSTED_DATE
+    , null as ATTRIBUTE8
+    , null as ATTRIBUTE7
+    , null as POST_REQUEST_ID
+    , null as USSGL_TRANSACTION_CODE
+    , null as ATTRIBUTE6
+    , null as GL_DATE
+    , null as PROGRAM_UPDATE_DATE
+    , null as REC_OFFSET_FLAG
+    , null as ATTRIBUTE5
+    , null as GL_POSTED_DATE
+    , null as ATTRIBUTE4
+    , null as ACCOUNT_CLASS
+    , null as ATTRIBUTE_CATEGORY
+    , null as PROGRAM_APPLICATION_ID
+    , null as EVENT_ID
+    , null as ATTRIBUTE10
+    , null as ATTRIBUTE14
+    , null as ATTRIBUTE13
+    , null as LATEST_REC_FLAG
+    , null as ATTRIBUTE12
+    , null as MRC_ACCOUNT_CLASS
+    , null as ATTRIBUTE11
+    , null as SET_OF_BOOKS_ID
+    , null as COMMENTS
+    , null as COLLECTED_TAX_CCID
+    , null as REQUEST_ID
+    , null as GLOBAL_ATTRIBUTE30
+    , null as GLOBAL_ATTRIBUTE28
+    , null as GLOBAL_ATTRIBUTE29
+    , null as CCID_CHANGE_FLAG
+    , null as GLOBAL_ATTRIBUTE26
+    , null as GLOBAL_ATTRIBUTE27
+    , null as COLLECTED_TAX_CONCAT_SEG
+    , null as GLOBAL_ATTRIBUTE24
+    , null as GLOBAL_ATTRIBUTE25
+    , null as GLOBAL_ATTRIBUTE22
+    , null as MRC_AMOUNT
+    , null as CODE_COMBINATION_ID
+    , null as GLOBAL_ATTRIBUTE23
+    , null as ROUNDING_CORRECTION_FLAG
+    , null as ACCOUNT_SET_FLAG
+    , null as CONCATENATED_SEGMENTS
+    , null as CUSTOMER_TRX_ID
+    , null as GLOBAL_ATTRIBUTE20
+    , null as ACCTD_AMOUNT
+    , null as GLOBAL_ATTRIBUTE21
+    , null as REV_ADJ_CLASS_TEMP
+    , null as LAST_UPDATE_LOGIN
+    , null as REVENUE_ADJUSTMENT_ID
+    , null as CUST_TRX_LINE_SALESREP_ID
+    , null as GLOBAL_ATTRIBUTE_CATEGORY
+    , null as GLOBAL_ATTRIBUTE17
+    , null as GLOBAL_ATTRIBUTE18
+    , null as GLOBAL_ATTRIBUTE15
+    , null as GLOBAL_ATTRIBUTE16
+    , null as MRC_POSTING_CONTROL_ID
+    , null as GLOBAL_ATTRIBUTE13
+    , null as GLOBAL_ATTRIBUTE14
+    , null as MRC_CUSTOMER_TRX_ID
+    , null as PERCENT
+    , null as GLOBAL_ATTRIBUTE11
+    , null as GLOBAL_ATTRIBUTE12
+    , null as ORIGINAL_GL_DATE
+    , null as ATTRIBUTE15
+    , null as COGS_REQUEST_ID
+    , null as GLOBAL_ATTRIBUTE19
+    , null as _FIVETRAN_DELETED
+    , null as _FIVETRAN_ID
+    , null as _FIVETRAN_SYNCED
+    , null as PSA_LOAD_DTS
+    , null as PSA_RECORD_SOURCE
+    , null as PSA_DELETE_IND
+    ,  CONVERT_TIMEZONE('UTC','1900-01-01'::TIMESTAMP)::TIMESTAMP  as  LOAD_DTS
+,'USAZET.SNOWFLAKE.FBIN.DERIVED' AS REC_SRC
+, ''::BINARY as HASH_DIFF  FROM
+        TABLE(strtok_split_to_table('0|-1|-2', '|')) AS GR
+{% endif %}

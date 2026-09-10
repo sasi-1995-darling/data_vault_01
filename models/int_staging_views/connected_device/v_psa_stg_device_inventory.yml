@@ -1,0 +1,27 @@
+version: 2
+models:
+- name: v_psa_stg_device_inventory
+  data_tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - ID
+        - LOAD_DTS
+      config:
+        severity: warn
+  columns:
+  - name: DEVICE_HK
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+  - name: DEVICE_BK
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+  - name: LOAD_DTS
+    data_tests:
+    - not_null:
+        config:
+          severity: warn

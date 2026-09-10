@@ -1,0 +1,14 @@
+version: 2
+models:
+  - name: sat_order_header__tt_e21
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - ORDER_HEADER_HK
+              - LOAD_DTS
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          config:
+            severity: warn
+          arguments:
+            min_value: 4

@@ -1,0 +1,21 @@
+version: 2
+models:
+  - name: lsat_production_order_line_detail__winn_sap
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - PRODUCTION_ORDER_LINE_LHK
+              - LOAD_DTS
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          config:
+            severity: warn
+          arguments:
+            min_value: 4
+    columns:
+      - name: PRODUCTION_ORDER_LINE_LHK
+        tests:
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'lnk_production_order_line_detail' )
+                pk_column_name: PRODUCTION_ORDER_LINE_LHK

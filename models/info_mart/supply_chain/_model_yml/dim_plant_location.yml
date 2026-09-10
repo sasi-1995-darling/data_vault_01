@@ -1,0 +1,13 @@
+version: 2
+
+models:
+  - name: dim_plant_location
+    description: Supply chain dimension for plant locations
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - dim_plant_location_pk
+    config:
+      tags:
+        - emtek

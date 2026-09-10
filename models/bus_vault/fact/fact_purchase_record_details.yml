@@ -1,0 +1,12 @@
+version: 2
+models:
+  - name: fact_purchase_record_details
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - PURCHASING_RECORD_DETAILS_HK
+              - PURCHASING_REC_DETAIL_HK
+              - PURCHASING_ORG_HK
+              - PLANT_HK
+    columns: []

@@ -1,0 +1,5 @@
+version: 2
+models:
+- name: ref_cost_center_texts
+  data_tests: []
+  columns: []

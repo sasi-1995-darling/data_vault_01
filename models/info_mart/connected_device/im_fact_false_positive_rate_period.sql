@@ -1,0 +1,72 @@
+{{ config(alias='fact_false_positive_rate_period') }}
+---- SRC LAYER ----
+WITH
+SRC_FPR            as ( SELECT BKCC, FALSE_ALARM_COUNT, FALSE_POSITIVE_RATE, MONTH_NUM, NUM_FLOW_EVENTS, PERIOD_START_DATE_KEY, PERIOD_TYPE, QUALIFIED_DEVICE_COUNT, QUARTER_NUM, REC_SRC, TOTAL_ALERT_COUNT, YEAR_NUM FROM {{ ref('fact_false_positive_rate_period') }} as SRC  )
+
+/*
+SRC_FPR            as ( SELECT * FROM BUS_VAULT.FACT_FALSE_POSITIVE_RATE_PERIOD )
+*/
+---- LOGIC LAYER ----
+
+, LOGIC_FPR as (
+    SELECT
+        PERIOD_TYPE
+      , PERIOD_START_DATE_KEY
+      , YEAR_NUM
+      , QUARTER_NUM
+      , MONTH_NUM
+      , QUALIFIED_DEVICE_COUNT
+      , FALSE_ALARM_COUNT
+      , TOTAL_ALERT_COUNT
+      , NUM_FLOW_EVENTS
+      , FALSE_POSITIVE_RATE
+      , BKCC
+      , REC_SRC
+    FROM SRC_FPR
+)
+---- RENAME LAYER ----
+
+, RENAME_FPR as (
+    SELECT
+        PERIOD_TYPE
+      , PERIOD_START_DATE_KEY
+      , YEAR_NUM
+      , QUARTER_NUM
+      , MONTH_NUM
+      , QUALIFIED_DEVICE_COUNT
+      , FALSE_ALARM_COUNT
+      , TOTAL_ALERT_COUNT
+      , NUM_FLOW_EVENTS
+      , FALSE_POSITIVE_RATE
+      , BKCC
+      , REC_SRC
+    FROM LOGIC_FPR
+)
+---- FILTER LAYER ----
+
+, FILTER_FPR as (
+    SELECT *
+    FROM RENAME_FPR
+)
+
+---- JOIN LAYER ----
+, JOIN_RESULT as (
+    SELECT *
+    FROM FILTER_FPR
+)
+
+---- FINAL LAYER ----
+SELECT
+          PERIOD_TYPE
+        , PERIOD_START_DATE_KEY
+        , YEAR_NUM
+        , QUARTER_NUM
+        , MONTH_NUM
+        , QUALIFIED_DEVICE_COUNT
+        , FALSE_ALARM_COUNT
+        , TOTAL_ALERT_COUNT
+        , NUM_FLOW_EVENTS
+        , FALSE_POSITIVE_RATE
+        , BKCC
+        , REC_SRC
+FROM JOIN_RESULT

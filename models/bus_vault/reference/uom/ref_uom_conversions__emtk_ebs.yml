@@ -1,0 +1,11 @@
+version: 2
+models:
+- name: ref_uom_conversions__emtk_ebs
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - INVENTORY_ITEM_ID
+        - UOM_CODE
+        - LOAD_DTS
+  columns: []

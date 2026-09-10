@@ -1,0 +1,37 @@
+version: 2
+models:
+  - name: v_psa_stg_invoice_line_gl_dist__ml_ebs
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          config:
+            severity: warn
+          arguments:
+            combination_of_columns:
+              - CUST_TRX_LINE_GL_DIST_ID
+              - LOAD_DTS
+    columns:
+      - name: INVOICE_LINE_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: INVOICE_LINE_BK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: LOAD_DTS
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: REC_SRC
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: HASHDIFF
+        tests:
+          - not_null:
+              config:
+                severity: warn

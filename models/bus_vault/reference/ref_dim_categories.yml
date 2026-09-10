@@ -1,0 +1,11 @@
+version: 2
+models:
+  - name: ref_dim_categories
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - CUSTOMER_PRODUCT_ID
+              - PRODUCT_ID
+              - RETAILER_ID
+    columns: []

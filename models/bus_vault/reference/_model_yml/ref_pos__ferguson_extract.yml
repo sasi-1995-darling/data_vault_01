@@ -1,0 +1,10 @@
+version: 2
+
+models:
+  - name: ref_pos_product_code_sap_xref__ferguson_extract
+    description: This is the reference model for ferguson product code sap material cross reference
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - xref_id

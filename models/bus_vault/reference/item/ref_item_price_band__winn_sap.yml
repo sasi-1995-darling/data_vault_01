@@ -1,0 +1,11 @@
+version: 2
+models:
+- name: ref_item_price_band__winn_sap
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - PRICE_BAND_ID
+        - LANGUAGE_KEY
+        - LOAD_DTS
+  columns: []

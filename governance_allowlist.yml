@@ -1,0 +1,94 @@
+# governance_allowlist.yml — Governed databases & schemas for I2 / I4 / I5 checks
+#
+# Drives three deterministic checks in scripts/automation/src/code_reviewer.py:
+#
+#   I2 (check_staging_source_discipline) — STAGING layer only:
+#       - source() must resolve to staging_source_db_default (default PSA_PROD).
+#         Exception: sources registered in `legacy_sources_yaml` may resolve
+#         to any DB in `staging_source_db_legacy`.
+#       - ref() forbidden except `ref('ref_business_key_collision')` (BKCC).
+#
+#   I4 (check_non_staging_uses_ref_only) — raw_vault/ bus_vault/ info_mart/:
+#       - Any source() FAILs. Downstream layers must use ref().
+#
+#   I5 (check_source_ref_in_governed_allowlist) — repo-wide governance:
+#       - Every source() must resolve to a database in `allowed_databases`
+#         (or to a DB.SCHEMA in `allowed_schemas`).
+#       - Two-arg cross-project ref('project','model') must reference a project
+#         in `allowed_projects`. (Currently no cross-project refs in this repo.)
+#
+# ─── ENV-SWAP NORMALIZATION ───
+# Source databases may be Jinja-templated (e.g. "psa_{{env_var('DBT_SOURCE_ENV')}}")
+# or carry env suffixes (e.g. EDP_BRONZE_DEV). The checks normalize both forms
+# to their PROD logical role before comparing:
+#   - Jinja env_var(...) → rendered as 'prod'
+#   - Suffixes _DEV, _DEVELOPMENT, _QA, _TEST, _STAGING, _STAGE → mapped to _PROD
+#
+# So you list ONLY the PROD form here. EDP_BRONZE_DEV will pass against
+# EDP_BRONZE_PROD automatically.
+
+# ─── I5: repo-wide governed-allowlist check ───
+# Database-level allowlist: any schema in these databases passes I5.
+allowed_databases:
+  - PSA_PROD # All Persistent Staging Area sources
+  - EDP_BRONZE_PROD # Enterprise data platform — bronze (raw governed)
+  - EDP_SILVER_PROD # Enterprise data platform — silver (conformed)
+  - EDP_GOLD_PROD # Enterprise data platform — gold (curated)
+  - DATAVAULT_PROD # This project's own database (raw/bus vault + info mart)
+  - FLO_FBWINN_SHARE # Inbound governed share (FLO → FBWINN)
+  - YIPIT_DATASHARE # Inbound third-party governed datashare
+
+# Schema-level allowlist: only the listed database.schema combinations pass.
+# Use this when a database mixes governed and ungoverned schemas. Leave empty
+# if database-level is sufficient.
+allowed_schemas: []
+  # Example:
+  # - SOME_DB.GOVERNED_SCHEMA
+
+# Cross-project ref() allowlist. Currently empty — this repo uses no two-arg
+# {{ ref('project','model') }} cross-project refs (verified 2026-06-22).
+# Add upstream project names here if cross-project refs are introduced.
+allowed_projects: []
+
+# ─── I2: staging-layer source discipline ───
+# Default permitted database for NEW sources registered in any
+# models/**/*sources*.yml OTHER than `legacy_sources_yaml`. All FBIN-modeled
+# raw data should land in PSA first — staging sources from anywhere else
+# require explicit legacy designation.
+staging_source_db_default: PSA_PROD
+
+# Permitted databases when a staging source is registered in `legacy_sources_yaml`.
+# Legacy models predate the PSA-only convention and may source directly from
+# EDP_BRONZE_PROD; new models must use PSA_PROD only.
+staging_source_db_legacy:
+  - PSA_PROD
+  - EDP_BRONZE_PROD
+
+# Basename of the sources YAML that grandfathers EDP_BRONZE_PROD usage.
+# Sources declared here can opt into `staging_source_db_legacy`; sources in
+# any other YAML are restricted to `staging_source_db_default`.
+legacy_sources_yaml: _sources_base_legacy.yml
+
+# ─── I2: ref() exemptions in staging ───
+# By default I2 forbids ref() in staging. The exception list below names
+# specific shared-reference v_psa_stg models that staging may ref() —
+# alongside the always-allowed `ref_business_key_collision` (BKCC), which
+# is exempted in CODE (not here) as the canonical example.
+#
+# DESIGN: named exemptions, NOT wildcards. A wildcard like `v_psa_stg_ref_*`
+# would be gameable by naming drift (same issue as G4's link_/lnk_ history).
+# Each model on this list is explicit and auditable — adding a third member
+# requires a conscious decision.
+#
+# EXPECTED-TEMPORARY (2026-06-22): The two cutoff-date models below are
+# transitional artifacts of the Talend → dbt migration. They hold the
+# single date that gates the old-pipeline vs new-pipeline cutover and are
+# joined to every staging model in the migration scope. Once the Talend
+# migration closes out (Talend deprecated, cutoff no longer meaningful),
+# these models and the staging refs to them should be removed entirely —
+# at which point this list shrinks back to empty. Same burn-down spirit
+# as .code_review_grandfather: the exemption is expected to end.
+staging_ref_exemptions:
+  - v_psa_stg_ref_avc_talend_migration_cutoff_date # 12 POS staging consumers (Amazon)
+  - v_psa_stg_ref_appbot_talend_migration_cutoff_date #  6 consumer_feedback consumers (Appbot)
+

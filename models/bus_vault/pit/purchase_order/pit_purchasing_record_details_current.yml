@@ -1,0 +1,9 @@
+version: 2
+models:
+  - name: pit_purchasing_record_details_current
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - PURCHASING_RECORD_DETAILS_HK
+    columns: []

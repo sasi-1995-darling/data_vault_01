@@ -1,0 +1,16 @@
+version: 2
+
+models:
+  - name: rpt_asn_receiving__emtk_ebs
+    description: Reporting table that mimics Emtek's Oracle Discoverer ASN Receiving report. Used by Tableau.
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - shipment_line_id
+              - src_po_line_id
+    config:
+      materialized: table
+      tags:
+        - emtek
+        - ebs

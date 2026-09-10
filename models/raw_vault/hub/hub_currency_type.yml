@@ -1,0 +1,43 @@
+version: 2
+models:
+- name: hub_currency_type
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - CURRENCY_TYPE_HK
+  - dbt_expectations.expect_table_row_count_to_be_between:
+      arguments:
+        min_value: 4
+      config:
+        severity: warn
+  columns:
+      - name: CURRENCY_TYPE_HK
+        tests:
+          - unique:
+              config:
+                severity: warn
+          - not_null:
+              config:
+                severity: warn
+      - name: CURRENCY_TYPE_BK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: BKCC
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: LOAD_DTS
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: REC_SRC
+        tests:
+          - not_null:
+              config:
+                severity: warn
+

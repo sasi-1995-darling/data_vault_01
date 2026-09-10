@@ -1,0 +1,21 @@
+version: 2
+models:
+  - name: v_psa_stg_price_availability__thermatru_profitero_share
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          config:
+            severity: warn
+          arguments:
+            combination_of_columns:
+              - DATE
+              - RETAILER_BK
+              - PRODUCT_BK
+              - RETAILER_LOCATION_BK
+              - LOAD_DTS
+    columns:
+      - name: DATE
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
+

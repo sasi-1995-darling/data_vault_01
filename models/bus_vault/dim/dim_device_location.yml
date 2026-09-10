@@ -1,0 +1,9 @@
+version: 2
+models:
+- name: dim_device_location
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - DEVICE_LOCATION_BK
+  columns: []

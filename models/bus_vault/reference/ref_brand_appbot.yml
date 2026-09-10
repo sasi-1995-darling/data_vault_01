@@ -1,0 +1,9 @@
+version: 2
+models:
+  - name: ref_brand_appbot
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - APPBOT_PRODUCT
+    columns: []

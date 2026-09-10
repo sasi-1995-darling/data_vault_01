@@ -1,0 +1,10 @@
+version: 2
+models:
+  - name: ref_pos_item_summary__amazon_vc_xref
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - ASIN
+              - MARKETPLACE_ID
+    columns: []

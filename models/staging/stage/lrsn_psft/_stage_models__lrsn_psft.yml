@@ -1,0 +1,147 @@
+version: 2
+
+models:
+  - name: stg_master_item__lrsn_psft
+    description: This is the staging model from Larson for sat_master_item
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - inv_item_id
+              - setid
+    columns:
+      - name: descr
+        tests:
+          - not_null
+  - name: stg_inv_items__lrsn_psft
+    description: This is the staging model from Larson for inv_items multi active satellite
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - inv_item_id
+              - effdt
+    columns:
+      - name: setid
+        tests:
+          - not_null
+  - name: stg_prod_item__lrsn_psft
+    description: This is the staging model from Larson for sat_prod_item
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - product_id
+    columns:
+      - name: setid
+        tests:
+          - not_null
+  - name: stg_prod_grp__lrsn_psft
+    description: This is the staging model from Larson for sat_prod_grp
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - product_id
+    columns:
+      - name: setid
+        tests:
+          - not_null
+  - name: stg_sp_prod__lrsn_psft
+    description: This is the staging model from Larson for sat_sp_prod
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - product_id
+    columns:
+      - name: setid
+        tests:
+          - not_null
+# - name: stg_item_cat__lrsn_psft
+#   description: This is the staging model from Larson for ref_item_cat
+#   tests:
+#     - dbt_utils.unique_combination_of_columns:
+#         combination_of_columns:
+#           - category_id
+#           - setid
+#           - effdt
+#         quote_columns: false
+#   columns:
+#     - name: category_cd
+#       tests:
+#         - not_null
+# - name: stg_prod_grp_lu__lrsn_psft
+#   description: This is the staging model from Larson for ref_prod_grp_lu
+#   tests:
+#     - dbt_utils.unique_combination_of_columns:
+#         combination_of_columns:
+#           - setid
+#           - l_grp_type
+#           - l_grp_code
+#         quote_columns: false
+#   columns:
+#     - name: descr
+#       tests:
+#         - not_null
+# - name: stg_xlatitem__lrsn_psft
+#   description: This is the staging model from Larson for ref_xlatitem
+#   tests:
+#     - dbt_utils.unique_combination_of_columns:
+#         combination_of_columns:
+#           - fieldname
+#           - fieldvalue
+#           - effdt
+#         quote_columns: false
+#   columns:
+#     - name: eff_status
+#       tests:
+#         - not_null
+  - name: stg_bi_hdr__lrsn_psft
+    description: This is the staging model from Larson for sat_bi_hdr
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - invoice
+    columns:
+      - name: business_unit
+        tests:
+          - not_null
+  - name: stg_bi_line__lrsn_psft
+    description: This is the staging model from Larson for lsat_bi_line
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - invoice
+              - line_seq_num
+              - product_id
+    columns:
+      - name: business_unit
+        tests:
+          - not_null
+  - name: stg_rep_cust__lrsn_psft
+    description: This is the staging model from Larson for sat_rep_cust and sat_rep_cust_location
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - cust_id
+    columns:
+      - name: setid
+        tests:
+          - not_null
+  - name: stg_cust_cgrp__lrsn_psft
+    description: This is the staging model from Larson for customer group multi active satellite
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - cust_id
+              - cust_grp_type
+              - customer_group
+    columns:
+      - name: setid
+        tests:
+          - not_null

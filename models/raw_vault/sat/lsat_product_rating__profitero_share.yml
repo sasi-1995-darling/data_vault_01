@@ -1,0 +1,23 @@
+version: 2
+models:
+- name: lsat_product_rating__profitero_share
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - PRODUCT_RETAILER_HK
+        - DATE
+        - LOAD_DTS
+        - DIM_ACCOUNT_PRODUCT_KEY
+  - dbt_expectations.expect_table_row_count_to_be_between:
+      arguments:
+        min_value: 4
+      config:
+        severity: warn
+  columns:
+  - name: PRODUCT_RETAILER_HK
+    data_tests:
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'lnk_product_retailer' )
+          pk_column_name: PRODUCT_RETAILER_HK

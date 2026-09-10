@@ -1,0 +1,29 @@
+version: 2
+models:
+  - name: pit_gl_activity_type
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - GL_ACTIVITY_TYPE_HK
+    columns:
+      - name: CONTROLLING_AREA_BK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: ACTIVITY_TYPE_BK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: VALID_TO_DATE__YYYYMMDD
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: VALID_FROM_DATE__YYYYMMDD
+        tests:
+          - not_null:
+              config:
+                severity: warn

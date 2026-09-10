@@ -1,0 +1,9 @@
+version: 2
+models:
+- name: ref_insurance_partner_name
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - PARTNER_NUMBER
+  columns: []

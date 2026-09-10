@@ -1,0 +1,74 @@
+---- SRC LAYER ----
+WITH
+SRC_a              as ( SELECT BKCC, CONFIRMATION_COUNTER_BK, CONFIRMATION_NUMBER_BK, LOAD_DTS, ORDER_CONFIRMATION_HK, REC_SRC FROM {{ ref('v_psa_stg_order_confirmation__winn_sap') }} as SRC 
+                        QUALIFY (ROW_NUMBER() OVER(PARTITION BY ORDER_CONFIRMATION_HK ORDER BY LOAD_DTS ))=1 )
+
+/*
+SRC_a              as ( SELECT * FROM STAGING.V_PSA_STG_ORDER_CONFIRMATION__WINN_SAP )
+*/
+---- LOGIC LAYER ----
+
+, LOGIC_a as (
+    SELECT
+        ORDER_CONFIRMATION_HK
+      , CONFIRMATION_NUMBER_BK
+      , CONFIRMATION_COUNTER_BK
+      , BKCC
+      , LOAD_DTS
+      , REC_SRC
+    FROM SRC_a
+)
+---- RENAME LAYER ----
+
+, RENAME_a as (
+    SELECT
+        ORDER_CONFIRMATION_HK
+      , CONFIRMATION_NUMBER_BK
+      , CONFIRMATION_COUNTER_BK
+      , BKCC
+      , LOAD_DTS
+      , REC_SRC
+    FROM LOGIC_a
+)
+---- FILTER LAYER ----
+
+, FILTER_a as (
+    SELECT *
+    FROM RENAME_a
+)
+
+---- JOIN LAYER ----
+, JOIN_RESULT as (
+    SELECT *
+    FROM FILTER_a
+)
+
+---- FINAL LAYER ----
+SELECT
+          ORDER_CONFIRMATION_HK
+        , CONFIRMATION_NUMBER_BK
+        , CONFIRMATION_COUNTER_BK
+        , BKCC
+        , LOAD_DTS
+        , REC_SRC
+FROM JOIN_RESULT
+{% if is_incremental() %}
+WHERE NOT EXISTS (
+    SELECT 1 
+    FROM {{ this }} existing
+    WHERE existing.ORDER_CONFIRMATION_HK = JOIN_RESULT.ORDER_CONFIRMATION_HK
+)
+{% endif %}
+{% if not is_incremental() %}
+
+union all
+SELECT 
+MD5_BINARY(GR.VALUE) AS ORDER_CONFIRMATION_HK,
+GR.VALUE::text AS CONFIRMATION_NUMBER_BK,
+GR.VALUE::text AS CONFIRMATION_COUNTER_BK,
+DECODE(GR.VALUE, 0, 'GHOST RECORD-SYSTEM', -1, 'GHOST RECORD-nullkey-required', -2, 'GHOST RECORD-nullkey-optional') AS BKCC,
+CONVERT_TIMEZONE('UTC','1900-01-01'::TIMESTAMP) AS LOAD_DTS,
+'USAZET.SNOWFLAKE.FBIN.DERIVED' AS REC_SRC
+FROM
+TABLE(strtok_split_to_table('0|-1|-2', '|')) AS GR
+{% endif %}

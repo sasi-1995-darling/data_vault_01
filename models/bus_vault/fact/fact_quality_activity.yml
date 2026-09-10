@@ -1,0 +1,14 @@
+version: 2
+models:
+  - name: fact_quality_activity
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - NOTIFICATION_ACTIVITY_BK
+    columns:
+      - name: NOTIFICATION_ACTIVITY_BK
+        tests:
+          - not_null:
+              config:
+                severity: warn

@@ -1,0 +1,54 @@
+version: 2
+models:
+  - name: v_psa_stg_cbsa_zip__snfl_usps
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          config:
+            severity: warn
+          arguments:
+            combination_of_columns:
+              - CBSA
+              - ZIP
+              - LOAD_DTS
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - CBSA_HK
+              - ZIP
+              - LOAD_DTS
+    columns:
+      - name: CBSA_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: CBSA_BK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: CBSA
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: ZIP
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: LOAD_DTS
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: REC_SRC
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: HASHDIFF
+        tests:
+          - not_null:
+              config:
+                severity: warn

@@ -1,0 +1,5 @@
+version: 2
+models:
+- name: dim_flo_user
+  data_tests: []
+  columns: []

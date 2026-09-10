@@ -1,0 +1,17 @@
+version: 2
+models:
+- name: v_psa_stg_po_header__fib_ocf
+  data_tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - PO_HEADER_HK
+        - LOAD_DTS
+      config:
+        severity: warn
+  columns:
+  - name: PO_HEADER_HK
+    data_tests:
+    - not_null:
+        config:
+          severity: warn

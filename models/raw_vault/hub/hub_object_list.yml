@@ -1,0 +1,15 @@
+version: 2
+models:
+- name: hub_object_list
+  data_tests:
+  - dbt_expectations.expect_table_row_count_to_be_between:
+      arguments:
+        min_value: 4
+      config:
+        severity: warn
+  columns:
+  - name: OBJECT_LIST_HK
+    data_tests:
+    - unique:
+        config:
+          severity: warn

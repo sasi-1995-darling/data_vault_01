@@ -1,0 +1,35 @@
+version: 2
+
+models:
+  - name: base_product__delighted_edp
+    description: This is the base staging model from Flo for hub application
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - product_name
+  - name: base_linkconsumer_product_review__delighted_edp
+    description: This is the base staging model from Flo for hub application
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - product_name
+              - person_email
+              - review_id
+  - name: base_review__delighted_edp
+    description: This is the base staging model from Flo for hub application
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - id
+  - name: base_sentiment__delighted_edp
+    description: This is the base staging model from Flo for hub application
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - category_label
+              - subcategory_label
+              - tag

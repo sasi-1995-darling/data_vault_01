@@ -1,0 +1,10 @@
+version: 2
+models:
+  - name: ref_connected_products_classification_for_sentiment_moen_apps
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - _LINE
+              - APP_NAME
+    columns: []

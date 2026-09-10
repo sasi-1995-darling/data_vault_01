@@ -1,0 +1,13 @@
+version: 2
+
+models:
+  - name: dim_item
+    description: Common dimension for items (parts, materials and products)
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - dim_item_pk
+    config:
+      tags:
+        - emtek

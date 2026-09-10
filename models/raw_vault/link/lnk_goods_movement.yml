@@ -1,0 +1,94 @@
+version: 2
+models:
+  - name: lnk_goods_movement
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - LNK_GOODS_MOVEMENT_HK
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          config:
+            severity: warn
+          arguments:
+            min_value: 4
+    columns:
+      - name: LNK_GOODS_MOVEMENT_HK
+        tests:
+          - unique:
+              config:
+                severity: warn
+          - not_null:
+              config:
+                severity: warn
+      - name: PLANT_HK
+        tests:
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'hub_plant_v1' )
+                pk_column_name: PLANT_HK
+      - name: ITEM_HK
+        tests:
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'hub_item_v1' )
+                pk_column_name: ITEM_HK
+      - name: SUPPLIER_HK
+        tests:
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'hub_supplier_v2' )
+                pk_column_name: SUPPLIER_HK
+      - name: CUSTOMER_HK
+        tests:
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'hub_customer_v1' )
+                pk_column_name: CUSTOMER_HK
+      - name: CUSTOMER_SHIP_LOCATION_HK
+        tests:
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'hub_customer_v1' )
+                pk_column_name: CUSTOMER_HK
+      - name: ORDER_LINE_HK
+        tests:
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'hub_order_line' )
+                pk_column_name: ORDER_LINE_HK
+      - name: PO_ITEM_HK
+        tests:
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'hub_po_item' )
+                pk_column_name: PO_ITEM_HK
+      - name: PRODUCTION_ORDER_HK
+        tests:
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'hub_production_order' )
+                pk_column_name: PRODUCTION_ORDER_HK
+      - name: DELIVERY_LINE_HK
+        tests:
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'hub_delivery_line' )
+                pk_column_name: DELIVERY_LINE_HK
+      - name: UOM_HK
+        tests:
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'hub_uom' )
+                pk_column_name: UOM_HK
+      - name: GOODS_MOVEMENT_ITEM_DOCUMENT_HK
+        tests:
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'hub_goods_movement_item_document' )
+                pk_column_name: GOODS_MOVEMENT_ITEM_DOCUMENT_HK
+      - name: GOODS_STORAGE_LOCATION_HK
+        tests:
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'hub_storage_location' )
+                pk_column_name: GOODS_STORAGE_LOCATION_HK

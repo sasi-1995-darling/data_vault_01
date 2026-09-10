@@ -1,0 +1,10 @@
+version: 2
+models:
+- name: pb_shipment_details
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - DELIVERY_HK
+        - SHIPMENT_HK
+  columns: []

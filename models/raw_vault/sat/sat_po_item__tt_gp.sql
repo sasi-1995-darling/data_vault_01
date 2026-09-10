@@ -1,0 +1,496 @@
+---- SRC LAYER ----
+WITH
+SRC_po_line        as ( SELECT * FROM {{ ref('v_psa_stg_po_item__tt_gp') }} as SRC 
+                         {% if is_incremental() %}
+                              where src.load_dts > (select dateadd('HOUR',-1,max(load_dts)) from {{ this }})
+                            {% endif %}   )
+
+/*
+SRC_po_line        as ( SELECT * FROM staging.v_psa_stg_po_item__tt_gp )
+*/
+---- LOGIC LAYER ----
+
+, LOGIC_po_line as (
+    SELECT
+        PO_ITEM_HK
+      , PONUMBER
+      , ORD
+      , POLNESTA
+      , POTYPE
+      , ITEMNMBR
+      , ITEMDESC
+      , VENDORID
+      , VNDITNUM
+      , VNDITDSC
+      , NONINVEN
+      , LOCNCODE
+      , UOFM
+      , UMQTYINB
+      , QTYORDER
+      , QTYCANCE
+      , QTYCMTBASE
+      , QTYUNCMTBASE
+      , UNITCOST
+      , EXTDCOST
+      , INVINDX
+      , REQDATE
+      , PRMDATE
+      , PRMSHPDTE
+      , REQSTDBY
+      , COMMNTID
+      , DOCTYPE
+      , POLNEARY_1
+      , POLNEARY_2
+      , POLNEARY_3
+      , POLNEARY_4
+      , POLNEARY_5
+      , POLNEARY_6
+      , POLNEARY_7
+      , POLNEARY_8
+      , POLNEARY_9
+      , DECPLCUR
+      , DECPLQTY
+      , ITMTRKOP
+      , VCTNMTHD
+      , BRKFLD1
+      , PO_LINE_STATUS_ORIG
+      , QTY_CANCELED_ORIG
+      , OPOSTSUB
+      , JOBNUMBR
+      , COSTCODE
+      , COSTTYPE
+      , CURNCYID
+      , CURRNIDX
+      , XCHGRATE
+      , RATECALC
+      , DENXRATE
+      , ORUNTCST
+      , OREXTCST
+      , LINEORIGIN
+      , FREEONBOARD
+      , ODECPLCU
+      , CAPITAL_ITEM
+      , PRODUCT_INDICATOR
+      , SOURCE_DOCUMENT_NUMBER
+      , SOURCE_DOCUMENT_LINE_NUM
+      , RELEASEBYDATE
+      , RELEASED_DATE
+      , CHANGE_ORDER_FLAG
+      , PURCHASE_IV_ITEM_TAXABLE
+      , PURCHASE_ITEM_TAX_SCHEDU
+      , PURCHASE_SITE_TAX_SCHEDU
+      , PURCHSITETXSCHSRC
+      , BSIVCTTL
+      , TAXAMNT
+      , ORTAXAMT
+      , BCKTXAMT
+      , OBTAXAMT
+      , LANDED_COST_GROUP_ID
+      , PLNNDSPPLID
+      , SHIPMTHD
+      , BACKOUTTRADEDISCTAX
+      , ORIGBACKOUTTRADEDISCTAX
+      , LINENUMBER
+      , ORIGPRMDATE
+      , FSTRCPTDT
+      , LSTRCPTDT
+      , RELEASE
+      , ADRSCODE
+      , CMPNYNAM
+      , CONTACT
+      , ADDRESS1
+      , ADDRESS2
+      , ADDRESS3
+      , CITY
+      , STATE
+      , ZIPCODE
+      , CCODE
+      , COUNTRY
+      , PHONE1
+      , PHONE2
+      , PHONE3
+      , FAX
+      , ADDRSOURCE
+      , FLAGS
+      , PROJNUM
+      , COSTCATID
+      , DEX_ROW_ID
+      , PSA_RECORD_SOURCE
+      , PSA_LOAD_DTS
+      , PSA_DELETE_IND
+      , LOAD_DTS
+      , REC_SRC
+      , BKCC
+      , HASHDIFF
+    FROM SRC_po_line
+)
+---- RENAME LAYER ----
+
+, RENAME_po_line as (
+    SELECT
+        PO_ITEM_HK
+      , PONUMBER
+      , ORD
+      , POLNESTA
+      , POTYPE
+      , ITEMNMBR
+      , ITEMDESC
+      , VENDORID
+      , VNDITNUM
+      , VNDITDSC
+      , NONINVEN
+      , LOCNCODE
+      , UOFM
+      , UMQTYINB
+      , QTYORDER
+      , QTYCANCE
+      , QTYCMTBASE
+      , QTYUNCMTBASE
+      , UNITCOST
+      , EXTDCOST
+      , INVINDX
+      , REQDATE
+      , PRMDATE
+      , PRMSHPDTE
+      , REQSTDBY
+      , COMMNTID
+      , DOCTYPE
+      , POLNEARY_1
+      , POLNEARY_2
+      , POLNEARY_3
+      , POLNEARY_4
+      , POLNEARY_5
+      , POLNEARY_6
+      , POLNEARY_7
+      , POLNEARY_8
+      , POLNEARY_9
+      , DECPLCUR
+      , DECPLQTY
+      , ITMTRKOP
+      , VCTNMTHD
+      , BRKFLD1
+      , PO_LINE_STATUS_ORIG
+      , QTY_CANCELED_ORIG
+      , OPOSTSUB
+      , JOBNUMBR
+      , COSTCODE
+      , COSTTYPE
+      , CURNCYID
+      , CURRNIDX
+      , XCHGRATE
+      , RATECALC
+      , DENXRATE
+      , ORUNTCST
+      , OREXTCST
+      , LINEORIGIN
+      , FREEONBOARD
+      , ODECPLCU
+      , CAPITAL_ITEM
+      , PRODUCT_INDICATOR
+      , SOURCE_DOCUMENT_NUMBER
+      , SOURCE_DOCUMENT_LINE_NUM
+      , RELEASEBYDATE
+      , RELEASED_DATE
+      , CHANGE_ORDER_FLAG
+      , PURCHASE_IV_ITEM_TAXABLE
+      , PURCHASE_ITEM_TAX_SCHEDU
+      , PURCHASE_SITE_TAX_SCHEDU
+      , PURCHSITETXSCHSRC
+      , BSIVCTTL
+      , TAXAMNT
+      , ORTAXAMT
+      , BCKTXAMT
+      , OBTAXAMT
+      , LANDED_COST_GROUP_ID
+      , PLNNDSPPLID
+      , SHIPMTHD
+      , BACKOUTTRADEDISCTAX
+      , ORIGBACKOUTTRADEDISCTAX
+      , LINENUMBER
+      , ORIGPRMDATE
+      , FSTRCPTDT
+      , LSTRCPTDT
+      , RELEASE
+      , ADRSCODE
+      , CMPNYNAM
+      , CONTACT
+      , ADDRESS1
+      , ADDRESS2
+      , ADDRESS3
+      , CITY
+      , STATE
+      , ZIPCODE
+      , CCODE
+      , COUNTRY
+      , PHONE1
+      , PHONE2
+      , PHONE3
+      , FAX
+      , ADDRSOURCE
+      , FLAGS
+      , PROJNUM
+      , COSTCATID
+      , DEX_ROW_ID
+      , PSA_RECORD_SOURCE
+      , PSA_LOAD_DTS
+      , PSA_DELETE_IND
+      , LOAD_DTS
+      , REC_SRC
+      , BKCC
+      , HASHDIFF
+    FROM LOGIC_po_line
+)
+---- FILTER LAYER ----
+
+, FILTER_po_line as (
+    SELECT *
+    FROM RENAME_po_line
+)
+
+---- JOIN LAYER ----
+, JOIN_RESULT as (
+    SELECT *
+    FROM FILTER_po_line
+)
+
+---- FINAL LAYER ----
+SELECT
+          PO_ITEM_HK
+        , PONUMBER
+        , ORD
+        , POLNESTA
+        , POTYPE
+        , ITEMNMBR
+        , ITEMDESC
+        , VENDORID
+        , VNDITNUM
+        , VNDITDSC
+        , NONINVEN
+        , LOCNCODE
+        , UOFM
+        , UMQTYINB
+        , QTYORDER
+        , QTYCANCE
+        , QTYCMTBASE
+        , QTYUNCMTBASE
+        , UNITCOST
+        , EXTDCOST
+        , INVINDX
+        , REQDATE
+        , PRMDATE
+        , PRMSHPDTE
+        , REQSTDBY
+        , COMMNTID
+        , DOCTYPE
+        , POLNEARY_1
+        , POLNEARY_2
+        , POLNEARY_3
+        , POLNEARY_4
+        , POLNEARY_5
+        , POLNEARY_6
+        , POLNEARY_7
+        , POLNEARY_8
+        , POLNEARY_9
+        , DECPLCUR
+        , DECPLQTY
+        , ITMTRKOP
+        , VCTNMTHD
+        , BRKFLD1
+        , PO_LINE_STATUS_ORIG
+        , QTY_CANCELED_ORIG
+        , OPOSTSUB
+        , JOBNUMBR
+        , COSTCODE
+        , COSTTYPE
+        , CURNCYID
+        , CURRNIDX
+        , XCHGRATE
+        , RATECALC
+        , DENXRATE
+        , ORUNTCST
+        , OREXTCST
+        , LINEORIGIN
+        , FREEONBOARD
+        , ODECPLCU
+        , CAPITAL_ITEM
+        , PRODUCT_INDICATOR
+        , SOURCE_DOCUMENT_NUMBER
+        , SOURCE_DOCUMENT_LINE_NUM
+        , RELEASEBYDATE
+        , RELEASED_DATE
+        , CHANGE_ORDER_FLAG
+        , PURCHASE_IV_ITEM_TAXABLE
+        , PURCHASE_ITEM_TAX_SCHEDU
+        , PURCHASE_SITE_TAX_SCHEDU
+        , PURCHSITETXSCHSRC
+        , BSIVCTTL
+        , TAXAMNT
+        , ORTAXAMT
+        , BCKTXAMT
+        , OBTAXAMT
+        , LANDED_COST_GROUP_ID
+        , PLNNDSPPLID
+        , SHIPMTHD
+        , BACKOUTTRADEDISCTAX
+        , ORIGBACKOUTTRADEDISCTAX
+        , LINENUMBER
+        , ORIGPRMDATE
+        , FSTRCPTDT
+        , LSTRCPTDT
+        , RELEASE
+        , ADRSCODE
+        , CMPNYNAM
+        , CONTACT
+        , ADDRESS1
+        , ADDRESS2
+        , ADDRESS3
+        , CITY
+        , STATE
+        , ZIPCODE
+        , CCODE
+        , COUNTRY
+        , PHONE1
+        , PHONE2
+        , PHONE3
+        , FAX
+        , ADDRSOURCE
+        , FLAGS
+        , PROJNUM
+        , COSTCATID
+        , DEX_ROW_ID
+        , PSA_RECORD_SOURCE
+        , PSA_LOAD_DTS
+        , PSA_DELETE_IND
+        , LOAD_DTS
+        , REC_SRC
+        , BKCC
+        , HASHDIFF
+FROM JOIN_RESULT
+{% if is_incremental() %}
+WHERE NOT EXISTS (
+    SELECT 1 
+    FROM {{ this }} existing
+    WHERE existing.PO_ITEM_HK = JOIN_RESULT.PO_ITEM_HK
+    AND existing.HASHDIFF = JOIN_RESULT.HASHDIFF
+)
+{% endif %}
+{% if not is_incremental() %}
+
+/* The following qualifier is implemented to prevent multiple loads of touched records during the initial build, such as multiple rows per HK and hashdiff. */
+qualify 1 = row_number() over (partition by PO_ITEM_HK, LANDED_COST_GROUP_ID, DEX_ROW_ID, HASHDIFF order by PSA_LOAD_DTS)
+
+union all
+SELECT 
+MD5_BINARY(GR.VALUE) AS PO_ITEM_HK,
+GR.VALUE::text AS PONUMBER,
+GR.VALUE::number AS ORD,
+NULL AS POLNESTA,
+NULL AS POTYPE,
+NULL AS ITEMNMBR,
+NULL AS ITEMDESC,
+NULL AS VENDORID,
+NULL AS VNDITNUM,
+NULL AS VNDITDSC,
+NULL AS NONINVEN,
+NULL AS LOCNCODE,
+NULL AS UOFM,
+NULL AS UMQTYINB,
+NULL AS QTYORDER,
+NULL AS QTYCANCE,
+NULL AS QTYCMTBASE,
+NULL AS QTYUNCMTBASE,
+NULL AS UNITCOST,
+NULL AS EXTDCOST,
+NULL AS INVINDX,
+NULL AS REQDATE,
+NULL AS PRMDATE,
+NULL AS PRMSHPDTE,
+NULL AS REQSTDBY,
+NULL AS COMMNTID,
+NULL AS DOCTYPE,
+NULL AS POLNEARY_1,
+NULL AS POLNEARY_2,
+NULL AS POLNEARY_3,
+NULL AS POLNEARY_4,
+NULL AS POLNEARY_5,
+NULL AS POLNEARY_6,
+NULL AS POLNEARY_7,
+NULL AS POLNEARY_8,
+NULL AS POLNEARY_9,
+NULL AS DECPLCUR,
+NULL AS DECPLQTY,
+NULL AS ITMTRKOP,
+NULL AS VCTNMTHD,
+NULL AS BRKFLD1,
+NULL AS PO_LINE_STATUS_ORIG,
+NULL AS QTY_CANCELED_ORIG,
+NULL AS OPOSTSUB,
+NULL AS JOBNUMBR,
+NULL AS COSTCODE,
+NULL AS COSTTYPE,
+NULL AS CURNCYID,
+NULL AS CURRNIDX,
+NULL AS XCHGRATE,
+NULL AS RATECALC,
+NULL AS DENXRATE,
+NULL AS ORUNTCST,
+NULL AS OREXTCST,
+NULL AS LINEORIGIN,
+NULL AS FREEONBOARD,
+NULL AS ODECPLCU,
+NULL AS CAPITAL_ITEM,
+NULL AS PRODUCT_INDICATOR,
+NULL AS SOURCE_DOCUMENT_NUMBER,
+NULL AS SOURCE_DOCUMENT_LINE_NUM,
+NULL AS RELEASEBYDATE,
+NULL AS RELEASED_DATE,
+NULL AS CHANGE_ORDER_FLAG,
+NULL AS PURCHASE_IV_ITEM_TAXABLE,
+NULL AS PURCHASE_ITEM_TAX_SCHEDU,
+NULL AS PURCHASE_SITE_TAX_SCHEDU,
+NULL AS PURCHSITETXSCHSRC,
+NULL AS BSIVCTTL,
+NULL AS TAXAMNT,
+NULL AS ORTAXAMT,
+NULL AS BCKTXAMT,
+NULL AS OBTAXAMT,
+NULL AS LANDED_COST_GROUP_ID,
+NULL AS PLNNDSPPLID,
+NULL AS SHIPMTHD,
+NULL AS BACKOUTTRADEDISCTAX,
+NULL AS ORIGBACKOUTTRADEDISCTAX,
+NULL AS LINENUMBER,
+NULL AS ORIGPRMDATE,
+NULL AS FSTRCPTDT,
+NULL AS LSTRCPTDT,
+NULL AS RELEASE,
+NULL AS ADRSCODE,
+NULL AS CMPNYNAM,
+NULL AS CONTACT,
+NULL AS ADDRESS1,
+NULL AS ADDRESS2,
+NULL AS ADDRESS3,
+NULL AS CITY,
+NULL AS STATE,
+NULL AS ZIPCODE,
+NULL AS CCODE,
+NULL AS COUNTRY,
+NULL AS PHONE1,
+NULL AS PHONE2,
+NULL AS PHONE3,
+NULL AS FAX,
+NULL AS ADDRSOURCE,
+NULL AS FLAGS,
+NULL AS PROJNUM,
+NULL AS COSTCATID,
+NULL AS DEX_ROW_ID,
+NULL AS PSA_RECORD_SOURCE,
+'1900-01-01'::TIMESTAMP AS PSA_LOAD_DTS,
+'N' AS PSA_DELETE_IND,
+CONVERT_TIMEZONE('UTC','1900-01-01'::TIMESTAMP) AS LOAD_DTS,
+'USAZET.SNOWFLAKE.FBIN.DERIVED' AS REC_SRC,
+DECODE(GR.VALUE, 0, 'GHOST RECORD-SYSTEM', -1, 'GHOST RECORD-nullkey-required', -2, 'GHOST RECORD-nullkey-optional') AS BKCC,
+''::BINARY AS HASHDIFF
+FROM
+TABLE(strtok_split_to_table('0|-1|-2', '|')) AS GR
+{% endif %}

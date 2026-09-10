@@ -1,0 +1,23 @@
+version: 2
+models:
+  - name: fact_delivery_line_item
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - DELIVERY_LINE_DETAIL_LHK
+    columns:
+      - name: delivery_line_detail_lhk
+        tests:
+          - not_null
+          - unique
+      - name: delivery_hk
+        tests:
+          - not_null
+      - name: delivered_quantity
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 0
+                inclusive: true              

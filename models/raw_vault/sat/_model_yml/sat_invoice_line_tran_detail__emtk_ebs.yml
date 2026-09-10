@@ -1,0 +1,22 @@
+version: 2
+
+models:
+  - name: sat_invoice_line_tran_detail__emtk_ebs
+    description: This is the raw vault satellite model for invoice line transaction detail
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - invoice_line_transaction_hk
+              - load_dts
+      - dbt_constraints.foreign_key:
+          arguments:
+            fk_column_names:
+              - invoice_line_transaction_hk
+            pk_table_name: ref('tlink_invoice_line_transaction')
+            pk_column_names:
+              - invoice_line_transaction_hk
+    config:
+      tags:
+        - emtek
+        - ebs

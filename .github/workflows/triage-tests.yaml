@@ -1,0 +1,170 @@
+name: Triage Safety Tests
+
+# =============================================================================
+# What this workflow does
+#
+# Runs the triage-safety pytest suite on every PR that
+# touches triage source code or triage tests. Blocks merge on failure.
+#
+# This is the per-PR MERGE GATE at the BASE of the testing pyramid: fast,
+# deterministic, cheap. It guards three classes of regression — any one
+# of which means something important broke:
+#
+#   1. Triage orchestrator + pattern catalog behavior (test_triage_orchestrator,
+#      test_triage_catalog, test_triage_rca_schema).
+#   2. Redactor pipeline + credential sentinel + literal stripping
+#      (test_triage_redact, test_redactor_pipeline). Includes TestRawAudit
+#      (test_triage_redact.py:965) and TestSentinelSweep
+#      (test_redactor_pipeline.py:126) — the credential-safety regression bar.
+#   3. Backtest corpus gate + Arch-1 schema-version drift
+#      (test_triage_backtest.py::TestBacktestCorpusGate) — outcome drift
+#      (1.000/1.000 on the v1.2.0 P0.1 corpus) and committed-fixture
+#      version-skew detection.
+#   4. M5 fix+proof atomicity prompt (test_code_reviewer_fix_proof.py) —
+#      ships with the triage-source guardrail it protects.
+# =============================================================================
+
+# =============================================================================
+# GATE-TIER DISCIPLINE — read before extending.
+#
+# This is the BASE of the testing pyramid (deterministic unit + small
+# integration tests, sub-second-per-file). Keep it that way.
+#
+#   * 15-min budget: the suite runs well under the 15-min developer-
+#     adoption budget for merge gates (test suites > 15 min lose
+#     adoption; > 60 min are routinely circumvented). Preserve that
+#     headroom — do not let it evaporate by adding slow statistical
+#     batteries here.
+#   * Gate-vs-release split: the held-out statistical accuracy battery
+#     (≥20 payloads, p≥0.90/r≥0.70 — see Phase-2 dormant items in
+#     docs/triage-agent/phase-2-progress-log.md) belongs in a separate
+#     release-layer workflow, NOT in this per-PR merge gate. Pre-release
+#     evaluation runs less often and can afford the cost; per-PR cannot.
+#   * No LLM-as-judge: this gate is deterministic pattern-match against
+#     a labeled corpus. Do NOT "upgrade" it to LLM-as-judge evaluation
+#     of RCA quality — that inverts the testing pyramid (expensive thing
+#     ran, cheap thing didn't catch the real bug) and prices the gate
+#     out of existence. LLM-judge eval, if added, lives in the release
+#     layer alongside the statistical battery.
+#
+# Adding a slow or non-deterministic test here is the exact failure mode
+# this comment exists to prevent. Reviewer: reject PRs that violate
+# these constraints unless they also move this comment.
+# =============================================================================
+
+# =============================================================================
+# SCOPE LIMITATION — what this gate verifies, what it does NOT.
+#
+# This workflow runs the triage-safety pytest suite end-to-end. A green
+# check means: "the enumerated triage-safety tests passed against the PR's HEAD."
+# It does NOT mean: "triage behavior is correct under all inputs" — the
+# gate is only as good as the corpus + tests it executes. New patterns,
+# new credential classes, and new redactor edge cases need new tests
+# (added to the gated files) before this gate protects them.
+#
+# A green check also does NOT relieve human reviewers of the credential
+# threat-model checklist (see credential-threat-model-gate.yaml §SCOPE
+# LIMITATION) — that gate and this gate cover orthogonal concerns.
+# =============================================================================
+
+# =============================================================================
+# Required-check note (configuration outside this file)
+#
+# This workflow runs but does not block merges unless added as a REQUIRED
+# CHECK in branch protection rules for the target branch
+# (Settings → Branches → Branch protection rules → Require status checks
+# to pass before merging → search for "triage-safety-tests"). Without
+# that setting, this workflow is advisory only — a failed check can be
+# merged through. The gate's enforcement depends on the branch-protection
+# configuration being in place AND on this workflow running; either
+# missing turns the gate off.
+# =============================================================================
+
+on:
+    pull_request:
+        types: [opened, synchronize, reopened]
+        branches: [main]
+        paths:
+            # Triage source — any change here can regress the orchestrator,
+            # redactor, backtest harness, pattern catalog, or RCA schema.
+            - "scripts/automation/src/triage/**"
+            # Triage tests + the M5 fix+proof test (ships with the triage
+            # guardrail in code_reviewer.py) + the redactor pipeline test.
+            - "scripts/automation/tests/test_triage_*.py"
+            - "scripts/automation/tests/test_redactor_pipeline.py"
+            - "scripts/automation/tests/test_code_reviewer_fix_proof.py"
+            # fixture_loader test does not match the `test_triage_*` glob
+            # above (no `_triage_` infix) but exercises a triage-source
+            # chokepoint — list explicitly so fixture_loader.py edits
+            # AND its own test edits both fire the gate.
+            - "scripts/automation/tests/test_fixture_loader.py"
+            # M5 check in code_reviewer.py — the triage-source guardrail
+            # whose proving test is gated above.
+            - "scripts/automation/src/code_reviewer.py"
+            # Committed fixtures — Arch-1 (version-skew) reads these.
+            - "docs/triage-agent/fixtures/**"
+            # Python deps — a requirements bump can break imports.
+            - "scripts/automation/requirements.txt"
+            # The workflow itself — edits must preserve gate semantics.
+            - ".github/workflows/triage-tests.yaml"
+
+# Cancel in-progress runs when new commits land on the same PR (matches
+# code-review.yaml's pattern — avoids wasted CI minutes on stale tips).
+concurrency:
+    group: triage-tests-${{ github.event.pull_request.number }}
+    cancel-in-progress: true
+
+permissions:
+    contents: read
+
+jobs:
+    triage-safety-tests:
+        name: triage-safety-tests
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v5
+
+            - name: Set up Python
+              uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5
+              with:
+                  python-version: "3.11"
+                  cache: "pip"
+
+            - name: Install dependencies
+              run: |
+                  python -m pip install --upgrade pip
+                  pip install -r scripts/automation/requirements.txt
+                  pip install pytest
+
+            - name: Run triage safety suite
+              # Explicit file list — NOT a glob — so a typo or missing file
+              # fails loudly at collection rather than silently passing by
+              # running nothing. The pass count + duration are surfaced
+              # by the workflow run output rather than pinned here —
+              # earlier revisions hard-coded specific numbers that
+              # drifted as the suite grew; current numbers live in the
+              # run log, not in this comment.
+              #
+              # MAINTENANCE: when adding a new `test_triage_*.py` (or any
+              # other test file that should gate triage merges), APPEND IT
+              # HERE. The path-trigger above will fire the workflow on the
+              # new file's creation, but pytest only runs what it is told.
+              # Reviewer rule: a PR adding `test_triage_*.py` without
+              # appending it to this list is incomplete.
+              run: |
+                  python -m pytest -q \
+                      scripts/automation/tests/test_triage_backtest.py \
+                      scripts/automation/tests/test_triage_orchestrator.py \
+                      scripts/automation/tests/test_triage_redact.py \
+                      scripts/automation/tests/test_triage_catalog.py \
+                      scripts/automation/tests/test_triage_rca_schema.py \
+                      scripts/automation/tests/test_redactor_pipeline.py \
+                      scripts/automation/tests/test_code_reviewer_fix_proof.py \
+                      scripts/automation/tests/test_triage_dbt_cloud_client.py \
+                      scripts/automation/tests/test_triage_dbt_cloud_adapter.py \
+                      scripts/automation/tests/test_triage_writer.py \
+                      scripts/automation/tests/test_triage_poll_loop.py \
+                      scripts/automation/tests/test_triage_notifier.py \
+                      scripts/automation/tests/test_fixture_loader.py

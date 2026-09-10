@@ -1,0 +1,1 @@
+  select * from ({{ data_exist('fact_incident_false_alarm_device_period','US.FLO_PROD.INCIDENTS_ALERT_FEEDBACK')}}) 

@@ -1,0 +1,1 @@
+select * from ({{ data_exist('dim_supplier_payment_terms','USOHNO.SAP.ECCPRD.Z_LFM1')}}) 

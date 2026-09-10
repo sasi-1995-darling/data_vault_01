@@ -1,0 +1,28 @@
+version: 2
+models:
+  - name: ref_sat_item_cat__lrsn_psft
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - ITEM_CAT_BK
+              - LOAD_DTS
+    columns:
+      - name: ITEM_CAT_BK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+          - dbt_utils.relationships_where:
+              arguments:
+                to: ref( 'ref_hub_item_cat' )
+                field: ITEM_CAT_BK
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'ref_hub_item_cat' )
+                pk_column_name: ITEM_CAT_BK
+      - name: LOAD_DTS
+        tests:
+          - not_null:
+              config:
+                severity: warn

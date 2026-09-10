@@ -1,0 +1,1 @@
+select * from ({{ primary_key_check('fact_shipment_fbin',['shipment_id']) }})

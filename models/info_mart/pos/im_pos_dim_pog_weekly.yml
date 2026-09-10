@@ -1,0 +1,12 @@
+version: 2
+models:
+  - name: im_pos_dim_pog_weekly
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - REPORTING_CUSTOMER
+              - SKU
+              - STORE_KEY
+              - TRANSACTION_DATEKEY
+    columns: []

@@ -1,0 +1,14 @@
+version: 2
+
+models:
+  - name: ref_item_category__emtk_ebs
+    description: This is the reference table for item categories from Emtek - join to msat_item_category__emtk_ebs
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - category_id
+    config:
+      tags:
+        - emtek
+        - ebs

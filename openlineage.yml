@@ -1,0 +1,35 @@
+# Production-only OpenLineage Configuration for Snowflake External Lineage
+# 
+# This configuration is used ONLY for production dbt Cloud jobs.
+# Dev and QA environments use regular dbt commands without lineage tracking.
+#
+# SETUP INSTRUCTIONS FOR DBT CLOUD:
+# 
+# 1. Replace YOUR-PROD-ACCOUNT with your Snowflake PRODUCTION account identifier
+#    Example: myorg-prod_account or xyz12345.us-east-1
+# 
+# 2. Generate a Snowflake API key with production access:
+#    - Log into your PRODUCTION Snowflake account
+#    - Navigate to Admin > Security > API Integration
+#    - Create/use OAuth/JWT token with appropriate permissions
+#    - Replace the apiKey value below
+#
+# 3. In dbt Cloud:
+#    - Go to your Production job (scheduled 7am EST daily)
+#    - Job Settings > Commands section
+#    - Replace: dbt build --target prod
+#    - With:     dbt-ol build --target prod
+#
+# 4. Set this file path in dbt Cloud environment variables:
+#    OPENLINEAGE_CONFIG=/path/to/openlineage.prod.yml
+
+transport:
+  type: http
+  url: https://YOUR-PROD-ACCOUNT.snowflakecomputing.com
+  endpoint: /api/v2/lineage/external-lineage
+  auth:
+    type: api_key
+    apiKey: YOUR_JWT_TOKEN_HERE  # Generate using generate_jwt.py script
+  compression: gzip
+
+namespace: production

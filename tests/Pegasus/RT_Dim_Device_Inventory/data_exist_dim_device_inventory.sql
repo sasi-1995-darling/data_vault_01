@@ -1,0 +1,1 @@
+select * from ({{ data_exist('dim_device_inventory','US.FLO_DYNAMODB.PROD_ICD')}})

@@ -1,0 +1,83 @@
+---- SRC LAYER ----
+WITH
+SRC_P              as ( SELECT * FROM {{ ref('pit_cost_element_current') }} as SRC  )
+
+/*
+SRC_P              as ( SELECT * FROM RAW_VAULT.PIT_COST_ELEMENT_CURRENT )
+*/
+---- LOGIC LAYER ----
+
+, LOGIC_P as (
+    SELECT
+        COST_ELEMENT_HK
+      , CHART_OF_ACCOUNTS
+      , COST_ELEMENT_1
+      , SAT_WINN_COA_CREATED_ON__YYYYMMDD
+      , SAT_WINN_COA_ENTERED_BY
+      , COST_ELEMENT_2
+      , CONTROLLING_AREA
+      , COST_ELEMENT_11
+      , VALID_TO_DATE__YYYYMMDD
+      , VALID_FROM_DATE__YYYYMMDD
+      , COST_ELEMENT_CATEGORY
+      , CREATED_ON__YYYYMMDD
+      , ENTERED_BY
+      , BKCC
+      , REC_SRC
+      , IS_DELETED
+    FROM SRC_P
+)
+---- RENAME LAYER ----
+
+, RENAME_P as (
+    SELECT
+        COST_ELEMENT_HK
+      , CHART_OF_ACCOUNTS
+      , COST_ELEMENT_1
+      , SAT_WINN_COA_CREATED_ON__YYYYMMDD
+      , SAT_WINN_COA_ENTERED_BY
+      , COST_ELEMENT_2
+      , CONTROLLING_AREA
+      , COST_ELEMENT_11
+      , VALID_TO_DATE__YYYYMMDD
+      , VALID_FROM_DATE__YYYYMMDD
+      , COST_ELEMENT_CATEGORY
+      , CREATED_ON__YYYYMMDD
+      , ENTERED_BY
+      , BKCC
+      , REC_SRC
+      , IS_DELETED
+    FROM LOGIC_P
+)
+---- FILTER LAYER ----
+
+, FILTER_P as (
+    SELECT *
+    FROM RENAME_P
+)
+
+---- JOIN LAYER ----
+, JOIN_RESULT as (
+    SELECT *
+    FROM FILTER_P
+)
+
+---- FINAL LAYER ----
+SELECT
+          COST_ELEMENT_HK
+        , CHART_OF_ACCOUNTS
+        , COST_ELEMENT_1
+        , SAT_WINN_COA_CREATED_ON__YYYYMMDD
+        , SAT_WINN_COA_ENTERED_BY
+        , COST_ELEMENT_2
+        , CONTROLLING_AREA
+        , COST_ELEMENT_11
+        , VALID_TO_DATE__YYYYMMDD
+        , VALID_FROM_DATE__YYYYMMDD
+        , COST_ELEMENT_CATEGORY
+        , CREATED_ON__YYYYMMDD
+        , ENTERED_BY
+        , BKCC
+        , REC_SRC
+        , IS_DELETED
+FROM JOIN_RESULT

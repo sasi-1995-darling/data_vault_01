@@ -1,0 +1,5 @@
+version: 2
+models:
+- name: v_psa_stg_test_email_patterns_for_flo_dynamo
+  data_tests: []
+  columns: []

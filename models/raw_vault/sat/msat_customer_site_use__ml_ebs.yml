@@ -1,0 +1,20 @@
+version: 2
+models:
+  - name: msat_customer_site_use__ml_ebs
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          config:
+            severity: warn
+          arguments:
+            combination_of_columns:
+              - CUSTOMER_SITE_HK
+              - SITE_USE_CODE
+              - SITE_USE_ID
+              - STATUS
+              - LOCATION
+              - LOAD_DTS
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          config:
+            severity: warn
+          arguments:
+            min_value: 4

@@ -1,0 +1,21 @@
+version: 2
+models:
+  - name: sat_delivery__winn_sap
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - DELIVERY_HK
+              - LOAD_DTS
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          config:
+            severity: warn
+          arguments:
+            min_value: 4
+    columns:
+      - name: DELIVERY_HK
+        tests:
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'hub_delivery_v1' )
+                pk_column_name: DELIVERY_HK

@@ -1,0 +1,5 @@
+version: 2
+models:
+- name: rep_stg_sent_unique_processed
+  tests: []
+  columns: []

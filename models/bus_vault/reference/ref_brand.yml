@@ -1,0 +1,9 @@
+version: 2
+models:
+  - name: ref_brand
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - SYSTEM_BRAND
+    columns: []

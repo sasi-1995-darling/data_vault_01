@@ -1,0 +1,25 @@
+version: 2
+models:
+- name: v_psa_stg_equipment_location_assignment__winn_sap
+  data_tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - LOCATION_ASSIGNMENT_BK
+        - EQUIPMENT_BK
+        - PARENT_EQUIPMENT_BK
+        - LOAD_DTS
+      config:
+        severity: warn
+  columns:
+  - name: LOCATION_ASSIGNMENT_BK
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+  - name: EQUIPMENT_BK
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+

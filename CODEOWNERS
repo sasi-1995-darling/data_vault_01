@@ -1,0 +1,58 @@
+* @FBWINN-Data-Analytics/data-ops-engineers
+  
+/models/ @FBWINN-Data-Analytics/Canonical-Model @FBWINN-Data-Analytics/Certification
+
+/models/info_mart/ @FBWINN-Data-Analytics/infomart @FBWINN-Data-Analytics/Certification
+
+/tests/ @FBWINN-Data-Analytics/Certification
+
+# ─── AI Automation Infrastructure ───
+# Protected files require DataOps lead review.
+# Self-healing files (lessons.md, agent-memory/) are excluded — agents update those.
+
+# Core project standards
+/CLAUDE.md                                      @FBWINN-Data-Analytics/data-ops-engineers
+/.github/copilot-instructions.md                @FBWINN-Data-Analytics/data-ops-engineers
+
+# Skills (canonical source)
+/.github/skills/                                @FBWINN-Data-Analytics/data-ops-engineers
+/.claude/skills/                                @FBWINN-Data-Analytics/data-ops-engineers
+
+# Agents (both IDE formats)
+/.github/agents/                                @FBWINN-Data-Analytics/data-ops-engineers
+/.claude/agents/                                @FBWINN-Data-Analytics/data-ops-engineers
+
+# Instructions & prompts
+/.github/instructions/                          @FBWINN-Data-Analytics/data-ops-engineers
+/.github/prompts/                               @FBWINN-Data-Analytics/data-ops-engineers
+
+# Hooks & guardrails
+/.claude/settings.json                          @FBWINN-Data-Analytics/data-ops-engineers
+/.claude/rules/                                 @FBWINN-Data-Analytics/data-ops-engineers
+/scripts/automation/hooks/                      @FBWINN-Data-Analytics/data-ops-engineers
+
+# Pipeline orchestrator & code generators
+/scripts/automation/pipeline_orchestrator.py    @FBWINN-Data-Analytics/data-ops-engineers
+/scripts/automation/src/                        @FBWINN-Data-Analytics/data-ops-engineers
+
+# Grandfather list — bounded-amnesty governance artifact
+# Any edit (additions, removals, comment changes) requires DataOps lead review.
+# NEW correctness-tier entries (H10) require explicit DataOps waiver per the
+# section-header policy inside the file. Removals are burn-down progress and
+# should be validated against `--validate-grandfather` before merging.
+# This explicit rule must survive future CODEOWNERS reorganisation — the
+# line-1 catch-all alone is too fragile a guarantee for a governance artifact.
+/scripts/automation/.code_review_grandfather    @FBWINN-Data-Analytics/data-ops-engineers
+
+# Sync enforcement
+/scripts/sync_skills.sh                         @FBWINN-Data-Analytics/data-ops-engineers
+/.github/workflows/skill-sync-check.yaml        @FBWINN-Data-Analytics/data-ops-engineers
+/.github/hooks/                                 @FBWINN-Data-Analytics/data-ops-engineers
+
+# CI/CD workflows
+/.github/workflows/                             @FBWINN-Data-Analytics/data-ops-engineers
+/.github/actions/                               @FBWINN-Data-Analytics/data-ops-engineers
+
+# dbt project config
+/dbt_project.yml                                @FBWINN-Data-Analytics/data-ops-engineers
+/packages.yml                                   @FBWINN-Data-Analytics/data-ops-engineers

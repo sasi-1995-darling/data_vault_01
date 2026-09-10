@@ -1,0 +1,1 @@
+select * from ({{ data_exist('fact_installer_order','US.SHOPIFY_MOEN.PRODUCT_VARIANT')}}) 

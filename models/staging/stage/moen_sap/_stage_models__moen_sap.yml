@@ -1,0 +1,278 @@
+version: 2
+
+models:
+  - name: stg_item_master__moen_sap
+    description: This is the staging model from Moen for sat_item_master
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - item_id
+  - name: stg_item_description__moen_sap
+    description: This is the staging model from Moen for ref_item_description
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - item_id
+              - language
+            quote_columns: false
+  - name: stg_item_room_area__moen_sap
+    description: This is the staging model from Moen for ref_item_room_area
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - room_area_id
+  - name: stg_item_group__moen_sap
+    description: This is the staging model from Moen for ref_item_group
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - item_group_id
+              - language
+            quote_columns: false
+    columns:
+      - name: item_group
+        tests:
+          - not_null
+  - name: stg_item_platform__moen_sap
+    description: This is the staging model from Moen for ref_item_platform
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - item_platform_id
+              - language
+            quote_columns: false
+    columns:
+      - name: item_platform
+        tests:
+          - not_null
+  - name: stg_item_reporting_category__moen_sap
+    description: This is the staging model from Moen for ref_item_reporting_category
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - reporting_category_id
+              - language
+            quote_columns: false
+    columns:
+      - name: reporting_category
+        tests:
+          - not_null
+  - name: stg_item_finish__moen_sap
+    description: This is the staging model from Moen for ref_item_finish
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - item_finish_id
+              - language
+            quote_columns: false
+    columns:
+      - name: finish
+        tests:
+          - not_null
+  - name: stg_item_price_group__moen_sap
+    description: This is the staging model from Moen for ref_item_price_group
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - item_price_type_group_id
+              - language
+            quote_columns: false
+    columns:
+      - name: price_type_group
+        tests:
+          - not_null
+  - name: stg_ausp_brand__moen_sap
+    description: This is the staging model from Moen for ref_ausp_brand
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - item_id
+    columns:
+      - name: item_brand
+        tests:
+          - not_null
+  - name: stg_shipment__moen_sap
+    description: This is the staging model from Moen for sat_shipment
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - mandt
+              - paledger
+              - vrgar
+              - versi
+              - perio
+              - paobjnr
+              - pasubnr
+              - belnr
+              - posnr
+            quote_columns: false
+    columns:
+      - name: item
+        tests:
+          - not_null
+  - name: stg_cust_sales_area__moen_sap
+    description: This is the staging model from Moen for sat_cust_sales_area
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - customer_number
+              - sales_org
+              - dist_channel
+              - division
+            quote_columns: false
+    columns:
+      - name: address_number
+        tests:
+          - not_null
+      - name: language
+        tests:
+          - not_null
+  - name: stg_location__moen_sap
+    description: This is the staging model from Moen for sat_location
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - location_id
+              - nation
+    columns:
+      - name: language
+        tests:
+          - not_null
+  - name: stg_shipment_inputs__moen_sap
+    description: This is the staging model from Moen for sat_shipment_inputs
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - mandt
+              - ssour
+              - vrsio
+              - spmon
+              - sap_load_date
+              - spwoc
+              - spbup
+              - customer_id
+              - item
+              - plant_id
+              - issue_date
+              - doc_number
+              - line_number
+              - sales_document_type
+              - stwae_01
+              - rejection_id
+            quote_columns: false
+    columns:
+      - name: item
+        tests:
+          - not_null
+  - name: stg_inputs_plant__moen_sap
+    description: This is the staging model from Moen for ref_plant
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - plant_id
+    columns:
+      - name: plant_name
+        tests:
+          - not_null
+  - name: stg_inputs_sales_doc_type__moen_sap
+    description: This is the staging model from Moen for ref_sales_doc_type
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - sales_doc_type_code
+              - language
+            quote_columns: false
+    columns:
+      - name: sales_doc_type_desc
+        tests:
+          - not_null
+  - name: stg_inputs_combined_reason__moen_sap
+    description: This is the staging model from Moen for ref_combined_reason
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - combined_reason_code
+              - language
+            quote_columns: false
+  - name: stg_inputs_sale_type__moen_sap
+    description: This is the staging model from Moen for ref_sale_type
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - sale_type_code
+              - language
+            quote_columns: false
+    columns:
+      - name: sale_type_desc
+        tests:
+          - not_null
+  - name: stg_item_bundle__moen_sap
+    description: This is the staging model for moen bundle mapping
+    tests:
+      - 'dbt_constraints.primary_key:':
+          arguments:
+            column_names:
+              - customer
+              - parent_material_number
+              - child_material_number
+  - name: stg_legacy_hofr_us_sales__hofr_ecl
+    description: This is the staging model from HofR for Moen shipment and inputs
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - invoice_no
+              - unique_key
+            quote_columns: false
+    columns:
+      - name: customer_number
+        tests:
+          - not_null
+      - name: order_date
+        tests:
+          - not_null
+      - name: date
+        tests:
+          - not_null
+  - name: stg_plant__moen_sap
+    description: This is the base staging model from hub_plant
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - werks
+    columns:
+      - name: mandt
+        tests:
+          - not_null
+      - name: name1
+        tests:
+          - not_null
+  - name: stg_brand__moen_sap
+    description: This is the base staging model from hub_plant
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - brand_bk
+    columns:
+      - name: rec_src
+        tests:
+          - not_null

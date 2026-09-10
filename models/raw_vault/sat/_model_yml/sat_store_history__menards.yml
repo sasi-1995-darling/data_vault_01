@@ -1,0 +1,43 @@
+version: 2
+models:
+  - name: sat_store_history__menards
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - STORE_HK
+              - LOAD_DTS
+    columns:
+      - name: STORE_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+          - dbt_utils.relationships_where:
+              arguments:
+                to: ref( 'hub_store' )
+                field: STORE_HK
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'hub_store' )
+                pk_column_name: STORE_HK
+      - name: LOAD_DTS
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: STATE
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: CITY
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: POSTAL_CD
+        tests:
+          - not_null:
+              config:
+                severity: warn

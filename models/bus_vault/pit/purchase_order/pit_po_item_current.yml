@@ -1,0 +1,64 @@
+version: 2
+models:
+  - name: pit_po_item_current
+    data_tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - PO_ITEM_HK
+    columns:
+      - name: PO_HEADER_BK
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: PO_LINE_NUMBER
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: PO_DATE_CHANGE_REASON
+        description: >
+          Free-text reason explaining why a PO date was changed, distinguishing
+          buyer-initiated from supplier-initiated changes. Sourced from the SAP
+          custom field EKPO_CI.ZZCAUSE (WINN); NULL for non-SAP source systems.
+      - name: FREIGHT_DELAY_REASON_CODE
+        description: >
+          Structured code identifying the reason for a freight/delivery issue,
+          used for root-cause analysis. Sourced from the SAP custom field
+          EKPO_CI.ZZFRTCD (WINN); NULL for non-SAP source systems.
+      - name: ORIGINAL_PROMISED_DATE__YYYYMMDD
+        description: >
+          Supplier's first committed delivery date before any changes, as a
+          YYYYMMDD integer, used for the supplier commit-accuracy metric.
+          Sourced from Therma-Tru E21 (ORIG_DATE_PROMISED); NULL for other
+          source systems.
+      - name: PROMISE_SHIP_DATE__YYYYMMDD
+        description: >
+          Promise ship date from Great Plains as a YYYYMMDD integer, distinct
+          from the delivery promise date. Sourced from Therma-Tru Great Plains
+          (POP10110.PRMSHPDTE); NULL for other source systems.
+      - name: SUPPLIER_SHIP_DATE_LATEST__YYYYMMDD
+        description: >
+          Latest supplier ship date across the PO line's PeopleSoft schedule
+          lines, as a YYYYMMDD integer (MAX of schedule-line SHIP_DATE). Sourced
+          from Larson PeopleSoft (PS schedule SHIP_DATE); NULL for other source
+          systems. Coverage: sparsely populated at Larson (~2,600 of ~2.5M
+          Larson PO lines, ~0.1%); not used for OTIF scoring in Phase 1.
+      - name: SUPPLIER_SHIP_DATE_EARLIEST__YYYYMMDD
+        description: >
+          Earliest supplier ship date across the PO line's PeopleSoft schedule
+          lines, as a YYYYMMDD integer (MIN of schedule-line SHIP_DATE). Sourced
+          from Larson PeopleSoft (PS schedule SHIP_DATE); NULL for other source
+          systems. Coverage: sparsely populated at Larson (~2,600 of ~2.5M
+          Larson PO lines, ~0.1%); not used for OTIF scoring in Phase 1.
+      - name: TRANSPORTATION_LEAD_DAYS
+        description: >
+          Planned transportation/delivery lead time in days from the SAP
+          purchasing info record (EINE.APLFZ), selected at the PO line's plant
+          grain (purchasing record + purchasing org + plant/WERKS). Deleted or
+          deletion-flagged info records (PSA_DELETE_IND = 'Y' or LOEKZ = 'X') are
+          excluded and yield NULL. Sourced from WINN SAP; NULL for other source
+          systems. Coverage: ~30% of SAP PO lines (an active info-record lead
+          time exists only for ~30%); where NULL, downstream OTIF calculation
+          falls back to a default threshold.

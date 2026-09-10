@@ -1,0 +1,22 @@
+version: 2
+models:
+  - name: pit_key_account_group
+    tests:
+      - dbt_constraints.primary_key:
+          config:
+            severity: warn
+          arguments:
+            column_names:
+              - KEY_ACCOUNT_GROUP_HK
+              - LANGUAGE_KEY
+    columns:
+      - name: KEY_ACCOUNT_GROUP_HK
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: LANGUAGE_KEY
+        data_tests:
+          - not_null:
+              config:
+                severity: warn

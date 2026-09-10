@@ -1,0 +1,33 @@
+version: 2
+models:
+  - name: v_psa_stg_object_location_account_assignment
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          config:
+            severity: warn
+          arguments:
+            combination_of_columns:
+              - MANDT
+              - ILOAN
+              - LOAD_DTS
+    columns:
+      - name: OBJECT_LOCATION_ACCOUNT_ASSIGNMENT_BK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: MANDT
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: ILOAN
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: OBJECT_LOCATION_ACCOUNT_ASSIGNMENT_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn

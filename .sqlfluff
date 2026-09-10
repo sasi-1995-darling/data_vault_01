@@ -1,0 +1,68 @@
+[sqlfluff]
+templater = dbt
+dialect = snowflake
+verbose = 1
+nocolor = False
+max_line_length = 120
+sql_file_exts = .sql
+exclude_rules = ST06, AM06
+
+[sqlfluff:indentation]
+allow_implicit_indents = True
+indented_joins = True
+
+[sqlfluff:templater:jinja]
+apply_dbt_builtins = True
+
+[sqlfluff:templater:dbt]
+project_dir = ./
+profiles_dir = .github/dbt_profiles/
+
+# Based on dbt standards https://github.com/dbt-labs/jaffle-shop-template/blob/main/.sqlfluff
+
+# --- Rules ---
+
+[sqlfluff:rules:capitalisation.keywords]
+capitalisation_policy = lower
+
+[sqlfluff:rules:aliasing.table]
+aliasing = explicit
+
+[sqlfluff:rules:aliasing.column]
+aliasing = explicit
+
+[sqlfluff:rules:aliasing.expression]
+allow_scalar = False
+
+[sqlfluff:rules:capitalisation.functions]
+capitalisation_policy = lower
+
+[sqlfluff:rules:capitalisation.literals]
+capitalisation_policy = lower
+
+[sqlfluff:rules:ambiguous.column_references]  # Number in group by
+group_by_and_order_by_style = implicit
+
+[sqlfluff:rules:capitalisation.identifiers]
+extended_capitalisation_policy = lower
+unquoted_identifiers_policy = all
+
+[sqlfluff:rules:jinja.padding]
+single_space = True
+
+# --- Layout ---
+
+[sqlfluff:layout:type:comma]
+line_position = leading
+
+[sqlfluff:rules:layout.spacing]
+no_trailing_whitespace = True
+extra_whitespace = False
+
+[sqlfluff:rules:layout.set_operators]
+set_operator_on_new_line = ['UNION', 'UNION ALL', 'MINUS', 'INTERSECT']
+
+[sqlfluff:layout:type:aliasing]
+spacing_before = align
+align_within = select_clause
+spacing_after = touch

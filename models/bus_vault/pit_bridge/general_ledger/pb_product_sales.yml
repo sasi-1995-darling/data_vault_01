@@ -1,0 +1,10 @@
+version: 2
+models:
+- name: pb_product_sales
+  data_tests: []
+  columns:
+  - name: L_LNK_COPA_SALES_HK
+    data_tests:
+    - not_null:
+        config:
+          severity: warn

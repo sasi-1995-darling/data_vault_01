@@ -1,0 +1,54 @@
+name: Auto Cancel & Delete Workflows on the PR Close
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [main]
+
+# ── Native concurrency control ──────────────────────────────────────────
+# Replaces styfle/cancel-workflow-action@0.9.1 (Node.js 20, deprecated).
+# ────────────────────────────────────────────────────────────────────────
+concurrency:
+  group: auto-cancel-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  cancel-previous-runs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cancel & Delete Runs using head_branch and head_sha
+        run: |
+          # Head branch/SHA arrive via the step env block to prevent script injection.
+          echo "Fetching workflow runs for branch '$HEAD_BRANCH' with head_sha '$HEAD_SHA'..."
+
+          # Query all workflow runs and filter for those whose head_branch and head_sha match
+          # and that have a status of queued, waiting, in_progress, or completed with cancelled conclusion.
+          # Pass head_branch/head_sha as jq data via --arg (not embedded in the jq program)
+          # so a branch name containing a double quote cannot break out into jq-expression injection.
+          runs=$(gh api -X GET /repos/${{ github.repository }}/actions/runs \
+            | jq -r --arg branch "$HEAD_BRANCH" --arg sha "$HEAD_SHA" \
+                '.workflow_runs[]
+                | select(.head_branch == $branch)
+                | select(.head_sha == $sha)
+                | select(.name != "PR Schema Cleanup")
+                | select(.status=="queued" or .status=="waiting" or .status=="in_progress" or (.status=="completed" and .conclusion=="cancelled"))
+                | "\(.id)"')
+
+          echo "Found workflow run IDs: $runs"
+
+          for run_id in $runs; do
+            # Avoid affecting the current run.
+            if [ "$run_id" != "${{ github.run_id }}" ]; then
+              echo "Attempting to cancel run ID: $run_id"
+              gh api -X POST /repos/${{ github.repository }}/actions/runs/$run_id/cancel || echo "Unable to cancel run ID: $run_id (perhaps already cancelled)"
+              # Optionally, wait a few seconds for cancellation to take effect.
+              sleep 5
+              echo "Deleting run ID: $run_id"
+              gh api -X DELETE /repos/${{ github.repository }}/actions/runs/$run_id || echo "Failed to delete run ID: $run_id"
+            fi
+          done
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # untrusted input — via env to prevent script injection (CWE-78)
+          HEAD_BRANCH: ${{ github.event.pull_request.head.ref }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}

@@ -1,0 +1,54 @@
+version: 2
+
+models:
+  - name: base_application__appbot_api
+    description: This is the base staging model from Appbott for hub application
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - id
+
+  # dups at the source across all cols
+  #- name: base_rating__appbot_api
+  #  description: This is the base staging model from Appbott for hub rating
+  #  tests:
+  #    - dbt_constraints.primary_key:
+  #        column_names:
+  #          - app_id
+  #          - created_at
+  #          - country
+  #          - country_id
+  #          - version
+
+  - name: base_review__appbot_api
+    description: This is the base staging model from Appbott for hub review
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - id
+
+  - name: base_linkratingapp__appbot_api
+    description: This is the base staging model from Appbott for hub rating  and application
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - link_rating_applist
+
+  - name: base_linkreviewapp__appbot_api
+    description: This is the base staging model from Appbott for hub review and application
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - link_review_applist
+
+  - name: base_linkreviewbrand__appbot_api
+    description: This is the base staging model from Appbott for hub review and hub brand
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - link_review_brand

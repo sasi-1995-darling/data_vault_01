@@ -1,0 +1,25 @@
+version: 2
+
+models:
+  - name: msat_po_action__emtk_ebs
+    description: This is the raw vault multi-active satellite model for po action
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - purchase_order_hk
+              - action_code
+              - action_date
+              - sequence_num
+              - load_dts
+      - dbt_constraints.foreign_key:
+          arguments:
+            fk_column_names:
+              - purchase_order_hk
+            pk_table_name: ref('hub_purchase_order')
+            pk_column_names:
+              - purchase_order_hk
+    config:
+      tags:
+        - emtek
+        - ebs

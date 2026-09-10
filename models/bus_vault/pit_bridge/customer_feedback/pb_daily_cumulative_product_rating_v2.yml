@@ -1,0 +1,10 @@
+version: 2
+models:
+  - name: pb_daily_cumulative_product_rating_v2
+    data_tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - PRODUCT_RETAILER_HK
+              - DATE_KEY
+              - BKCC

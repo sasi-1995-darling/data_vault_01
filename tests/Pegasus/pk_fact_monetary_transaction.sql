@@ -1,0 +1,1 @@
+select * from ({{ primary_key_check('fact_monetary_transaction',['TRANSACTION_BK','BKCC','REC_SRC']) }})

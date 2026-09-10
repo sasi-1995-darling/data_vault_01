@@ -1,0 +1,70 @@
+---- SRC LAYER ----
+WITH
+SRC_b              as ( SELECT * FROM {{ ref('v_psa_stg_production_order_line__winn_sap') }} as SRC  
+                        QUALIFY (ROW_NUMBER() OVER(PARTITION BY PRODUCTION_ORDER_LINE_LHK ORDER BY LOAD_DTS desc))=1 )
+
+/*
+SRC_b              as ( SELECT * FROM STAGING.V_PSA_STG_PRODUCTION_ORDER_LINE__WINN_SAP )
+*/
+---- LOGIC LAYER ----
+
+, LOGIC_b as (
+    SELECT
+        PRODUCTION_ORDER_LINE_LHK
+      , PRODUCTION_ORDER_LINE_HK
+      , PRODUCTION_ORDER_HK
+      , LOAD_DTS
+      , REC_SRC
+    FROM SRC_b
+)
+---- RENAME LAYER ----
+
+, RENAME_b as (
+    SELECT
+        PRODUCTION_ORDER_LINE_LHK
+      , PRODUCTION_ORDER_LINE_HK
+      , PRODUCTION_ORDER_HK
+      , LOAD_DTS
+      , REC_SRC
+    FROM LOGIC_b
+)
+---- FILTER LAYER ----
+
+, FILTER_b as (
+    SELECT *
+    FROM RENAME_b
+)
+
+---- JOIN LAYER ----
+, JOIN_RESULT as (
+    SELECT *
+    FROM FILTER_b
+)
+
+---- FINAL LAYER ----
+SELECT
+          PRODUCTION_ORDER_LINE_LHK
+        , PRODUCTION_ORDER_LINE_HK
+        , PRODUCTION_ORDER_HK
+        , LOAD_DTS
+        , REC_SRC
+FROM JOIN_RESULT
+{% if is_incremental() %}
+WHERE NOT EXISTS (
+    SELECT 1 
+    FROM {{ this }} existing
+    WHERE existing.PRODUCTION_ORDER_LINE_LHK = JOIN_RESULT.PRODUCTION_ORDER_LINE_LHK
+)
+{% endif %}
+{% if not is_incremental() %}
+
+union all
+SELECT 
+MD5_BINARY(GR.VALUE) AS PRODUCTION_ORDER_LINE_LHK,
+MD5_BINARY(GR.VALUE) AS PRODUCTION_ORDER_LINE_HK,
+MD5_BINARY(GR.VALUE) AS PRODUCTION_ORDER_HK,
+CONVERT_TIMEZONE('UTC','1900-01-01'::TIMESTAMP) AS LOAD_DTS,
+'USAZET.SNOWFLAKE.FBIN.DERIVED' AS REC_SRC
+FROM
+TABLE(strtok_split_to_table('0|-1|-2', '|')) AS GR
+{% endif %}

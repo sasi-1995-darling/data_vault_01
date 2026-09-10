@@ -1,0 +1,21 @@
+version: 2
+models:
+- name: fact_product_cost_estimate
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - ITEM_BK
+        - REFERENCE_OBJECT
+        - COST_ESTIMATE_NUMBER
+        - COSTING_TYPE
+        - COSTING_DATE__YYYYMMDD
+        - COSTING_VERSION
+        - VALUATION_VARIANT
+        - COSTS_ENTERED_MANUALLY
+        - PARTNER_NUMBER
+        - TYPE_OF_COST_COMPONENT_SPLIT
+        - LINK_FIELD_FOR_CURRENCY_TYPE
+        - INDICATOR_LOWER_LEVEL_COSTS
+        - INDICATOR_COSTS_ENTERED_MANUAL
+  columns: []

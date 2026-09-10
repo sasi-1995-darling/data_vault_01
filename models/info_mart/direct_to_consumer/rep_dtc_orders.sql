@@ -1,0 +1,367 @@
+---- SRC LAYER ----
+WITH
+SRC_fact_order     as ( SELECT ADJUSTMENT_ID, BASE_MATERIAL, BASE_MATERIAL_KEY, ITEM_KEY, ITEM_NUMBER, LINE_DOLLARS, LINE_QUANTITY, ORDER_HEADER_KEY, 
+                        ORDER_LINE_BK, ORDER_LINE_ID, ORDER_LINE_KEY, ORDER_LINE_NUMBER, ORIGIN, PRICE, REFUND_LINE_RECORD_ID, SKU, STORE, VARIANT_ID 
+                        FROM {{ ref('im_dtc_fact_dtc_order_line') }} as SRC  ),
+SRC_dim_order      as ( SELECT BILLING_CITY, BILLING_COUNTRY, BILLING_STATE, BILLING_ZIP, CONSUMER_BK, CONSUMER_KEY, CREATED_DATE_KEY, CUSTOMER_BK, 
+                        CUSTOMER_ID, CUSTOMER_KEY, FINANCIAL_STATUS, FULFILLMENT_STATUS, ORDER_HEADER_BK, ORDER_HEADER_KEY, ORDER_ID, SHIPPING_CITY, 
+                        SHIPPING_COUNTRY, SHIPPING_STATE, SHIPPING_ZIP FROM {{ ref('im_dtc_dim_dtc_order_header') }} as SRC  ),
+SRC_dim_date       as ( SELECT DATE, DATE_BK, EPOCH_DAY, EPOCH_MONTH, EPOCH_WEEK, FISCAL_445_CAL_DAY, FISCAL_445_CAL_MONTH, FISCAL_445_CAL_MONTH_YYYYMM, 
+                        FISCAL_445_CAL_QUARTER, FISCAL_445_CAL_QUARTER_YYYYQQ, FISCAL_445_CAL_WEEK, FISCAL_445_CAL_WEEK_YYYYWW, FISCAL_445_CAL_YEAR, 
+                        FISCAL_445_WORKING_DAY_FLAG, FISCAL_DAY_OF_YEAR, FISCAL_LAST_12_MONTHS_FLAG, FISCAL_LAST_13_WEEKS_FLAG, FISCAL_LAST_3_MONTHS_FLAG, 
+                        FISCAL_LAST_4_WEEKS_FLAG, FISCAL_LAST_MONTH_FLAG, FISCAL_LAST_QUARTER_FLAG, FISCAL_LAST_WEEK_FLAG, FISCAL_QTD_FLAG, 
+                        FISCAL_ROLLING_52_WEEK_FLAG, FISCAL_YTD_FLAG, IS_COMPLETED_FISCAL_MONTH, IS_COMPLETED_FISCAL_WEEK, MONTH_NAME, MONTH_NAME_ABBR, 
+                        MONTH_NUMBER_LEADING_ZERO, WEEKS_IN_MONTH FROM {{ ref('im_dtc_dim_date_fiscal_445') }} as SRC  ),
+SRC_dim_item       as ( SELECT BRAND, FORECAST_BASE_MATERIAL, ITEM_ARCHITECTURE, ITEM_ARCHITECTURE_DETAIL, ITEM_BASE_UOM, ITEM_CATEGORY, ITEM_CLASS, 
+                        ITEM_FINISH, ITEM_ID, ITEM_PRICE_BAND, ITEM_PRODUCT_LINE, ITEM_PRODUCT_SEGMENT, ITEM_REPORTING_CATEGORY, ITEM_ROOM_AREA_DETAIL, 
+                        ITEM_STATUS, ITEM_SUB_CATEGORY, ITEM_SUB_CLASS, ITEM_TITLE, ITEM_TYPE_CODE, PNS_PRICE_BAND, ULTIMATE_ITEM_SUPPLY_SOURCE 
+                        FROM {{ ref('im_dtc_dim_item_fbin') }} as SRC  )
+
+/*
+SRC_fact_order     as ( SELECT * FROM direct_to_consumer.im_dtc_fact_dtc_order_line )
+SRC_dim_order      as ( SELECT * FROM direct_to_consumer.im_dtc_dim_dtc_order_header )
+SRC_dim_date       as ( SELECT * FROM direct_to_consumer.im_dtc_dim_date_fiscal_445 )
+SRC_dim_item       as ( SELECT * FROM direct_to_consumer.im_dtc_dim_item_fbin )
+*/
+---- LOGIC LAYER ----
+
+, LOGIC_fact_order as (
+    SELECT
+        ORDER_HEADER_KEY
+      , ORDER_LINE_KEY
+      , ORDER_LINE_BK
+      , ORDER_LINE_ID
+      , ORDER_LINE_NUMBER
+      , REFUND_LINE_RECORD_ID
+      , ADJUSTMENT_ID
+      , BASE_MATERIAL_KEY
+      , BASE_MATERIAL
+      , ITEM_KEY
+      , ITEM_NUMBER
+      , SKU
+      , VARIANT_ID
+      , PRICE
+      , LINE_DOLLARS
+      , LINE_QUANTITY
+      , ORIGIN
+      , STORE
+    FROM SRC_fact_order
+)
+
+, LOGIC_dim_order as (
+    SELECT
+        ORDER_HEADER_BK
+      , ORDER_ID
+      , CUSTOMER_KEY
+      , CUSTOMER_BK
+      , CUSTOMER_ID
+      , CONSUMER_KEY
+      , CONSUMER_BK
+      , FINANCIAL_STATUS
+      , FULFILLMENT_STATUS
+      , SHIPPING_CITY
+      , SHIPPING_STATE
+      , SHIPPING_COUNTRY
+      , SHIPPING_ZIP
+      , BILLING_CITY
+      , BILLING_STATE
+      , BILLING_COUNTRY
+      , BILLING_ZIP
+      , ORDER_HEADER_KEY                                             as                         DIM_ORDER_ORDER_HEADER_KEY
+      , CREATED_DATE_KEY                                             as                          DIM_ORDER_CREATED_DATEKEY
+    FROM SRC_dim_order
+)
+
+, LOGIC_dim_date as (
+    SELECT
+        DATE                                                         as                                ORDER_CREATION_DATE
+      , FISCAL_445_CAL_DAY
+      , FISCAL_445_CAL_WEEK
+      , FISCAL_445_CAL_MONTH
+      , FISCAL_445_CAL_QUARTER
+      , FISCAL_445_CAL_YEAR
+      , FISCAL_445_CAL_QUARTER_YYYYQQ
+      , FISCAL_445_CAL_MONTH_YYYYMM
+      , FISCAL_445_CAL_WEEK_YYYYWW
+      , FISCAL_445_WORKING_DAY_FLAG
+      , IS_COMPLETED_FISCAL_MONTH
+      , IS_COMPLETED_FISCAL_WEEK
+      , FISCAL_LAST_WEEK_FLAG
+      , FISCAL_LAST_4_WEEKS_FLAG
+      , FISCAL_LAST_13_WEEKS_FLAG
+      , FISCAL_LAST_MONTH_FLAG
+      , FISCAL_LAST_3_MONTHS_FLAG
+      , FISCAL_LAST_12_MONTHS_FLAG
+      , MONTH_NAME
+      , MONTH_NAME_ABBR
+      , EPOCH_DAY
+      , EPOCH_WEEK
+      , EPOCH_MONTH
+      , WEEKS_IN_MONTH
+      , MONTH_NUMBER_LEADING_ZERO
+      , FISCAL_DAY_OF_YEAR
+      , FISCAL_YTD_FLAG
+      , FISCAL_ROLLING_52_WEEK_FLAG
+      , FISCAL_QTD_FLAG
+      , FISCAL_LAST_QUARTER_FLAG
+      , DATE_BK                                                      as                                   DIM_DATE_DATE_BK
+    FROM SRC_dim_date
+)
+
+, LOGIC_dim_item as (
+    SELECT
+        ITEM_TITLE                                                   as                                   ITEM_DESCRIPTION
+      , ITEM_TYPE_CODE
+      , ITEM_STATUS
+      , BRAND
+      , ITEM_CATEGORY
+      , ITEM_SUB_CATEGORY
+      , ITEM_CLASS
+      , ITEM_SUB_CLASS
+      , FORECAST_BASE_MATERIAL
+      , ULTIMATE_ITEM_SUPPLY_SOURCE
+      , ITEM_BASE_UOM
+      , ITEM_ARCHITECTURE
+      , ITEM_ARCHITECTURE_DETAIL
+      , ITEM_FINISH
+      , ITEM_PRICE_BAND
+      , PNS_PRICE_BAND
+      , ITEM_PRODUCT_LINE
+      , ITEM_PRODUCT_SEGMENT
+      , ITEM_REPORTING_CATEGORY
+      , ITEM_ROOM_AREA_DETAIL
+      , ITEM_ID                                                      as                                   DIM_ITEM_ITEM_ID
+    FROM SRC_dim_item
+)
+---- RENAME LAYER ----
+
+, RENAME_fact_order as (
+    SELECT
+        ORDER_HEADER_KEY
+      , ORDER_LINE_KEY
+      , ORDER_LINE_BK
+      , ORDER_LINE_ID
+      , ORDER_LINE_NUMBER
+      , REFUND_LINE_RECORD_ID
+      , ADJUSTMENT_ID
+      , BASE_MATERIAL_KEY
+      , BASE_MATERIAL
+      , ITEM_KEY
+      , ITEM_NUMBER
+      , SKU
+      , VARIANT_ID
+      , PRICE
+      , LINE_DOLLARS
+      , LINE_QUANTITY
+      , ORIGIN
+      , STORE
+    FROM LOGIC_fact_order
+)
+
+, RENAME_dim_order as (
+    SELECT
+        ORDER_HEADER_BK
+      , ORDER_ID
+      , CUSTOMER_KEY
+      , CUSTOMER_BK
+      , CUSTOMER_ID
+      , CONSUMER_KEY
+      , CONSUMER_BK
+      , FINANCIAL_STATUS
+      , FULFILLMENT_STATUS
+      , SHIPPING_CITY
+      , SHIPPING_STATE
+      , SHIPPING_COUNTRY
+      , SHIPPING_ZIP
+      , BILLING_CITY
+      , BILLING_STATE
+      , BILLING_COUNTRY
+      , BILLING_ZIP
+      , DIM_ORDER_ORDER_HEADER_KEY
+      , DIM_ORDER_CREATED_DATEKEY
+    FROM LOGIC_dim_order
+)
+
+, RENAME_dim_date as (
+    SELECT
+        ORDER_CREATION_DATE
+      , FISCAL_445_CAL_DAY
+      , FISCAL_445_CAL_WEEK
+      , FISCAL_445_CAL_MONTH
+      , FISCAL_445_CAL_QUARTER
+      , FISCAL_445_CAL_YEAR
+      , FISCAL_445_CAL_QUARTER_YYYYQQ
+      , FISCAL_445_CAL_MONTH_YYYYMM
+      , FISCAL_445_CAL_WEEK_YYYYWW
+      , FISCAL_445_WORKING_DAY_FLAG
+      , IS_COMPLETED_FISCAL_MONTH
+      , IS_COMPLETED_FISCAL_WEEK
+      , FISCAL_LAST_WEEK_FLAG
+      , FISCAL_LAST_4_WEEKS_FLAG
+      , FISCAL_LAST_13_WEEKS_FLAG
+      , FISCAL_LAST_MONTH_FLAG
+      , FISCAL_LAST_3_MONTHS_FLAG
+      , FISCAL_LAST_12_MONTHS_FLAG
+      , MONTH_NAME
+      , MONTH_NAME_ABBR
+      , EPOCH_DAY
+      , EPOCH_WEEK
+      , EPOCH_MONTH
+      , WEEKS_IN_MONTH
+      , MONTH_NUMBER_LEADING_ZERO
+      , FISCAL_DAY_OF_YEAR
+      , FISCAL_YTD_FLAG
+      , FISCAL_ROLLING_52_WEEK_FLAG
+      , FISCAL_QTD_FLAG
+      , FISCAL_LAST_QUARTER_FLAG
+      , DIM_DATE_DATE_BK
+    FROM LOGIC_dim_date
+)
+
+, RENAME_dim_item as (
+    SELECT
+        ITEM_DESCRIPTION
+      , ITEM_TYPE_CODE
+      , ITEM_STATUS
+      , BRAND
+      , ITEM_CATEGORY
+      , ITEM_SUB_CATEGORY
+      , ITEM_CLASS
+      , ITEM_SUB_CLASS
+      , FORECAST_BASE_MATERIAL
+      , ULTIMATE_ITEM_SUPPLY_SOURCE
+      , ITEM_BASE_UOM
+      , ITEM_ARCHITECTURE
+      , ITEM_ARCHITECTURE_DETAIL
+      , ITEM_FINISH
+      , ITEM_PRICE_BAND
+      , PNS_PRICE_BAND
+      , ITEM_PRODUCT_LINE
+      , ITEM_PRODUCT_SEGMENT
+      , ITEM_REPORTING_CATEGORY
+      , ITEM_ROOM_AREA_DETAIL
+      , DIM_ITEM_ITEM_ID
+    FROM LOGIC_dim_item
+)
+---- FILTER LAYER ----
+
+, FILTER_fact_order as (
+    SELECT *
+    FROM RENAME_fact_order
+)
+
+, FILTER_dim_order as (
+    SELECT *
+    FROM RENAME_dim_order
+)
+
+, FILTER_dim_date as (
+    SELECT *
+    FROM RENAME_dim_date
+)
+
+, FILTER_dim_item as (
+    SELECT *
+    FROM RENAME_dim_item
+)
+
+---- JOIN LAYER ----
+, JOIN_RESULT as (
+    SELECT *
+    FROM FILTER_fact_order
+    LEFT JOIN FILTER_dim_order
+        ON FILTER_fact_order.ORDER_HEADER_KEY = DIM_ORDER_ORDER_HEADER_KEY
+    LEFT JOIN FILTER_dim_date
+        ON DIM_ORDER_CREATED_DATEKEY = DIM_DATE_DATE_BK
+    LEFT JOIN FILTER_dim_item
+        ON FILTER_fact_order.ITEM_KEY = DIM_ITEM_ITEM_ID
+)
+
+---- FINAL LAYER ----
+SELECT
+          ORDER_HEADER_KEY
+        , ORDER_HEADER_BK
+        , ORDER_ID
+        , ORDER_LINE_KEY
+        , ORDER_LINE_BK
+        , ORDER_LINE_ID
+        , ORDER_LINE_NUMBER
+        , REFUND_LINE_RECORD_ID
+        , ADJUSTMENT_ID
+        , ORDER_CREATION_DATE
+        , CUSTOMER_KEY
+        , CUSTOMER_BK
+        , CUSTOMER_ID
+        , CONSUMER_KEY
+        , CONSUMER_BK
+        , FINANCIAL_STATUS
+        , FULFILLMENT_STATUS
+        , BASE_MATERIAL_KEY
+        , BASE_MATERIAL
+        , ITEM_KEY
+        , ITEM_NUMBER
+        , SKU
+        , VARIANT_ID
+        , ITEM_DESCRIPTION
+        , ITEM_TYPE_CODE
+        , ITEM_STATUS
+        , BRAND
+        , ITEM_CATEGORY
+        , ITEM_SUB_CATEGORY
+        , ITEM_CLASS
+        , ITEM_SUB_CLASS
+        , FORECAST_BASE_MATERIAL
+        , ULTIMATE_ITEM_SUPPLY_SOURCE
+        , ITEM_BASE_UOM
+        , ITEM_ARCHITECTURE
+        , ITEM_ARCHITECTURE_DETAIL
+        , ITEM_FINISH
+        , ITEM_PRICE_BAND
+        , PNS_PRICE_BAND
+        , ITEM_PRODUCT_LINE
+        , ITEM_PRODUCT_SEGMENT
+        , ITEM_REPORTING_CATEGORY
+        , ITEM_ROOM_AREA_DETAIL
+        , PRICE
+        , LINE_DOLLARS
+        , LINE_QUANTITY
+        , ORIGIN
+        , STORE
+        , SHIPPING_CITY
+        , SHIPPING_STATE
+        , SHIPPING_COUNTRY
+        , SHIPPING_ZIP
+        , BILLING_CITY
+        , BILLING_STATE
+        , BILLING_COUNTRY
+        , BILLING_ZIP
+        , FISCAL_445_CAL_DAY
+        , FISCAL_445_CAL_WEEK
+        , FISCAL_445_CAL_MONTH
+        , FISCAL_445_CAL_QUARTER
+        , FISCAL_445_CAL_YEAR
+        , FISCAL_445_CAL_QUARTER_YYYYQQ
+        , FISCAL_445_CAL_MONTH_YYYYMM
+        , FISCAL_445_CAL_WEEK_YYYYWW
+        , FISCAL_445_WORKING_DAY_FLAG
+        , IS_COMPLETED_FISCAL_MONTH
+        , IS_COMPLETED_FISCAL_WEEK
+        , FISCAL_LAST_WEEK_FLAG
+        , FISCAL_LAST_4_WEEKS_FLAG
+        , FISCAL_LAST_13_WEEKS_FLAG
+        , FISCAL_LAST_MONTH_FLAG
+        , FISCAL_LAST_3_MONTHS_FLAG
+        , FISCAL_LAST_12_MONTHS_FLAG
+        , MONTH_NAME
+        , MONTH_NAME_ABBR
+        , EPOCH_DAY
+        , EPOCH_WEEK
+        , EPOCH_MONTH
+        , WEEKS_IN_MONTH
+        , MONTH_NUMBER_LEADING_ZERO
+        , FISCAL_DAY_OF_YEAR
+        , FISCAL_YTD_FLAG
+        , FISCAL_ROLLING_52_WEEK_FLAG
+        , FISCAL_QTD_FLAG
+        , FISCAL_LAST_QUARTER_FLAG
+FROM JOIN_RESULT

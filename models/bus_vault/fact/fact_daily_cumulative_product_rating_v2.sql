@@ -1,0 +1,95 @@
+---- SRC LAYER ----
+WITH
+SRC_PB             as ( SELECT * FROM {{ ref('pb_daily_cumulative_product_rating_v2') }} as SRC  )
+
+/*
+SRC_PB             as ( SELECT * FROM BUS_VAULT.PB_DAILY_CUMULATIVE_PRODUCT_RATING_V2 )
+*/
+---- LOGIC LAYER ----
+
+, LOGIC_PB as (
+    SELECT
+        PRODUCT_BK
+      , RETAILER_BK
+      , BRAND_BK
+      , BKCC
+      , REC_SRC
+      , DATE_KEY
+      , CUMULATIVE_STAR_RATING
+      , CUMULATIVE_REVIEWS
+      , CUMULATIVE_5_STAR_REVIEWS
+      , CUMULATIVE_4_STAR_REVIEWS
+      , CUMULATIVE_3_STAR_REVIEWS
+      , CUMULATIVE_2_STAR_REVIEWS
+      , CUMULATIVE_1_STAR_REVIEWS
+      , INCRE_1_STAR
+      , INCRE_2_STAR
+      , INCRE_3_STAR
+      , INCRE_4_STAR
+      , INCRE_5_STAR
+      , SOURCE
+      , COUNTRY
+    FROM SRC_PB
+)
+---- RENAME LAYER ----
+
+, RENAME_PB as (
+    SELECT
+        PRODUCT_BK
+      , RETAILER_BK
+      , BRAND_BK
+      , BKCC
+      , REC_SRC
+      , DATE_KEY
+      , CUMULATIVE_STAR_RATING
+      , CUMULATIVE_REVIEWS
+      , CUMULATIVE_5_STAR_REVIEWS
+      , CUMULATIVE_4_STAR_REVIEWS
+      , CUMULATIVE_3_STAR_REVIEWS
+      , CUMULATIVE_2_STAR_REVIEWS
+      , CUMULATIVE_1_STAR_REVIEWS
+      , INCRE_1_STAR
+      , INCRE_2_STAR
+      , INCRE_3_STAR
+      , INCRE_4_STAR
+      , INCRE_5_STAR
+      , SOURCE
+      , COUNTRY
+    FROM LOGIC_PB
+)
+---- FILTER LAYER ----
+
+, FILTER_PB as (
+    SELECT *
+    FROM RENAME_PB
+)
+
+---- JOIN LAYER ----
+, JOIN_RESULT as (
+    SELECT *
+    FROM FILTER_PB
+)
+
+---- FINAL LAYER ----
+SELECT
+          PRODUCT_BK
+        , RETAILER_BK
+        , BRAND_BK
+        , BKCC
+        , REC_SRC
+        , DATE_KEY
+        , CUMULATIVE_STAR_RATING
+        , CUMULATIVE_REVIEWS
+        , CUMULATIVE_5_STAR_REVIEWS
+        , CUMULATIVE_4_STAR_REVIEWS
+        , CUMULATIVE_3_STAR_REVIEWS
+        , CUMULATIVE_2_STAR_REVIEWS
+        , CUMULATIVE_1_STAR_REVIEWS
+        , INCRE_1_STAR
+        , INCRE_2_STAR
+        , INCRE_3_STAR
+        , INCRE_4_STAR
+        , INCRE_5_STAR
+        , SOURCE
+        , COUNTRY
+FROM JOIN_RESULT

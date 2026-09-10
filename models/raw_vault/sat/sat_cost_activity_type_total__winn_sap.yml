@@ -1,0 +1,24 @@
+version: 2
+models:
+  - name: sat_cost_activity_type_total__winn_sap
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - COST_ACTIVITY_TYPE_TOTALS_HK
+              - LOAD_DTS
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          config:
+            severity: warn
+          arguments:
+            min_value: 4
+    columns:
+      - name: COST_ACTIVITY_TYPE_TOTALS_HK
+        tests:
+          - dbt_utils.relationships_where:
+              arguments:
+                to: ref( 'lnk_cost_activity_type_total' )
+                field: COST_ACTIVITY_TYPE_TOTALS_HK
+          - not_null:
+              config:
+                severity: warn

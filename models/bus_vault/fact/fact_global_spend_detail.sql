@@ -1,0 +1,291 @@
+---- SRC LAYER ----
+WITH
+SRC_pb             as ( SELECT AVG_INV_PRICE, BKCC, BUSINESS_UNIT, CAL_MONTH, CAL_YEAR, CATEGORY_CD, CATEGORY_DESC, CATEGORY_LEADER_NAME, CONSIGNMENT_IND, COUNTRY_OF_ORIGIN, DIRECTOR_NAME, DOCUMENT_TYPE, DRVD_OPCO, FBIN_CATEGORY_I, FBIN_CATEGORY_II, FBIN_CATEGORY_III, HDR_BUYER_CODE, ITEM_BK, ITEM_HK, LEGAL_ENTITY_BK, LEGAL_ENTITY_HK, LOCAL_CURRENCY, MATERIAL_DOCUMENT_ITEM, MATERIAL_DOCUMENT_NUMBER, OPCO_CATEGORY, ORDER_QTY, ORDER_UNIT_PRICE, ORDER_UNIT_PRICE_USD, PAYMENT_TERMS, PLANT_BK, PLANT_HK, POSTING_DATE, PO_CREATION_DATE, PO_CURRENCY, PO_HEADER_DEL_IND, PO_HEADER_HK, PO_HEADER_ID, PO_ITEM_UOM, PO_LINE_ELIKZ, PO_LINE_NUMBER, PO_NUMBER, PO_RECEIPT_UOM, PURCHASING_ORG_BK, PURCHASING_RECORD_BK, PURCHASING_RECORD_HK, RECEIPT_QTY, RECEIPT_SPEND, REC_SRC, RELEASE_NUMBER, SPEND_AMOUNT_LOCAL_CURRENCY, SPEND_TYPE_FLAG, SPEND_USD, SPEND_VOLUME, SUPPLIER_BK, SUPPLIER_HK, SUPPLIER_NAME_CHILD, SUPPLIER_NAME_PARENT, SUPPLIER_NUMBER_CHILD, SUPPLIER_NUMBER_PARENT, SUPPLIER_SITE_BK, TOTAL_INV_QTY, TOTAL_INV_SPEND, TOTAL_RCPT_QTY, TOTAL_RCPT_SPEND, TRANSACTION_ID, USD_PO_ITEM_PRICE FROM {{ ref('pb_global_spend_detail') }} as SRC  ),
+SRC_pb_spt         as ( SELECT BKCC, END_DATE__YYYYMMDD, PURCHASING_ORG_BK, START_DATE__YYYYMMDD, SUPPLIER_HK, SUPPLIER_PAYMENT_TERM_DURABLE_HK, SUPPLIER_PAYMENT_TERM_HK, SUPPLIER_SITE_BK FROM {{ ref('pb_supplier_payment_terms') }} as SRC  )
+
+/*
+SRC_pb             as ( SELECT * FROM BUS_VAULT.pb_global_spend_detail )
+SRC_pb_spt         as ( SELECT * FROM BUS_VAULT.pb_supplier_payment_terms )
+*/
+---- LOGIC LAYER ----
+
+, LOGIC_pb as (
+    SELECT
+        PO_HEADER_ID
+      , PO_NUMBER
+      , PO_LINE_NUMBER
+      , MATERIAL_DOCUMENT_NUMBER
+      , MATERIAL_DOCUMENT_ITEM
+      , TRANSACTION_ID
+      , RELEASE_NUMBER
+      , TO_CHAR(PO_CREATION_DATE, 'YYYYMMDD')::INTEGER               as                               PO_CREATION_DATE_KEY
+      , TO_CHAR(POSTING_DATE, 'YYYYMMDD')::INTEGER                   as                                   POSTING_DATE_KEY
+      , CAL_YEAR
+      , CAL_MONTH
+      , ORDER_QTY
+      , TOTAL_RCPT_QTY
+      , TOTAL_RCPT_SPEND
+      , TOTAL_INV_QTY
+      , TOTAL_INV_SPEND
+      , RECEIPT_QTY
+      , RECEIPT_SPEND
+      , PO_CURRENCY
+      , AVG_INV_PRICE
+      , SPEND_VOLUME
+      , SPEND_AMOUNT_LOCAL_CURRENCY
+      , LOCAL_CURRENCY
+      , SPEND_USD
+      , USD_PO_ITEM_PRICE
+      , PO_ITEM_UOM
+      , ORDER_UNIT_PRICE
+      , ORDER_UNIT_PRICE_USD
+      , PO_RECEIPT_UOM
+      , PO_LINE_ELIKZ
+      , DRVD_OPCO                                                    as                                               OPCO
+      , OPCO_CATEGORY
+      , DIRECTOR_NAME
+      , CATEGORY_LEADER_NAME
+      , FBIN_CATEGORY_I
+      , FBIN_CATEGORY_II
+      , FBIN_CATEGORY_III
+      , CONSIGNMENT_IND
+      , CATEGORY_CD
+      , CATEGORY_DESC
+      , HDR_BUYER_CODE
+      , SUPPLIER_NUMBER_PARENT
+      , SUPPLIER_NAME_PARENT
+      , SUPPLIER_NUMBER_CHILD
+      , SUPPLIER_NAME_CHILD
+      , PAYMENT_TERMS
+      , DOCUMENT_TYPE
+      , COUNTRY_OF_ORIGIN
+      , SPEND_TYPE_FLAG
+      , PURCHASING_ORG_BK
+      , SUPPLIER_SITE_BK
+      , SUPPLIER_BK
+      , ITEM_BK
+      , PLANT_BK
+      , LEGAL_ENTITY_BK
+      , PURCHASING_RECORD_BK
+      , TO_CHAR(PO_CREATION_DATE, 'YYYYMMDD')::INTEGER               as                         PO_CREATION_DATE__YYYYMMDD
+      , TO_CHAR(POSTING_DATE, 'YYYYMMDD')::INTEGER                   as                             POSTING_DATE__YYYYMMDD
+      , PO_HEADER_HK
+      , ITEM_HK
+      , SUPPLIER_HK
+      , PLANT_HK
+      , LEGAL_ENTITY_HK
+      , PURCHASING_RECORD_HK
+      , BKCC
+      , REC_SRC
+      , BUSINESS_UNIT
+      , PO_CREATION_DATE
+      , POSTING_DATE
+      , PO_HEADER_DEL_IND
+    FROM SRC_pb
+)
+
+, LOGIC_pb_spt as (
+    SELECT
+        SUPPLIER_HK                                                  as                                    SPT_SUPPLIER_HK
+      , PURCHASING_ORG_BK                                            as                              SPT_PURCHASING_ORG_BK
+      , SUPPLIER_SITE_BK                                             as                               SPT_SUPPLIER_SITE_BK
+      , START_DATE__YYYYMMDD
+      , END_DATE__YYYYMMDD
+      , SUPPLIER_PAYMENT_TERM_HK
+      , SUPPLIER_PAYMENT_TERM_DURABLE_HK
+      , BKCC                                                         as                                           SPT_BKCC
+    FROM SRC_pb_spt
+)
+---- RENAME LAYER ----
+
+, RENAME_pb as (
+    SELECT
+        PO_HEADER_ID
+      , PO_NUMBER
+      , PO_LINE_NUMBER
+      , MATERIAL_DOCUMENT_NUMBER
+      , MATERIAL_DOCUMENT_ITEM
+      , TRANSACTION_ID
+      , RELEASE_NUMBER
+      , PO_CREATION_DATE_KEY
+      , POSTING_DATE_KEY
+      , CAL_YEAR
+      , CAL_MONTH
+      , ORDER_QTY
+      , TOTAL_RCPT_QTY
+      , TOTAL_RCPT_SPEND
+      , TOTAL_INV_QTY
+      , TOTAL_INV_SPEND
+      , RECEIPT_QTY
+      , RECEIPT_SPEND
+      , PO_CURRENCY
+      , AVG_INV_PRICE
+      , SPEND_VOLUME
+      , SPEND_AMOUNT_LOCAL_CURRENCY
+      , LOCAL_CURRENCY
+      , SPEND_USD
+      , USD_PO_ITEM_PRICE
+      , PO_ITEM_UOM
+      , ORDER_UNIT_PRICE
+      , ORDER_UNIT_PRICE_USD
+      , PO_RECEIPT_UOM
+      , PO_LINE_ELIKZ
+      , OPCO
+      , OPCO_CATEGORY
+      , DIRECTOR_NAME
+      , CATEGORY_LEADER_NAME
+      , FBIN_CATEGORY_I
+      , FBIN_CATEGORY_II
+      , FBIN_CATEGORY_III
+      , CONSIGNMENT_IND
+      , CATEGORY_CD
+      , CATEGORY_DESC
+      , HDR_BUYER_CODE
+      , SUPPLIER_NUMBER_PARENT
+      , SUPPLIER_NAME_PARENT
+      , SUPPLIER_NUMBER_CHILD
+      , SUPPLIER_NAME_CHILD
+      , PAYMENT_TERMS
+      , DOCUMENT_TYPE
+      , COUNTRY_OF_ORIGIN
+      , SPEND_TYPE_FLAG
+      , PURCHASING_ORG_BK
+      , SUPPLIER_SITE_BK
+      , SUPPLIER_BK
+      , ITEM_BK
+      , PLANT_BK
+      , LEGAL_ENTITY_BK
+      , PURCHASING_RECORD_BK
+      , PO_CREATION_DATE__YYYYMMDD
+      , POSTING_DATE__YYYYMMDD
+      , PO_HEADER_HK
+      , ITEM_HK
+      , SUPPLIER_HK
+      , PLANT_HK
+      , LEGAL_ENTITY_HK
+      , PURCHASING_RECORD_HK
+      , BKCC
+      , REC_SRC
+      , BUSINESS_UNIT
+      , PO_CREATION_DATE
+      , POSTING_DATE
+      , PO_HEADER_DEL_IND
+    FROM LOGIC_pb
+)
+
+, RENAME_pb_spt as (
+    SELECT
+        SPT_SUPPLIER_HK
+      , SPT_PURCHASING_ORG_BK
+      , SPT_SUPPLIER_SITE_BK
+      , START_DATE__YYYYMMDD
+      , END_DATE__YYYYMMDD
+      , SUPPLIER_PAYMENT_TERM_HK
+      , SUPPLIER_PAYMENT_TERM_DURABLE_HK
+      , SPT_BKCC
+    FROM LOGIC_pb_spt
+)
+---- FILTER LAYER ----
+
+, FILTER_pb as (
+    SELECT *
+    FROM RENAME_pb
+    WHERE PO_HEADER_DEL_IND ='N'
+)
+
+, FILTER_pb_spt as (
+    SELECT *
+    FROM RENAME_pb_spt
+)
+
+---- JOIN LAYER ----
+, JOIN_RESULT as (
+    SELECT *
+    FROM FILTER_pb
+    LEFT JOIN FILTER_pb_spt
+        ON SUPPLIER_HK = SPT_SUPPLIER_HK
+        AND BKCC = SPT_BKCC
+        AND POSTING_DATE BETWEEN TO_DATE(START_DATE__YYYYMMDD::STRING, 'YYYYMMDD') 
+                               AND TO_DATE(END_DATE__YYYYMMDD::STRING, 'YYYYMMDD') 
+        AND ( 
+              (PURCHASING_ORG_BK = SPT_PURCHASING_ORG_BK AND BKCC = 'Hiding_Tiger')
+              OR (SUPPLIER_SITE_BK = SPT_SUPPLIER_SITE_BK AND BKCC IN ('Crouching_Dragon','Diving_Sea','Jumping_River','Swimming_Ocean'))
+              OR (BKCC IN ('Kicking_Panda'))
+            )
+)
+
+---- FINAL LAYER ----
+SELECT
+          PO_HEADER_ID
+        , PO_NUMBER
+        , PO_LINE_NUMBER
+        , MATERIAL_DOCUMENT_NUMBER
+        , MATERIAL_DOCUMENT_ITEM
+        , TRANSACTION_ID
+        , RELEASE_NUMBER
+        , PO_CREATION_DATE_KEY
+        , POSTING_DATE_KEY
+        , CAL_YEAR
+        , CAL_MONTH
+        , ORDER_QTY
+        , TOTAL_RCPT_QTY
+        , TOTAL_RCPT_SPEND
+        , TOTAL_INV_QTY
+        , TOTAL_INV_SPEND
+        , RECEIPT_QTY
+        , RECEIPT_SPEND
+        , PO_CURRENCY
+        , AVG_INV_PRICE
+        , SPEND_VOLUME
+        , SPEND_AMOUNT_LOCAL_CURRENCY
+        , LOCAL_CURRENCY
+        , SPEND_USD
+        , USD_PO_ITEM_PRICE
+        , PO_ITEM_UOM
+        , ORDER_UNIT_PRICE
+        , ORDER_UNIT_PRICE_USD
+        , PO_RECEIPT_UOM
+        , PO_LINE_ELIKZ
+        , OPCO
+        , OPCO_CATEGORY
+        , DIRECTOR_NAME
+        , CATEGORY_LEADER_NAME
+        , FBIN_CATEGORY_I
+        , FBIN_CATEGORY_II
+        , FBIN_CATEGORY_III
+        , CONSIGNMENT_IND
+        , CATEGORY_CD
+        , CATEGORY_DESC
+        , HDR_BUYER_CODE
+        , SUPPLIER_NUMBER_PARENT
+        , SUPPLIER_NAME_PARENT
+        , SUPPLIER_NUMBER_CHILD
+        , SUPPLIER_NAME_CHILD
+        , PAYMENT_TERMS
+        , DOCUMENT_TYPE
+        , COUNTRY_OF_ORIGIN
+        , SPEND_TYPE_FLAG
+        , PURCHASING_ORG_BK
+        , SUPPLIER_SITE_BK
+        , SUPPLIER_BK
+        , ITEM_BK
+        , PLANT_BK
+        , LEGAL_ENTITY_BK
+        , PURCHASING_RECORD_BK
+        , PO_CREATION_DATE__YYYYMMDD
+        , POSTING_DATE__YYYYMMDD
+        , PO_HEADER_HK
+        , ITEM_HK
+        , SUPPLIER_HK
+        , PLANT_HK
+        , LEGAL_ENTITY_HK
+        , /*Replacing NULL Key with Ghost Record Optional NULL Key to enable Inner Join with DIM*/
+        COALESCE (SUPPLIER_PAYMENT_TERM_HK, X'5D7B9ADCBE1C629EC722529DD12E5129') as SUPPLIER_PAYMENT_TERM_HK
+        , /*Replacing NULL Key with Ghost Record Optional NULL Key to enable Inner Join with DIM*/
+        COALESCE (SUPPLIER_PAYMENT_TERM_DURABLE_HK, X'5D7B9ADCBE1C629EC722529DD12E5129') as SUPPLIER_PAYMENT_TERM_DURABLE_HK
+        , PURCHASING_RECORD_HK
+        , BKCC
+        , REC_SRC
+        , BUSINESS_UNIT
+FROM JOIN_RESULT
+/* Descriptive Attributes are also now part of the fact */

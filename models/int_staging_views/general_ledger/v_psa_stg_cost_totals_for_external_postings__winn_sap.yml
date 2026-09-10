@@ -1,0 +1,154 @@
+version: 2
+models:
+  - name: v_psa_stg_cost_totals_for_external_postings__winn_sap
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          config:
+            severity: warn
+          arguments:
+            combination_of_columns:
+              - LEDNR
+              - OBJNR
+              - GJAHR
+              - WRTTP
+              - VERSN
+              - KSTAR
+              - HRKFT
+              - VRGNG
+              - VBUND
+              - PARGB
+              - BEKNZ
+              - TWAER
+              - PERBL
+              - LOAD_DTS
+    columns:
+      - name: MANDT
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: LEDGER_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: OBJECT_NUMBER_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: FISCAL_PERIOD_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: COST_VALUE_TYPE_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: COST_VERSION_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: COST_ELEMENT_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: ORIGIN_GROUP_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: COST_BUSINESS_TRANSACTION_TYPE_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: LEGAL_ENTITY_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: CURRENCY_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: TRADING_PARTNER_BUSINESS_AREA_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: DEBIT_CREDIT_INDICATOR_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: LEDGER_BK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: OBJECT_NUMBER_BK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: FISCAL_YEAR_BK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: COST_VALUE_TYPE_BK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: COST_VERSION_BK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: COST_ELEMENT_BK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: ORIGIN_GROUP_BK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: COST_BUSINESS_TRANSACTION_TYPE_BK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: LEGAL_ENTITY_BK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: TRADING_PARTNER_BUSINESS_AREA_BK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: DEBIT_CREDIT_INDICATOR_BK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: CURRENCY_BK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: PERIOD_BLOCK_BK
+        tests:
+          - not_null:
+              config:
+                severity: warn

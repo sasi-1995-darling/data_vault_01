@@ -1,0 +1,108 @@
+{%- set yaml_metadata -%}
+source_model: 'stg_item_base__emtk_ebs_common'
+src_pk: 'item_hk'
+src_hashdiff: 'item_base_hdiff'
+src_payload:
+    - 'org_id'
+    - 'segment1'
+    - 'inventory_item_id'
+    - 'organization_id'
+    - 'last_update_date'
+    - 'last_updated_by'
+    - 'creation_date'
+    - 'created_by'
+    - 'last_update_login'
+    - 'summary_flag'
+    - 'description'
+    - 'attribute_category'
+    - 'attribute1'
+    - 'attribute2'
+    - 'attribute3'
+    - 'attribute4'
+    - 'attribute5'
+    - 'attribute6'
+    - 'attribute7'
+    - 'attribute8'
+    - 'attribute9'
+    - 'attribute11'
+    - 'attribute12'
+    - 'attribute13'
+    - 'attribute15'
+    - 'purchasing_item_flag'
+    - 'shippable_item_flag'
+    - 'customer_order_flag'
+    - 'internal_order_flag'
+    - 'inventory_item_flag'
+    - 'inventory_asset_flag'
+    - 'purchasing_enabled_flag'
+    - 'customer_order_enabled_flag'
+    - 'internal_order_enabled_flag'
+    - 'so_transactions_flag'
+    - 'mtl_transactions_enabled_flag'
+    - 'stock_enabled_flag'
+    - 'bom_enabled_flag'
+    - 'build_in_wip_flag'
+    - 'returnable_flag'
+    - 'taxable_flag'
+    - 'allow_item_desc_update_flag'
+    - 'receipt_required_flag'
+    - 'list_price_per_unit'
+    - 'price_tolerance_percent'
+    - 'expense_account'
+    - 'encumbrance_account'
+    - 'unit_weight'
+    - 'weight_uom_code'
+    - 'end_assembly_pegging_flag'
+    - 'replenish_to_order_flag'
+    - 'wip_supply_type'
+    - 'wip_supply_subinventory'
+    - 'primary_uom_code'
+    - 'primary_unit_of_measure'
+    - 'allowed_units_lookup_code'
+    - 'cost_of_sales_account'
+    - 'sales_account'
+    - 'default_include_in_rollup_flag'
+    - 'inventory_item_status_code'
+    - 'planning_make_buy_code'
+    - 'rounding_control_type'
+    - 'min_minmax_quantity'
+    - 'reservable_type'
+    - 'invoiceable_item_flag'
+    - 'invoice_enabled_flag'
+    - 'request_id'
+    - 'program_application_id'
+    - 'program_id'
+    - 'program_update_date'
+    - 'costing_enabled_flag'
+    - 'cycle_count_enabled_flag'
+    - 'item_type'
+    - 'mrp_planning_code'
+    - 'ato_forecast_control'
+    - 'check_shortages_flag'
+    - 'orderable_on_web_flag'
+    - 'back_orderable_flag'
+    - 'web_status'
+    - 'object_version_number'
+    - 'ont_pricing_qty_source'
+    - 'attribute16'
+    - 'attribute17'
+    - 'process_execution_enabled_flag'
+    - 'recipe_enabled_flag' 
+src_ldts: load_dts
+src_source: rec_src
+{%- endset -%}
+
+{% set metadata_dict = fromyaml(yaml_metadata) %}
+
+{% set source_model = metadata_dict['source_model'] %}
+{% set src_pk = metadata_dict['src_pk'] %}
+{% set src_hashdiff = metadata_dict['src_hashdiff'] %}
+{% set src_payload = metadata_dict['src_payload'] %}
+{% set src_ldts = metadata_dict['src_ldts'] %}
+{% set src_source = metadata_dict['src_source'] %}
+
+
+{{ automate_dv.sat(src_pk=src_pk, src_hashdiff=src_hashdiff,
+                   src_payload=src_payload, src_eff=none,
+                   src_ldts=src_ldts, src_source=src_source,
+                   source_model=source_model) }}

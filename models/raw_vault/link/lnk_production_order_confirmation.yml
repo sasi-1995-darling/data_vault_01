@@ -1,0 +1,69 @@
+version: 2
+models:
+- name: lnk_production_order_confirmation
+  data_tests:
+  - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - PRODUCTION_ORDER_CONFIRMATION_LHK
+  - dbt_expectations.expect_table_row_count_to_be_between:
+      arguments:
+        min_value: 4
+      config:
+        severity: warn
+  columns:
+      - name: PRODUCTION_ORDER_LINE_HK
+        tests:
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'hub_production_order_line' )
+                pk_column_name: PRODUCTION_ORDER_LINE_HK
+
+      - name: PRODUCTION_ORDER_HK
+        tests:
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'hub_production_order' )
+                pk_column_name: PRODUCTION_ORDER_HK
+
+      - name: ROUTING_HK
+        tests:
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'hub_routing' )
+                pk_column_name: ROUTING_HK
+
+      - name: CAPACITY_HK
+        tests:
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'hub_capacity' )
+                pk_column_name: CAPACITY_HK
+
+      - name: COST_CENTER_HK
+        tests:
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'hub_cost_center' )
+                pk_column_name: COST_CENTER_HK
+      
+      - name: MATERIAL_BASE_UOM_HK
+        tests:
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'hub_uom' )
+                pk_column_name: UOM_HK
+      
+      - name: CONFIRMATION_UOM_HK
+        tests:
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'hub_uom' )
+                pk_column_name: UOM_HK
+
+      - name: ORDER_CONFIRMATION_HK
+        tests:
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'hub_order_confirmation' )
+                pk_column_name: ORDER_CONFIRMATION_HK                

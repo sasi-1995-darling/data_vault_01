@@ -1,0 +1,17 @@
+version: 2
+models:
+  - name: ref_sap_order_account_mapping
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - MANDT
+              - KAPPL
+              - KSCHL
+              - KTOPL
+              - VKORG
+              - VTWEG
+              - KVSL1
+              - ZZPSTYV
+              - ZZAUGRU
+              - ZZAUART

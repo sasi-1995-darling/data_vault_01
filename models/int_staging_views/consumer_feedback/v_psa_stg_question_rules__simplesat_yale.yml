@@ -1,0 +1,18 @@
+version: 2
+models:
+  - name: v_psa_stg_question_rules__simplesat_yale
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          config:
+            severity: warn
+          arguments:
+            combination_of_columns:
+              - QUESTION_BK
+              - INDEX
+              - LOAD_DTS
+    columns:
+      - name: QUESTION_BK
+        data_tests:
+          - not_null:
+              config:
+                severity: warn

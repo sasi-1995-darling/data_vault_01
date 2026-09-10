@@ -1,0 +1,13 @@
+# CLAUDE.local.md — Personal Overrides (gitignored)
+# Copy this to CLAUDE.local.md and customize for your environment.
+
+## My Environment
+# Snowflake user: <your_email>
+# Default warehouse: DATA_ENGINEER_WH
+# Default role: DATA_ENGINEER
+# Default schema: dbt_<your_username>
+
+## My Preferences
+# Preferred dbt target: dev
+# Preferred editor: VS Code
+# Skip MCP setup: false

@@ -1,0 +1,18 @@
+version: 2
+models:
+- name: v_psa_stg_amz_category__security_profitero_share
+  data_tests:
+  - dbt_utils.unique_combination_of_columns:
+      name: grain_v_psa_stg_amz_category__security_profitero_share
+      arguments:
+        combination_of_columns:
+        - SNS_CATEGORY_BK
+        - LOAD_DTS
+      config:
+        severity: warn
+  columns:
+  - name: SNS_CATEGORY_BK
+    data_tests:
+    - not_null:
+        config:
+          severity: warn

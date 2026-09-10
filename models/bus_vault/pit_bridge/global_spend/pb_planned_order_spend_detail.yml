@@ -1,0 +1,9 @@
+version: 2
+models:
+  - name: pb_planned_order_spend_detail
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - PLANNED_ORDER_HK
+    columns: []

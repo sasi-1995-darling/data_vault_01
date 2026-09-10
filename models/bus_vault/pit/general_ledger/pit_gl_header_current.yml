@@ -1,0 +1,9 @@
+version: 2
+models:
+  - name: pit_gl_header_current
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - GENERAL_LEDGER_HK
+    columns: []

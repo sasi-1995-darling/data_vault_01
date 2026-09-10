@@ -1,0 +1,26 @@
+version: 2
+models:
+- name: ref_informatica_mdm_item_category_sat
+  data_tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - ITEM_BK
+        - BRAND
+        - LOAD_DTS
+      config:
+        severity: warn
+  columns:
+  - name: ITEM_BK
+    data_tests:
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'ref_informatica_mdm_item_category_hub' )
+          pk_column_name: ITEM_BK
+  - name: BRAND
+    data_tests:
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'ref_informatica_mdm_item_category_hub' )
+          pk_column_name: BRAND
+          

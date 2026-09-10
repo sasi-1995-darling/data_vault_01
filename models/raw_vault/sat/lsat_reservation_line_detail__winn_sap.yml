@@ -1,0 +1,23 @@
+
+version: 2
+models:
+  - name: lsat_reservation_line_detail__winn_sap
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - LNK_DEPENDENCY_RESERVATION_HK
+              - RSART
+              - LOAD_DTS
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          config:
+            severity: warn
+          arguments:
+            min_value: 4
+    columns:
+      - name: LNK_DEPENDENCY_RESERVATION_HK
+        tests:
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'lnk_reservation_line_detail' )
+                pk_column_name: LNK_DEPENDENCY_RESERVATION_HK

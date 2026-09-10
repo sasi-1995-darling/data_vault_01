@@ -1,0 +1,9 @@
+version: 2
+models:
+- name: dim_promotion
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - DIM_PROMOTION_KEY
+  columns: []

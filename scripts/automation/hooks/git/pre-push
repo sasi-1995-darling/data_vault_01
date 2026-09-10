@@ -1,0 +1,264 @@
+#!/usr/bin/env bash
+# pre-push hook — pre-push DA enforcement substrate
+#
+# Spec: docs/triage-agent/lessons-learned.md entries 8 + 9
+# β.4 self-flag: YES — this hook IS enforcement machinery (commits editing
+# pre-push itself bypass this gate; structural self-protection gap, see F-5).
+#
+# Rule (push-level): if the push range includes EITHER —
+#   Rule 1: a NEW .py file under scripts/automation/src/triage/
+#           (unconditionally — new code is always DA-due, entry-7 discipline)
+#   Rule 2: a MODIFIED .py file under scripts/automation/src/triage/ with
+#           smell-token additions on + lines (entry-8 carry-forward)
+#   Rule 3: ANY single commit in the range with >200 added lines in
+#           *.md files under docs/  (lesson #9 docs-only-is-not-DA-exempt)
+# — then the HEAD commit message of the push range MUST contain a line
+#   matching `^da-completed:[[:space:]]+<value>` (non-empty value required).
+#
+# Stdin format (per `man githooks`):
+#   <local-ref> SP <local-object-name> SP <remote-ref> SP <remote-object-name> LF
+#   (one line per ref being pushed; we loop ALL lines)
+#
+# Per-ref handling:
+#   local_sha = 0…40    → SKIP this ref (branch deletion)
+#   remote_sha = 0…40   → range = local_sha --not --remotes (new branch)
+#   both real           → range = remote_sha..local_sha (normal push)
+#   git rev-list error  → fail-CLOSED (refuse push)
+#
+# Trigger/satisfaction asymmetry (intentional, locked by tests 13 + 14):
+#   Triggers detected PER-COMMIT (any qualifying commit in range → push triggers)
+#   Satisfaction declared PUSH-LEVEL via HEAD commit message — ONE token
+#   blesses a coherent batch. Token in non-HEAD commit → REJECT (test 13).
+#   Token without value → REJECT (test 14).
+#
+# Fixture/JSON exclusion (C-3 fix):
+#   docs LOC counter is *.md under docs/ ONLY. JSON re-emissions in
+#   docs/triage-agent/fixtures/ do NOT count (Commit-B style payloads
+#   routinely add hundreds of `+` JSON lines; fixtures have their own
+#   gates: idempotency tests, EXPECTED_BANDS).
+#
+# Bypass: `git push --no-verify` (honor-system, reviewer-detected at PR
+# time parallel to `bypass-rationale:` discipline).
+
+set -euo pipefail
+
+ZERO="0000000000000000000000000000000000000000"
+TRIAGE_PATH="scripts/automation/src/triage"
+DOCS_LOC_LIMIT=200
+
+# Smell-token ERE pattern (entry-8 carry-forward + DA findings).
+# Each clause documented at point-of-use; do NOT collapse into "any predicate":
+#   - `def _(is|has)_[a-zA-Z0-9_]+` — defensive predicates that often
+#     hide the WRONG question (lesson #9 truth-table heuristic)
+#   - `_usable|_valid` — same shape, varying name conventions
+#   - `re\.(compile|match|search)\(` — ANY regex call in triage code is
+#     review-worthy. Spec narrowed to "anchored regex" but anchor absence
+#     does NOT prove "regex doesn't need review"; stricter is safer here.
+#     False-positive cost low (re-amend with rationale); false-negative
+#     cost high (silent corruption shape per lesson #9).
+#   - `isinstance\(...\).*else.*bool\(` — type-then-truthy fall-through;
+#     almost always wrong (lesson #9 #2 "prevents crash, keeps wrong semantics")
+SMELL_PATTERNS='(def _(is|has)_[a-zA-Z0-9_]+|_usable|_valid|re\.(compile|match|search)\(|isinstance\(.*\).*else[[:space:]]*bool\()'
+
+PUSH_TRIGGERED=0
+TRIGGER_REASONS=""
+
+print_rejection() {
+    local reason="$1"
+    local local_sha="$2"
+    local branch_hint
+    branch_hint=$(git symbolic-ref --short HEAD 2>/dev/null || echo "<branch>")
+    cat >&2 <<EOF
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  ✗ pre-push DA enforcement (lessons-learned entry 9, Commit C)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+$reason
+
+Trigger details:$TRIGGER_REASONS
+
+──────────────────────────────────────────────────────────
+  How to proceed (after running pre-push DA on the bytes):
+──────────────────────────────────────────────────────────
+
+  Primary remedy — two-step amend (robust to shell quoting):
+
+      git commit --amend
+      # In the editor, append a blank line then:
+      #     da-completed: <your one-line rationale>
+      # Save and exit.
+
+      git push origin ${branch_hint}
+
+  NOTE: amend changes the SHA. If you've already surfaced the
+  pre-amend SHA to a reviewer, re-surface the post-amend SHA
+  (entry-9 capture-after-amend lesson, applied at point-of-use).
+
+  Alternative one-liner (only if you trust your shell's quoting;
+  failure mode is "amend committed silently against wrong
+  message body" — the worst silent-corruption shape):
+
+      git commit --amend -m "\$(git log -1 --format=%B)
+
+      da-completed: <rationale>"
+      git push origin ${branch_hint}
+      # — note the blank line is significant.
+
+  Bypass (NOT recommended; reviewer-detected at PR time):
+
+      git push --no-verify origin ${branch_hint}
+      # then add 'bypass-rationale:' line to a follow-up commit body
+      # explaining why this push is exempt (entry 7 honor-system pattern).
+
+  Reference: docs/triage-agent/lessons-learned.md entries 8 + 9
+             docs/triage-agent/phase-2-progress-log.md (Commit C)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+EOF
+}
+
+# Process each ref on stdin. `|| [ -n "$local_ref" ]` handles partial-line
+# at EOF (read returns non-zero but $local_ref still populated).
+exit_code=0
+
+while read -r local_ref local_sha remote_ref remote_sha || [ -n "${local_ref:-}" ]; do
+    # Blank-line guard
+    [ -z "${local_ref:-}" ] && continue
+
+    # Branch deletion (per `man githooks`: local_ref is literal "(delete)",
+    # local_sha is all zeros). SKIP — nothing being pushed to gate.
+    if [ "$local_sha" = "$ZERO" ]; then
+        continue
+    fi
+
+    # Build commit list for this ref
+    if [ "$remote_sha" = "$ZERO" ]; then
+        # New branch — exclude commits already on any remote tracking branch.
+        # `--not --remotes` is determinable (not undetermined) per C-2 fix.
+        if ! commits=$(git rev-list --reverse "$local_sha" --not --remotes 2>/dev/null); then
+            cat >&2 <<EOF
+pre-push hook: ERROR — cannot enumerate commits for new branch '$local_ref'.
+Failing CLOSED (rejecting push).
+EOF
+            exit 1
+        fi
+    else
+        # Normal push — commits between remote tip and local tip
+        if ! commits=$(git rev-list --reverse "$remote_sha..$local_sha" 2>/dev/null); then
+            cat >&2 <<EOF
+pre-push hook: ERROR — cannot enumerate commits for range '$remote_sha..$local_sha' (ref: $local_ref).
+Failing CLOSED (rejecting push).
+EOF
+            exit 1
+        fi
+    fi
+
+    # Empty range — nothing to check for this ref
+    [ -z "$commits" ] && continue
+
+    # Reset per-ref trigger state
+    PUSH_TRIGGERED=0
+    TRIGGER_REASONS=""
+
+    # --- Per-commit trigger evaluation ---
+    for commit in $commits; do
+        short_sha=$(git rev-parse --short "$commit")
+
+        # Rule 1: ANY new .py file under triage subtree → trigger unconditionally
+        # Pathspec on `git show` restricts the diff scope at git's level (not a
+        # post-grep filter) — a `def _is_*` in unrelated repo Python never
+        # enters the candidate set. Mirrors entry-7's WATCHED_RE discipline.
+        new_py=$(git show --diff-filter=A --name-only --format="" "$commit" -- "${TRIAGE_PATH}/*.py" 2>/dev/null || true)
+        if [ -n "$new_py" ]; then
+            PUSH_TRIGGERED=1
+            TRIGGER_REASONS="$TRIGGER_REASONS
+  Rule 1 (commit ${short_sha}): new triage code, DA-due unconditionally:
+$(echo "$new_py" | sed 's|^|    + |')"
+        fi
+
+        # Rule 2: MODIFIED .py under triage with smell-token additions
+        # on + lines. Same pathspec discipline as Rule 1.
+        modified_py=$(git show --diff-filter=M --name-only --format="" "$commit" -- "${TRIAGE_PATH}/*.py" 2>/dev/null || true)
+        if [ -n "$modified_py" ]; then
+            # `^\+[^+]` strips diff headers (+++ ) and matches added lines only.
+            # SC2086: word-splitting $modified_py is intentional (multi-file).
+            # shellcheck disable=SC2086
+            smell_hits=$(git show --format="" "$commit" -- $modified_py 2>/dev/null \
+                | grep -E '^\+[^+]' \
+                | grep -E "$SMELL_PATTERNS" \
+                || true)
+            if [ -n "$smell_hits" ]; then
+                PUSH_TRIGGERED=1
+                TRIGGER_REASONS="$TRIGGER_REASONS
+  Rule 2 (commit ${short_sha}): smell-token additions in modified triage code:
+$(echo "$modified_py" | sed 's|^|    M |')
+    Sample matches (first 3):
+$(echo "$smell_hits" | head -3 | sed 's|^|      |')"
+            fi
+        fi
+
+        # Rule 3: docs LOC additions > limit (*.md under docs/ ONLY, C-3 fix)
+        # numstat output: "added\tdeleted\tfilename". Binary files show "-\t-\t".
+        # Sum additions where filename matches docs/**/*.md.
+        docs_loc=$(git show --numstat --format="" "$commit" 2>/dev/null \
+            | awk -F'\t' '$3 ~ /^docs\/.*\.md$/ && $1 != "-" { sum += $1 } END { print sum + 0 }')
+        if [ "$docs_loc" -gt "$DOCS_LOC_LIMIT" ]; then
+            PUSH_TRIGGERED=1
+            subj=$(git log -1 --format=%s "$commit")
+            TRIGGER_REASONS="$TRIGGER_REASONS
+  Rule 3 (commit ${short_sha}): ${docs_loc} LOC added in docs/**/*.md (limit: ${DOCS_LOC_LIMIT})
+    Subject: \"$subj\""
+        fi
+    done
+
+    # --- Satisfaction check (only if any rule triggered) ---
+    if [ "$PUSH_TRIGGERED" -eq 1 ]; then
+        # HEAD of push range = local_sha (push-level satisfaction)
+        if ! head_msg=$(git log -1 --format=%B "$local_sha" 2>/dev/null); then
+            cat >&2 <<EOF
+pre-push hook: ERROR — cannot read HEAD commit message at $local_sha.
+Failing CLOSED.
+EOF
+            exit 1
+        fi
+
+        # C-4: token must be present at start of line WITH non-empty value.
+        # POSIX-portable: `[^[:space:]]` instead of `\S` (BSD grep compat).
+        if ! echo "$head_msg" | grep -qE '^da-completed:[[:space:]]+[^[:space:]]'; then
+            # Diagnose: bare-with-no-value vs entirely absent
+            if echo "$head_msg" | grep -qE '^da-completed:[[:space:]]*$'; then
+                reason="HEAD commit message at $local_sha has BARE \`da-completed:\` token (no value after the colon).
+Token must be \`da-completed: <one-line rationale>\` — value required (C-4 fix)."
+            else
+                reason="HEAD commit message at $local_sha LACKS \`da-completed: <rationale>\` token.
+Push range contains DA-due changes (see trigger details above) but the HEAD
+commit message does not declare DA completion."
+            fi
+            print_rejection "$reason" "$local_sha"
+            exit_code=1
+            continue
+        fi
+
+        # C-4 asymmetry lock: token must appear ONLY in HEAD, not in any
+        # other commit of the range. (Catches stale tokens carried forward
+        # from earlier commits — push-level satisfaction means ONE blessing
+        # per push, not per-commit blessings accumulated.)
+        for commit in $commits; do
+            [ "$commit" = "$local_sha" ] && continue
+            if git log -1 --format=%B "$commit" | grep -qE '^da-completed:'; then
+                short_sha=$(git rev-parse --short "$commit")
+                reason="Token \`da-completed:\` found in non-HEAD commit ${short_sha}.
+The token belongs in the HEAD commit message of the push range ONLY
+(push-level satisfaction, C-4 asymmetry). Stale tokens from earlier
+commits indicate the push range was not re-blessed after composition.
+Move/keep the token in HEAD only; remove from $short_sha via amend."
+                print_rejection "$reason" "$local_sha"
+                exit_code=1
+                break
+            fi
+        done
+    fi
+done
+
+exit $exit_code

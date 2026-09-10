@@ -1,0 +1,51 @@
+version: 2
+models:
+  - name: v_psa_stg_sales_inventory__tsm_lowes
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          config:
+            severity: warn
+          arguments:
+            combination_of_columns:
+              - STORE_BK
+              - ITEM_NUMBER
+              - END_DATE
+              - _LINE
+              - _FILE
+              - LOAD_DTS
+    columns:
+      - name: STORE_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: STORE_BK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: ITEM_NUMBER
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: END_DATE
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: _LINE
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: _FILE
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: LOAD_DTS
+        tests:
+          - not_null:
+              config:
+                severity: warn

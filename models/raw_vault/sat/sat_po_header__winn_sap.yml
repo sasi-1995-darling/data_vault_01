@@ -1,0 +1,28 @@
+version: 2
+models:
+  - name: sat_po_header__winn_sap
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - PO_HEADER_HK
+              - LOAD_DTS
+    columns:
+      - name: PO_HEADER_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'hub_po_header' )
+                pk_column_name: PO_HEADER_HK
+      - name: BKCC
+        tests:
+          - not_null
+      - name: REC_SRC
+        tests:
+          - not_null
+      - name: LOAD_DTS
+        tests:
+          - not_null

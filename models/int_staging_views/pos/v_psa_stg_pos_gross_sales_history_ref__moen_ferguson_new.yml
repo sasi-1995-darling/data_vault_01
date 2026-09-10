@@ -1,0 +1,30 @@
+version: 2
+models:
+  - name: v_psa_stg_pos_gross_sales_history_ref__moen_ferguson_new
+    tests: []
+    columns:
+      - name: STORE_BK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: _FILE
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: YEAR_MONTH
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: DATE
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: LOAD_DTS
+        tests:
+          - not_null:
+              config:
+                severity: warn

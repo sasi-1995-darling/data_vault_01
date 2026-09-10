@@ -1,0 +1,9 @@
+version: 2
+models:
+  - name: sat_order_header__ml_ebs
+    data_tests:
+    - dbt_constraints.primary_key:
+        arguments:
+          column_names:
+            - ORDER_HEADER_HK
+            - LOAD_DTS

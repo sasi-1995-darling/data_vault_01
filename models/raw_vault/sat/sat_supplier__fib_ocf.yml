@@ -1,0 +1,24 @@
+version: 2
+models:
+- name: sat_supplier__fib_ocf
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - SUPPLIER_HK
+        - LOAD_DTS
+  - dbt_expectations.expect_table_row_count_to_be_between:
+      arguments:
+        min_value: 4
+      config:
+        severity: warn
+  columns:
+  - name: SUPPLIER_HK
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'hub_supplier_v2' )
+          pk_column_name: SUPPLIER_HK

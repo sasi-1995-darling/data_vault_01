@@ -1,0 +1,11 @@
+version: 2
+models:
+- name: ref_mrp_controller__winn_sap
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - PLANT_BK
+        - MRP_CONTROLLER_ID
+        - LOAD_DTS
+  columns: []

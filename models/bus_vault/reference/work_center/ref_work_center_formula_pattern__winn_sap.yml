@@ -1,0 +1,11 @@
+version: 2
+models:
+- name: ref_work_center_formula_pattern__winn_sap
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - PARAMETER_ID
+        - LANGUAGE_KEY
+        - LOAD_DTS
+  columns: []

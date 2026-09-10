@@ -1,0 +1,50 @@
+version: 2
+models:
+- name: lnk_plant_tasklist
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - LNK_PLANT_TASKLIST_HK
+  - dbt_expectations.expect_table_row_count_to_be_between:
+      arguments:
+        min_value: 4
+      config:
+        severity: warn
+  columns:
+  - name: PLANT_HK
+    data_tests:
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'hub_plant_v1' )
+          pk_column_name: PLANT_HK
+  - name: ASSEMBLY_ITEM_HK
+    data_tests:
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'hub_item_v1' )
+          pk_column_name: ITEM_HK
+  - name: CHANGE_MASTER_HK
+    data_tests:
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'hub_change_master' )
+          pk_column_name: CHANGE_MASTER_HK
+  - name: TASKLIST_GROUP_HK
+    data_tests:
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'hub_tasklist_group' )
+          pk_column_name: TASKLIST_GROUP_HK
+  - name: PLANNING_PLANT_HK
+    data_tests:
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'hub_plant_v1' )
+          pk_column_name: PLANT_HK
+  - name: BOM_HK
+    data_tests:
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'hub_bom' )
+          pk_column_name: BOM_HK

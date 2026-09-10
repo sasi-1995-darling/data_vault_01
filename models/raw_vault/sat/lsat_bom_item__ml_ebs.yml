@@ -1,0 +1,25 @@
+version: 2
+models:
+  - name: lsat_bom_item__ml_ebs
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - LNK_BOM_ITEM_HK
+              - COMPONENT_SEQUENCE_ID
+              - LOAD_DTS
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          config:
+            severity: warn
+          arguments:
+            min_value: 4
+    columns:
+      - name: LNK_BOM_ITEM_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'lnk_bom_item' )
+                pk_column_name: LNK_BOM_ITEM_HK

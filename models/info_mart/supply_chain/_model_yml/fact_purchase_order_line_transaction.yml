@@ -1,0 +1,77 @@
+version: 2
+
+models:
+  - name: fact_purchase_order_line_transaction
+    description: Supply Chain fact table - grain is one row per transaction per po line
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - fact_purchase_order_line_transaction_pk
+              - dim_purchase_order_line_shipment_pk # temporary until proper joins can be figured out for outlier data
+      - dbt_constraints.foreign_key:
+          arguments:
+            fk_column_names:
+              - dim_purchase_order_line_shipment_pk
+            pk_table_name: ref('dim_purchase_order_line_shipment')
+            pk_column_names:
+              - dim_purchase_order_line_shipment_pk
+      - dbt_constraints.foreign_key:
+          arguments:
+            fk_column_names:
+              - dim_purchase_order_line_pk
+            pk_table_name: ref('dim_purchase_order_line')
+            pk_column_names:
+              - dim_purchase_order_line_pk
+      - dbt_constraints.foreign_key:
+          arguments:
+            fk_column_names:
+              - dim_purchase_order_pk
+            pk_table_name: ref('dim_purchase_order')
+            pk_column_names:
+              - dim_purchase_order_pk
+      - dbt_constraints.foreign_key:
+          arguments:
+            fk_column_names:
+              - dim_plant_location_pk
+            pk_table_name: ref('dim_plant_location')
+            pk_column_names:
+              - dim_plant_location_pk
+      - dbt_constraints.foreign_key:
+          arguments:
+            fk_column_names:
+              - dim_supplier_pk
+            pk_table_name: ref('dim_supplier')
+            pk_column_names:
+              - dim_supplier_pk
+      - dbt_constraints.foreign_key:
+          arguments:
+            fk_column_names:
+              - dim_supplier_site_pk
+            pk_table_name: ref('dim_supplier_site')
+            pk_column_names:
+              - dim_supplier_site_pk
+      - dbt_constraints.foreign_key:
+          arguments:
+            fk_column_names:
+              - dim_contact_supplier_email_pk
+            pk_table_name: ref('dim_contact')
+            pk_column_names:
+              - dim_contact_pk
+      - dbt_constraints.foreign_key:
+          arguments:
+            fk_column_names:
+              - dim_item_pk
+            pk_table_name: ref('dim_item')
+            pk_column_names:
+              - dim_item_pk
+      - dbt_constraints.foreign_key:
+          arguments:
+            fk_column_names:
+              - dim_item_inventory_category_pk
+            pk_table_name: ref('dim_item_category')
+            pk_column_names:
+              - dim_item_category_pk
+    config:
+      tags:
+        - emtek

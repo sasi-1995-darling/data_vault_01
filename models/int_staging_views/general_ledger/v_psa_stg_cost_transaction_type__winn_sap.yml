@@ -1,0 +1,17 @@
+version: 2
+models:
+- name: v_psa_stg_cost_transaction_type__winn_sap
+  data_tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - VRGNG
+        - LOAD_DTS
+      config:
+        severity: warn
+  columns:
+  - name: VRGNG
+    data_tests:
+    - not_null:
+        config:
+          severity: warn

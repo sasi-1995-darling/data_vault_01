@@ -1,0 +1,26 @@
+version: 2
+models:
+  - name: lnk_supplier_item
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - LNK_SUPPLIER_ITEM_HK
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          config:
+            severity: warn
+          arguments:
+            min_value: 4
+    columns:
+      - name: supplier_hk
+        tests:
+          - not_null
+      - name: item_hk
+        tests:
+          - not_null
+      - name: REC_SRC
+        tests:
+          - not_null
+      - name: LOAD_DTS
+        tests:
+          - not_null

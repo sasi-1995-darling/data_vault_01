@@ -1,0 +1,73 @@
+---- SRC LAYER ----
+WITH
+SRC_SORDHDW        as ( SELECT CONSUMER_HK, CUSTOMER_HK, LNK_ORDER_CUSTOMER_CONSUMER_HK, LOAD_DTS, ORDER_HEADER_HK, REC_SRC 
+                        FROM {{ ref('v_psa_stg_dtc_order_header__winn_shopify') }} as SRC 
+                        QUALIFY ROW_NUMBER() OVER(PARTITION BY LNK_ORDER_CUSTOMER_CONSUMER_HK ORDER BY LOAD_DTS )=1 )
+
+/*
+SRC_SORDHDW        as ( SELECT * FROM STAGING.v_psa_stg_dtc_order_header__winn_shopify )
+*/
+---- LOGIC LAYER ----
+
+, LOGIC_SORDHDW as (
+    SELECT
+        LNK_ORDER_CUSTOMER_CONSUMER_HK
+      , ORDER_HEADER_HK
+      , CUSTOMER_HK
+      , CONSUMER_HK
+      , LOAD_DTS
+      , REC_SRC
+    FROM SRC_SORDHDW
+)
+---- RENAME LAYER ----
+
+, RENAME_SORDHDW as (
+    SELECT
+        LNK_ORDER_CUSTOMER_CONSUMER_HK
+      , ORDER_HEADER_HK
+      , CUSTOMER_HK
+      , CONSUMER_HK
+      , LOAD_DTS
+      , REC_SRC
+    FROM LOGIC_SORDHDW
+)
+---- FILTER LAYER ----
+
+, FILTER_SORDHDW as (
+    SELECT *
+    FROM RENAME_SORDHDW
+)
+---- JOIN LAYER ----
+, JOIN_RESULT as (
+    SELECT * FROM FILTER_SORDHDW
+)
+
+---- FINAL LAYER ----
+SELECT
+          LNK_ORDER_CUSTOMER_CONSUMER_HK
+        , ORDER_HEADER_HK
+        , CUSTOMER_HK
+        , CONSUMER_HK
+        , LOAD_DTS
+        , REC_SRC
+FROM JOIN_RESULT
+{% if is_incremental() %}
+WHERE NOT EXISTS (
+    SELECT 1 
+    FROM {{ this }} existing
+    WHERE existing.LNK_ORDER_CUSTOMER_CONSUMER_HK = JOIN_RESULT.LNK_ORDER_CUSTOMER_CONSUMER_HK
+)
+{% endif %}
+{% if not is_incremental() %}
+
+union all
+SELECT 
+MD5_BINARY(GR.VALUE) AS LNK_ORDER_CUSTOMER_CONSUMER_HK,
+MD5_BINARY(GR.VALUE) AS ORDER_HEADER_HK,
+MD5_BINARY(GR.VALUE) AS CUSTOMER_HK,
+MD5_BINARY(GR.VALUE) AS CONSUMER_HK,
+CONVERT_TIMEZONE('UTC','1900-01-01'::TIMESTAMP) AS LOAD_DTS,
+'USAZET.SNOWFLAKE.FBIN.DERIVED' AS REC_SRC
+FROM
+TABLE(strtok_split_to_table('0|-1|-2', '|')) AS GR
+{% endif %}

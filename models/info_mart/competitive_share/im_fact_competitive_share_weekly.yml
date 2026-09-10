@@ -1,0 +1,5 @@
+version: 2
+models:
+- name: im_fact_competitive_share_weekly
+  tests: []
+  columns: []

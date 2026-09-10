@@ -1,0 +1,457 @@
+---- SRC LAYER ----
+WITH
+SRC_SWINN          as ( SELECT * FROM {{ ref('v_psa_stg_cost_activity_type_total__winn_sap') }} as SRC 
+                         {% if is_incremental() %}
+                         WHERE SRC.LOAD_DTS > (SELECT DATEADD('HOUR', '-1', MAX(LOAD_DTS)) FROM {{this}})
+                         {% endif %}  )
+
+/*
+SRC_SWINN          as ( SELECT * FROM STAGING.v_psa_stg_cost_activity_type_total__winn_sap )
+*/
+---- LOGIC LAYER ----
+
+, LOGIC_SWINN as (
+    SELECT
+        COST_ACTIVITY_TYPE_TOTALS_HK
+      , MANDT
+      , LEDNR 
+      , OBJNR 
+      , GJAHR 
+      , WRTTP 
+      , VERSN 
+      , VRGNG 
+      , PERBL
+      , GLREQUEST
+      , MEINH
+      , LST001
+      , LST002
+      , LST003
+      , LST004
+      , LST005
+      , LST006
+      , LST007
+      , LST008
+      , LST009
+      , LST010
+      , LST011
+      , LST012
+      , LST013
+      , LST014
+      , LST015
+      , LST016
+      , KAP001
+      , KAP002
+      , KAP003
+      , KAP004
+      , KAP005
+      , KAP006
+      , KAP007
+      , KAP008
+      , KAP009
+      , KAP010
+      , KAP011
+      , KAP012
+      , KAP013
+      , KAP014
+      , KAP015
+      , KAP016
+      , AUSEH
+      , AUS001
+      , AUS002
+      , AUS003
+      , AUS004
+      , AUS005
+      , AUS006
+      , AUS007
+      , AUS008
+      , AUS009
+      , AUS010
+      , AUS011
+      , AUS012
+      , AUS013
+      , AUS014
+      , AUS015
+      , AUS016
+      , DIS001
+      , DIS002
+      , DIS003
+      , DIS004
+      , DIS005
+      , DIS006
+      , DIS007
+      , DIS008
+      , DIS009
+      , DIS010
+      , DIS011
+      , DIS012
+      , DIS013
+      , DIS014
+      , DIS015
+      , DIS016
+      , AEQ001
+      , AEQ002
+      , AEQ003
+      , AEQ004
+      , AEQ005
+      , AEQ006
+      , AEQ007
+      , AEQ008
+      , AEQ009
+      , AEQ010
+      , AEQ011
+      , AEQ012
+      , AEQ013
+      , AEQ014
+      , AEQ015
+      , AEQ016
+      , GLDELFLAG
+      , GLSOURCESYSTEM
+      , GLCHANGETIME
+      , PSA_RECORD_SOURCE
+      , PSA_DELETE_IND
+      , LOAD_DTS
+      , REC_SRC
+      , BKCC
+      , HASHDIFF
+    FROM SRC_SWINN
+)
+---- RENAME LAYER ----
+
+, RENAME_SWINN as (
+    SELECT
+        COST_ACTIVITY_TYPE_TOTALS_HK
+      , MANDT
+      , LEDNR 
+      , OBJNR 
+      , GJAHR 
+      , WRTTP 
+      , VERSN 
+      , VRGNG 
+      , PERBL
+      , GLREQUEST
+      , MEINH
+      , LST001
+      , LST002
+      , LST003
+      , LST004
+      , LST005
+      , LST006
+      , LST007
+      , LST008
+      , LST009
+      , LST010
+      , LST011
+      , LST012
+      , LST013
+      , LST014
+      , LST015
+      , LST016
+      , KAP001
+      , KAP002
+      , KAP003
+      , KAP004
+      , KAP005
+      , KAP006
+      , KAP007
+      , KAP008
+      , KAP009
+      , KAP010
+      , KAP011
+      , KAP012
+      , KAP013
+      , KAP014
+      , KAP015
+      , KAP016
+      , AUSEH
+      , AUS001
+      , AUS002
+      , AUS003
+      , AUS004
+      , AUS005
+      , AUS006
+      , AUS007
+      , AUS008
+      , AUS009
+      , AUS010
+      , AUS011
+      , AUS012
+      , AUS013
+      , AUS014
+      , AUS015
+      , AUS016
+      , DIS001
+      , DIS002
+      , DIS003
+      , DIS004
+      , DIS005
+      , DIS006
+      , DIS007
+      , DIS008
+      , DIS009
+      , DIS010
+      , DIS011
+      , DIS012
+      , DIS013
+      , DIS014
+      , DIS015
+      , DIS016
+      , AEQ001
+      , AEQ002
+      , AEQ003
+      , AEQ004
+      , AEQ005
+      , AEQ006
+      , AEQ007
+      , AEQ008
+      , AEQ009
+      , AEQ010
+      , AEQ011
+      , AEQ012
+      , AEQ013
+      , AEQ014
+      , AEQ015
+      , AEQ016
+      , GLDELFLAG
+      , GLSOURCESYSTEM
+      , GLCHANGETIME
+      , PSA_RECORD_SOURCE
+      , PSA_DELETE_IND
+      , LOAD_DTS
+      , REC_SRC
+      , BKCC
+      , HASHDIFF
+    FROM LOGIC_SWINN
+)
+---- FILTER LAYER ----
+
+, FILTER_SWINN as (
+    SELECT *
+    FROM RENAME_SWINN
+)
+
+---- JOIN LAYER ----
+, JOIN_RESULT as (
+    SELECT *
+    FROM FILTER_SWINN
+)
+
+---- FINAL LAYER ----
+SELECT
+          COST_ACTIVITY_TYPE_TOTALS_HK
+        , MANDT
+        , LEDNR 
+        , OBJNR 
+        , GJAHR 
+        , WRTTP 
+        , VERSN 
+        , VRGNG 
+        , PERBL
+        , GLREQUEST
+        , MEINH
+        , LST001
+        , LST002
+        , LST003
+        , LST004
+        , LST005
+        , LST006
+        , LST007
+        , LST008
+        , LST009
+        , LST010
+        , LST011
+        , LST012
+        , LST013
+        , LST014
+        , LST015
+        , LST016
+        , KAP001
+        , KAP002
+        , KAP003
+        , KAP004
+        , KAP005
+        , KAP006
+        , KAP007
+        , KAP008
+        , KAP009
+        , KAP010
+        , KAP011
+        , KAP012
+        , KAP013
+        , KAP014
+        , KAP015
+        , KAP016
+        , AUSEH
+        , AUS001
+        , AUS002
+        , AUS003
+        , AUS004
+        , AUS005
+        , AUS006
+        , AUS007
+        , AUS008
+        , AUS009
+        , AUS010
+        , AUS011
+        , AUS012
+        , AUS013
+        , AUS014
+        , AUS015
+        , AUS016
+        , DIS001
+        , DIS002
+        , DIS003
+        , DIS004
+        , DIS005
+        , DIS006
+        , DIS007
+        , DIS008
+        , DIS009
+        , DIS010
+        , DIS011
+        , DIS012
+        , DIS013
+        , DIS014
+        , DIS015
+        , DIS016
+        , AEQ001
+        , AEQ002
+        , AEQ003
+        , AEQ004
+        , AEQ005
+        , AEQ006
+        , AEQ007
+        , AEQ008
+        , AEQ009
+        , AEQ010
+        , AEQ011
+        , AEQ012
+        , AEQ013
+        , AEQ014
+        , AEQ015
+        , AEQ016
+        , GLDELFLAG
+        , GLSOURCESYSTEM
+        , GLCHANGETIME
+        , PSA_RECORD_SOURCE
+        , PSA_DELETE_IND
+        , LOAD_DTS
+        , REC_SRC
+        , BKCC
+        , HASHDIFF
+FROM JOIN_RESULT
+{% if is_incremental() %}
+WHERE NOT EXISTS (
+    SELECT 1 
+    FROM {{ this }} existing
+    WHERE existing.COST_ACTIVITY_TYPE_TOTALS_HK= JOIN_RESULT.COST_ACTIVITY_TYPE_TOTALS_HK
+    AND existing.HASHDIFF = JOIN_RESULT.HASHDIFF
+)
+{% endif %} 
+{% if not is_incremental() %}
+/*the following qualify is to restrict multiple loads of touched records during the initial build. Ex: multiple row per hk, hashdiff */
+qualify 1= row_number()over(partition by COST_ACTIVITY_TYPE_TOTALS_HK, HASHDIFF order by LOAD_DTS)
+union all
+    SELECT        
+    MD5_BINARY(GR.VALUE) AS COST_ACTIVITY_TYPE_TOTALS_HK,
+CAST(NULL AS STRING) AS MANDT,
+CAST(NULL AS STRING) AS LEDNR,
+CAST(NULL AS STRING) AS OBJNR,
+CAST(NULL AS STRING) AS GJAHR,
+CAST(NULL AS STRING) AS WRTTP,
+CAST(NULL AS STRING) AS VERSN,
+CAST(NULL AS STRING) AS VRGNG,
+CAST(NULL AS STRING) AS PERBL,
+CAST(NULL AS NUMBER) AS GLREQUEST,
+CAST(NULL AS STRING) AS MEINH,
+CAST(NULL AS NUMBER) AS LST001,
+CAST(NULL AS NUMBER) AS LST002,
+CAST(NULL AS NUMBER) AS LST003,
+CAST(NULL AS NUMBER) AS LST004,
+CAST(NULL AS NUMBER) AS LST005,
+CAST(NULL AS NUMBER) AS LST006,
+CAST(NULL AS NUMBER) AS LST007,
+CAST(NULL AS NUMBER) AS LST008,
+CAST(NULL AS NUMBER) AS LST009,
+CAST(NULL AS NUMBER) AS LST010,
+CAST(NULL AS NUMBER) AS LST011,
+CAST(NULL AS NUMBER) AS LST012,
+CAST(NULL AS NUMBER) AS LST013,
+CAST(NULL AS NUMBER) AS LST014,
+CAST(NULL AS NUMBER) AS LST015,
+CAST(NULL AS NUMBER) AS LST016,
+CAST(NULL AS NUMBER) AS KAP001,
+CAST(NULL AS NUMBER) AS KAP002,
+CAST(NULL AS NUMBER) AS KAP003,
+CAST(NULL AS NUMBER) AS KAP004,
+CAST(NULL AS NUMBER) AS KAP005,
+CAST(NULL AS NUMBER) AS KAP006,
+CAST(NULL AS NUMBER) AS KAP007,
+CAST(NULL AS NUMBER) AS KAP008,
+CAST(NULL AS NUMBER) AS KAP009,
+CAST(NULL AS NUMBER) AS KAP010,
+CAST(NULL AS NUMBER) AS KAP011,
+CAST(NULL AS NUMBER) AS KAP012,
+CAST(NULL AS NUMBER) AS KAP013,
+CAST(NULL AS NUMBER) AS KAP014,
+CAST(NULL AS NUMBER) AS KAP015,
+CAST(NULL AS NUMBER) AS KAP016,
+CAST(NULL AS STRING) AS AUSEH,
+CAST(NULL AS NUMBER) AS AUS001,
+CAST(NULL AS NUMBER) AS AUS002,
+CAST(NULL AS NUMBER) AS AUS003,
+CAST(NULL AS NUMBER) AS AUS004,
+CAST(NULL AS NUMBER) AS AUS005,
+CAST(NULL AS NUMBER) AS AUS006,
+CAST(NULL AS NUMBER) AS AUS007,
+CAST(NULL AS NUMBER) AS AUS008,
+CAST(NULL AS NUMBER) AS AUS009,
+CAST(NULL AS NUMBER) AS AUS010,
+CAST(NULL AS NUMBER) AS AUS011,
+CAST(NULL AS NUMBER) AS AUS012,
+CAST(NULL AS NUMBER) AS AUS013,
+CAST(NULL AS NUMBER) AS AUS014,
+CAST(NULL AS NUMBER) AS AUS015,
+CAST(NULL AS NUMBER) AS AUS016,
+CAST(NULL AS NUMBER) AS DIS001,
+CAST(NULL AS NUMBER) AS DIS002,
+CAST(NULL AS NUMBER) AS DIS003,
+CAST(NULL AS NUMBER) AS DIS004,
+CAST(NULL AS NUMBER) AS DIS005,
+CAST(NULL AS NUMBER) AS DIS006,
+CAST(NULL AS NUMBER) AS DIS007,
+CAST(NULL AS NUMBER) AS DIS008,
+CAST(NULL AS NUMBER) AS DIS009,
+CAST(NULL AS NUMBER) AS DIS010,
+CAST(NULL AS NUMBER) AS DIS011,
+CAST(NULL AS NUMBER) AS DIS012,
+CAST(NULL AS NUMBER) AS DIS013,
+CAST(NULL AS NUMBER) AS DIS014,
+CAST(NULL AS NUMBER) AS DIS015,
+CAST(NULL AS NUMBER) AS DIS016,
+CAST(NULL AS NUMBER) AS AEQ001,
+CAST(NULL AS NUMBER) AS AEQ002,
+CAST(NULL AS NUMBER) AS AEQ003,
+CAST(NULL AS NUMBER) AS AEQ004,
+CAST(NULL AS NUMBER) AS AEQ005,
+CAST(NULL AS NUMBER) AS AEQ006,
+CAST(NULL AS NUMBER) AS AEQ007,
+CAST(NULL AS NUMBER) AS AEQ008,
+CAST(NULL AS NUMBER) AS AEQ009,
+CAST(NULL AS NUMBER) AS AEQ010,
+CAST(NULL AS NUMBER) AS AEQ011,
+CAST(NULL AS NUMBER) AS AEQ012,
+CAST(NULL AS NUMBER) AS AEQ013,
+CAST(NULL AS NUMBER) AS AEQ014,
+CAST(NULL AS NUMBER) AS AEQ015,
+CAST(NULL AS NUMBER) AS AEQ016,
+  CAST(NULL AS STRING) AS GLDELFLAG,
+  CAST(NULL AS STRING) AS GLSOURCESYSTEM,
+  CAST(NULL AS NUMBER) AS GLCHANGETIME,
+  CAST(NULL AS STRING) AS PSA_RECORD_SOURCE,
+  CAST(NULL AS STRING) AS PSA_DELETE_IND
+, CONVERT_TIMEZONE('UTC','1900-01-01')  as  LOAD_DTS
+,'USAZET.SNOWFLAKE.FBIN.DERIVED' AS REC_SRC
+, DECODE(GR.VALUE, 0, 'GHOST RECORD-SYSTEM', -1, 'GHOST RECORD-nullkey-required', -2, 'GHOST RECORD-nullkey-optional')  AS BKCC
+, ''::BINARY as HASHDIFF FROM
+        TABLE(strtok_split_to_table('0|-1|-2', '|')) AS GR
+{% endif %}

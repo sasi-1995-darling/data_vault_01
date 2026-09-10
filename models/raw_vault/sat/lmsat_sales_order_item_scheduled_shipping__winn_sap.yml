@@ -1,0 +1,25 @@
+version: 2
+models:
+  - name: lmsat_sales_order_item_scheduled_shipping__winn_sap
+    data_tests:
+
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - SO_ITEM_LHK
+              - VBELN
+              - POSNR
+              - ETENR
+              - LOAD_DTS
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          arguments:
+            min_value: 4
+          config:
+            severity: warn
+    columns:
+      - name: SO_ITEM_LHK
+        data_tests:
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'lnk_sales_order_line' )
+                pk_column_name: SO_ITEM_LHK

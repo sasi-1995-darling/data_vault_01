@@ -1,0 +1,26 @@
+agent_services: []
+search_services: []
+analyst_services: []
+
+other_services:
+  object_manager: false
+  query_manager: true
+
+sql_statement_permissions:
+  - Select: true
+  - Describe: true
+  - Use: true
+  - Insert: false
+  - Update: false
+  - Delete: false
+  - Merge: false
+  - Create: false
+  - Drop: false
+  - Alter: false
+  - TruncateTable: false
+  - Transaction: false
+  - Commit: false
+  - Rollback: false
+  - Comment: false
+  - Command: false
+  - Unknown: false

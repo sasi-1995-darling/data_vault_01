@@ -1,0 +1,13 @@
+version: 2
+models:
+  - name: lnk_sales_invoice_item
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - sales_invoice_item_hk
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          config:
+            severity: warn
+          arguments:
+            min_value: 4

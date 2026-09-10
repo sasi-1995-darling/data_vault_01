@@ -1,0 +1,9 @@
+version: 2
+models:
+- name: FACT_PRIMARY_DIRECTOR_LEADER_SPEND_BY_SUPPLIER
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - supplier_hk
+  columns: []

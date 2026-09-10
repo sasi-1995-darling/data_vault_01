@@ -1,0 +1,14 @@
+version: 2
+models:
+  - name: pit_customer
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - CUSTOMER_HK
+    columns:
+      - name: CUSTOMER_BK
+        tests:
+          - not_null:
+              config:
+                severity: warn

@@ -1,0 +1,299 @@
+name: Triage Cron
+
+# =============================================================================
+# What this workflow does
+#
+# Drives the dbt-Cloud failure-triage agent's polling + notifier loop on
+# a fixed cadence. Each tick:
+#   1. Polls the configured dbt-Cloud jobs for newly-failed runs since the
+#      cursor (Snowflake OPS_PROD.LOGS.TRIAGE_INVOCATIONS, MAX(run_id)).
+#   2. For each newly-failed run, fetches results, redacts, classifies
+#      via the pattern catalog, writes one OPS_PROD.LOGS.TRIAGE_INVOCATIONS
+#      row per result.
+#   3. For each NEWLY-NOTIFIED run, posts ONE aggregated GitHub issue (or
+#      adds a comment to the existing issue for that run) summarizing the
+#      failed results — H9 dedup via list-issues endpoint + exact-matchable
+#      run_id=<id> marker (NOT search — search index lag would cause dups).
+#
+# This is the only loop that produces the agent's user-visible output.
+# Everything upstream (poll_loop, writer, redactor, orchestrator, catalog)
+# is here in service of getting one trustworthy GH issue per failed run.
+# =============================================================================
+
+# =============================================================================
+# CADENCE — Q3-locked, do not drift.
+#
+# PR jobs (5-minute cadence):
+#   * 786800 — PROD PR build (FBINFR_DEV_QA / model build)
+#   * 786806 — DEV PR build (FBINFR_DEV / continuous integration)
+# Rationale: PR-author feedback loop is short. Failing fast on a stuck PR
+# saves human-merger time. The 5-min interval lines up with typical
+# dbt-Cloud queue + run + result-fetch latency (median ~2-3 min, so each
+# tick reliably picks up new finished runs without piling up backlog).
+#
+# Scheduled jobs (30-min cadence, Phase-1.5 — currently COMMENTED OUT):
+#   * 647886 — Scheduled DEV build
+#   * 939844 — Scheduled PROD build
+# Rationale (when activated): scheduled jobs run every 4-6h; 30 min is
+# faster than the human SLA for triaging scheduled-job failure (typically
+# next-business-day) while staying well under the GHA scheduled-workflow
+# practical floor (5 min, but GHA does not guarantee tick-precision <30 s
+# under load — overshoot vs underrun is preferred).
+#
+# Why PR-jobs-first phasing: PR jobs failing block author productivity
+# RIGHT NOW; scheduled jobs failing block tomorrow morning's dashboard.
+# Phase-1 (PR jobs only) absorbs operational learnings — false-positive
+# rate, cursor-race incidents, GH API rate-limit experience — before
+# expanding scope to scheduled jobs. See docs/triage-agent for the
+# rollout decision log. Do NOT enable scheduled jobs without an
+# explicit go-decision in the doc.
+# =============================================================================
+
+# =============================================================================
+# CONCURRENCY — serial-cron, REQUIRED by cursor design.
+#
+# The agent's cursor is MAX(run_id) in OPS_PROD.LOGS.TRIAGE_INVOCATIONS.
+# Two concurrent passes on the same scope would each read the same
+# high-water mark, each fetch the same set of newly-failed runs, and
+# each write duplicate rows (worst case) or trip a unique-key constraint
+# (best case). Either way: corrupted state.
+#
+# concurrency.cancel-in-progress is set to FALSE deliberately:
+#   * true  → a new tick CANCELS the in-flight pass, leaving partial
+#             results (some runs notified, cursor not advanced) — the
+#             next tick re-notifies, creating duplicate issues.
+#   * false → a new tick QUEUES behind the in-flight pass (or GHA
+#             discards the new tick if a queued one exists). The
+#             in-flight pass completes atomically; the next one starts
+#             fresh from the now-advanced cursor.
+#
+# group: triage-cron is a STABLE identifier (not per-run). A per-run
+# group key (e.g., ${{ github.run_id }}) would defeat the serial guarantee
+# entirely — every tick would have a different group and they'd all run
+# concurrently. Reviewer: any change that makes the group key
+# per-tick-unique is a P0 bug, reject it.
+# =============================================================================
+
+# =============================================================================
+# SECRETS — keyless WIF; net secret surface REDUCED vs. password auth.
+#
+# Snowflake auth is keyless Workload Identity Federation (GitHub OIDC) as of
+# the WIF cutover. The cron's identity (SA_TRIAGE_AGENT, TYPE=SERVICE) has NO
+# password/keypair/PAT — there is zero credential material to leak or rotate.
+# Secret / identifier inventory:
+#   * secrets.GITHUB_TOKEN            — built-in to every GHA repo
+#   * secrets.DBT_CLOUD_*             — existing org-level secret family
+#                                       (already used by dbt-deploy.yaml,
+#                                       qa-incremental-sync.yaml)
+#   * secrets.SNOWFLAKE_ACCOUNT       — existing org-level secret (the one
+#                                       genuinely-shared Snowflake secret;
+#                                       same account for all workflows)
+#   * secrets.SNOWFLAKE_OIDC_AUDIENCE — NEW, but NOT a credential: the account
+#                                       audience URL the OIDC token is minted
+#                                       for. It MUST byte-match the account's
+#                                       OIDC_AUDIENCE_LIST, so it is declared
+#                                       once (from the provisioning DDL) and
+#                                       never rotates. Stored as a secret only
+#                                       because it embeds the account
+#                                       identifier (same treatment as
+#                                       SNOWFLAKE_ACCOUNT).
+#
+# SNOWFLAKE_USER / SNOWFLAKE_ROLE / SNOWFLAKE_WAREHOUSE are NOT secrets — they
+# are the cron's own identifiers, set as LITERALS in the env block. Repointing
+# the SHARED secrets.SNOWFLAKE_USER to SA_TRIAGE_AGENT would break
+# dbt-deploy.yaml and every other workflow on that secret family, so this
+# cutover deliberately touches ZERO shared secrets.
+#
+# We dropped secrets.SNOWFLAKE_PASSWORD entirely (a real credential with a
+# rotation obligation). Do NOT re-introduce a credential secret here
+# (TRIAGE_NOTIFIER_TOKEN, NOTIFIER_GH_PAT, a password, a keypair) — the
+# keyless design is the whole point: nothing to expire, nothing to rotate.
+# =============================================================================
+
+# =============================================================================
+# Required-check note (configuration outside this file)
+#
+# This workflow is SCHEDULED (triggered by cron), not a per-PR gate. It
+# does NOT block merges. Its job-level outcomes are visible in the
+# Actions tab; failures should be triaged by the on-call DBA via the
+# usual GHA failure-notification mechanism. Ops note: a scheduled
+# workflow that fails 4+ consecutive ticks should be paused (disable
+# via Actions UI) to avoid generating noise; the cursor will resume
+# from its last-known-good state once the underlying issue is fixed.
+# =============================================================================
+
+on:
+    schedule:
+        # PR jobs — 5-minute cadence. Cron expression in UTC.
+        - cron: "*/5 * * * *"
+        # ---------------------------------------------------------------
+        # Phase-1.5 (scheduled jobs at 30-min cadence) — DOCUMENTED
+        # follow-on, not yet active. Uncomment after the PR-only Phase-1
+        # rollout has absorbed >= 2 weeks of operational data and the
+        # rollout doc records an explicit go-decision.
+        # - cron: "*/30 * * * *"
+        # ---------------------------------------------------------------
+
+    # Manual trigger for ops + dry-run testing.
+    workflow_dispatch:
+        inputs:
+            job_ids_override:
+                description: "Comma-separated dbt-Cloud job ids (default: PR jobs)"
+                required: false
+                default: "786800,786806"
+            dry_run:
+                description: "If true, skip the GH-write step (poll + classify only)"
+                required: false
+                default: "false"
+                type: choice
+                options:
+                    - "false"
+                    - "true"
+
+concurrency:
+    group: triage-cron
+    cancel-in-progress: false
+
+permissions:
+    contents: read
+    issues: write
+    id-token: write # mint GitHub OIDC token for keyless Snowflake WIF auth
+
+jobs:
+    triage-poll-and-notify:
+        name: triage-poll-and-notify
+        runs-on: ubuntu-latest
+        timeout-minutes: 10
+        # -----------------------------------------------------------------
+        # WARNING — do NOT add an `environment:` key to this job.
+        # SA_TRIAGE_AGENT's Snowflake WIF binding registers the OIDC subject
+        # as  repo:FBWINN-Data-Analytics/dbt-datavault:ref:refs/heads/main .
+        # A GitHub `environment:` flips the token's `sub` claim to
+        # repo:...:environment:<name>, breaking EVERY Snowflake login with a
+        # subject mismatch that reads like an auth bug. If deployment
+        # protection is ever needed, re-register the WORKLOAD_IDENTITY
+        # subject on SA_TRIAGE_AGENT to the environment sub FIRST.
+        # -----------------------------------------------------------------
+
+        env:
+            # Secret inventory (incl. the non-credential SNOWFLAKE_OIDC_AUDIENCE)
+            # is in the SECRETS header above. dbt-Cloud credential sourcing —
+            # canonical names verified against the WORKING dbt-deploy.yaml +
+            # .github/actions/{trigger_dbt_cloud_job,poll_dbt_job_status} +
+            # the proven-working .vscode/mcp.json + docs/triage-agent/setup.md §2:
+            #   - DBT_CLOUD_API_TOKEN sources from the shared secrets.DBT_SVC_TOKEN
+            #     (the dbt Cloud job-admin service token dbt-deploy.yaml auths
+            #     with). The Python reads os.environ["DBT_CLOUD_API_TOKEN"], so the
+            #     env-var NAME stays while its VALUE points at the canonical secret.
+            #   - DBT_CLOUD_ACCOUNT_ID is the non-sensitive account id 173296 — a
+            #     hardcoded literal in dbt-deploy's composite-action API URLs, so a
+            #     literal here too. The Python client INJECTS it into the dbt-mcp
+            #     subprocess under dbt-mcp's name DBT_ACCOUNT_ID (required by the
+            #     account-scoped Admin API) — see dbt_cloud_client.py Decision 2.
+            #   - DBT_HOST / MULTICELL_ACCOUNT_PREFIX / DBT_PROD_ENV_ID /
+            #     DBT_DEV_ENV_ID are non-secret account-context identifiers the
+            #     client COPIES into the dbt-mcp subprocess via an EXPLICIT
+            #     allowlist (not **os.environ). The proven .vscode/mcp.json runs a
+            #     MULTI-CELL account: DBT_HOST is the BARE cell host (us1.dbt.com)
+            #     and MULTICELL_ACCOUNT_PREFIX (kl673) is a SEPARATE var dbt-mcp
+            #     composes into the real host kl673.us1.dbt.com. BOTH are required
+            #     — DBT_HOST alone resolves to us1.dbt.com and 404s every
+            #     account-scoped Admin API call (the prefix is what makes account
+            #     173296 reachable). The prefix lived only in the gitignored
+            #     .vscode/mcp.json and was never in this tracked workflow, so the
+            #     first end-to-end run polled 0 runs. DBT_HOST and
+            #     MULTICELL_ACCOUNT_PREFIX are both members of
+            #     dbt_cloud_client.py DBT_REQUIRED_ENV_VARS, so the client
+            #     loud-fails if EITHER of the two is absent.
+            # DBT_USER_ID / DBT_QA_ENV_ID are intentionally ABSENT: per the dbt-mcp
+            # env-vars reference DBT_USER_ID is only needed for execute_sql (unused
+            # here) and DBT_QA_ENV_ID is not a recognized dbt-mcp var — requiring
+            # them crashed the never-run cron on config dbt-mcp does not consume.
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            DBT_CLOUD_API_TOKEN: ${{ secrets.DBT_SVC_TOKEN }}
+            DBT_CLOUD_ACCOUNT_ID: "173296"
+            DBT_HOST: us1.dbt.com
+            MULTICELL_ACCOUNT_PREFIX: "kl673"
+            DBT_PROD_ENV_ID: "296881"
+            DBT_DEV_ENV_ID: "287190"
+            # Snowflake — keyless Workload Identity Federation (GitHub OIDC).
+            # ACCOUNT stays a shared org-level secret (one account for all
+            # workflows). USER/ROLE/WAREHOUSE are the cron's OWN identifiers
+            # (NOT secrets) — literals so this cutover touches ZERO shared
+            # secrets; repointing the shared SNOWFLAKE_USER secret would break
+            # dbt-deploy.yaml. No password: SA_TRIAGE_AGENT is TYPE=SERVICE and
+            # is keyless. The OIDC token is minted in the run step below and
+            # injected as SNOWFLAKE_WIF_TOKEN.
+            SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
+            SNOWFLAKE_USER: SA_TRIAGE_AGENT
+            SNOWFLAKE_ROLE: TRIAGE_AGENT_WRITER
+            SNOWFLAKE_WAREHOUSE: DATA_OPS_WH
+            SNOWFLAKE_DATABASE: OPS_PROD
+            SNOWFLAKE_SCHEMA: LOGS
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v5
+
+            - name: Set up Python
+              uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+              with:
+                  python-version: "3.11"
+                  cache: "pip"
+
+            - name: Install uv (so uvx is on PATH for dbt-mcp spawn)
+              # The StdioMcpDbtCloudClient spawns dbt-mcp via:
+              #   uvx --python 3.13 --from dbt-mcp==1.19.2 dbt-mcp
+              # uv must be installed in the runner so uvx is discoverable
+              # on PATH (which the client's subprocess env passes through).
+              # Pinned uv version to keep this step deterministic.
+              uses: astral-sh/setup-uv@caf0cab7a618c569241d31dcd442f54681755d39 # v3
+              with:
+                  version: "0.5.8"
+
+            - name: Install dependencies
+              # Uses requirements-runtime.txt (NOT requirements.txt): this job
+              # opens a Snowflake connection at runtime, so it needs the
+              # snowflake-connector-python driver. That driver is imported
+              # lazily (cron_entrypoint._open_snowflake_cursor) and is
+              # deliberately kept out of requirements.txt so the unit-test
+              # workflows stay light — requirements-runtime.txt layers it on
+              # top of the base set. Without it the cron crashes with
+              # ModuleNotFoundError: No module named 'snowflake'.
+              run: |
+                  python -m pip install --upgrade pip
+                  python -m pip install -r scripts/automation/requirements-runtime.txt
+
+            - name: Run triage poll + notify pass
+              # Q3-locked job ids:
+              #   * 786800 — PROD PR build
+              #   * 786806 — DEV PR build
+              # Phase-1.5 (currently inactive — see schedule comment above):
+              #   * 647886 — Scheduled DEV build
+              #   * 939844 — Scheduled PROD build
+              #
+              # Keyless WIF: mint a short-lived GitHub OIDC token for the
+              # Snowflake account audience, mask it, and hand it to the cron
+              # via SNOWFLAKE_WIF_TOKEN in THIS step's env. The token stays a
+              # local shell var — it is never written to GITHUB_OUTPUT and is
+              # masked (::add-mask::) so it cannot surface in logs. The
+              # audience MUST byte-match the account's OIDC_AUDIENCE_LIST; it
+              # is anchored to a single secret set from the provisioning DDL.
+              env:
+                  SNOWFLAKE_OIDC_AUDIENCE: ${{ secrets.SNOWFLAKE_OIDC_AUDIENCE }}
+              run: |
+                  SNOWFLAKE_WIF_TOKEN="$(curl -sS -G \
+                      -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+                      --data-urlencode "audience=$SNOWFLAKE_OIDC_AUDIENCE" \
+                      "$ACTIONS_ID_TOKEN_REQUEST_URL" | jq -r '.value')"
+                  echo "::add-mask::$SNOWFLAKE_WIF_TOKEN"
+                  if [ -z "$SNOWFLAKE_WIF_TOKEN" ] || [ "$SNOWFLAKE_WIF_TOKEN" = "null" ]; then
+                      echo "::error::Failed to mint GitHub OIDC token for Snowflake WIF (check id-token: write permission and SNOWFLAKE_OIDC_AUDIENCE)"
+                      exit 1
+                  fi
+                  export SNOWFLAKE_WIF_TOKEN
+                  python -m scripts.automation.src.triage.cron_entrypoint \
+                      --owner FBWINN-Data-Analytics \
+                      --repo dbt-datavault \
+                      --job-ids "${{ github.event.inputs.job_ids_override || '786800,786806' }}" \
+                      --dry-run "${{ github.event.inputs.dry_run || 'false' }}"

@@ -1,0 +1,11 @@
+version: 2
+models:
+  - name: fact_open_po_spend_detail
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          config:
+            severity: warn
+          arguments:
+            combination_of_columns:
+              - OPEN_PO_HK
+    columns: []

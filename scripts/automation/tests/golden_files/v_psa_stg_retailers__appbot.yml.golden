@@ -1,0 +1,18 @@
+version: 2
+models:
+- name: v_psa_stg_retailers__appbot
+  data_tests:
+  - dbt_utils.unique_combination_of_columns:
+      name: grain_v_psa_stg_retailers__appbot
+      arguments:
+        combination_of_columns:
+        - RETAILER_BK
+        - LOAD_DTS
+      config:
+        severity: warn
+  columns:
+  - name: RETAILER_BK
+    data_tests:
+    - not_null:
+        config:
+          severity: warn

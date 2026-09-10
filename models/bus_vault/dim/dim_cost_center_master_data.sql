@@ -1,0 +1,92 @@
+---- SRC LAYER ----
+WITH
+SRC_P              as ( SELECT * FROM {{ ref('pit_cost_center_master_data_current') }} as SRC  )
+
+/*
+SRC_P              as ( SELECT * FROM RAW_VAULT.PIT_COST_CENTER_MASTER_DATA_CURRENT )
+*/
+---- LOGIC LAYER ----
+
+, LOGIC_P as (
+    SELECT
+        COST_CENTER_MASTER_DATA_HK
+      , CONTROLLING_AREA_BK
+      , COST_CENTER_BK
+      , VALID_TO_DATE__YYYYMMDD
+      , COMPANY_CODE
+      , CURRENCY_KEY
+      , COST_CENTER_CATEGORY
+      , PERSON_RESPONSIBLE
+      , STD_HIERARCHY_AREA
+      , FUNCTIONAL_AREA
+      , DEPARTMENT
+      , POSTAL_CODE
+      , COUNTRY_KEY
+      , REGION
+      , LOCK_INDICATOR
+      , VALID_FROM_DATE__YYYYMMDD
+      , BKCC
+      , REC_SRC
+      , IS_DELETED
+    FROM SRC_P
+)
+---- RENAME LAYER ----
+
+, RENAME_P as (
+    SELECT
+        COST_CENTER_MASTER_DATA_HK
+      , CONTROLLING_AREA_BK
+      , COST_CENTER_BK
+      , VALID_TO_DATE__YYYYMMDD
+      , COMPANY_CODE
+      , CURRENCY_KEY
+      , COST_CENTER_CATEGORY
+      , PERSON_RESPONSIBLE
+      , STD_HIERARCHY_AREA
+      , FUNCTIONAL_AREA
+      , DEPARTMENT
+      , POSTAL_CODE
+      , COUNTRY_KEY
+      , REGION
+      , LOCK_INDICATOR
+      , VALID_FROM_DATE__YYYYMMDD
+      , BKCC
+      , REC_SRC
+      , IS_DELETED
+    FROM LOGIC_P
+)
+---- FILTER LAYER ----
+
+, FILTER_P as (
+    SELECT *
+    FROM RENAME_P
+)
+
+---- JOIN LAYER ----
+, JOIN_RESULT as (
+    SELECT *
+    FROM FILTER_P
+)
+
+---- FINAL LAYER ----
+SELECT
+          COST_CENTER_MASTER_DATA_HK
+        , CONTROLLING_AREA_BK
+        , COST_CENTER_BK
+        , VALID_TO_DATE__YYYYMMDD
+        , COMPANY_CODE
+        , CURRENCY_KEY
+        , COST_CENTER_CATEGORY
+        , PERSON_RESPONSIBLE
+        , STD_HIERARCHY_AREA
+        , FUNCTIONAL_AREA
+        , DEPARTMENT
+        , POSTAL_CODE
+        , COUNTRY_KEY
+        , REGION
+        , LOCK_INDICATOR
+        , VALID_FROM_DATE__YYYYMMDD
+        , BKCC
+        , REC_SRC
+        , IS_DELETED
+FROM JOIN_RESULT

@@ -1,0 +1,13 @@
+version: 2
+models:
+  - name: hub_sales_invoice_line
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - SALES_INVOICE_LINE_HK
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          config:
+            severity: warn
+          arguments:
+            min_value: 4

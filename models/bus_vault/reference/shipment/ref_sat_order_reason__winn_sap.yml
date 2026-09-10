@@ -1,0 +1,15 @@
+version: 2
+models:
+  - name: ref_sat_order_reason__winn_sap
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - ORDER_REASON_BK
+              - LOAD_DTS
+    columns:
+      - name: ORDER_REASON_BK
+        tests:
+          - not_null:
+              config:
+                severity: warn

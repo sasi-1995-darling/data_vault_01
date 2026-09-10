@@ -1,0 +1,10 @@
+version: 2
+models:
+  - name: pit_quality_task_current
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - QUALITY_TASKS_HK
+              - TASK_NOTIFICATION_BK
+    columns: []

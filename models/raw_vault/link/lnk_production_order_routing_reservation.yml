@@ -1,0 +1,110 @@
+version: 2
+models:
+- name: lnk_production_order_routing_reservation
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - LNK_PRODUCTION_ORDER_ROUTING_RESERVATION_HK
+  - dbt_expectations.expect_table_row_count_to_be_between:
+      arguments:
+        min_value: 4
+      config:
+        severity: warn
+  columns:
+  - name: PRODUCTION_ORDER_HK
+    data_tests:
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'hub_production_order' )
+          pk_column_name: PRODUCTION_ORDER_HK
+  - name: LEAD_PRODUCTION_ORDER_HK
+    data_tests:
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'hub_production_order' )
+          pk_column_name: PRODUCTION_ORDER_HK
+  - name: RESERVATION_HK
+    data_tests:
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'hub_reservation' )
+          pk_column_name: RESERVATION_HK
+  - name: RESERVATION_LINE_HK
+    data_tests:
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'hub_reservation_line' )
+          pk_column_name: RESERVATION_LINE_HK
+  - name: ROUTING_PLANNED_ITEM_HK
+    data_tests:
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'hub_item_v1' )
+          pk_column_name: ITEM_HK
+  - name: ROUTING_NUMBER_OPERATIONS_HK
+    data_tests:
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'hub_routing' )
+          pk_column_name: ROUTING_HK
+  - name: PRODUCTION_ORDER_ROUTING_NUMBER_HK
+    data_tests:
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'hub_routing' )
+          pk_column_name: ROUTING_HK
+  - name: BOM_SPECIFIED_ITEM_HK
+    data_tests:
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'hub_item_v1' )
+          pk_column_name: ITEM_HK
+  - name: BASE_UOM_HK
+    data_tests:
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'hub_uom' )
+          pk_column_name: UOM_HK
+  - name: PRODUCTION_ORDER_BASE_UOM_HK
+    data_tests:
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'hub_uom' )
+          pk_column_name: UOM_HK
+  - name: BASE_QUANTITY_UOM_HK
+    data_tests:
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'hub_uom' )
+          pk_column_name: UOM_HK
+  - name: PLANNED_ROUTING_UOM_HK
+    data_tests:
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'hub_uom' )
+          pk_column_name: UOM_HK
+  - name: ROUTING_CHANGE_NUMBER_HK
+    data_tests:
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'hub_change_master' )
+          pk_column_name: CHANGE_MASTER_HK
+  - name: BOM_CHANGE_NUMBER_HK
+    data_tests:
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'hub_change_master' )
+          pk_column_name: CHANGE_MASTER_HK
+  - name: ENGINEERING_CHANGE_NUMBER_HK
+    data_tests:
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'hub_change_master' )
+          pk_column_name: CHANGE_MASTER_HK
+  - name: BOM_HK
+    data_tests:
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'hub_bom' )
+          pk_column_name: BOM_HK

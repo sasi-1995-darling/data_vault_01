@@ -1,0 +1,14 @@
+version: 2
+models:
+  - name: ref_pos_item__ferguson_moen_xref
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          config:
+            severity: warn
+          arguments:
+            combination_of_columns:
+              - FEI_PRODUCT_NUMBER
+              - MOEN_ITEM_NUMBER
+              - MOEN_KEY_ACCOUNT_NUMBER
+              - LOAD_DTS
+    columns: []

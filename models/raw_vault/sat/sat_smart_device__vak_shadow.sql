@@ -1,0 +1,384 @@
+---- SRC LAYER ----
+WITH
+SRC_VAK            as ( SELECT * FROM {{ ref('v_psa_stg_smart_device_vak_shadow') }} as SRC 
+                         {% if is_incremental() %}
+                         WHERE SRC.LOAD_DTS > (SELECT DATEADD('HOUR', '-1', MAX(LOAD_DTS)) FROM {{this}})
+                         {% endif %}  )
+
+/*
+SRC_VAK            as ( SELECT * FROM staging.v_psa_stg_smart_device_vak_shadow )
+*/
+---- LOGIC LAYER ----
+
+, LOGIC_VAK as (
+    SELECT
+        SMART_DEVICE_HK
+      , LOAD_DTS
+      , SERIAL_NUMBER
+      , EVENT_TIMESTAMP
+      , FIRMWARE_VERSION
+      , UPGRADE_URI
+      , CONNECTED
+      , LAST_CONNECT
+      , WIFI_RSSI
+      , WIFI_NO_POLL
+      , WIFI_NETWORK
+      , COMMAND
+      , COMMAND_SRC
+      , BEEPER_VOLUME
+      , BEEPER_PIEZO_ENABLE
+      , BEEPER_SIREN_ENABLE
+      , DEV_DEVICE
+      , OCCUPANCY
+      , DISP_LANGUAGE
+      , HANDLE_FW
+      , HANDLE_REVERSE
+      , HANDLE_COMM_ERROR
+      , GESTURE_FW
+      , GESTURE_MODE
+      , GESTURE_COMM_ERROR
+      , SENSOR_LATCH_FW
+      , SENSOR_LED_BRIGHTNESS
+      , SENSOR_COMM_ERROR
+      , SENSOR_CONFIG
+      , SENSOR_DISABLE
+      , POWER_SOURCE
+      , POWER_BATTERY_LIFE_REMAINING
+      , POWER_BATTERY_PERCENTAGE
+      , POWER_BATTERY_SAVING_LEVEL
+      , POWER_ON
+      , STATE
+      , SYSTEM_STATE
+      , FLOW_CAL_SRC
+      , PRESET_ID
+      , VOLUME
+      , FLOW_RATE
+      , TEMPERATURE
+      , TEMPERATURE_GOAL
+      , TEMPERATURE_LAST
+      , FREEZE_ENABLE
+      , IS_FREEZING
+      , TRICKLE_FLOW_RATE
+      , LEARNED_MIN_TEMP
+      , LEARNED_MAX_TEMP
+      , DEFAULT_TEMP
+      , DEFAULT_FLOW_RATE
+      , MAX_FLOW_RATE
+      , PURGE_TIMEOUT
+      , HANDLE_TIMEOUT
+      , SENSOR_TIMEOUT
+      , VOICE_TIMEOUT
+      , DISPENSE_ACTIVATE_TIMEOUT
+      , VD_TELEMETRY_PUBLISH_INTERVAL
+      , SAFETY_LIMIT_TEMP
+      , SAFETY_MODE_ENABLED
+      , CHILD_LIMIT_TEMP
+      , CHILD_MODE_ENABLED
+      , SETPOINT_COLD_TEMP
+      , SETPOINT_WARM_TEMP
+      , SETPOINT_HOT_TEMP
+      , ASSEMBLY_AIR_TEMP
+      , USER_CALIBRATED
+      , REVERSE_HOT_COLD
+      , UNWINTERIZE_TIMEOUT
+      , HEALTH_PROTECT_TIMEOUT
+      , LOW_FLOW_RATE
+      , ALERTS
+      , JANUS_OVERVIEW
+      , CURRENT_VERSION
+      , DEVICE_TYPE
+      , VERSION
+      , _RESCUED_DATA
+      , PSA_LOAD_DTS
+      , PSA_RECORD_SOURCE
+      , PSA_DELETE_IND
+      , REC_SRC
+      , BKCC
+      , HASHDIFF
+    FROM SRC_VAK
+)
+---- RENAME LAYER ----
+
+, RENAME_VAK as (
+    SELECT
+        SMART_DEVICE_HK
+      , LOAD_DTS
+      , SERIAL_NUMBER
+      , EVENT_TIMESTAMP
+      , FIRMWARE_VERSION
+      , UPGRADE_URI
+      , CONNECTED
+      , LAST_CONNECT
+      , WIFI_RSSI
+      , WIFI_NO_POLL
+      , WIFI_NETWORK
+      , COMMAND
+      , COMMAND_SRC
+      , BEEPER_VOLUME
+      , BEEPER_PIEZO_ENABLE
+      , BEEPER_SIREN_ENABLE
+      , DEV_DEVICE
+      , OCCUPANCY
+      , DISP_LANGUAGE
+      , HANDLE_FW
+      , HANDLE_REVERSE
+      , HANDLE_COMM_ERROR
+      , GESTURE_FW
+      , GESTURE_MODE
+      , GESTURE_COMM_ERROR
+      , SENSOR_LATCH_FW
+      , SENSOR_LED_BRIGHTNESS
+      , SENSOR_COMM_ERROR
+      , SENSOR_CONFIG
+      , SENSOR_DISABLE
+      , POWER_SOURCE
+      , POWER_BATTERY_LIFE_REMAINING
+      , POWER_BATTERY_PERCENTAGE
+      , POWER_BATTERY_SAVING_LEVEL
+      , POWER_ON
+      , STATE
+      , SYSTEM_STATE
+      , FLOW_CAL_SRC
+      , PRESET_ID
+      , VOLUME
+      , FLOW_RATE
+      , TEMPERATURE
+      , TEMPERATURE_GOAL
+      , TEMPERATURE_LAST
+      , FREEZE_ENABLE
+      , IS_FREEZING
+      , TRICKLE_FLOW_RATE
+      , LEARNED_MIN_TEMP
+      , LEARNED_MAX_TEMP
+      , DEFAULT_TEMP
+      , DEFAULT_FLOW_RATE
+      , MAX_FLOW_RATE
+      , PURGE_TIMEOUT
+      , HANDLE_TIMEOUT
+      , SENSOR_TIMEOUT
+      , VOICE_TIMEOUT
+      , DISPENSE_ACTIVATE_TIMEOUT
+      , VD_TELEMETRY_PUBLISH_INTERVAL
+      , SAFETY_LIMIT_TEMP
+      , SAFETY_MODE_ENABLED
+      , CHILD_LIMIT_TEMP
+      , CHILD_MODE_ENABLED
+      , SETPOINT_COLD_TEMP
+      , SETPOINT_WARM_TEMP
+      , SETPOINT_HOT_TEMP
+      , ASSEMBLY_AIR_TEMP
+      , USER_CALIBRATED
+      , REVERSE_HOT_COLD
+      , UNWINTERIZE_TIMEOUT
+      , HEALTH_PROTECT_TIMEOUT
+      , LOW_FLOW_RATE
+      , ALERTS
+      , JANUS_OVERVIEW
+      , CURRENT_VERSION
+      , DEVICE_TYPE
+      , VERSION
+      , _RESCUED_DATA
+      , PSA_LOAD_DTS
+      , PSA_RECORD_SOURCE
+      , PSA_DELETE_IND
+      , REC_SRC
+      , BKCC
+      , HASHDIFF
+    FROM LOGIC_VAK
+)
+---- FILTER LAYER ----
+
+, FILTER_VAK as (
+    SELECT *
+    FROM RENAME_VAK
+)
+---- JOIN LAYER ----
+, JOIN_RESULT as (
+    SELECT * FROM FILTER_VAK
+)
+
+---- FINAL LAYER ----
+SELECT
+          SMART_DEVICE_HK
+        , LOAD_DTS
+        , SERIAL_NUMBER
+        , EVENT_TIMESTAMP
+        , FIRMWARE_VERSION
+        , UPGRADE_URI
+        , CONNECTED
+        , LAST_CONNECT
+        , WIFI_RSSI
+        , WIFI_NO_POLL
+        , WIFI_NETWORK
+        , COMMAND
+        , COMMAND_SRC
+        , BEEPER_VOLUME
+        , BEEPER_PIEZO_ENABLE
+        , BEEPER_SIREN_ENABLE
+        , DEV_DEVICE
+        , OCCUPANCY
+        , DISP_LANGUAGE
+        , HANDLE_FW
+        , HANDLE_REVERSE
+        , HANDLE_COMM_ERROR
+        , GESTURE_FW
+        , GESTURE_MODE
+        , GESTURE_COMM_ERROR
+        , SENSOR_LATCH_FW
+        , SENSOR_LED_BRIGHTNESS
+        , SENSOR_COMM_ERROR
+        , SENSOR_CONFIG
+        , SENSOR_DISABLE
+        , POWER_SOURCE
+        , POWER_BATTERY_LIFE_REMAINING
+        , POWER_BATTERY_PERCENTAGE
+        , POWER_BATTERY_SAVING_LEVEL
+        , POWER_ON
+        , STATE
+        , SYSTEM_STATE
+        , FLOW_CAL_SRC
+        , PRESET_ID
+        , VOLUME
+        , FLOW_RATE
+        , TEMPERATURE
+        , TEMPERATURE_GOAL
+        , TEMPERATURE_LAST
+        , FREEZE_ENABLE
+        , IS_FREEZING
+        , TRICKLE_FLOW_RATE
+        , LEARNED_MIN_TEMP
+        , LEARNED_MAX_TEMP
+        , DEFAULT_TEMP
+        , DEFAULT_FLOW_RATE
+        , MAX_FLOW_RATE
+        , PURGE_TIMEOUT
+        , HANDLE_TIMEOUT
+        , SENSOR_TIMEOUT
+        , VOICE_TIMEOUT
+        , DISPENSE_ACTIVATE_TIMEOUT
+        , VD_TELEMETRY_PUBLISH_INTERVAL
+        , SAFETY_LIMIT_TEMP
+        , SAFETY_MODE_ENABLED
+        , CHILD_LIMIT_TEMP
+        , CHILD_MODE_ENABLED
+        , SETPOINT_COLD_TEMP
+        , SETPOINT_WARM_TEMP
+        , SETPOINT_HOT_TEMP
+        , ASSEMBLY_AIR_TEMP
+        , USER_CALIBRATED
+        , REVERSE_HOT_COLD
+        , UNWINTERIZE_TIMEOUT
+        , HEALTH_PROTECT_TIMEOUT
+        , LOW_FLOW_RATE
+        , ALERTS
+        , JANUS_OVERVIEW
+        , CURRENT_VERSION
+        , DEVICE_TYPE
+        , VERSION
+        , _RESCUED_DATA
+        , PSA_LOAD_DTS
+        , PSA_RECORD_SOURCE
+        , PSA_DELETE_IND
+        , REC_SRC
+        , BKCC
+        , HASHDIFF
+FROM JOIN_RESULT
+{% if is_incremental() %}
+WHERE NOT EXISTS (
+    SELECT 1 
+    FROM {{ this }} existing
+    WHERE existing.SMART_DEVICE_HK = JOIN_RESULT.SMART_DEVICE_HK
+    AND existing.HASHDIFF = JOIN_RESULT.HASHDIFF
+)
+{% endif %} 
+qualify 1= row_number()over(partition by SMART_DEVICE_HK, HASHDIFF order by LOAD_DTS)
+{% if not is_incremental() %}
+union all
+SELECT
+MD5_BINARY(GR.VALUE) AS SMART_DEVICE_HK
+,CONVERT_TIMEZONE('UTC','1900-01-01'::TIMESTAMP)  AS LOAD_DTS
+,null as SERIAL_NUMBER
+,null as EVENT_TIMESTAMP
+,null as FIRMWARE_VERSION
+,null as UPGRADE_URI
+,null as CONNECTED
+,null as LAST_CONNECT
+,null as WIFI_RSSI
+,null as WIFI_NO_POLL
+,null as WIFI_NETWORK
+,null as COMMAND
+,null as COMMAND_SRC
+,null as BEEPER_VOLUME
+,null as BEEPER_PIEZO_ENABLE
+,null as BEEPER_SIREN_ENABLE
+,null as DEV_DEVICE
+,null as OCCUPANCY
+,null as DISP_LANGUAGE
+,null as HANDLE_FW
+,null as HANDLE_REVERSE
+,null as HANDLE_COMM_ERROR
+,null as GESTURE_FW
+,null as GESTURE_MODE
+,null as GESTURE_COMM_ERROR
+,null as SENSOR_LATCH_FW
+,null as SENSOR_LED_BRIGHTNESS
+,null as SENSOR_COMM_ERROR
+,null as SENSOR_CONFIG
+,null as SENSOR_DISABLE
+,null as POWER_SOURCE
+,null as POWER_BATTERY_LIFE_REMAINING
+,null as POWER_BATTERY_PERCENTAGE
+,null as POWER_BATTERY_SAVING_LEVEL
+,null as POWER_ON
+,null as STATE
+,null as SYSTEM_STATE
+,null as FLOW_CAL_SRC
+,null as PRESET_ID
+,null as VOLUME
+,null as FLOW_RATE
+,null as TEMPERATURE
+,null as TEMPERATURE_GOAL
+,null as TEMPERATURE_LAST
+,null as FREEZE_ENABLE
+,null as IS_FREEZING
+,null as TRICKLE_FLOW_RATE
+,null as LEARNED_MIN_TEMP
+,null as LEARNED_MAX_TEMP
+,null as DEFAULT_TEMP
+,null as DEFAULT_FLOW_RATE
+,null as MAX_FLOW_RATE
+,null as PURGE_TIMEOUT
+,null as HANDLE_TIMEOUT
+,null as SENSOR_TIMEOUT
+,null as VOICE_TIMEOUT
+,null as DISPENSE_ACTIVATE_TIMEOUT
+,null as VD_TELEMETRY_PUBLISH_INTERVAL
+,null as SAFETY_LIMIT_TEMP
+,null as SAFETY_MODE_ENABLED
+,null as CHILD_LIMIT_TEMP
+,null as CHILD_MODE_ENABLED
+,null as SETPOINT_COLD_TEMP
+,null as SETPOINT_WARM_TEMP
+,null as SETPOINT_HOT_TEMP
+,null as ASSEMBLY_AIR_TEMP
+,null as USER_CALIBRATED
+,null as REVERSE_HOT_COLD
+,null as UNWINTERIZE_TIMEOUT
+,null as HEALTH_PROTECT_TIMEOUT
+,null as LOW_FLOW_RATE
+,null as ALERTS
+,null as JANUS_OVERVIEW
+,null as CURRENT_VERSION
+,null as DEVICE_TYPE
+,null as VERSION
+,null as _RESCUED_DATA
+,null as PSA_LOAD_DTS
+,null as PSA_RECORD_SOURCE
+,null as PSA_DELETE_IND		
+, DECODE(GR.VALUE, 0, 'GHOST RECORD-SYSTEM', -1, 'GHOST RECORD-nullkey-required', -2, 'GHOST RECORD-nullkey-optional')  AS BKCC
+, 'USAZET.SNOWFLAKE.FBIN.DERIVED' AS REC_SRC
+, ''::BINARY as HASHDIFF
+FROM
+TABLE(strtok_split_to_table('0|-1|-2', '|')) AS GR
+
+{% endif %}

@@ -1,0 +1,95 @@
+---- SRC LAYER ----
+WITH
+SRC_ctip          as ( SELECT * FROM {{ ref('v_psa_stg_cost_total_for_internal_postings__winn_sap') }} as SRC 
+                        QUALIFY (ROW_NUMBER() OVER(PARTITION BY COST_TOTAL_FOR_INTERNAL_POSTINGS_HK ORDER BY LOAD_DTS ))=1 )
+
+/*
+SRC_ctip           as ( SELECT * FROM None.v_psa_stg_cost_total_for_internal_postings__winn_sap )
+*/
+---- LOGIC LAYER ----
+
+, LOGIC_ctip as (
+    SELECT
+        COST_TOTAL_FOR_INTERNAL_POSTINGS_HK
+      , OBJECT_NUMBER_HK
+      , COST_ELEMENT_HK
+      , FISCAL_PERIOD_HK
+      , COST_VALUE_TYPE_HK
+      , COST_VERSION_HK
+      , ORIGIN_GROUP_HK
+      , COST_TRANSACTION_TYPE_HK
+      , LEDGER_HK
+      , LOAD_DTS
+      , REC_SRC
+    FROM SRC_ctip
+)
+---- RENAME LAYER ----
+
+, RENAME_ctip as (
+    SELECT
+        COST_TOTAL_FOR_INTERNAL_POSTINGS_HK
+      , OBJECT_NUMBER_HK
+      , COST_ELEMENT_HK
+      , FISCAL_PERIOD_HK
+      , COST_VALUE_TYPE_HK
+      , COST_VERSION_HK
+      , ORIGIN_GROUP_HK
+      , COST_TRANSACTION_TYPE_HK
+      , LEDGER_HK
+      , LOAD_DTS
+      , REC_SRC
+    FROM LOGIC_ctip
+)
+---- FILTER LAYER ----
+
+, FILTER_ctip as (
+    SELECT *
+    FROM RENAME_ctip
+)
+
+---- JOIN LAYER ----
+, JOIN_RESULT as (
+    SELECT *
+    FROM FILTER_ctip
+)
+
+---- FINAL LAYER ----
+SELECT
+          COST_TOTAL_FOR_INTERNAL_POSTINGS_HK
+        , OBJECT_NUMBER_HK
+        , COST_ELEMENT_HK
+        , FISCAL_PERIOD_HK
+        , COST_VALUE_TYPE_HK
+        , COST_VERSION_HK
+        , ORIGIN_GROUP_HK
+        , COST_TRANSACTION_TYPE_HK
+        , LEDGER_HK
+        , LOAD_DTS
+        , REC_SRC
+FROM JOIN_RESULT
+{% if is_incremental() %}
+WHERE NOT EXISTS (
+    SELECT 1 
+    FROM {{ this }} existing
+    WHERE existing.COST_TOTAL_FOR_INTERNAL_POSTINGS_HK = JOIN_RESULT.COST_TOTAL_FOR_INTERNAL_POSTINGS_HK
+)
+{% endif %}
+
+{% if not is_incremental() %}
+union all
+SELECT 
+
+MD5_BINARY(GR.VALUE) AS COST_TOTAL_FOR_INTERNAL_POSTINGS_HK
+, MD5_BINARY(GR.VALUE) AS OBJECT_NUMBER_HK
+, MD5_BINARY(GR.VALUE) AS COST_ELEMENT_HK
+, MD5_BINARY(GR.VALUE) AS FISCAL_PERIOD_HK
+, MD5_BINARY(GR.VALUE) AS COST_VALUE_TYPE_HK
+, MD5_BINARY(GR.VALUE) AS COST_VERSION_HK
+, MD5_BINARY(GR.VALUE) AS ORIGIN_GROUP_HK
+, MD5_BINARY(GR.VALUE) AS COST_TRANSACTION_TYPE_HK
+, MD5_BINARY(GR.VALUE) AS LEDGER_HK
+, CONVERT_TIMEZONE('UTC','1900-01-01'::TIMESTAMP)  AS LOAD_DTS
+, 'USAZET.SNOWFLAKE.FBIN.DERIVED' AS REC_SRC
+FROM
+TABLE(strtok_split_to_table('0|-1|-2', '|')) AS GR
+{% endif %}

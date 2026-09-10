@@ -1,0 +1,8 @@
+version: 2
+models:
+- name: pit_entity
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - ENTITY_HK

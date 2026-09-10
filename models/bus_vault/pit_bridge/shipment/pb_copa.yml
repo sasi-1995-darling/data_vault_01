@@ -1,0 +1,9 @@
+version: 2
+models:
+  - name: pb_copa
+    data_tests:
+    - dbt_constraints.primary_key:
+        arguments:
+          column_names:
+            - LNK_COPA_SALES_HK
+    columns: []

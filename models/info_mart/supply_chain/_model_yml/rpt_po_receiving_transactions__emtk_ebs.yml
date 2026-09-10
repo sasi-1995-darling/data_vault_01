@@ -1,0 +1,10 @@
+version: 2
+
+models:
+  - name: rpt_po_receiving_transactions__emtk_ebs
+    description: Reporting table that mimics Emtek's Oracle Discoverer PO Receiving Transactions report. Used by Tableau.
+    config:
+      materialized: table
+      tags:
+        - emtek
+        - ebs

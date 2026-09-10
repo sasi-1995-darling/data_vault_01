@@ -1,0 +1,12 @@
+version: 2
+models:
+  - name: ref_bom_usage__winn_sap
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - CLIENT
+              - LANGUAGE_KEY
+              - BOM_USAGE
+              - LANGUAGE_NAME
+    columns: []

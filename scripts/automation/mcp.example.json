@@ -1,0 +1,19 @@
+{
+  "servers": {
+    "snow-mcp": {
+      "command": "uvx",
+      "args": [
+        "--from",
+        "git+https://github.com/Snowflake-Labs/mcp@v.1.4.0",
+        "mcp-server-snowflake",
+        "--service-config-file",
+        "scripts/automation/tools_config.yaml"
+      ],
+      "env": {
+        "SNOWFLAKE_PAT": "<your_snowflake_personal_access_token>",
+        "SNOWFLAKE_ACCOUNT": "FBHS_GPG.east-us-2.azure",
+        "SNOWFLAKE_USER": "<your_email@fbwinn.com>"
+      }
+    }
+  }
+}

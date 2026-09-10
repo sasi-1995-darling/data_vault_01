@@ -1,0 +1,55 @@
+version: 2
+models:
+  - name: lsat_tract_zip__snfl_usps
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          config:
+            severity: warn
+          arguments:
+            combination_of_columns:
+              - LNK_ZIP_TRACT_HK
+              - LOAD_DTS
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - LNK_ZIP_TRACT_HK
+              - LOAD_DTS
+    columns:
+      - name: LNK_ZIP_TRACT_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+          - dbt_utils.relationships_where:
+              arguments:
+                to: ref( 'lnk_zipcode_tract' )
+                field: LNK_ZIP_TRACT_HK
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'lnk_zipcode_tract' )
+                pk_column_name: LNK_ZIP_TRACT_HK
+      - name: TRACT
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: ZIP
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: LOAD_DTS
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: REC_SRC
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: HASHDIFF
+        tests:
+          - not_null:
+              config:
+                severity: warn

@@ -1,0 +1,31 @@
+version: 2
+models:
+  - name: msat_po_item__tt_e21
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - PO_ITEM_HK
+              - REL_NUMB
+              - LOAD_DTS
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          config:
+            severity: warn
+          arguments:
+            min_value: 4
+    columns:
+      - name: PO_ITEM_HK
+        tests:
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'hub_po_item' )
+                pk_column_name: PO_ITEM_HK
+      - name: BKCC
+        tests:
+          - not_null
+      - name: REC_SRC
+        tests:
+          - not_null
+      - name: LOAD_DTS
+        tests:
+          - not_null

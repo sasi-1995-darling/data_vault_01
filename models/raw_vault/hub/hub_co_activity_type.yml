@@ -1,0 +1,14 @@
+version: 2
+models:
+  - name: hub_co_activity_type
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - CO_ACTIVITY_TYPE_HK
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          config:
+            severity: warn
+          arguments:
+            min_value: 4
+    columns: []

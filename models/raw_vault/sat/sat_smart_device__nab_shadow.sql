@@ -1,0 +1,288 @@
+---- SRC LAYER ----
+WITH
+SRC_NAB            as ( SELECT * FROM {{ ref('v_psa_stg_smart_device_nab_shadow') }} as SRC 
+                         {% if is_incremental() %}
+                         WHERE SRC.LOAD_DTS > (SELECT DATEADD('HOUR', '-1', MAX(LOAD_DTS)) FROM {{this}})
+                         {% endif %}  )
+
+/*
+SRC_NAB            as ( SELECT * FROM staging.v_psa_stg_smart_device_nab_shadow )
+*/
+---- LOGIC LAYER ----
+
+, LOGIC_NAB as (
+    SELECT
+        SMART_DEVICE_HK
+      , LOAD_DTS
+      , DEVICE_TYPE
+      , SERIAL_NUMBER
+      , TIMESTAMP
+      , FIRMWARE_VERSION
+      , UPGRADE_URI
+      , CONNECTED
+      , LAST_CONNECT
+      , WIFI_RSSI
+      , WIFI_NETWORK
+      , WIFI_NO_POLL
+      , COMMAND
+      , COMMAND_SRC
+      , LOGCOMMAND_COMMAND
+      , LOGCOMMAND_EVENTID
+      , LOGCOMMAND_DURATION
+      , LOGCOMMAND_ARGS
+      , LOGALERTACK_EVENTID
+      , LOGALERTACK_TYPE
+      , LOG_DEBUG
+      , LOG_DEBUG_STATE
+      , SYSTEM_STATE
+      , BEEPER_VOLUME
+      , BEEPER_PIEZO_ENABLE
+      , BEEPER_SIREN_ENABLE
+      , DEV_DEVICE
+      , DISP_LANGUAGE
+      , TEMP_SCALE
+      , TEMP_LOW_THRESHOLD
+      , TEMP_HIGH_THRESHOLD
+      , HUMID_LOW_THRESHOLD
+      , HUMID_HIGH_THRESHOLD
+      , POWER_SOURCE
+      , BATTERY_PERCENTAGE
+      , CROCK_DIAMETER_MM
+      , CROCK_BACKUP
+      , CROCK_COMMAND
+      , CROCK_COMMAND_SRC
+      , CROCK_STREAM
+      , CROCK_BCK_TST
+      , BCKTST_TIMESTAMP
+      , BCKTST_STATUS
+      , CROCK_STATE
+      , CROCK_TOF_DISTANCE
+      , CROCK_TOF_HEIGHT
+      , DROPLET_LEVEL
+      , DROPLET_TREND
+      , DROPLET_FLOOD_RISK
+      , DROPLET_PRIMARY_STATE
+      , DROPLET_BACKUP_STATE
+      , ALERTS
+      , CURRENT_VERSION
+      , PSA_LOAD_DTS
+      , PSA_RECORD_SOURCE
+      , PSA_DELETE_IND
+      , REC_SRC
+      , BKCC
+      , HASHDIFF
+    FROM SRC_NAB
+)
+---- RENAME LAYER ----
+
+, RENAME_NAB as (
+    SELECT
+        SMART_DEVICE_HK
+      , LOAD_DTS
+      , DEVICE_TYPE
+      , SERIAL_NUMBER
+      , TIMESTAMP
+      , FIRMWARE_VERSION
+      , UPGRADE_URI
+      , CONNECTED
+      , LAST_CONNECT
+      , WIFI_RSSI
+      , WIFI_NETWORK
+      , WIFI_NO_POLL
+      , COMMAND
+      , COMMAND_SRC
+      , LOGCOMMAND_COMMAND
+      , LOGCOMMAND_EVENTID
+      , LOGCOMMAND_DURATION
+      , LOGCOMMAND_ARGS
+      , LOGALERTACK_EVENTID
+      , LOGALERTACK_TYPE
+      , LOG_DEBUG
+      , LOG_DEBUG_STATE
+      , SYSTEM_STATE
+      , BEEPER_VOLUME
+      , BEEPER_PIEZO_ENABLE
+      , BEEPER_SIREN_ENABLE
+      , DEV_DEVICE
+      , DISP_LANGUAGE
+      , TEMP_SCALE
+      , TEMP_LOW_THRESHOLD
+      , TEMP_HIGH_THRESHOLD
+      , HUMID_LOW_THRESHOLD
+      , HUMID_HIGH_THRESHOLD
+      , POWER_SOURCE
+      , BATTERY_PERCENTAGE
+      , CROCK_DIAMETER_MM
+      , CROCK_BACKUP
+      , CROCK_COMMAND
+      , CROCK_COMMAND_SRC
+      , CROCK_STREAM
+      , CROCK_BCK_TST
+      , BCKTST_TIMESTAMP
+      , BCKTST_STATUS
+      , CROCK_STATE
+      , CROCK_TOF_DISTANCE
+      , CROCK_TOF_HEIGHT
+      , DROPLET_LEVEL
+      , DROPLET_TREND
+      , DROPLET_FLOOD_RISK
+      , DROPLET_PRIMARY_STATE
+      , DROPLET_BACKUP_STATE
+      , ALERTS
+      , CURRENT_VERSION
+      , PSA_LOAD_DTS
+      , PSA_RECORD_SOURCE
+      , PSA_DELETE_IND
+      , REC_SRC
+      , BKCC
+      , HASHDIFF
+    FROM LOGIC_NAB
+)
+---- FILTER LAYER ----
+
+, FILTER_NAB as (
+    SELECT *
+    FROM RENAME_NAB
+)
+---- JOIN LAYER ----
+, JOIN_RESULT as (
+    SELECT * FROM FILTER_NAB
+)
+
+---- FINAL LAYER ----
+SELECT
+          SMART_DEVICE_HK
+        , LOAD_DTS
+        , DEVICE_TYPE
+        , SERIAL_NUMBER
+        , TIMESTAMP
+        , FIRMWARE_VERSION
+        , UPGRADE_URI
+        , CONNECTED
+        , LAST_CONNECT
+        , WIFI_RSSI
+        , WIFI_NETWORK
+        , WIFI_NO_POLL
+        , COMMAND
+        , COMMAND_SRC
+        , LOGCOMMAND_COMMAND
+        , LOGCOMMAND_EVENTID
+        , LOGCOMMAND_DURATION
+        , LOGCOMMAND_ARGS
+        , LOGALERTACK_EVENTID
+        , LOGALERTACK_TYPE
+        , LOG_DEBUG
+        , LOG_DEBUG_STATE
+        , SYSTEM_STATE
+        , BEEPER_VOLUME
+        , BEEPER_PIEZO_ENABLE
+        , BEEPER_SIREN_ENABLE
+        , DEV_DEVICE
+        , DISP_LANGUAGE
+        , TEMP_SCALE
+        , TEMP_LOW_THRESHOLD
+        , TEMP_HIGH_THRESHOLD
+        , HUMID_LOW_THRESHOLD
+        , HUMID_HIGH_THRESHOLD
+        , POWER_SOURCE
+        , BATTERY_PERCENTAGE
+        , CROCK_DIAMETER_MM
+        , CROCK_BACKUP
+        , CROCK_COMMAND
+        , CROCK_COMMAND_SRC
+        , CROCK_STREAM
+        , CROCK_BCK_TST
+        , BCKTST_TIMESTAMP
+        , BCKTST_STATUS
+        , CROCK_STATE
+        , CROCK_TOF_DISTANCE
+        , CROCK_TOF_HEIGHT
+        , DROPLET_LEVEL
+        , DROPLET_TREND
+        , DROPLET_FLOOD_RISK
+        , DROPLET_PRIMARY_STATE
+        , DROPLET_BACKUP_STATE
+        , ALERTS
+        , CURRENT_VERSION
+        , PSA_LOAD_DTS
+        , PSA_RECORD_SOURCE
+        , PSA_DELETE_IND
+        , REC_SRC
+        , BKCC
+        , HASHDIFF
+FROM JOIN_RESULT
+{% if is_incremental() %}
+WHERE NOT EXISTS (
+    SELECT 1 
+    FROM {{ this }} existing
+    WHERE existing.SMART_DEVICE_HK = JOIN_RESULT.SMART_DEVICE_HK
+    AND existing.HASHDIFF = JOIN_RESULT.HASHDIFF
+)
+{% endif %} 
+qualify 1= row_number()over(partition by SMART_DEVICE_HK, HASHDIFF order by LOAD_DTS)
+{% if not is_incremental() %}
+union all
+SELECT
+MD5_BINARY(GR.VALUE) AS SMART_DEVICE_HK
+,CONVERT_TIMEZONE('UTC','1900-01-01'::TIMESTAMP)  AS LOAD_DTS
+,null as DEVICE_TYPE
+,null as SERIAL_NUMBER
+,null as TIMESTAMP
+,null as FIRMWARE_VERSION
+,null as UPGRADE_URI
+,null as CONNECTED
+,null as LAST_CONNECT
+,null as WIFI_RSSI
+,null as WIFI_NETWORK
+,null as WIFI_NO_POLL
+,null as COMMAND
+,null as COMMAND_SRC
+,null as LOGCOMMAND_COMMAND
+,null as LOGCOMMAND_EVENTID
+,null as LOGCOMMAND_DURATION
+,null as LOGCOMMAND_ARGS
+,null as LOGALERTACK_EVENTID
+,null as LOGALERTACK_TYPE
+,null as LOG_DEBUG
+,null as LOG_DEBUG_STATE
+,null as SYSTEM_STATE
+,null as BEEPER_VOLUME
+,null as BEEPER_PIEZO_ENABLE
+,null as BEEPER_SIREN_ENABLE
+,null as DEV_DEVICE
+,null as DISP_LANGUAGE
+,null as TEMP_SCALE
+,null as TEMP_LOW_THRESHOLD
+,null as TEMP_HIGH_THRESHOLD
+,null as HUMID_LOW_THRESHOLD
+,null as HUMID_HIGH_THRESHOLD
+,null as POWER_SOURCE
+,null as BATTERY_PERCENTAGE
+,null as CROCK_DIAMETER_MM
+,null as CROCK_BACKUP
+,null as CROCK_COMMAND
+,null as CROCK_COMMAND_SRC
+,null as CROCK_STREAM
+,null as CROCK_BCK_TST
+,null as BCKTST_TIMESTAMP
+,null as BCKTST_STATUS
+,null as CROCK_STATE
+,null as CROCK_TOF_DISTANCE
+,null as CROCK_TOF_HEIGHT
+,null as DROPLET_LEVEL
+,null as DROPLET_TREND
+,null as DROPLET_FLOOD_RISK
+,null as DROPLET_PRIMARY_STATE
+,null as DROPLET_BACKUP_STATE
+,null as ALERTS
+,null as CURRENT_VERSION
+,null as PSA_LOAD_DTS
+,null as PSA_RECORD_SOURCE
+,null as PSA_DELETE_IND		
+, DECODE(GR.VALUE, 0, 'GHOST RECORD-SYSTEM', -1, 'GHOST RECORD-nullkey-required', -2, 'GHOST RECORD-nullkey-optional')  AS BKCC
+, 'USAZET.SNOWFLAKE.FBIN.DERIVED' AS REC_SRC
+, ''::BINARY as HASHDIFF
+FROM
+TABLE(strtok_split_to_table('0|-1|-2', '|')) AS GR
+
+{% endif %}

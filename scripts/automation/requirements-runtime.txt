@@ -1,0 +1,22 @@
+# Runtime-only dependencies (extends requirements.txt).
+#
+# requirements.txt is the curated unit-test / parse dependency set — kept
+# deliberately light and snowflake-free so the triage test workflows install
+# fast. The Snowflake driver below is imported LAZILY at runtime (see
+# scripts/automation/src/triage/cron_entrypoint.py::_open_snowflake_cursor and
+# scripts/automation/pipeline_orchestrator.py) and is NOT needed to run the
+# unit tests, so it lives here rather than in requirements.txt.
+#
+# Install this file in workflows that actually open a Snowflake connection at
+# runtime (e.g. .github/workflows/triage-cron.yaml). Local .venv setup installs
+# the driver too — see SETUP_GUIDE.md.
+-r requirements.txt
+
+# snowflake-connector-python: Snowflake driver for the triage cron's
+# OPS_PROD.LOGS.TRIAGE_INVOCATIONS cursor reads/writes (and the pipeline
+# orchestrator's Snowflake paths). Floor matches the dev-validated .venv
+# version (4.2.0); capped at the next major to surface breaking changes
+# deliberately. The range resolves to the latest 4.x in CI, which carries the
+# most Workload Identity Federation (WIF) hardening — relevant to the planned
+# keyless-auth migration (WIF authenticator supported since 3.17.0).
+snowflake-connector-python>=4.2,<5

@@ -1,0 +1,5 @@
+version: 2
+models:
+- name: pb_stg_incident_false_alarm_yly
+  data_tests: []
+  columns: []

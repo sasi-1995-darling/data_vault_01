@@ -1,0 +1,1415 @@
+version: 2
+sources:
+#Same name and schema
+# - name: ml_ebs_ap
+#   database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+#   description: Persistent Staging Area masterlock supplier data
+#   schema: ml_ebs_ap
+#   tables:
+#     - name: ap_suppliers
+#       description: "Supplier data from ML EBS AP module"
+#     - name: ap_terms_tl
+#       description: "The table contains records of various attributes and descriptions for purchasing terms from ML EBS AP module"
+#       
+# - name: ml_ebs_po
+#   database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+#   description: Persistent Staging Area masterlock purchase orders data
+#   schema: ml_ebs_po
+#   tables:
+#     - name: po_headers_all
+#       description: "Purchase Order Header data from ML EBS AP module"
+#     - name: po_lines_all
+#       description: "Purchase Order Line Item data from ML EBS AP module"
+#     - name: rcv_transactions
+#       description: "Purchase Order Receipt data from ML EBS AP module"
+# 
+# - name: ml_ebs_inv
+#   database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+#   description: Persistent Staging Area masterlock purchase orders data
+#   schema: ml_ebs_inv
+#   tables:
+#     - name: mtl_system_items_b
+#       description: "Material Item Master data from ML EBS AP module"
+#     - name: mtl_material_transactions
+#       description: "Inventory material transactions from ML EBS AP module"
+#     - name: mtl_parameters
+#       description: "Material warehouse information from ML EBS AP module"
+#     - name: mtl_item_categories
+#       description: "item categories information from ML EBS AP module"
+#     - name: mtl_category_sets_b
+#       description: "item categories set details from ML EBS AP module"
+#     - name: mtl_category_sets_tl
+#       description: "category set information from ML EBS AP module"
+#     - name: mtl_categories_b
+#       description: "category information from ML EBS AP module"
+# 
+# - name: ml_ebs_hr
+#   database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+#   description: Persistent Staging Area masterlock legal entity data
+#   schema: ml_ebs_hr
+#   tables:
+#     - name: hr_all_organization_units
+#       description: "The Master table for all the Organizations"
+#     - name: hr_organization_information
+#       description: "Information types for the Organizations"
+# 
+# - name: ml_ebs_ar
+#   database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+#   description: Persistent Staging Area Masterlock payments
+#   schema: ml_ebs_ar
+#   tables:
+#     - name: ar_payment_schedules_all
+#       description: "Data for payments, installments, credit memos and invoice balances associated with customers"
+#     - name: ra_customer_trx_all
+#       description: "Data about customer transactions"
+#     - name: ra_customer_trx_lines_all
+#       description: "Data about customer line transactions"
+#     - name: ra_cust_trx_line_gl_dist_all
+#       description: "Data about accounting records for revenue, unearned revenue, and unbilled receivables for each invoice or credit memo line"
+#     - name: ra_batch_sources_all
+#       description: "Data about the sources of invoices, credit memos, and commitments"
+#     - name: ar_adjustments_all
+#       description: "Data about invoice adjustments"
+#     - name: ar_receivables_trx_all
+#       description: "Data that links distribution information with receivables activities"
+#     - name: ar_memo_lines_all_b
+#       description: "Data about standard memo lines for debit memos, on-account credits, debit memo reversals, chargebacks, and invoices"
+# 
+# - name: ml_ebs_gl
+#   database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+#   description: Persistent Staging Area Masterlock General Ledger
+#   schema: ml_ebs_gl
+#   tables:
+#     - name: gl_daily_rates
+#       description: "Data for the daily conversion rates for foreign currency transactions"
+# - name: ml_ebs_ont
+#   database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+#   description: Persistent Staging Area Masterlock Order Management
+#   schema: ml_ebs_ont
+#   tables:
+#     - name: oe_order_lines_all
+#       description: "Data about attributes, such as item type, quantity, price, and shipping details, which may differ from the order header"
+#     - name: oe_order_headers_all
+#       description: "Data about sales order header, such as sales orders, including customer, order type, status, and pricing details"
+#     - name: oe_transaction_types_tl
+#       description: "Data about translation attributes for transaction types"
+# 
+# - name: mdm_supplier
+#   database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+#   description: Persistent Staging Area MDM Supplier Data
+#   schema: mdm_supplier
+#   tables:
+#     - name: outbound_supplier
+#       description: "Supplier MDM Golden Records"
+#     - name: outbound_supplier_xref
+#       description: "Supplier MDM Golden Records Crosswalk table"
+# 
+# - name: sap_ecc_prd
+#   database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+#   description: Persistent Staging Area Moen ECC data
+#   schema: sap_ecc_prd
+#   tables:
+#     - name: z_lfa1
+#       description: "Supplier data from ML EBS AP module"
+#     - name: z_ekko
+#       description: "Header PO from WINN SAP module"
+#     - name: z_ekpo
+#       description: "Line Item PO from WINN SAP module"
+#     - name: z_ekbe
+#       description: "Purchase Receipts for WINN SAP module"
+#     - name: z_t001
+#       description: "Legal Entity data for WINN SAP module"
+#     - name: z_ausp
+#       description: "Brand data for WINN SAP module"
+#     - name: z_zdw_s600
+#       description: "Sales/input data, derived from two main SAP tables VBAK stores header info for sales documents and VBAP stores line item details for each sales document"
+#     - name: z_ce1new4
+#       description: "COPA (control parameters) data - Moen Operating Concern, which is the raw sales/shipment data from SAP"
+#     - name: z_kna1
+#       description: "General customer master data such as name, address, group/group key and other attributes"
+#     - name: z_t024
+#       description: "Purchasing org tables master"
+#     - name: z_eina
+#       description: "Purchasing info record "
+#     - name: z_eine
+#       description: "Purchasing Org data "
+#     - name: z_mara
+#       description: "Data about material; item numbers, lookup keys for item descriptions etc"
+#     - name: z_marc
+#       description: "Plant data for material"
+#     - name: z_t001w
+#       description: "Plant data and their associated details"
+#     - name: z_qmel
+#       description: "Quality Notification"
+#     - name: z_qmur
+#       description: "Quality Causes"
+#     - name: z_iloa
+#       description: "PM Object Location and Account Assignment"
+#     - name: z_qmih
+#       description: "Quality message - maintenance data excerpt"
+#     - name: z_qmfe
+#       description: "Quality notification - items"
+#     - name: z_qmsm
+#       description: "Quality notification - tasks"
+#     - name: z_tq80
+#       description: "Notification Types"
+#     - name: z_ihpa
+#       description: "Plant Maintenance: Partners"
+#     - name: z_qmma
+#       description: "Quality notification - activities"
+#     - name: z_tcurr
+#       description: "stores exchange rates between different currencies"
+#     - name: z_zbwfiscalpr
+#       description: "custom table related to fiscal periods in SAP "
+# 
+- name: lowes_vpp_psa
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  description: psa lowes api data
+  schema: lowes_vpp
+  tables:
+    - name: sales_inventory_moen
+      description: "POS Sales Data from Lowes API for Moen"
+    - name: sales_inventory_larson
+      description: "POS Sales Data from Lowes API for Larson"
+    - name: sales_inventory_thermatru
+      description: "POS Sales Data from Lowes API for Thermatru"
+    - name: sales_inventory_masterlock
+      description: "POS Sales Data from Lowes API for Masterlock"
+    - name: sales_inventory
+      description: "POS Sales Historical Data from Lowes API for Moen"
+
+- name: home_depot_psa
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  description: psa home depot data
+  schema: home_depot
+  tables:
+    - name: hd_askuity_pos
+      description: "POS Sales Data from Home Depot"
+    - name: hd_askuity_master_storeattributes
+      description: "POS Store Location Data from Home Depot"
+
+- name: stock_market_psa
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  description: psa stock market data
+  schema: stock_market
+  tables:
+    - name: tsm_lowes_us
+      description: "POS Stock Market for Moen"
+- name: lowes_us_psa
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  description: psa lowes us misc data
+  schema: lowes_us
+  tables:
+    - name: location
+      description: "POS Location Data from Lowes"
+
+- name: us_zip_code_crosswalk_hudusps
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  description: Persistent Staging Area HUD USPS Zipcode Crosswalk Data
+  schema: zipcode_crosswalk
+  tables:
+    - name: cbsa
+      description: "cbsa data from HUD USPS Zipcode Crosswalk"
+    - name: cbsa_zip
+      description: "cbsa zip data from HUD USPS Zipcode Crosswalk"
+    - name: county
+      description: "county data from HUD USPS Zipcode Crosswalk"
+    - name: county_zip
+      description: "county zip data from HUD USPS Zipcode Crosswalk"
+    - name: tract_zip
+      description: "tract zip data from HUD USPS Zipcode Crosswalk"
+    - name: zip_cbsa
+      description: "zip cbsa data from HUD USPS Zipcode Crosswalk"
+    - name: zip_county
+      description: "zip county data from HUD USPS Zipcode Crosswalk"
+    - name: zip_tract
+      description: "zip tract data from HUD USPS Zipcode Crosswalk"
+
+- name: amazon_vc_psa
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  description: amazon vendor central data psa
+  schema: amazon_vc
+  tables:
+    - name: sales
+      description: "POS Sales Data for Lowes"   
+
+# - name: lrsn_psft_sysadm
+#   database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+#   description: Persistent Staging Area Larson 
+#   schema: lrsn_psft_sysadm
+#   tables:
+#     - name: ps_l_salesman_info
+#       description: "Larson Sales Person Data"
+#     - name: ps_bi_hdr
+#       description: "Larson Header Sales Data"
+#     - name: ps_bi_line
+#       description: "Larson Line Sales Data"
+#     - name: ps_cust_cgrp_lnk
+#       description: "Data with linkages between customers and customer groups"
+#     - name: ps_l_rep_cust
+#       description: "Customer data specific for reporting, relationship tracking, customer segmentation, sales region etc"
+#     - name: ps_bus_unit_tbl_in
+#       description: "Configuration and control information for Inventory Business Units"
+#     - name: ps_bus_unit_tbl_fs
+#       description: "Configuration and control information for Financial Business Units"
+#     - name: ps_l_cust_grp_lu
+#       description: "Lookup table for customer groups"
+#     - name: ps_l_prod_grp_lu
+#       description: "Lookup table for product groups with description for group types and lookup/group codes" 
+#     - name: psxlatitem
+#       description: "Translation data for various values in fields like status code, customer_type, eff_status etc"
+#     - name: ps_l_state_grp
+#       description: "Data for state group classifications"
+#     - name: ps_itm_cat_tbl
+#       description: "Data for item categories and their characteristics"
+#     - name: ps_inv_items
+#       description: "Inventory item data; unique item ids, descriptions, type, etc"
+#     - name: ps_master_item_tbl
+#       description: "Data for items used across various modules Inventory, Purchasing, and Supply Chain Management"
+#     - name: ps_prod_item
+#       description: "Data about products, including product ids, description and various attributes"
+#     - name: ps_l_sp_prod
+#       description: "Data for special products that have unique attributes or specialized handling requirements"
+#     - name: ps_l_prod_grp_tbl
+#       description: "Product groups data for organizing or categorizing or classify products"
+#     - name: ps_bu_items_inv
+#       description: "Data for inventory items across different business units"
+# 
+# - name: tt_e21prd_e21trubis
+#   database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+#   description: Persistent Staging Area Thermatru E21 
+#   schema: tt_e21prd_e21trubis
+#   tables:
+#     - name: arsalesman
+#       description: "Thermatru E21 Sales Person Data"
+#     - name: apvndmstr
+#       description: "Supplier data from Thermatru module"
+# 
+# - name: tt_gpd
+#   database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+#   description: Persistent Staging Area Thermatru Great Plains supplier data
+#   schema: tt_gpd
+#   tables:
+#     - name: dbo_pm00200
+#       description: "Supplier data from Thermatru GP module"  
+# 
+- name: profitero_winn_psa
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  description: Profitero WINN Customer Feedback
+  schema: profitero
+  tables:
+      - name: customer_products
+        description: "Profitero WINN Customer Products"
+      - name: reviews
+        description: "Profitero WINN reviews"
+      - name: product_ratings
+        description: "Profitero WINN ratings"
+      - name: brands
+        description: "Profitero WINN brands"
+      - name: retailers
+        description: "Profitero WINN retailers"
+
+- name: profitero_security_psa
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  description: Profitero WINN Customer Feedback
+  schema: profitero_security
+  tables:
+      - name: customer_products
+        description: "Profitero Security Customer Products"
+      - name: reviews
+        description: "Profitero Security review"
+      - name: product_ratings
+        description: "Profitero Security ratings"
+      - name: brands
+        description: "Profitero Security brands"
+      - name: retailers
+        description: "Profitero Security retailers"
+
+- name: profitero_fypon_psa
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  description: Profitero Fypon Customer Feedback
+  schema: profitero_fypon
+  tables:
+      - name: customer_products
+        description: "Profitero Fypon Customer Products"
+      - name: reviews
+        description: "Profitero Fypon review"
+      - name: product_ratings
+        description: "Profitero Fypon ratings"
+      - name: brands
+        description: "Profitero Fypon brands"
+      - name: retailers
+        description: "Profitero Fypon retailers"
+
+- name: profitero_fiberon_psa
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  description: Profitero fiberon Customer Feedback
+  schema: profitero_fiberon
+  tables:
+      - name: customer_products
+        description: "Profitero fiberon Customer Products"
+      - name: reviews
+        description: "Profitero fiberon reviews"
+      - name: product_ratings
+        description: "Profitero fiberon ratings"
+      - name: brands
+        description: "Profitero fiberon brands"
+      - name: retailers
+        description: "Profitero fiberon retailers"
+
+- name: profitero_thermatru_psa
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  description: Profitero thermatru Customer Feedback
+  schema: profitero_thermatru
+  tables:
+      - name: customer_products
+        description: "Profitero thermatru Customer Products"
+      - name: reviews
+        description: "Profitero thermatru reviews"
+      - name: product_ratings
+        description: "Profitero thermatru ratings"
+      - name: brands
+        description: "Profitero thermatru brands"
+      - name: retailers
+        description: "Profitero thermatru retailers"
+
+- name: profitero_larson_psa
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  description: Profitero larson Customer Feedback
+  schema: profitero_larson
+  tables:
+      - name: customer_products
+        description: "Profitero larson Customer Products"
+      - name: reviews
+        description: "Profitero larson reviews"
+      - name: product_ratings
+        description: "Profitero larson ratings"
+      - name: brands
+        description: "Profitero larson brands"
+      - name: retailers
+        description: "Profitero larson retailers"
+
+- name: reference_psa
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  description: Profitero larson Customer Feedback
+  schema: reference
+  tables:
+      - name: ref_product_delighted
+        description: "Delighted Product: sws, vak,..."
+      - name: ref_brand_appbot
+        description: "Appbot Product: sws, vak,..."
+      - name: ref_brand
+        description: "Universal brands"
+      - name: dim_categories
+        description: "Jamie's categorization"
+      - name: flat_file_connected_products_classification_for_sentiment_moen_physical
+        description: "Jamie's categorization"
+      - name: flat_file_connected_products_classification_for_sentiment_moen_apps
+        description: "Jamie's categorization"
+      - name: flat_file_connected_products_classification_for_sentiment_yale_combined
+        description: "Jamie's categorization"
+      - name: hd_fiberon_cross_ref
+        description: Lookup to translate Home Depot manuf_part_numbers to oracle_item_id
+        
+- name: sentiment_psa
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  description: Persistent Staging Area for Sentiment Data
+  schema: sentiment
+  tables:
+    - name: sentiment_category_mapping
+      description: "Sentiment Category Mapping"
+    - name: sentiment_subcategory_mapping
+      description: "Sentiment Subcategory Mapping"
+    - name: sentiment_tag_mapping
+      description: "Sentiment Tag Mapping"
+    - name: sentiment_output
+      description: "Sentiment Output"
+    - name: invalid_reviews
+      description: "Sentiment Output Invalid Reviews"
+
+- name: appbot_psa
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  description: Profitero larson Customer Feedback
+  schema: appbot
+  tables:
+      - name: applist
+        description: "Delighted Product: sws, vak,..."
+      - name: ratings
+        description: "Appbot ratings"
+      - name: reviews
+        description: "Appbot reviews"
+
+- name: delighted_yale_psa
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  description: Delighted Yale Customer Feedback
+  schema: delighted_yale
+  tables:
+      - name: response
+        description: "Delighted response for Yale"
+
+- name: delighted_hyd_psa
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  description: Delighted Hydra Customer Feedback
+  schema: delighted_hydra
+  tables:
+      - name: response
+        description: "Delighted response for SI"
+- name: delighted_naboo_psa
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  description: Delighted Naboo Customer Feedback
+  schema: delighted_naboo
+  tables:
+      - name: response
+        description: "Delighted response for SWD"
+- name: delighted_sws_psa
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  description: Delighted SWD Customer Feedback
+  schema: delighted_sws
+  tables:
+      - name: response
+        description: "Delighted response for SWS"
+- name: delighted_vak_psa
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  description: Delighted SWS Customer Feedback
+  schema: delighted_vak
+  tables:
+      - name: response
+        description: "Delighted response for VAK"
+
+# - name: ff_direct_spend_src_ctg
+#   database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+#   description: Persistent Staging Area  for Direct Soend Sourcing Category
+#   schema: ff_direct_spend_src_ctg
+#   tables:
+#     - name: ff_direct_spend_cat_src
+#       description: "Direct Spend cat sro flat file"  
+#     - name: ff_direct_spend_email_name_xref
+#       description: "Direct Spend email to category leader name, director name cross walk table" 
+# 
+# - name: hofr_eclipse
+#   database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+#   description: Persistent Staging Area for Legacy House of Rohl Data
+#   schema: hofr_eclipse
+#   tables:
+#     - name: hofr_us_sales
+#       description: "One time load table of historic shipments data from eclipse(2019-2023)"
+#     - name: eclipse_sap_cust_xref
+#       description: "Cross-reference table for eclipse customer_id to sap customer_id for legacy hofr data"
+# 
+# - name: outd_ocf_egp
+#   database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+#   description: Persistent Staging Area Fiberon Product Model
+#   schema: outd_ocf_egp
+#   tables:
+#     - name: egp_system_items_b
+#       description: "Data for Item Number i.e.part number/part/item"
+#     - name: egp_system_items_tl
+#       description: "Stores translatable attributes of item"
+#     - name: egp_item_relationships_b
+#       description: "Data for item relationships"
+#     - name: egp_item_classes_b
+#       description: "Item classes data for setup entity"
+#     - name: egp_item_cat_assignments
+#       description: "Data for items assigned to a catalog and its category."
+# - name: outd_ocf_ego
+#   database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+#   description: Persistent Staging Area Fiberon Product and Catalog Management
+#   schema: outd_ocf_ego
+#   tables:
+#     - name: ego_item_eff_b
+#       description: "Extensible flexfields/data for egp_system_items_b"
+# - name: outd_ocf_inv
+#   database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+#   description: Persistent Staging Area Fiberon Product and Catalog Management
+#   schema: outd_ocf_inv
+#   tables:
+#     - name: inv_org_parameters
+#       description: "Data for each organization's item master organization"
+- name: menards_psa
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  description: Persistent Staging Area Menards Historical data from Moen
+  schema: menards
+  tables:
+      - name: menards_store_history
+        description: "Store data shared by Menards Moen"  
+      - name: location_lookup
+        description: "Store Data shared by Menards Larson - fivetran"
+      - name: moen_sales_and_inventory_history
+        description: "Historical Sales and inventory data from Menards" 
+- name: menards_ft_psa
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  description: Persistent Staging Area Menards data from fivetran
+  schema: menards_ft
+  tables:
+    - name: menards_larson_pos
+      description: "POS data for Larson Menards"
+    - name: menards_larson_xref
+      description: "POS data xref for Menards Larson"
+    - name: menards_moen_sales_inventory
+      description: "POS Sales Inventory data from fivetran - weekly refresh"                                          
+- name: bazaarvoice_psa
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  description: BazaarVoice Customer Feedback
+  schema: ft_bazaarvoice_prod
+  tables:
+      - name: product
+        description: "product"
+      - name: review
+        description: "BazaarVoice review"
+- name: appbot__rr
+  description: "**[Online Reference Manual](https://app.appbot.co/api)**"
+  database: edp_bronze_{{env_var('DBT_SOURCE_ENV')}}
+  schema: appbot
+  tables:
+    - name: applist
+      description: '{{ doc("appbot__application") }}'
+    - name: ratings
+      description: '{{ doc("appbot__rating") }}'
+    - name: reviews
+      description: '{{ doc("appbot__review") }}'
+
+
+- name: target_retailer__rr
+  description: "Retailers that customers care to see on Health Sentiment Dashboard. This is used to filter in on all incoming retailers. It's manually updated if needed."
+  database: edp_bronze_{{env_var('DBT_SOURCE_ENV')}}
+  schema: reference
+  tables:
+    - name: target_retailer
+- name: gold_reference
+  description: "Referring DIM_DATE_COLUMNAR view from gold"
+  database: edp_gold_{{env_var('DBT_SOURCE_ENV')}}
+  schema: reference
+  tables:
+    - name: dim_date_columnar
+
+
+
+
+
+- name: delighted_hydra__rr
+  description: "Delighted Pulled From Snowflake EDP.Bronze"
+  database: edp_bronze_prod
+  schema: delighted_hydra
+  tables:
+    - name: person
+      description: '{{ doc("delighted__person") }}'
+    - name: response
+      description: '{{ doc("delighted__response") }}'
+
+- name: delighted_naboo__rr
+  description: "Delighted Pulled From Snowflake EDP.Bronze"
+  database: edp_bronze_prod
+  schema: delighted_naboo
+  tables:
+    - name: person
+      description: '{{ doc("delighted__person") }}'
+    - name: response
+      description: '{{ doc("delighted__response") }}'
+
+- name: delighted_sws__rr
+  description: "Delighted Pulled From Snowflake EDP.Bronze"
+  database: edp_bronze_prod
+  schema: delighted_sws
+  tables:
+    - name: person
+      description: '{{ doc("delighted__person") }}'
+    - name: response
+      description: '{{ doc("delighted__response") }}'
+    - name: question
+      description: '{{ doc("delighted__sws_extras") }}'
+    - name: response_answer
+      description: '{{ doc("delighted__sws_extras") }}'
+    - name: response_answer_selection
+      description: '{{ doc("delighted__sws_extras") }}'
+    - name: response_note
+      description: '{{ doc("delighted__sws_extras") }}'
+    - name: response_tag
+      description: '{{ doc("delighted__sws_extras") }}'
+
+- name: delighted_vak__rr
+  description: "Delighted Pulled From Snowflake EDP.Bronze"
+  database: edp_bronze_prod
+  schema: delighted_vak
+  tables:
+    - name: person
+      description: '{{ doc("delighted__person") }}'
+    - name: response
+      description: '{{ doc("delighted__response") }}'
+
+- name: data_science__rr
+  description: "Delighted Pulled From Snowflake EDP.Bronze"
+  database: datavault_{{env_var('DBT_SOURCE_ENV')}}
+  schema: staging
+  tables:
+    - name: sentiment_output
+      description: '{{ doc("sentiment_output") }}'
+    - name: sentiment_subcategory_mapping
+      description: '{{ doc("sentiment_subcategory_mapping") }}'
+    - name: sentiment_tag_mapping
+      description: '{{ doc("sentiment_tag_mapping") }}'
+
+
+- name: emtk_crm_sales
+  description: Placeholder description.
+  database: edp_bronze_prod
+  schema: dataverse_crm
+  tables:
+    - name: account
+      description: Placeholder description
+    - name: contact
+      description: Placeholder description
+    - name: fbin_salesrep
+      description: Placeholder description
+    - name: fbin_salesrepagencytocontact
+      description: Placeholder description
+    - name: stringmap
+      description: Placeholder description
+    - name: territory
+      description: Placeholder description
+
+
+
+- name: emtk_ebs_common__ar
+  description: "**[Online Reference Manual](https://etrm.live/search?q=po_action_history+&version=12.2.2&object_type=table&product=)**"
+  database: edp_bronze_{{env_var('DBT_SOURCE_ENV')}}
+  schema: emtk_ebs_ar
+  tables:
+    - name: hz_contact_points
+      description: '{{ doc("emtk_ebs_common__ar_hz_contact_points") }}'
+    - name: hz_party_sites
+
+- name: emtk_ebs_common__bom
+  description: "**[Online Reference Manual](https://etrm.live/search?q=po_action_history+&version=12.2.2&object_type=table&product=)**"
+  database: edp_bronze_{{env_var('DBT_SOURCE_ENV')}}
+  schema: emtk_ebs_bom
+  tables:
+    - name: cst_item_costs
+      description: '{{ doc("emtk_ebs_common__bom_cst_item_costs") }}'
+
+- name: emtk_ebs_common__inv
+  description: "**[Online Reference Manual](https://etrm.live/search?q=po_action_history+&version=12.2.2&object_type=table&product=)**"
+  database: edp_bronze_{{env_var('DBT_SOURCE_ENV')}}
+  schema: emtk_ebs_inv
+  tables:
+    - name: mtl_categories_b
+      description: '{{ doc("emtk_ebs_common__mtl_categories_b") }}'
+    - name: mtl_categories_tl
+    - name: mtl_category_sets_b
+      description: '{{ doc("emtk_ebs_common__mtl_category_sets_b") }}'
+    - name: mtl_category_sets_tl
+    - name: mtl_item_categories
+      description: '{{ doc("emtk_ebs_common__mtl_item_categories") }}'
+    - name: mtl_system_items_b
+      description: '{{ doc("emtk_ebs_common__mtl_system_items_b") }}'
+    - name: mtl_system_items_tl
+
+- name: emtk_ebs_common__applsys
+  description: "**[Online Reference Manual](https://etrm.live/search?q=po_action_history+&version=12.2.2&object_type=table&product=)**"
+  database: edp_bronze_{{env_var('DBT_SOURCE_ENV')}}
+  schema: emtk_ebs_applsys
+  tables:
+    - name: fnd_lookup_values
+      description: '{{ doc("emtk_ebs_common__fnd_lookup_values") }}'
+
+
+
+
+- name: emtk_ebs_po__po
+  description: "**[Online Reference Manual](https://etrm.live/search?q=po_action_history+&version=12.2.2&object_type=table&product=)**"
+  database: edp_bronze_{{env_var('DBT_SOURCE_ENV')}}
+  schema: emtk_ebs_po
+  tables:
+    - name: po_action_history
+      description: '{{ doc("emtk_ebs_po__po_action_history") }}'
+    - name: po_distributions_all
+      description: '{{ doc("emtk_ebs_po__po_distributions_all") }}'
+    - name: po_headers_all
+      description: '{{ doc("emtk_ebs_po__po_headers_all") }}'
+    - name: po_lines_all
+      description: '{{ doc("emtk_ebs_po__po_lines_all") }}'
+    - name: po_line_locations_all
+      description: '{{ doc("emtk_ebs_po__po_line_locations_all") }}'
+    - name: rcv_shipment_headers
+    - name: rcv_shipment_lines
+    - name: rcv_transactions
+      description: '{{ doc("emtk_ebs_po__rcv_transactions") }}'
+
+- name: emtk_ebs_po__ap
+  description: "**[Online Reference Manual](https://etrm.live/search?q=po_action_history+&version=12.2.2&object_type=table&product=)**"
+  database: edp_bronze_{{env_var('DBT_SOURCE_ENV')}}
+  schema: emtk_ebs_ap
+  tables:
+    - name: ap_suppliers
+      description: '{{ doc("emtk_ebs_po__ap_suppliers") }}'
+    - name: ap_supplier_sites_all
+      description: '{{ doc("emtk_ebs_po__ap_supplier_sites_all") }}'
+    - name: financials_system_params_all
+      description: '{{ doc("emtk_ebs_po__financials_system_params_all") }}'
+
+- name: emtk_ebs_po__applsys
+  description: "**[Online Reference Manual](https://etrm.live/search?q=po_action_history+&version=12.2.2&object_type=table&product=)**"
+  database: edp_bronze_{{env_var('DBT_SOURCE_ENV')}}
+  schema: emtk_ebs_applsys
+  tables:
+    - name: fnd_lookup_values
+      description: '{{ doc("emtk_ebs_po__fnd_lookup_values") }}'
+
+- name: emtk_ebs_po__bom
+  description: "**[Online Reference Manual](https://etrm.live/search?q=po_action_history+&version=12.2.2&object_type=table&product=)**"
+  database: edp_bronze_{{env_var('DBT_SOURCE_ENV')}}
+  schema: emtk_ebs_bom
+  tables:
+    - name: cst_cost_types
+    - name: cst_item_costs
+      description: '{{ doc("emtk_ebs_po__cst_item_costs") }}'
+
+- name: emtk_ebs_po__gl
+  description: "**[Online Reference Manual](https://etrm.live/search?q=po_action_history+&version=12.2.2&object_type=table&product=)**"
+  database: edp_bronze_{{env_var('DBT_SOURCE_ENV')}}
+  schema: emtk_ebs_gl
+  tables:
+    - name: gl_code_combinations
+      description: '{{ doc("emtk_ebs_po__gl_code_combinations") }}'
+
+- name: emtk_ebs_po__hr
+  description: "**[Online Reference Manual](https://etrm.live/search?q=po_action_history+&version=12.2.2&object_type=table&product=)**"
+  database: edp_bronze_{{env_var('DBT_SOURCE_ENV')}}
+  schema: emtk_ebs_hr
+  tables:
+    - name: hr_all_organization_units
+      description: '{{ doc("emtk_ebs_po__hr_all_organization_units") }}'
+    - name: hr_locations_all
+      description: '{{ doc("emtk_ebs_po__hr_locations_all") }}'
+    - name: per_all_people_f
+      description: '{{ doc("emtk_ebs_po__per_all_people_f") }}'
+    - name: per_jobs_tl
+
+- name: emtk_ebs_po__inv
+  description: "**[Online Reference Manual](https://etrm.live/search?q=po_action_history+&version=12.2.2&object_type=table&product=)**"
+  database: edp_bronze_{{env_var('DBT_SOURCE_ENV')}}
+  schema: emtk_ebs_inv
+  tables:
+    - name: mtl_parameters
+
+
+
+- name: emtk_ebs_sales__applsys
+  description: "**[Online Reference Manual](https://etrm.live/search?q=fnd_lookup_values+&version=12.2.2&object_type=table&product=)**"
+  database: edp_bronze_{{env_var('DBT_SOURCE_ENV')}}
+  schema: emtk_ebs_applsys
+  tables:
+    - name: fnd_lookup_values
+      description: '{{ doc("emtk_ebs_sales__fnd_lookup_values") }}'
+
+- name: emtk_ebs_sales__bom
+  description: "**[Online Reference Manual](https://etrm.live/search?q=po_action_history+&version=12.2.2&object_type=table&product=)**"
+  database: edp_bronze_{{env_var('DBT_SOURCE_ENV')}}
+  schema: emtk_ebs_bom
+  tables:
+    - name: cst_item_costs
+      description: '{{ doc("emtk_ebs_sales__cst_item_costs") }}'
+    - name: cst_cost_types
+      description: '{{ doc("emtk_ebs_sales__cst_cost_types") }}'
+
+- name: emtk_ebs_sales__ar
+  description: "**[Online Reference Manual](https://etrm.live/search?q=po_action_history+&version=12.2.2&object_type=table&product=)**"
+  database: edp_bronze_{{env_var('DBT_SOURCE_ENV')}}
+  schema: emtk_ebs_ar
+  tables:
+    - name: hz_cust_accounts
+      description: '{{ doc("emtk_ebs_sales__hz_cust_accounts") }}'
+    - name: hz_cust_acct_sites_all
+      description: '{{ doc("emtk_ebs_sales__hz_cust_acct_sites_all") }}'
+    - name: hz_cust_site_uses_all
+      description: '{{ doc("emtk_ebs_sales__hz_cust_site_uses_all") }}'
+    - name: hz_locations
+      description: '{{ doc("emtk_ebs_sales__hz_locations") }}'
+    - name: hz_parties
+      description: '{{ doc("emtk_ebs_sales__hz_parties") }}'
+    - name: ra_cust_trx_types_all
+      description: '{{ doc("emtk_ebs_sales__ra_cust_trx_types_all") }}'
+    - name: ra_customer_trx_all
+      description: '{{ doc("emtk_ebs_sales__ra_customer_trx_all") }}'
+    - name: ra_customer_trx_lines_all
+      description: '{{ doc("emtk_ebs_sales__ra_customer_trx_lines_all") }}'
+    - name: ra_salesrep_territories
+      description: '{{ doc("emtk_ebs_sales__ra_salesrep_territories") }}'
+    - name: ra_territories
+      description: '{{ doc("emtk_ebs_sales__ra_territories") }}'
+    - name: ra_batch_sources_all
+      description: '{{ doc("emtk_ebs_sales__ra_batch_sources_all") }}'
+    - name: hz_party_sites
+      description: '{{ doc("emtk_ebs_sales__hz_party_sites") }}'
+
+- name: emtk_ebs_sales__jtf
+  description: "**[Online Reference Manual](https://etrm.live/search?q=po_action_history+&version=12.2.2&object_type=table&product=)**"
+  database: edp_bronze_{{env_var('DBT_SOURCE_ENV')}}
+  schema: emtk_ebs_jtf
+  tables:
+    - name: jtf_rs_group_members
+      description: '{{ doc("emtk_ebs_sales__jtf_rs_group_members") }}'
+    - name: jtf_rs_resource_extns
+      description: '{{ doc("emtk_ebs_sales__jtf_rs_resource_extns") }}'
+    - name: jtf_rs_resource_extns_tl
+      description: '{{ doc("emtk_ebs_sales__jtf_rs_resource_extns_tl") }}'
+    - name: jtf_rs_groups_tl
+      description: '{{ doc("emtk_ebs_sales__jtf_rs_groups_tl") }}'
+    - name: jtf_rs_groups_b
+      description: '{{ doc("emtk_ebs_sales__jtf_rs_groups_b") }}'
+    - name: jtf_rs_salesreps
+      description: '{{ doc("emtk_ebs_sales__jtf_rs_salesreps") }}'
+
+- name: emtk_ebs_sales__ont
+  description: "**[Online Reference Manual](https://etrm.live/search?q=po_action_history+&version=12.2.2&object_type=table&product=)**"
+  database: edp_bronze_{{env_var('DBT_SOURCE_ENV')}}
+  schema: emtk_ebs_ont
+  tables:
+    - name: oe_sales_credit_types
+      description: '{{ doc("emtk_ebs_sales__oe_sales_credit_types") }}'
+    - name: oe_order_header_all
+      description: '{{ doc("emtk_ebs_sales__oe_order_header_all") }}'
+    - name: oe_order_lines_all
+      description: '{{ doc("emtk_ebs_sales__oe_order_sources") }}'
+    - name: oe_order_sources
+      description: '{{ doc("emtk_ebs_sales__oe_order_sources") }}'
+    - name: oe_transaction_types_tl
+      description: '{{ doc("emtk_ebs_sales__oe_transaction_types_tl") }}'
+
+- name: emtk_ebs_sales__ap
+  description: "**[Online Reference Manual](https://etrm.live/search?q=po_action_history+&version=12.2.2&object_type=table&product=)**"
+  database: edp_bronze_{{env_var('DBT_SOURCE_ENV')}}
+  schema: emtk_ebs_ap
+  tables:
+    - name: financials_system_params_all
+      description: '{{ doc("emtk_ebs_sales__financials_system_params_all") }}'
+
+- name: emtk_ebs_sales__wsh
+  description: "**[Online Reference Manual](https://etrm.live/search?q=po_action_history+&version=12.2.2&object_type=table&product=)**"
+  database: edp_bronze_{{env_var('DBT_SOURCE_ENV')}}
+  schema: emtk_ebs_wsh
+  tables:
+    - name: wsh_delivery_assignments
+      description: WSH_DELIVERY_ASSIGNMENTS assigns delivery details to a delivery and/or a parent delivery detail (LPN).
+    - name: wsh_delivery_details
+      description: WSH_DELIVERY_DETAILS has delivery lines and LPNs.
+
+- name: emtk_ebs_sales__inv
+  description: "**[Online Reference Manual](https://etrm.live/search?q=po_action_history+&version=12.2.2&object_type=table&product=)**"
+  database: edp_bronze_{{env_var('DBT_SOURCE_ENV')}}
+  schema: emtk_ebs_inv
+  tables:
+    - name: mtl_material_transactions
+
+
+# match
+# - name: emtk_files
+#   description: Miscellaneous user file sources imported directly to Snowflake Bronze_Prod
+#   database: edp_bronze_prod
+#   schema: emtk_files
+#   tables:
+#     - name: luxury_hardware_bath
+#       description: User exported CSV for extra attributes to help with sales forcasting
+#     - name: luxury_hardware_cabinet
+#       description: User exported CSV for extra attributes to help with sales forcasting
+# 
+# 
+- name: flo__rr
+  description: "snowflake database shared from flo snowflakes"
+  database: flo_fbwinn_share
+  schema: flo_dynamodb
+  tables:
+    - name: prod_account
+      description: '{{ doc("flo__prod_account") }}'
+    - name: prod_account_subscription
+      description: '{{ doc("flo__prod_account_subscription") }}'
+    - name: prod_location
+      description: '{{ doc("flo__prod_location") }}'
+    - name: prod_icd
+      description: '{{ doc("flo_prod_icd") }}'
+    - name: prod_onboarding_log
+      description: '{{ doc("flo__prod_onboarding_log") }}'
+    - name: prod_subscription
+      description: '{{ doc("flo__prod_subscription") }}'
+    - name: prod_user
+      description: '{{ doc("flo__prod_user") }}'
+    - name: prod_alert_feedback
+      description: '{{ doc("flo__prod_alert_feedback") }}'
+
+- name: flo_test_cases__rr
+  description: "snowflake database shared from flo snowflakes"
+  database: flo_fbwinn_share
+  schema: flo_data_prod_master_public
+  tables:
+    - name: internal_devices
+      description: '{{ doc("flo__internal_devices") }}'
+    - name: internal_locations
+      description: '{{ doc("flo__internal_locations") }}'
+
+- name: flo_telemetry__rr
+  description: "snowflake database shared from flo snowflakes"
+  database: flo_fbwinn_share
+  schema: flo_telemetry
+  tables:
+    - name: flo_device_daily
+      description: '{{ doc("flo__device_daily") }}'
+
+- name: flo_inv_pub__rr
+  description: "snowflake database shared from flo snowflakes"
+  database: flo_fbwinn_share
+  schema: flo_data_prod_device_inventory_public
+  tables:
+    - name: device_info
+      description: '{{ doc("flo__device_info") }}'
+
+- name: flo_pg_nrv2_public__rr
+  description: "snowflake database shared from flo snowflakes"
+  database: flo_fbwinn_share
+  schema: flo_pg_nrv2_public
+  tables:
+    - name: incident
+      description: '{{ doc("flo__incident") }}'
+    - name: alarm
+      description: '{{ doc("flo__alarm") }}'
+
+
+- name: bronze_lrsn_psft
+  description: bronze larson data - tables related to material/item/product, shipment/inputs, customer and categories/lookups
+  database: edp_bronze_{{env_var('DBT_SOURCE_ENV')}}
+  schema: lrsn_psft_sysadm
+  tables:
+    - name: ps_inv_items
+      description: '{{ doc("lrsn_psft_product__ps_inv_items") }}'
+    - name: ps_master_item_tbl
+      description: '{{ doc("lrsn_psft_product__ps_master_item_tbl") }}'
+    - name: ps_prod_item
+      description: '{{ doc("lrsn_psft_product__ps_prod_item") }}'
+    - name: ps_l_prod_grp_tbl
+      description: '{{ doc("lrsn_psft_product__ps_l_prod_grp_tbl") }}'
+    - name: ps_l_prod_grp_lu
+      description: '{{ doc("lrsn_psft_product__ps_l_prod_grp_lu") }}'
+    - name: ps_l_sp_prod
+      description: '{{ doc("lrsn_psft_product__ps_l_sp_prod") }}'
+    - name: ps_itm_cat_tbl
+      description: '{{ doc("lrsn_psft_product__ps_itm_cat_tbl") }}'
+    - name: psxlatitem
+      description: '{{ doc("lrsn_psft_product__psxlatitem") }}'
+    - name: ps_bi_hdr
+      description: '{{ doc("lrsn_psft_shipment__ps_bi_hdr") }}'
+    - name: ps_bi_line
+      description: '{{ doc("lrsn_psft_shipment__ps_bi_line") }}'
+    - name: ps_l_rep_cust
+      description: '{{ doc("lrsn_psft_shipment__ps_l_rep_cust") }}'
+    - name: ps_cust_cgrp_lnk
+      description: '{{ doc("lrsn_psft_shipment__ps_cust_cgrp_lnk") }}'
+
+
+
+- name: bronze_ml_ebs_inv
+  database: edp_bronze_{{env_var('DBT_SOURCE_ENV')}}
+  description: bronze masterlock inventory data - item, item categories and system items tables etc
+  schema: ml_ebs_inv
+  tables:
+    - name: mtl_system_items_b
+      description: '{{ doc("ml_ebs_product__mtl_system_items_b") }}'
+    - name: mtl_system_items_tl
+      description: '{{ doc("ml_ebs_product__mtl_system_items_tl") }}'
+    - name: mtl_item_categories
+      description: '{{ doc("ml_ebs_product__mtl_item_categories") }}'
+    - name: mtl_categories_b
+      description: '{{ doc("ml_ebs_product__mtl_categories_b") }}'
+    - name: mtl_category_sets_tl
+      description: '{{ doc("ml_ebs_product__mtl_category_sets_tl") }}'
+    - name: mtl_parameters
+      description: Plant Paramater Data for Master Lock EBS
+- name: bronze_ml_ebs_hr
+  database: edp_bronze_{{env_var('DBT_SOURCE_ENV')}}
+  description: bronze masterlock organization data - organization and location tables etc
+  schema: ml_ebs_hr
+  tables:
+    - name: hr_all_organization_units
+      description: '{{ doc("ml_ebs_product__hr_all_organization_units") }}'
+- name: bronze_ml_ebs_ar
+  database: edp_bronze_{{env_var('DBT_SOURCE_ENV')}}
+  description: bronze masterlock organization data - organization and location tables etc
+  schema: ml_ebs_ar
+  tables:
+    - name: hz_cust_accounts
+      description: '{{ doc("ml_ebs_shipment__hz_cust_accounts") }}'
+    - name: hz_cust_acct_sites_all
+      description: '{{ doc("ml_ebs_shipment__hz_cust_acct_sites_all") }}'
+    - name: hz_cust_site_uses_all
+      description: '{{ doc("ml_ebs_shipment__hz_cust_site_uses_all") }}'
+    - name: ra_customer_trx_all
+      description: '{{ doc("ml_ebs_shipment__ra_customer_trx_all") }}'
+    - name: ra_customer_trx_lines_all
+      description: '{{ doc("ml_ebs_shipment__ra_customer_trx_lines_all") }}'
+    - name: ra_cust_trx_line_gl_dist_all
+      description: '{{ doc("ml_ebs_shipment__ra_cust_trx_line_gl_dist_all") }}'
+    - name: hz_locations
+      description: '{{ doc("ml_ebs_shipment__hz_locations") }}'
+    - name: hz_parties
+      description: '{{ doc("ml_ebs_shipment__hz_parties") }}'
+    - name: hz_party_sites
+      description: '{{ doc("ml_ebs_shipment__hz_party_sites") }}'
+    - name: ar_payment_schedules_all
+      description: '{{ doc("ml_ebs_shipment__ar_payment_schedules_all") }}'
+- name: bronze_reference
+  database: edp_bronze_{{env_var('DBT_SOURCE_ENV')}}
+  description: bronze reference tables
+  schema: reference
+  tables:
+    - name: tmlc_category_map
+      description: '{{ doc("reference_tmlc_category_map") }}'
+- name: bronze_ml_ebs_cust
+  database: edp_bronze_{{env_var('DBT_ENVIRON')}}
+  schema: ml_ebs_ar
+  tables:  
+    - name: hz_parties
+      description: '{{ doc("ml_ebs_hz_parties") }}'
+    - name: hz_cust_accounts
+      description: '{{ doc("ml_ebs_hz_cust_accounts") }}'   
+- name: bronze_ml_ebs_ont
+  database: edp_bronze_{{env_var('DBT_SOURCE_ENV')}}
+  description: bronze masterlock contains data related to the Order Management module, which is responsible for handling customer orders, processing shipments, tracking order status, and managing order fulfillment
+  schema: ml_ebs_ont
+  tables:
+    - name: oe_order_lines_all
+      description: '{{ doc("ml_ebs_shipment_oe_order_lines_all") }}'     
+
+
+- name: bronze_moen_sap
+  description: bronze moen data - tables related to material/item, shipment/inputs and categories/lookups
+  database: edp_bronze_{{env_var('DBT_SOURCE_ENV')}}
+  schema: sap_ecc_prd
+  tables:
+    - name: z_mara
+      description: '{{ doc("moen_sap_product__z_mara") }}' 
+    - name: z_marc
+      description: plant data for Moen
+    - name: z_mvke
+      description: plant item sales data for Moen
+    - name: z_makt
+      description: '{{ doc("moen_sap_product__z_makt") }}'
+    - name: z_zrmarea
+      description: '{{ doc("moen_sap_product__z_zrmarea") }}'
+    - name: z_zptgkt
+      description: '{{ doc("moen_sap_product__z_zptgkt") }}'
+    - name: z_zpltt
+      description: '{{ doc("moen_sap_product__z_zpltt") }}'
+    - name: z_zptypt
+      description: '{{ doc("moen_sap_product__z_zptypt") }}'
+    - name: z_zrepcatgt
+      description: '{{ doc("moen_sap_product__z_zrepcatgt") }}'
+    - name: z_zarcht
+      description: '{{ doc("moen_sap_product__z_zarcht") }}'
+    - name: z_zptk
+      description: '{{ doc("moen_sap_product__z_zptk") }}'
+    - name: z_zpfint
+      description: '{{ doc("moen_sap_product__z_zpfint") }}'
+    - name: z_zcmpfamt
+      description: '{{ doc("moen_sap_product__z_zcmpfamt") }}'
+    - name: z_zptgt
+      description: '{{ doc("moen_sap_product__z_zptgt") }}'
+    - name: z_zpbusownert
+      description: '{{ doc("moen_sap_product__z_zpbusownert") }}'
+    - name: z_zbusinessunitt
+      description: '{{ doc("moen_sap_product__z_zbusinessunitt") }}'
+    - name: z_ausp
+      description: '{{ doc("moen_sap_product__z_ausp") }}'
+    - name: z_ce1new4
+      description: '{{ doc("moen_sap_shipment__z_ce1new4") }}'
+    - name: z_kna1
+      description: '{{ doc("moen_sap_shipment__z_kna1") }}'
+    - name: z_knvv
+      description: '{{ doc("moen_sap_shipment__z_knvv") }}'
+    - name: z_adrc
+      description: '{{ doc("moen_sap_shipment__z_adrc") }}'
+    - name: z_zdw_s600
+      description: '{{ doc("moen_sap_input__z_zdw_s600") }}'
+    - name: z_t001w
+      description: '{{ doc("moen_sap_input__z_t001w") }}'
+    - name: z_tvagt
+      description: '{{ doc("moen_sap_input__z_tvagt") }}' 
+    - name: z_tvakt
+      description: '{{ doc("moen_sap_input__z_tvakt") }}'
+    - name: z_t25a0
+      description: '{{ doc("moen_sap_input__z_t25a0") }}'  
+    - name: z_t25a1
+      description: '{{ doc("moen_sap_input__z_t25a1") }}' 
+- name: bronze_moen_reference
+  description: bronze moen reference data
+  database: edp_bronze_{{env_var('DBT_SOURCE_ENV')}}
+  schema: reference
+  tables:
+    - name: winn_virtual_bundles
+      description: '{{ doc("reference__winn_virtual_bundles") }}'
+- name: bronze_moen_sap_bw
+  description: bronze moen data from SAP BW 
+  database: edp_bronze_{{env_var('DBT_SOURCE_ENV')}}
+  schema: sap_bw
+  tables:
+    - name: azcopa
+      description: '{{ doc("moen_sap_bw_shipment__azcopa") }}'
+    - name: azinput
+      description: '{{ doc("moen_sap_bw_shipment_inputs__azinput") }}'
+- name: bronze_hofr_eclipse
+  description: bronze hofr data from eclipse 
+  database: edp_bronze_{{env_var('DBT_SOURCE_ENV')}}
+  schema: hofr_eclipse
+  tables:
+    - name: hofr_us_sales
+      description: '{{ doc("hofr_sap_shipment_inputs__hofr_us_sales") }}'
+    - name: eclipse_sap_cust_xref
+      description: '{{ doc("hofr_sap_shipment_inputs__eclipse_sap_cust_xref") }}'
+
+
+- name: amazon_vc1
+  description: bronze amazon vendor central data
+  database: edp_bronze_{{env_var('DBT_SOURCE_ENV')}}
+  schema: amazon_vc
+  tables:
+    - name: sales
+      description: '{{ doc("amazon_vc_sales") }}'
+    - name: inventory
+      description: '{{ doc("amazon_vc_inventory") }}'
+    - name: cross_ref
+      description: '{{ doc("amazon_pos__amazon_tmlc_catalog_hist") }}'
+- name: amazon_xref
+  description: bronze amazon xref data
+  database: edp_bronze_{{env_var('DBT_SOURCE_ENV')}}
+  schema: amazon_xref
+  tables:
+    - name: amazon_moen_catalog_hist
+      description: '{{ doc("amazon_pos__amazon_moen_catalog_hist") }}'
+
+
+- name: ferguson_pos_m3a
+  description: bronze ferguson moen data - new file structure
+  database: edp_bronze_{{env_var('DBT_SOURCE_ENV')}}
+  schema: ferguson
+  tables:
+    - name: moen_m_3_a_new
+      description: '{{ doc("ferguson_pos__moen_m_3_a_new") }}'
+    - name: moen_usfs_fei_xref
+      description: '{{ doc("ferguson_pos__moen_usfs_fei_xref") }}'
+    - name: moen_m_3_a_new_cfg
+      description: '{{ doc("ferguson_pos__moen_m_3_a_new_cfg") }}'
+    - name: hofr_m_3_a_new
+      description: '{{ doc("ferguson_pos__hofr_m_3_a_new") }}'
+    - name: moen_m_3_a_new_grove
+      description: '{{ doc("ferguson_pos__moen_m_3_a_new_grove") }}'
+    - name: fei_product_code_moen_sap_xref
+      description: '{{ doc("ferguson_pos__fei_product_code_moen_sap_xref") }}'
+    - name: hofr_m_3_a_new_grove
+      description: '{{ doc("ferguson_pos__hofr_m_3_a_new_grove") }}'
+    - name: fei_product_code_hofr_sap_xref
+      description: '{{ doc("ferguson_pos__fei_product_code_hofr_sap_xref") }}'
+
+
+
+- name: homedepot_pos_askuity
+  description: bronze home depot pos data
+  database: edp_bronze_{{env_var('DBT_SOURCE_ENV')}}
+  schema: home_depot
+  tables:
+    - name: fiscal_calendar
+      description: '{{ doc("homedepot_pos__fiscal_calendar") }}'
+    - name: hd_askuity_inventory
+      description: '{{ doc("homedepot_pos__hd_askuity_inventory") }}'
+    - name: hd_askuity_master_storeattributes
+      description: '{{ doc("homedepot_pos__hd_askuity_master_storeattributes") }}'
+    - name: hd_askuity_master_itemattributes
+      description: '{{ doc("homedepot_pos__hd_askuity_master_itemattributes") }}'
+    - name: hd_askuity_pos
+      description: '{{ doc("homedepot_pos__hd_askuity_pos") }}'
+- name: homedepot_bronze_reference
+  description: bronze home depot pos data
+  database: edp_bronze_{{env_var('DBT_SOURCE_ENV')}}
+  schema: reference
+  tables:
+    - name: hd_tmlc_cross_ref
+      description: '{{ doc("homedepot_pos__hd_tmlc_cross_ref") }}'
+
+# match
+# - name: lowes_vpp
+#   description: bronze lowes vpp data schema
+#   database: edp_bronze_{{env_var('DBT_SOURCE_ENV')}}
+#   schema: lowes_vpp
+#   tables:
+#     - name: sales_inventory
+#       description: '{{ doc("lowes_sales_inventory") }}'
+#     - name: sales_inventory_moen
+#       description: '{{ doc("lowes_sales_inventory_moen") }}'
+#     - name: sales_inventory_masterlock
+#       description: '{{ doc("lowes_sales_inventory_masterlock") }}'
+#     - name: sales_inventory_larson
+#       description: '{{ doc("lowes_sales_inventory_larson") }}'
+#       
+# 
+# - name: lowes_xref #same name as new one but the xref_v1 is not in pSa
+#   description: bronze lowes xref data schema
+#   database: edp_bronze_{{env_var('DBT_SOURCE_ENV')}}
+#   schema: lowes_xref
+#   tables:
+#     - name: lowes_moen_cross_reference
+#       description: '{{ doc("lowes_moen_cross_reference") }}'
+# 
+#     - name: lowes_tmlc_cross_reference
+#       description: '{{ doc("lowes_tmlc_cross_reference") }}'
+# 
+#     - name: lowes_larson_cross_reference_v_1
+#       description: '{{ doc("lowes_larson_cross_reference") }}'
+# 
+
+- name: lowes_tsm
+  description: bronze lowes stock market data schema
+  database: edp_bronze_{{env_var('DBT_SOURCE_ENV')}}
+  schema: stock_market
+  tables:
+    - name: tsm_lowes_us
+      description: '{{ doc("lowes_moen_cross_reference") }}'
+# matched    
+# - name: lowes_us
+#   description: bronze lowes US schema for locatiosn data
+#   database: edp_bronze_{{env_var('DBT_SOURCE_ENV')}}
+#   schema: lowes_us
+#   tables:
+#     - name: location
+#       description: '{{ doc("lowes_location") }}'
+# 
+# 
+# 
+# 
+- name: profitero__rr
+  description: "Profitero Pulled From Snowflake EDP.Silver"
+  database: edp_silver_{{env_var('DBT_SOURCE_ENV')}}
+  schema: profitero
+  tables:
+    - name: products_master
+      description: '{{ doc("profitero__products_master") }}'
+    - name: products_ratings
+      description: '{{ doc("profitero__rating") }}'
+    - name: reviews
+      description: '{{ doc("profitero__review") }}'
+    - name: customer_products
+      description: '{{ doc("profitero__customer_products") }}'
+    - name: retailers
+      description: '{{ doc("profitero__retailers") }}'
+    - name: brands
+      description: '{{ doc("profitero__brands") }}'
+    - name: price_availability_history
+      description: '{{ doc("profitero__price_availability_history") }}'
+
+
+- name: profitero_gold__rr
+  description: "Profitero Pulled From Snowflake EDP.Gold.This is for the tablea tables"
+  database: edp_gold_prod
+  schema: profitero
+  tables:
+    - name: dim_categories
+    - name: fact_sentiment_v2
+
+
+
+- name: reference__rr
+  description: "Brand document from Confluence"
+  database: psa_{{env_var('DBT_SOURCE_ENV')}}
+  schema: reference
+  tables:
+    - name: ref_brand
+      description: '{{ doc("ref_brand") }}'
+    - name: ref_brand_appbot
+      description: '{{ doc("ref_brand_appbot") }}'
+    - name: ref_date_fbin
+      description: '{{ doc("ref_date_fbin") }}'
+    - name: ref_date_fiscal_445
+      description: '{{ doc("ref_date_fiscal_445") }}'
+    - name: ref_date_pos_lowes
+      description: '{{ doc("ref_date_pos_lowes") }}'
+
+- name: ref_bus_vault__rr
+  description: "Brand document from Confluence"
+  database: datavault_{{env_var('DBT_SOURCE_ENV')}}
+  schema: bus_vault
+  tables:
+    - name: ref_connected_products_sentiment_classification
+      description: '{{ doc("ref_connected_products_sentiment_classification") }}'
+    - name: ref_connected_products_sentiment_classification_yale
+      description: '{{ doc("ref_connected_products_sentiment_classification_yale") }}'
+
+- name: business_key_collision__rr
+  description: "Tracks record source and bkcc"
+  database: datavault_{{env_var('DBT_SOURCE_ENV')}}
+  schema: raw_vault
+  tables:
+    - name: ref_business_key_collision
+      description: '{{ doc("ref_business_key_collision") }}'
+- name: ref
+  description: bronze reference data schema
+  database: edp_bronze_{{env_var('DBT_SOURCE_ENV')}}
+  schema: reference
+  tables:
+    - name: ref_us_state
+      description: '{{ doc("ref_us_state") }}'
+    - name: ref_country
+      description: '{{ doc("ref_country") }}'
+    
+
+
+- name: sap_bw_ref
+  description: silver sap pos gross pricing data
+  database: edp_silver_{{env_var('DBT_SOURCE_ENV')}}
+  schema: reference
+  tables:
+    - name: sap_bw_pos_gross_price
+      description: '{{ doc("sap_bw_pos_gross_price") }}'
+
+
+
+- name: bronze_tt_e21
+  description: bronze thermatru data - tables related to wholesale business
+  database: edp_bronze_{{env_var('DBT_SOURCE_ENV')}}
+  schema: tt_e21prd_e21trubis
+  tables:
+    - name: partmstr
+      description: '{{ doc("tt_e21_product__partmstr") }}'
+    - name: partgrp
+      description: '{{ doc("tt_e21_product__partgrp") }}'
+    - name: partsgrp
+      description: '{{ doc("tt_e21_product__partsgrp") }}'
+    - name: partsgrp2
+      description: '{{ doc("tt_e21_product__partsgrp2") }}'
+    - name: partsgrp3
+      description: '{{ doc("tt_e21_product__partsgrp3") }}'
+    - name: invhead
+      description: '{{ doc("tt_e21_shipment__invhead") }}'
+    - name: invitem
+      description: '{{ doc("tt_e21_shipment__invitem") }}'
+    - name: arsalesman
+      description: '{{ doc("tt_e21_shipment__arsalesman") }}'
+    - name: corp_parent
+      description: '{{ doc("tt_e21_customer__corpparent") }}'
+    - name: corp_link
+      description: '{{ doc("tt_e21_customer__corplink") }}'
+    - name: shiphead  
+      description: '{{ doc("tt_e21_customer__shiphead") }}'
+
+
+
+- name: yipit_share
+  database: yipit_datashare
+  description: Data share provided yipit for market share data
+  schema: yipitdata
+  tables:
+    - name: granular_products_monthly_v3_paleturquoisebrook_view
+      description: '{{ doc("yipit_granular_products_monthly_v3_paleturquoisebrook_view") }}'
+
+- name: amazon_sp_ft_psa
+  database: "psa_{{env_var('DBT_SOURCE_ENV')}}"
+  description: Amazon API data from Fivetran
+  schema: amazon_sp_ft
+  tables:
+  - name: item_summary
+    description: "item_summary"
+  - name: item_vendor_detail
+    description: "item_vendor_detail"

@@ -1,0 +1,29 @@
+name: Delete Cancelled Workflows
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 0 * * *' # This will run the workflow daily at midnight UTC
+
+jobs:
+  delete-cancelled-workflows:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v5
+
+      - name: List cancelled workflows
+        run: |
+          gh api -X GET /repos/${{ github.repository }}/actions/runs \
+            -F status=cancelled \
+            -q '.workflow_runs[].id' > cancelled_workflows.txt
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Delete cancelled workflows
+        run: |
+          for run_id in $(cat cancelled_workflows.txt); do
+            gh api -X DELETE /repos/${{ github.repository }}/actions/runs/$run_id
+          done
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,17 @@
+version: 2
+models:
+  - name: v_psa_stg_po_header__ml_ebs
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          config:
+            severity: warn
+          arguments:
+            combination_of_columns:
+              - PO_HEADER_HK
+              - LOAD_DTS
+    columns:
+      - name: PO_HEADER_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn

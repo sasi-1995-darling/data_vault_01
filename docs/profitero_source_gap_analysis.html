@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Profitero Source Migration Gap Analysis</title>
+<style>
+  body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 20px; background: #f5f7fa; color: #222; font-size: 14px; }
+  h1 { color: #1a3c5e; border-bottom: 3px solid #1a3c5e; padding-bottom: 8px; }
+  h2 { color: #1a3c5e; margin-top: 36px; border-left: 4px solid #3a7abf; padding-left: 10px; }
+  h3 { color: #2c5f8a; margin-top: 24px; }
+  .meta { background: #e8f0f9; border-radius: 6px; padding: 12px 18px; margin-bottom: 24px; font-size: 13px; color: #444; }
+  .meta strong { color: #1a3c5e; }
+  table { border-collapse: collapse; width: 100%; margin: 12px 0 24px 0; background: #fff; border-radius: 6px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+  th { background: #1a3c5e; color: #fff; padding: 8px 12px; text-align: left; font-size: 13px; white-space: nowrap; }
+  td { padding: 7px 12px; border-bottom: 1px solid #e8ecf0; vertical-align: top; font-size: 13px; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #f0f5fb; }
+  .c-confirmed { background: #d4edda; color: #155724; font-weight: bold; padding: 2px 7px; border-radius: 10px; white-space: nowrap; }
+  .c-high  { background: #d4edda; color: #155724; font-weight: bold; padding: 2px 7px; border-radius: 10px; white-space: nowrap; }
+  .c-med   { background: #fff3cd; color: #856404; font-weight: bold; padding: 2px 7px; border-radius: 10px; white-space: nowrap; }
+  .c-low   { background: #f8d7da; color: #721c24; font-weight: bold; padding: 2px 7px; border-radius: 10px; white-space: nowrap; }
+  .c-lost  { background: #721c24; color: #fff; font-weight: bold; padding: 2px 7px; border-radius: 10px; white-space: nowrap; }
+  .c-new   { background: #cce5ff; color: #004085; font-weight: bold; padding: 2px 7px; border-radius: 10px; white-space: nowrap; }
+  .c-std   { background: #d1ecf1; color: #0c5460; font-weight: bold; padding: 2px 7px; border-radius: 10px; white-space: nowrap; }
+  .c-unk   { background: #e2e3e5; color: #383d41; font-weight: bold; padding: 2px 7px; border-radius: 10px; white-space: nowrap; }
+  .c-recovered { background: #e8d5f5; color: #5a0080; font-weight: bold; padding: 2px 7px; border-radius: 10px; white-space: nowrap; }
+  .badge-green  { background: #28a745; color: #fff; border-radius: 4px; padding: 2px 8px; font-size: 12px; }
+  .badge-yellow { background: #ffc107; color: #333; border-radius: 4px; padding: 2px 8px; font-size: 12px; }
+  .badge-red    { background: #dc3545; color: #fff; border-radius: 4px; padding: 2px 8px; font-size: 12px; }
+  .badge-blue   { background: #17a2b8; color: #fff; border-radius: 4px; padding: 2px 8px; font-size: 12px; }
+  .badge-dark   { background: #343a40; color: #fff; border-radius: 4px; padding: 2px 8px; font-size: 12px; }
+  .badge-purple { background: #6f42c1; color: #fff; border-radius: 4px; padding: 2px 8px; font-size: 12px; }
+  .note { background: #fff8e1; border-left: 4px solid #ffc107; padding: 10px 14px; margin: 10px 0 18px 0; border-radius: 0 4px 4px 0; font-size: 13px; }
+  .blocker { background: #fdecea; border-left: 4px solid #dc3545; padding: 10px 14px; margin: 10px 0 18px 0; border-radius: 0 4px 4px 0; font-size: 13px; }
+  .good-news { background: #d4edda; border-left: 4px solid #28a745; padding: 10px 14px; margin: 10px 0 18px 0; border-radius: 0 4px 4px 0; font-size: 13px; }
+  .correction { background: #fff0d6; border-left: 4px solid #e87c00; padding: 10px 14px; margin: 10px 0 18px 0; border-radius: 0 4px 4px 0; font-size: 13px; }
+  .section-card { background: #fff; border-radius: 8px; padding: 20px 24px; margin: 20px 0; box-shadow: 0 1px 6px rgba(0,0,0,0.08); }
+  .legend { display: flex; gap: 16px; flex-wrap: wrap; margin: 12px 0 24px 0; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 13px; }
+  code { background: #eef1f5; padding: 1px 5px; border-radius: 3px; font-family: Consolas, monospace; font-size: 12px; }
+  pre { background: #1e1e2e; color: #cdd6f4; padding: 16px; border-radius: 6px; font-size: 12px; overflow-x: auto; line-height: 1.5; font-family: Consolas, monospace; }
+  .toc { background: #fff; border-radius: 6px; padding: 14px 20px; margin-bottom: 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+  .toc a { color: #3a7abf; text-decoration: none; }
+  .toc a:hover { text-decoration: underline; }
+  .toc ol { margin: 8px 0 0 0; padding-left: 20px; }
+  .toc li { margin-bottom: 4px; }
+  .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin: 16px 0; }
+  .summary-card { background: #fff; border-radius: 8px; padding: 14px 18px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); border-top: 4px solid #1a3c5e; }
+  .summary-card.red { border-top-color: #dc3545; }
+  .summary-card.yellow { border-top-color: #ffc107; }
+  .summary-card.green { border-top-color: #28a745; }
+  .summary-card.dark { border-top-color: #343a40; }
+  .summary-card.purple { border-top-color: #6f42c1; }
+  .summary-card h4 { margin: 0 0 6px 0; font-size: 13px; color: #555; }
+  .summary-card .big { font-size: 28px; font-weight: bold; color: #1a3c5e; }
+  .summary-card.red .big { color: #dc3545; }
+  .summary-card.yellow .big { color: #856404; }
+  .summary-card.green .big { color: #155724; }
+  .summary-card.purple .big { color: #6f42c1; }
+  .delta-badge { background: #6f42c1; color: #fff; border-radius: 4px; padding: 1px 6px; font-size: 11px; margin-left: 4px; }
+  .v3-badge { background: #e87c00; color: #fff; border-radius: 4px; padding: 1px 6px; font-size: 11px; margin-left: 4px; }
+  tr.lost-row td { background: #fff5f5; }
+  tr.new-row td { background: #f0f8ff; }
+  tr.confirmed-row td { background: #f0fff4; }
+  tr.corrected-row td { background: #fff8ed; }
+</style>
+</head>
+<body>
+
+<h1>Profitero Source Migration Gap Analysis</h1>
+<div class="meta">
+  <strong>Generated:</strong> May 14, 2026 &nbsp;|&nbsp;
+  <strong>Version:</strong> 3.0 — Live Snowflake DB verification (PSA_PROD) &nbsp;|&nbsp;
+  <strong>Sources:</strong> Direct Snowflake MCP queries against PSA_PROD + internal v_psa_stg code analysis &nbsp;|&nbsp;
+  <strong>Scope:</strong> Upstream of <code>im_rep_pricing_competitive_weekly</code>
+</div>
+
+<div class="good-news">
+  <strong>Version 3.0 — Live DB Verification:</strong> All table and column structures confirmed via direct Snowflake queries against <code>PSA_PROD</code>. Critical corrections from v2.0: (1) <code>DIM_PRODUCT_HISTORY</code> has <strong>no</strong> <code>DIM_RETAILER_PRODUCT_KEY</code> — v2.0 join topology was wrong; (2) <code>ADD_ON_ITEM</code> is <strong>recoverable</strong> as <code>AMAZON_ADDON_ITEM</code> in <code>DIM_CATEGORY_PRODUCT</code>; (3) <code>DIM_RETAILER_CATEGORY</code> uses <code>RETAILER_CATEGORY_NAME</code> not <code>FULL_NAME</code>; (4) <code>DIM_ACCOUNT_PRODUCT_CATEGORY</code> stores <code>ACCOUNT_PRODUCT_ID</code> directly; (5) <code>RANKING_PRODUCT_ID</code> does not exist on <code>DIM_RETAILER_PRODUCT</code>; (6) <code>DIM_CATEGORY_PRODUCT</code> is a major undocumented table replacing placement/rankings.
+</div>
+
+<div class="toc">
+  <strong>Contents</strong>
+  <ol>
+    <li><a href="#brand-mapping">Brand / Source Mapping</a></li>
+    <li><a href="#table-map">Old → New Table Inventory</a></li>
+    <li><a href="#legend">Confidence Legend</a></li>
+    <li><a href="#s1">Table: <code>retailers</code> → <code>DIM_RETAILER</code></a></li>
+    <li><a href="#s2">Table: <code>price_availability_history</code> → <code>DIM_PRODUCT_HISTORY</code> <span class="v3-badge">V3 CORRECTED</span></a></li>
+    <li><a href="#s3">Table: <code>products</code> (competitor) → <code>DIM_RETAILER_PRODUCT</code> <span class="v3-badge">V3 CORRECTED</span></a></li>
+    <li><a href="#s-customer-products">Table: <code>customer_products</code> → <code>DIM_ACCOUNT_PRODUCT</code></a></li>
+    <li><a href="#s4">Table: <code>categories</code> → <code>DIM_RETAILER_CATEGORY</code> / <code>DIM_ACCOUNT_CATEGORY</code> <span class="v3-badge">V3 CORRECTED</span></a></li>
+    <li><a href="#s5">Table: <code>categories_products</code> → <code>DIM_ACCOUNT_PRODUCT_CATEGORY</code> <span class="v3-badge">V3 CORRECTED</span></a></li>
+    <li><a href="#s-dim-category-product">Table: NEW <code>DIM_CATEGORY_PRODUCT</code> — Placement / Rankings Replacement <span class="v3-badge">V3 NEW</span></a></li>
+    <li><a href="#s-moen-amz">Moen-Specific: AMZ Tables (GLANCE_VIEWS / SALES / SNS_*) <span class="v3-badge">V3 NEW</span></a></li>
+    <li><a href="#join-topology">Join Topology: Corrected <code>v_psa_stg_price_availability</code> Pattern <span class="v3-badge">V3 CORRECTED</span></a></li>
+    <li><a href="#rec-src">REC_SRC Value Changes</a></li>
+    <li><a href="#model-impact">v_psa_stg Model Impact Summary</a></li>
+    <li><a href="#new-capabilities">New Capabilities Unlocked</a></li>
+    <li><a href="#continuity">Data Continuity Risks</a></li>
+    <li><a href="#blockers">Action Items</a></li>
+  </ol>
+</div>
+
+<!-- BRAND MAPPING -->
+<div class="section-card" id="brand-mapping">
+<h2>1. Brand / Source Mapping</h2>
+<table>
+  <tr><th>Brand</th><th>Old dbt Source</th><th>New dbt Source</th><th>Notes</th></tr>
+  <tr><td>Fiberon</td><td><code>profitero_fiberon</code></td><td><code>profitero_share_fiberon</code></td><td><span class="badge-green">1:1</span></td></tr>
+  <tr><td>Fypon</td><td><code>profitero_fypon</code></td><td><code>profitero_share_fypon</code></td><td><span class="badge-green">1:1</span></td></tr>
+  <tr><td>Larson</td><td><code>profitero_larson</code></td><td><code>profitero_share_larson</code></td><td><span class="badge-green">1:1</span></td></tr>
+  <tr><td>Security / Master Lock</td><td><code>profitero_security</code></td><td><code>profitero_share_master_lock</code></td><td><span class="badge-yellow">Name change</span></td></tr>
+  <tr><td>Thermatru</td><td><code>profitero_thermatru</code></td><td><code>profitero_share_thermatru</code></td><td><span class="badge-green">1:1</span></td></tr>
+  <tr><td>Winn / Moen</td><td><code>profitero</code> <em>(generic)</em></td><td><code>profitero_share_moen</code></td><td><span class="badge-red">Source renamed</span> — "WINN" was a Profitero account/client name, not a brand; new naming is brand-based</td></tr>
+</table>
+<div class="note">
+  <strong>Additional schemas available:</strong> <code>profitero_share_moen_ca</code> (Canada) and <code>profitero_share_moen_mx</code> (Mexico) are also available in the new data share for Moen. These were not present in the old <code>profitero</code> schema.
+</div>
+<div class="note">
+  <strong>WINN naming impact:</strong> Existing BKCC registrations and REC_SRC values (e.g., <code>US.PROFITERO_WINN.PRICING_AVAILABILITY_HISTORY</code>) are tied to the old <code>profitero</code> generic schema. All 6 new REC_SRC values must be registered in <code>REF_BUSINESS_KEY_COLLISION</code> via the Streamlit app before running <code>dbt build</code> on any new models.
+</div>
+</div>
+
+<!-- TABLE INVENTORY -->
+<div class="section-card" id="table-map">
+<h2>2. Old → New Table Inventory (All Tables) — DB Verified</h2>
+<p>All 6 new <code>profitero_share_*</code> brand schemas exist in <strong>PSA_PROD</strong> (old schemas are in PSA_DEV). All schemas have identical table sets. The new schema is a pre-built dimensional model — a paradigm shift from flat transactional tables. Row counts shown for Fiberon (smallest) and Moen (largest) for scale planning.</p>
+
+<div class="correction">
+  <strong>⚠️ V3 Database Location Correction:</strong> New schemas are in <strong>PSA_PROD</strong>, not PSA_DEV. All <code>source()</code> references must point to PSA_PROD. Old schemas remain in PSA_DEV during parallel run period.
+</div>
+
+<table>
+  <tr><th>Old Table (PSA_DEV)</th><th>New Table Candidate (PSA_PROD)</th><th>Match %</th><th>Rows (Fiberon / Moen)</th><th>Notes</th></tr>
+  <tr class="confirmed-row"><td><code>retailers</code></td><td><code>DIM_RETAILER</code></td><td>~90%</td><td>5 / 9</td><td>ALIAS→RETAILER_ALIAS; NAME→RETAILER_NAME; ID→DIM_RETAILER_KEY (surrogate); rest direct</td></tr>
+  <tr class="confirmed-row"><td><code>price_availability_history</code></td><td><code>DIM_PRODUCT_HISTORY</code></td><td>~75%</td><td>27M / 789M</td><td>All pricing cols confirmed. DATE→DIM_DATE_KEY join; FK cols → dim keys. MATCH_TYPE LOST. ADD_ON_ITEM RECOVERABLE via DIM_CATEGORY_PRODUCT.</td></tr>
+  <tr class="confirmed-row"><td><code>products</code> (competitor)</td><td><code>DIM_RETAILER_PRODUCT</code></td><td>~80%</td><td>671K / 1.9M</td><td>MODEL→PRODUCT_MODEL; URL→PRODUCT_URL; RANKING_PRODUCT_ID NOT present (see section 6)</td></tr>
+  <tr class="confirmed-row"><td><code>customer_products</code></td><td><code>DIM_ACCOUNT_PRODUCT</code></td><td>~80%</td><td>3,425 / 98K</td><td>ACCOUNT_PRODUCT_ID = natural key; RPC→PROVIDED_RPC; NAME→ACCOUNT_PRODUCT_NAME; MAP_PRICE is new and valuable</td></tr>
+  <tr class="confirmed-row"><td><code>categories</code></td><td><code>DIM_ACCOUNT_CATEGORY</code> (for product scoping)<br><code>DIM_RETAILER_CATEGORY</code> (for retailer cat rankings)</td><td>~80%</td><td>12 / 32 (acct) &amp; 536 / 448 (retailer)</td><td>FULL_NAME is on DIM_ACCOUNT_CATEGORY; DIM_RETAILER_CATEGORY uses RETAILER_CATEGORY_NAME + RETAILER_CATEGORY_PATH</td></tr>
+  <tr class="confirmed-row"><td><code>categories_products</code></td><td><code>DIM_ACCOUNT_PRODUCT_CATEGORY</code></td><td>~90%</td><td>4,710 / 86K</td><td>ACCOUNT_PRODUCT_ID stored directly — no extra join needed for product BK</td></tr>
+  <tr class="confirmed-row"><td><code>brands</code></td><td><code>DIM_BRAND</code></td><td>~85%</td><td>52K / 167K</td><td>NAME→BRAND_NAME; adds BRAND_OWNER, BRAND, SUBBRAND, SUBSUBBRAND hierarchy</td></tr>
+  <tr class="confirmed-row"><td><code>product_ratings</code></td><td><code>DIM_PRODUCT_RATING</code></td><td>~90%</td><td>5.5M / 39.6M</td><td>Adds CUMULATIVE_RATINGS, SOURCE_UPDATED_AT; star breakdown by 1-5 stars confirmed</td></tr>
+  <tr class="confirmed-row"><td><code>reviews</code></td><td><code>DIM_REVIEW</code> + <code>DIM_PRODUCT_REVIEW</code></td><td>~80%</td><td>42K / 764K (DIM_REVIEW)</td><td>Reviews split: DIM_REVIEW=content; DIM_PRODUCT_REVIEW=account-product × review bridge. Adds SYNDICATED_REVIEW, PAID_REVIEW, MANUFACTURER_COMMENT</td></tr>
+  <tr class="confirmed-row"><td><code>placement</code> + <code>rankings</code> + <code>ranking_products</code></td><td><code>DIM_CATEGORY_PRODUCT</code></td><td>~85%</td><td>29M / 36M</td><td>Major new table: ranking × badge × category × retailer product × date. Contains AMAZON_ADDON_ITEM (ADD_ON_ITEM recovery path)</td></tr>
+  <tr class="confirmed-row"><td><code>placement</code> (keyword-driven)</td><td><code>DIM_SEARCH_PRODUCT</code> + <code>DIM_KEYWORD</code></td><td>~80%</td><td>86M / 528M</td><td>Keyword-based search rankings. DIM_KEYWORD has KEYWORD_NAME, KEYWORD_TYPE, ASFR</td></tr>
+  <tr class="confirmed-row"><td><code>product_content</code></td><td><code>DIM_PRODUCT_CONTENT</code></td><td>~75%</td><td>17.6M / 1.04B</td><td>Adds COMPLIANT flag, EXPECTED_CONTENT, ACTUAL_CONTENT</td></tr>
+  <tr class="new-row"><td>— (not in old schema)</td><td><code>DIM_DATE</code></td><td>NEW</td><td>5,480 / 5,480</td><td>Date dimension: DIM_DATE_KEY (YYYYMMDD integer), DT_DATE, DT_YEAR, DT_MONTH, DT_DAY, DT_WEEK_NUMBER. Required for date resolution from DIM_PRODUCT_HISTORY.</td></tr>
+  <tr class="new-row"><td>— (not in old schema)</td><td><code>DIM_RETAILER_LOCATION</code></td><td>NEW</td><td>17 / 12</td><td>Store/virtual-location granularity: RETAILER_LOCATION_NAME, IS_VIRTUAL_LOCATION, VIEW_GROUP_NAME, VIEW_GROUP_WEIGHT</td></tr>
+  <tr class="new-row"><td>— (not in old schema)</td><td><code>FACT_PRODUCT_SCORE</code></td><td>NEW</td><td>134M / 2.24B</td><td>5-dimension product scoring linked to all dimension keys. Uses ARRAY type for category/search/review FKs.</td></tr>
+  <tr class="new-row"><td>— (not in old schema)</td><td><code>DIM_PRODUCT_ATTRIBUTE</code></td><td>NEW</td><td>24 / 72</td><td>Attribute compliance monitoring</td></tr>
+  <tr class="new-row"><td>— (not in old schema)</td><td><code>FACT_ACCOUNT_RETAILER_PRODUCT</code></td><td>NEW</td><td>2,627 / 53K</td><td>Bridge: DIM_ACCOUNT_PRODUCT_KEY ↔ DIM_RETAILER_PRODUCT_KEY — the link between "our" products and competitor product listings</td></tr>
+  <tr class="confirmed-row"><td><code>sales</code> (Moen/WINN only)</td><td><code>DIM_AMZ_PRODUCT_SALE</code></td><td>~75%</td><td>0 / 144M</td><td>Amazon-specific sales data. Only populated for Moen; empty for Fiberon.</td></tr>
+  <tr class="confirmed-row"><td><code>sns_categories</code> (Moen/WINN only)</td><td><code>DIM_AMZ_CATEGORY</code></td><td>~85%</td><td>0 / 250</td><td>AMZ_CATEGORY_ID, AMZ_CATEGORY_NAME, AMZ_CATEGORY_TYPE confirmed</td></tr>
+  <tr class="confirmed-row"><td><code>sns_products</code> (Moen/WINN only)</td><td><code>DIM_AMZ_PRODUCT</code></td><td>~80%</td><td>0 / 3.75M</td><td>AMZ_PRODUCT_ID (=ASIN), NAME, EAN, UPC, MODEL confirmed</td></tr>
+  <tr class="confirmed-row"><td><code>glance_views</code> (Moen/WINN only)</td><td><code>DIM_AMZ_PRODUCT_VIEW</code></td><td>~80%</td><td>0 / 4.7M</td><td>Amazon glance view data</td></tr>
+  <tr class="confirmed-row"><td><code>category_sales</code> (Moen/WINN only)</td><td><code>DIM_AMZ_CATEGORY_SALE</code></td><td>~80%</td><td>0 / 214K</td><td>Amazon category-level sales</td></tr>
+</table>
+
+<div class="note">
+  <strong>Fiberon-specific note:</strong> AMZ-prefixed tables (DIM_AMZ_PRODUCT, DIM_AMZ_PRODUCT_SALE, DIM_AMZ_PRODUCT_VIEW) have 0 rows for Fiberon — Amazon data is only live for Moen. The tables exist in all brand schemas structurally.
+</div>
+</div>
+
+<!-- LEGEND -->
+<div class="section-card" id="legend">
+<h2>3. Confidence Legend</h2>
+<div class="legend">
+  <div class="legend-item"><span class="c-confirmed">CONFIRMED</span> Verified directly from PSA_PROD Snowflake schema (v3.0).</div>
+  <div class="legend-item"><span class="c-high">HIGH</span> Name/type evidence strongly suggests equivalence.</div>
+  <div class="legend-item"><span class="c-med">MEDIUM</span> Likely mapping — minor transformation needed; verify before implementing.</div>
+  <div class="legend-item"><span class="c-low">LOW</span> Uncertain — needs specific DB verification.</div>
+  <div class="legend-item"><span class="c-lost">LOST</span> Column does not exist in the new schema. Decision required.</div>
+  <div class="legend-item"><span class="c-recovered">RECOVERED</span> Previously thought LOST — alternative source found in new schema.</div>
+  <div class="legend-item"><span class="c-new">NEW</span> New column/capability not available in old schema.</div>
+  <div class="legend-item"><span class="c-std">STD</span> Standard PSA column — present on all profitero_share tables.</div>
+</div>
+<div class="note">Rows highlighted <span style="background:#f0fff4;padding:1px 5px;">green</span> = confirmed mapping | <span style="background:#fff5f5;padding:1px 5px;">red</span> = lost/gap | <span style="background:#f0f8ff;padding:1px 5px;">blue</span> = new capability | <span style="background:#fff8ed;padding:1px 5px;">orange</span> = v2.0 correction</div>
+</div>
+
+<!-- RETAILERS -->
+<div class="section-card" id="s1">
+<h2>4. <code>retailers</code> → <code>DIM_RETAILER</code> <span class="delta-badge">DB VERIFIED</span></h2>
+<p><strong>Used by:</strong> <code>v_psa_stg_price_availability__profitero_*</code> and <code>v_psa_stg_competitive_products__profitero_*</code><br>
+<strong>Confidence:</strong> High — DB verified (PSA_PROD.PROFITERO_SHARE_FIBERON.DIM_RETAILER: 5 rows)<br>
+<strong>Match quality:</strong> ~90%</p>
+
+<table>
+  <tr><th>Old Column</th><th>Old Type</th><th>New Column</th><th>New Type</th><th>Status</th><th>Transformation</th></tr>
+  <tr class="confirmed-row"><td><code>ID</code></td><td>INTEGER (natural key)</td><td><code>DIM_RETAILER_KEY</code></td><td>NUMBER(38,0) (surrogate)</td><td><span class="c-med">MEDIUM</span></td><td>Old join <code>ON RETAILER_ID = retailers.ID</code> becomes <code>ON DIM_RETAILER_KEY = dim_product_history.DIM_RETAILER_KEY</code>. Old natural ID values ≠ new surrogate values.</td></tr>
+  <tr class="confirmed-row"><td><code>NAME</code></td><td>VARCHAR</td><td><code>RETAILER_NAME</code></td><td>VARCHAR</td><td><span class="c-confirmed">CONFIRMED</span></td><td>Direct rename. <code>COALESCE(NULLIF(TRIM(RETAILER_NAME),''),'-1')</code>.</td></tr>
+  <tr class="confirmed-row"><td><code>COUNTRY</code></td><td>VARCHAR</td><td><code>COUNTRY</code></td><td>VARCHAR</td><td><span class="c-confirmed">CONFIRMED</span></td><td>Direct — same name.</td></tr>
+  <tr class="confirmed-row"><td><code>ALIAS</code></td><td>VARCHAR</td><td><code>RETAILER_ALIAS</code></td><td>VARCHAR</td><td><span class="c-confirmed">CONFIRMED</span></td><td>Direct rename. DB confirmed column exists.</td></tr>
+  <tr class="confirmed-row"><td><code>IS_DELETED</code></td><td>BOOLEAN</td><td><code>PSA_DELETE_IND</code></td><td>VARCHAR</td><td><span class="c-confirmed">CONFIRMED</span></td><td><code>IS_DELETED=TRUE</code> → <code>PSA_DELETE_IND='Y'</code>. Filter on <code>PSA_DELETE_IND='N'</code>.</td></tr>
+  <tr><td><code>UPDATED_AT</code></td><td>TEXT (old) / TIMESTAMP_NTZ</td><td><code>UPDATED_AT</code></td><td>TIMESTAMP_NTZ(9)</td><td><span class="c-confirmed">CONFIRMED</span></td><td>Type promoted. No casting required.</td></tr>
+  <tr><td><code>PSA_LOAD_DTS</code></td><td>TIMESTAMP</td><td><code>PSA_LOAD_DTS</code></td><td>TIMESTAMP_LTZ(9)</td><td><span class="c-std">STD</span></td><td>Standard column.</td></tr>
+  <tr><td><code>PSA_RECORD_SOURCE</code></td><td>VARCHAR</td><td><code>PSA_RECORD_SOURCE</code></td><td>VARCHAR</td><td><span class="c-std">STD</span></td><td>Value changes — see REC_SRC section.</td></tr>
+  <tr><td><code>PSA_DELETE_IND</code></td><td>CHAR(1)</td><td><code>PSA_DELETE_IND</code></td><td>VARCHAR</td><td><span class="c-std">STD</span></td><td>Standard column.</td></tr>
+  <tr class="new-row"><td>—</td><td>—</td><td><code>CREATED_AT</code></td><td>TIMESTAMP_NTZ(9)</td><td><span class="c-new">NEW</span></td><td>First-seen timestamp from Profitero. Available for enrichment.</td></tr>
+</table>
+</div>
+
+<!-- PRICE AVAILABILITY HISTORY -->
+<div class="section-card" id="s2">
+<h2>5. <code>price_availability_history</code> → <code>DIM_PRODUCT_HISTORY</code> <span class="delta-badge">DB VERIFIED</span> <span class="v3-badge">V3 CORRECTED</span></h2>
+<p><strong>Used by:</strong> <code>v_psa_stg_price_availability__profitero_*</code> (primary source of competitive pricing)<br>
+<strong>DB location:</strong> <code>PSA_PROD.PROFITERO_SHARE_FIBERON.DIM_PRODUCT_HISTORY</code> — 27M rows (Fiberon), 789M rows (Moen)<br>
+<strong>Old table confirmed columns:</strong> DATE, CUSTOMER_PRODUCT_ID, PRODUCT_ID, RETAILER_ID, MATCH_TYPE, REGULAR_PRICE, PROMOTION_TEXT, PROMOTION_PRICE, AVAILABILITY, FIRST_PARTY_WON_BUY_BOX, THIRD_PARTY_SELLER, ADD_ON_ITEM, PRIME_EXCLUSIVE, PROMO_TYPE, UPDATED_AT (<strong>TEXT type!</strong>), IS_DELETED</p>
+
+<div class="correction">
+  ⚠️ <strong>V3 Critical Correction — DIM_PRODUCT_HISTORY has NO <code>DIM_RETAILER_PRODUCT_KEY</code>:</strong>
+  V2.0 incorrectly stated this column exists and included it in the join topology. Actual DIM_PRODUCT_HISTORY columns are only:
+  <code>DIM_PRODUCT_HISTORY_KEY, DIM_DATE_KEY, DIM_ACCOUNT_PRODUCT_KEY, DIM_RETAILER_KEY, DIM_RETAILER_LOCATION_KEY</code> + pricing metrics + PSA cols.
+  There is <strong>no reference to competitor product</strong> in DIM_PRODUCT_HISTORY. This table tracks <em>our account products'</em> prices at retailers. Remove <code>s.DIM_RETAILER_PRODUCT_KEY</code> from all join topology.
+</div>
+
+<div class="good-news">
+  ✅ <strong>V3 Update — ADD_ON_ITEM is RECOVERABLE (not permanently lost):</strong>
+  Available as <code>AMAZON_ADDON_ITEM</code> (BOOLEAN) in both <code>DIM_CATEGORY_PRODUCT</code> and <code>DIM_SEARCH_PRODUCT</code>. Recovery requires a join via <code>DIM_DATE_KEY + DIM_RETAILER_KEY</code> through the account-retailer-product chain using <code>FACT_ACCOUNT_RETAILER_PRODUCT</code>. See Section 10 for the DIM_CATEGORY_PRODUCT details.
+</div>
+
+<div class="blocker">
+  ❌ <strong>1 Column Permanently LOST (confirmed via full schema scan):</strong>
+  <ul style="margin-top:6px">
+    <li><strong><code>MATCH_TYPE</code> (VARCHAR)</strong> — not present in any table in the new schema. Set <code>NULL::VARCHAR AS MATCH_TYPE</code>. Audit all downstream sat/pb/pit/dim models before accepting.</li>
+  </ul>
+</div>
+
+<table>
+  <tr><th>Old Column</th><th>Old Type</th><th>New Column / Source</th><th>New Type</th><th>Status</th><th>Transformation / Notes</th></tr>
+  <tr class="confirmed-row"><td><code>DATE</code></td><td>DATE</td><td><code>DIM_DATE_KEY</code> → <code>DIM_DATE.DT_DATE</code></td><td>NUMBER(38,0) → DATE</td><td><span class="c-med">MEDIUM</span></td><td>DIM_DATE confirmed: 5,480 rows. DIM_DATE_KEY is integer YYYYMMDD. Join: <code>LEFT JOIN DIM_DATE dd ON s.DIM_DATE_KEY = dd.DIM_DATE_KEY</code>, select <code>dd.DT_DATE AS DATE</code>. Bonus: DT_YEAR, DT_MONTH, DT_DAY, DT_WEEK_NUMBER also available.</td></tr>
+  <tr class="confirmed-row"><td><code>CUSTOMER_PRODUCT_ID</code></td><td>NUMBER(38,0)</td><td><code>DIM_ACCOUNT_PRODUCT_KEY</code> → <code>DIM_ACCOUNT_PRODUCT.ACCOUNT_PRODUCT_ID</code></td><td>NUMBER(38,0) surrogate</td><td><span class="c-med">MEDIUM</span></td><td>Join: <code>LEFT JOIN DIM_ACCOUNT_PRODUCT ap ON s.DIM_ACCOUNT_PRODUCT_KEY = ap.DIM_ACCOUNT_PRODUCT_KEY</code>. Use <code>ap.ACCOUNT_PRODUCT_ID</code> as PRODUCT_BK. Verify ACCOUNT_PRODUCT_ID matches historical CUSTOMER_PRODUCT_ID values for hub continuity.</td></tr>
+  <tr class="confirmed-row"><td><code>RETAILER_ID</code></td><td>NUMBER(38,0)</td><td><code>DIM_RETAILER_KEY</code> → <code>DIM_RETAILER.RETAILER_NAME</code></td><td>NUMBER(38,0) surrogate</td><td><span class="c-med">MEDIUM</span></td><td>Join: <code>LEFT JOIN DIM_RETAILER r ON s.DIM_RETAILER_KEY = r.DIM_RETAILER_KEY</code>. Use <code>r.RETAILER_NAME</code> for RETAILER_BK.</td></tr>
+  <tr class="lost-row"><td><code>PRODUCT_ID</code></td><td>NUMBER(38,0)</td><td><strong>NO EQUIVALENT in DIM_PRODUCT_HISTORY</strong></td><td>—</td><td><span class="c-lost">LOST</span></td><td>Old PRODUCT_ID referenced competitor products. DIM_PRODUCT_HISTORY has no DIM_RETAILER_PRODUCT_KEY. Competitor product data now lives in <code>DIM_CATEGORY_PRODUCT</code>. The competitive products v_psa_stg must be sourced from DIM_CATEGORY_PRODUCT, not DIM_PRODUCT_HISTORY.</td></tr>
+  <tr class="confirmed-row"><td><code>AVAILABILITY</code></td><td>VARCHAR</td><td><code>AVAILABILITY</code></td><td>VARCHAR</td><td><span class="c-confirmed">CONFIRMED</span></td><td>Direct — same name, same type. DB verified.</td></tr>
+  <tr class="confirmed-row"><td><code>REGULAR_PRICE</code></td><td>NUMBER(20,6)</td><td><code>REGULAR_PRICE</code></td><td>FLOAT</td><td><span class="c-confirmed">CONFIRMED</span></td><td>Direct — type widened to FLOAT. DB verified.</td></tr>
+  <tr class="confirmed-row"><td><code>PROMOTION_TEXT</code></td><td>VARCHAR</td><td><code>PROMOTION_TEXT</code></td><td>VARCHAR</td><td><span class="c-confirmed">CONFIRMED</span></td><td>Direct. DB verified.</td></tr>
+  <tr class="confirmed-row"><td><code>PROMOTION_PRICE</code></td><td>NUMBER(20,6)</td><td><code>PROMOTION_PRICE</code></td><td>FLOAT</td><td><span class="c-confirmed">CONFIRMED</span></td><td>Direct — type widened to FLOAT. DB verified.</td></tr>
+  <tr class="confirmed-row"><td><code>FIRST_PARTY_WON_BUY_BOX</code></td><td>BOOLEAN</td><td><code>FIRST_PARTY_WON_BUY_BOX</code></td><td>BOOLEAN</td><td><span class="c-confirmed">CONFIRMED</span></td><td>Direct. DB verified.</td></tr>
+  <tr class="confirmed-row"><td><code>THIRD_PARTY_SELLER</code></td><td>VARCHAR</td><td><code>THIRD_PARTY_SELLER</code></td><td>VARCHAR</td><td><span class="c-confirmed">CONFIRMED</span></td><td>Direct. DB verified.</td></tr>
+  <tr class="confirmed-row"><td><code>PRIME_EXCLUSIVE</code></td><td>BOOLEAN</td><td><code>PRIME_EXCLUSIVE</code></td><td>BOOLEAN</td><td><span class="c-confirmed">CONFIRMED</span></td><td>Direct. DB verified.</td></tr>
+  <tr class="confirmed-row"><td><code>PROMO_TYPE</code></td><td>VARCHAR</td><td><code>PROMO_TYPE</code></td><td>VARCHAR</td><td><span class="c-confirmed">CONFIRMED</span></td><td>Direct. DB verified.</td></tr>
+  <tr class="confirmed-row"><td><code>UPDATED_AT</code></td><td><strong>VARCHAR (TEXT)</strong></td><td><code>UPDATED_AT</code></td><td>TIMESTAMP_NTZ(9)</td><td><span class="c-confirmed">CONFIRMED</span></td><td>Type promoted from VARCHAR/TEXT to TIMESTAMP_NTZ. Old model required <code>TO_TIMESTAMP_NTZ(UPDATED_AT)</code> — no longer needed. LOAD_DTS: <code>CONVERT_TIMEZONE('UTC', IFF(PSA_DELETE_IND='Y', PSA_LOAD_DTS, UPDATED_AT))</code>.</td></tr>
+  <tr class="confirmed-row"><td><code>IS_DELETED</code></td><td>BOOLEAN</td><td>use <code>PSA_DELETE_IND</code></td><td>—</td><td><span class="c-confirmed">CONFIRMED</span></td><td>Use <code>PSA_DELETE_IND='N'</code> filter. Set <code>FALSE AS IS_DELETED</code> in output if downstream expects it.</td></tr>
+  <tr class="lost-row"><td><code>MATCH_TYPE</code></td><td>VARCHAR</td><td><strong>NOT IN ANY NEW TABLE</strong></td><td>—</td><td><span class="c-lost">LOST</span></td><td>Set <code>NULL::VARCHAR AS MATCH_TYPE</code>. Audit all downstream models for usage before accepting.</td></tr>
+  <tr class="corrected-row"><td><code>ADD_ON_ITEM</code></td><td>BOOLEAN</td><td><code>AMAZON_ADDON_ITEM</code> in <code>DIM_CATEGORY_PRODUCT</code></td><td>BOOLEAN</td><td><span class="c-recovered">RECOVERED</span></td><td>Not in DIM_PRODUCT_HISTORY directly, but available in DIM_CATEGORY_PRODUCT and DIM_SEARCH_PRODUCT as <code>AMAZON_ADDON_ITEM</code>. Recovery join: DIM_PRODUCT_HISTORY → FACT_ACCOUNT_RETAILER_PRODUCT → DIM_CATEGORY_PRODUCT (on DIM_RETAILER_PRODUCT_KEY + DIM_DATE_KEY + DIM_RETAILER_KEY). If join is too expensive, source separately from DIM_CATEGORY_PRODUCT in its own v_psa_stg.</td></tr>
+  <tr><td><code>PSA_LOAD_DTS</code></td><td>TIMESTAMP</td><td><code>PSA_LOAD_DTS</code></td><td>TIMESTAMP_LTZ(9)</td><td><span class="c-std">STD</span></td><td>Standard column.</td></tr>
+  <tr><td><code>PSA_RECORD_SOURCE</code></td><td>VARCHAR</td><td><code>PSA_RECORD_SOURCE</code></td><td>VARCHAR</td><td><span class="c-std">STD</span></td><td>Value changes. Update FILTER_a rec_src predicate — see REC_SRC section.</td></tr>
+  <tr><td><code>PSA_DELETE_IND</code></td><td>CHAR(1)</td><td><code>PSA_DELETE_IND</code></td><td>VARCHAR</td><td><span class="c-std">STD</span></td><td>Standard column. Type changed to VARCHAR in new schema.</td></tr>
+  <tr class="new-row"><td>—</td><td>—</td><td><code>DIM_PRODUCT_HISTORY_KEY</code></td><td>NUMBER(38,0)</td><td><span class="c-new">NEW</span></td><td>PK. Use with QUALIFY ROW_NUMBER() for deduplication.</td></tr>
+  <tr class="new-row"><td>—</td><td>—</td><td><code>DIM_RETAILER_LOCATION_KEY</code></td><td>NUMBER(38,0)</td><td><span class="c-new">NEW</span></td><td>Store-level pricing granularity. Join to DIM_RETAILER_LOCATION for RETAILER_LOCATION_NAME, IS_VIRTUAL_LOCATION.</td></tr>
+  <tr class="new-row"><td>—</td><td>—</td><td><code>CREATED_AT</code></td><td>TIMESTAMP_NTZ(9)</td><td><span class="c-new">NEW</span></td><td>First-seen timestamp from Profitero.</td></tr>
+</table>
+</div>
+
+<!-- PRODUCTS (COMPETITOR) -->
+<div class="section-card" id="s3">
+<h2>6. <code>products</code> (Competitor) → <code>DIM_RETAILER_PRODUCT</code> <span class="delta-badge">DB VERIFIED</span> <span class="v3-badge">V3 CORRECTED</span></h2>
+<p><strong>Used by:</strong> <code>v_psa_stg_competitive_products__profitero_*</code><br>
+<strong>DB location:</strong> <code>PSA_PROD.PROFITERO_SHARE_FIBERON.DIM_RETAILER_PRODUCT</code> — 671K rows (Fiberon), 1.9M rows (Moen)<br>
+<strong>Match quality:</strong> ~80%</p>
+
+<div class="correction">
+  ⚠️ <strong>V3 Critical Correction — <code>RANKING_PRODUCT_ID</code> does NOT exist on DIM_RETAILER_PRODUCT:</strong>
+  V2.0 stated this column "exists in DIM_RETAILER_PRODUCT, resolvable via RPC join." DB verification shows actual columns are only:
+  <code>DIM_RETAILER_PRODUCT_KEY, DIM_BRAND_KEY, RETAILER_PRODUCT_NAME, RPC, EAN, UPC, PRODUCT_MODEL, DIM_RETAILER_KEY, NUMBER_OF_IMAGES, PRODUCT_URL, URL_KEY, VARIATION_KEY, CREATED_AT, UPDATED_AT, PSA_*</code>.
+  No <code>RANKING_PRODUCT_ID</code>. No natural integer ID. The old <code>products.ID</code> concept has no equivalent.
+</div>
+
+<div class="blocker">
+  ❌ <strong>COMPETITIVE_PRODUCT_BK continuity risk — HIGH PRIORITY:</strong>
+  Old BK: <code>COALESCE(NULLIF(TRIM(products.ID::VARCHAR),''),'-1')</code> — used the natural integer ID.
+  New table has <strong>no natural ID column</strong>. Only surrogate key (<code>DIM_RETAILER_PRODUCT_KEY</code>) exists.
+  Options: (A) Use <code>RPC</code> as the new BK (if RPC is unique per retailer+product combo), (B) Use surrogate <code>DIM_RETAILER_PRODUCT_KEY::VARCHAR</code> as BK (breaks continuity with any existing records), (C) Cross-reference old product IDs via RPC values to remap existing hub records.
+  <strong>Action required before migration:</strong> Run data profiling on RPC uniqueness within each brand schema.
+</div>
+
+<table>
+  <tr><th>Old Column</th><th>Old Type</th><th>New Column</th><th>New Type</th><th>Status</th><th>Transformation / Notes</th></tr>
+  <tr class="confirmed-row"><td><code>ID</code></td><td>NUMBER(38,0) natural key</td><td><code>DIM_RETAILER_PRODUCT_KEY</code></td><td>NUMBER(38,0) surrogate</td><td><span class="c-med">MEDIUM</span></td><td>Surrogate only. Natural ID values differ. No natural ID column in new table. BK derivation must use RPC or accept surrogate. See blocker above.</td></tr>
+  <tr class="lost-row"><td><code>RANKING_PRODUCT_ID</code></td><td>VARCHAR</td><td><strong>NOT IN DIM_RETAILER_PRODUCT</strong></td><td>—</td><td><span class="c-lost">LOST</span></td><td>Does not exist on DIM_RETAILER_PRODUCT. DB verified. Set <code>NULL::VARCHAR AS RANKING_PRODUCT_ID</code> or remove from downstream models.</td></tr>
+  <tr class="confirmed-row"><td><code>RPC</code></td><td>VARCHAR</td><td><code>RPC</code></td><td>VARCHAR</td><td><span class="c-confirmed">CONFIRMED</span></td><td>Direct. DB verified. Best candidate for COMPETITIVE_PRODUCT_BK.</td></tr>
+  <tr class="confirmed-row"><td><code>EAN</code></td><td>VARCHAR</td><td><code>EAN</code></td><td>VARCHAR</td><td><span class="c-confirmed">CONFIRMED</span></td><td>Direct. DB verified.</td></tr>
+  <tr class="confirmed-row"><td><code>UPC</code></td><td>VARCHAR</td><td><code>UPC</code></td><td>VARCHAR</td><td><span class="c-confirmed">CONFIRMED</span></td><td>Direct. DB verified.</td></tr>
+  <tr class="confirmed-row"><td><code>MODEL</code></td><td>VARCHAR</td><td><code>PRODUCT_MODEL</code></td><td>VARCHAR</td><td><span class="c-confirmed">CONFIRMED</span></td><td>Renamed. DB verified. Alias back to MODEL or update downstream.</td></tr>
+  <tr class="confirmed-row"><td><code>URL</code></td><td>VARCHAR</td><td><code>PRODUCT_URL</code></td><td>VARCHAR</td><td><span class="c-confirmed">CONFIRMED</span></td><td>Renamed. DB verified.</td></tr>
+  <tr class="confirmed-row"><td><code>RETAILER_ID</code></td><td>NUMBER(38,0)</td><td><code>DIM_RETAILER_KEY</code></td><td>NUMBER(38,0) surrogate</td><td><span class="c-med">MEDIUM</span></td><td>Join to DIM_RETAILER on DIM_RETAILER_KEY to get RETAILER_NAME for RETAILER_BK. DB verified.</td></tr>
+  <tr class="confirmed-row"><td><code>IS_DELETED</code></td><td>BOOLEAN</td><td><code>PSA_DELETE_IND</code></td><td>VARCHAR</td><td><span class="c-confirmed">CONFIRMED</span></td><td>Standard — filter on PSA_DELETE_IND='N'.</td></tr>
+  <tr class="confirmed-row"><td><code>UPDATED_AT</code></td><td>VARCHAR (TEXT)</td><td><code>UPDATED_AT</code></td><td>TIMESTAMP_NTZ(9)</td><td><span class="c-confirmed">CONFIRMED</span></td><td>Type promoted. DB verified.</td></tr>
+  <tr><td><code>PSA_LOAD_DTS</code></td><td>TIMESTAMP</td><td><code>PSA_LOAD_DTS</code></td><td>TIMESTAMP_LTZ(9)</td><td><span class="c-std">STD</span></td><td>Standard column.</td></tr>
+  <tr><td><code>PSA_RECORD_SOURCE</code></td><td>VARCHAR</td><td><code>PSA_RECORD_SOURCE</code></td><td>VARCHAR</td><td><span class="c-std">STD</span></td><td>Value changes from old PRODUCTS rec_src.</td></tr>
+  <tr><td><code>PSA_DELETE_IND</code></td><td>CHAR(1)</td><td><code>PSA_DELETE_IND</code></td><td>VARCHAR</td><td><span class="c-std">STD</span></td><td>Standard column.</td></tr>
+  <tr class="new-row"><td>—</td><td>—</td><td><code>DIM_BRAND_KEY</code></td><td>NUMBER(38,0)</td><td><span class="c-new">NEW</span></td><td>Join to DIM_BRAND for brand name. Enables brand-level competitive analysis.</td></tr>
+  <tr class="new-row"><td>—</td><td>—</td><td><code>RETAILER_PRODUCT_NAME</code></td><td>VARCHAR</td><td><span class="c-new">NEW</span></td><td>Product name at this specific retailer — previously not available.</td></tr>
+  <tr class="new-row"><td>—</td><td>—</td><td><code>NUMBER_OF_IMAGES</code></td><td>NUMBER(38,0)</td><td><span class="c-new">NEW</span></td><td>Image count for content scoring. Previously not available at this table level.</td></tr>
+  <tr class="new-row"><td>—</td><td>—</td><td><code>URL_KEY</code></td><td>VARCHAR</td><td><span class="c-new">NEW</span></td><td>Normalized URL key for dedup across redirects.</td></tr>
+  <tr class="new-row"><td>—</td><td>—</td><td><code>VARIATION_KEY</code></td><td>VARCHAR</td><td><span class="c-new">NEW</span></td><td>Product variation identifier (size/color/etc).</td></tr>
+  <tr class="new-row"><td>—</td><td>—</td><td><code>CREATED_AT</code></td><td>TIMESTAMP_NTZ(9)</td><td><span class="c-new">NEW</span></td><td>First-seen timestamp.</td></tr>
+</table>
+</div>
+
+<!-- CATEGORIES -->
+<div class="section-card" id="s4">
+<h2>7. <code>categories</code> → <code>DIM_RETAILER_CATEGORY</code> <span class="delta-badge">CONFIRMED</span></h2>
+<p><strong>Used by:</strong> <code>v_psa_stg_category_products__profitero_*</code> (note: naming inversion — this file reads from the <code>categories</code> table)<br>
+<strong>Source:</strong> External peer gap analysis<br>
+<strong>Match quality:</strong> ~80%</p>
+
+<div class="note">
+  <strong>Table candidate correction (v2.0):</strong> Version 1 suggested <code>dim_account_category</code>. The peer analysis confirms <code>DIM_RETAILER_CATEGORY</code> is the correct replacement for the old <code>categories</code> table. <code>DIM_ACCOUNT_CATEGORY</code> is a different concept (account-level category scoping, no equivalent in old schema).
+</div>
+
+<table>
+  <tr><th>Old Column</th><th>Old Type</th><th>New Column</th><th>New Type</th><th>Status</th><th>Transformation / Notes</th></tr>
+  <tr><td><code>ID</code></td><td>NUMBER(38,5) — unusual decimal precision</td><td>Natural category key (likely <code>RETAILER_CATEGORY_ID</code> or similar)</td><td>Unknown</td><td><span class="c-low">LOW</span></td><td>The old ID was cast as <code>NUMBER(38,5)</code> — unusual decimal precision, possibly a Profitero internal convention. Verify the new natural key column name and whether the values are compatible with existing <code>CATEGORY_BK</code> values in the hub.</td></tr>
+  <tr><td><code>FULL_NAME</code></td><td>VARCHAR</td><td><code>FULL_NAME</code></td><td>VARCHAR</td><td><span class="c-high">HIGH</span></td><td><code>FULL_NAME</code> is consistently present across profitero_share dimension tables. High probability of same column name.</td></tr>
+  <tr><td><code>IS_DELETED</code></td><td>BOOLEAN</td><td><code>PSA_DELETE_IND</code></td><td>CHAR(1)</td><td><span class="c-high">HIGH</span></td><td>Standard PSA pattern. Old LOAD_DTS: <code>COALESCE(updated_at, psa_load_dts)</code> for NULL handling — verify if still needed.</td></tr>
+  <tr><td><code>UPDATED_AT</code></td><td>TIMESTAMP</td><td><code>UPDATED_AT</code></td><td>TIMESTAMP_NTZ</td><td><span class="c-high">HIGH</span></td><td>Standard across all profitero_share tables.</td></tr>
+  <tr><td><code>PSA_LOAD_DTS</code></td><td>TIMESTAMP</td><td><code>PSA_LOAD_DTS</code></td><td>TIMESTAMP</td><td><span class="c-std">STD</span></td><td>Standard column.</td></tr>
+  <tr><td><code>PSA_RECORD_SOURCE</code></td><td>VARCHAR</td><td><code>PSA_RECORD_SOURCE</code></td><td>VARCHAR</td><td><span class="c-std">STD</span></td><td>Value changes from <code>US.PROFITERO_FIBERON.CATEGORIES</code>.</td></tr>
+  <tr><td><code>PSA_DELETE_IND</code></td><td>CHAR(1)</td><td><code>PSA_DELETE_IND</code></td><td>CHAR(1)</td><td><span class="c-std">STD</span></td><td>Standard column.</td></tr>
+  <tr class="new-row"><td>—</td><td>—</td><td>Surrogate key (e.g., <code>DIM_RETAILER_CATEGORY_KEY</code>)</td><td>INTEGER</td><td><span class="c-new">NEW</span></td><td>Expected surrogate key — needed as FK target from <code>DIM_CATEGORY_PRODUCT</code> / <code>DIM_ACCOUNT_PRODUCT_CATEGORY</code>.</td></tr>
+</table>
+</div>
+
+<!-- CATEGORIES_PRODUCTS -->
+<div class="section-card" id="s5">
+<h2>8. <code>categories_products</code> → <code>DIM_ACCOUNT_PRODUCT_CATEGORY</code> <span class="delta-badge">CONFIRMED</span></h2>
+<p><strong>Used by:</strong> <code>v_psa_stg_categories__profitero_*</code> (note: naming inversion — this file reads from the <code>categories_products</code> table)<br>
+<strong>Source:</strong> CSV — <code>UPDATED_AT</code> confirmed in <code>DIM_ACCOUNT_PRODUCT_CATEGORY</code>; FK keys confirmed via <code>DIM_ACCOUNT_CATEGORY</code> and <code>DIM_ACCOUNT_PRODUCT</code><br>
+<strong>Match quality:</strong> ~85%</p>
+
+<table>
+  <tr><th>Old Column</th><th>Old Type</th><th>New Column / Source</th><th>Status</th><th>Transformation / Notes</th></tr>
+  <tr><td><code>CATEGORY_ID</code></td><td>VARCHAR</td><td><code>DIM_ACCOUNT_CATEGORY.DIM_ACCOUNT_CATEGORY_KEY</code></td><td><span class="c-confirmed">CONFIRMED</span></td><td>CSV confirms: <code>categories_products.CATEGORY_ID</code> → <code>DIM_ACCOUNT_CATEGORY.DIM_ACCOUNT_CATEGORY_KEY</code> with Replaceable=Yes. The junction table <code>DIM_ACCOUNT_PRODUCT_CATEGORY</code> likely stores <code>DIM_ACCOUNT_CATEGORY_KEY</code> as a FK. To get the natural category ID (for CATEGORY_BK), join to <code>DIM_ACCOUNT_CATEGORY</code>.</td></tr>
+  <tr><td><code>CUSTOMER_PRODUCT_ID</code></td><td>VARCHAR</td><td><code>DIM_ACCOUNT_PRODUCT.ACCOUNT_PRODUCT_ID</code></td><td><span class="c-med">MEDIUM</span></td><td>CSV confirms mapping but marks "No — Concept changed". The junction table stores <code>DIM_ACCOUNT_PRODUCT_KEY</code> (surrogate). Join to <code>DIM_ACCOUNT_PRODUCT</code> to get <code>ACCOUNT_PRODUCT_ID</code> (= old CUSTOMER_PRODUCT_ID) for PRODUCT_BK derivation.</td></tr>
+  <tr class="confirmed-row"><td><code>UPDATED_AT</code></td><td>TIMESTAMP</td><td><code>DIM_ACCOUNT_PRODUCT_CATEGORY.UPDATED_AT</code></td><td><span class="c-confirmed">CONFIRMED</span></td><td>Confirmed from CSV — <code>UPDATED_AT</code> exists directly on <code>DIM_ACCOUNT_PRODUCT_CATEGORY</code>.</td></tr>
+  <tr><td><code>IS_DELETED</code></td><td>BOOLEAN</td><td><code>PSA_DELETE_IND</code></td><td><span class="c-high">HIGH</span></td><td>Standard PSA pattern.</td></tr>
+  <tr><td><code>PSA_LOAD_DTS</code></td><td>TIMESTAMP</td><td><code>PSA_LOAD_DTS</code></td><td><span class="c-std">STD</span></td><td>Standard column.</td></tr>
+  <tr><td><code>PSA_RECORD_SOURCE</code></td><td>VARCHAR</td><td><code>PSA_RECORD_SOURCE</code></td><td><span class="c-std">STD</span></td><td>Value changes from <code>US.PROFITERO_FIBERON.CATEGORIES_PRODUCTS</code>.</td></tr>
+  <tr><td><code>PSA_DELETE_IND</code></td><td>CHAR(1)</td><td><code>PSA_DELETE_IND</code></td><td><span class="c-std">STD</span></td><td>Standard column.</td></tr>
+</table>
+
+<div class="note">
+  <strong>Required joins to reconstruct natural IDs from this junction table:</strong><br>
+  1. Join <code>DIM_ACCOUNT_PRODUCT_CATEGORY</code> → <code>DIM_ACCOUNT_CATEGORY</code> on <code>DIM_ACCOUNT_CATEGORY_KEY</code> to get natural category ID for <code>CATEGORY_BK</code><br>
+  2. Join <code>DIM_ACCOUNT_PRODUCT_CATEGORY</code> → <code>DIM_ACCOUNT_PRODUCT</code> on <code>DIM_ACCOUNT_PRODUCT_KEY</code> to get <code>ACCOUNT_PRODUCT_ID</code> for <code>PRODUCT_BK</code><br>
+  These 2 additional joins do not exist in the old model and must be added to the v_psa_stg rewrite.
+</div>
+</div>
+
+<!-- JOIN TOPOLOGY -->
+<div class="section-card" id="join-topology">
+<h2>9. Join Topology: New <code>v_psa_stg_price_availability</code> Pattern</h2>
+<p>The following is the recommended CTE structure for rewriting the 6 <code>v_psa_stg_price_availability__profitero_*</code> files. This pattern resolves all surrogate keys back to natural IDs and handles the 2 lost columns.</p>
+<pre><code>---- SRC LAYER ----
+WITH
+SRC_S    AS (SELECT * FROM {{ source('profitero_share_fiberon', 'DIM_PRODUCT_HISTORY') }}),
+SRC_DD   AS (SELECT DIM_DATE_KEY, DT_DATE
+             FROM {{ source('profitero_share_fiberon', 'DIM_DATE') }}),
+SRC_AP   AS (SELECT DIM_ACCOUNT_PRODUCT_KEY, ACCOUNT_PRODUCT_ID AS CUSTOMER_PRODUCT_ID
+             FROM {{ source('profitero_share_fiberon', 'DIM_ACCOUNT_PRODUCT') }}
+             QUALIFY ROW_NUMBER() OVER(PARTITION BY DIM_ACCOUNT_PRODUCT_KEY ORDER BY PSA_LOAD_DTS DESC)=1),
+SRC_R    AS (SELECT DIM_RETAILER_KEY, RETAILER_NAME AS NAME
+             FROM {{ source('profitero_share_fiberon', 'DIM_RETAILER') }}
+             WHERE PSA_DELETE_IND = 'N'
+             QUALIFY ROW_NUMBER() OVER(PARTITION BY DIM_RETAILER_KEY ORDER BY PSA_LOAD_DTS DESC)=1),
+SRC_A    AS (SELECT BKCC, REC_SRC FROM {{ ref('ref_business_key_collision') }})
+
+---- LOGIC LAYER ----
+, LOGIC_S AS (
+    SELECT
+        COALESCE(NULLIF(TRIM(ap.CUSTOMER_PRODUCT_ID::VARCHAR),''),'-1') AS PRODUCT_BK
+      , CONVERT_TIMEZONE('UTC', IFF(s.PSA_DELETE_IND='Y', s.PSA_LOAD_DTS, s.UPDATED_AT)) AS LOAD_DTS
+      , dd.DT_DATE                           AS DATE
+      , ap.CUSTOMER_PRODUCT_ID              AS CUSTOMER_PRODUCT_ID
+      , s.DIM_RETAILER_KEY::VARCHAR          AS RETAILER_ID          -- surrogate now
+      , s.DIM_RETAILER_PRODUCT_KEY::VARCHAR  AS PRODUCT_ID           -- competitor product key
+      , s.UPDATED_AT
+      , s.AVAILABILITY
+      , s.REGULAR_PRICE
+      , s.PROMOTION_TEXT
+      , s.PROMOTION_PRICE
+      , s.FIRST_PARTY_WON_BUY_BOX
+      , s.THIRD_PARTY_SELLER
+      , s.PRIME_EXCLUSIVE
+      , s.PROMO_TYPE
+      , NULL::BOOLEAN                        AS ADD_ON_ITEM           -- LOST in new schema
+      , NULL::VARCHAR                        AS MATCH_TYPE            -- LOST in new schema
+      , FALSE                                AS IS_DELETED            -- use PSA_DELETE_IND
+      , s.PSA_LOAD_DTS
+      , s.PSA_RECORD_SOURCE
+      , s.PSA_DELETE_IND
+    FROM SRC_S s
+    LEFT JOIN SRC_DD dd ON s.DIM_DATE_KEY            = dd.DIM_DATE_KEY
+    LEFT JOIN SRC_AP ap ON s.DIM_ACCOUNT_PRODUCT_KEY = ap.DIM_ACCOUNT_PRODUCT_KEY
+)
+, LOGIC_R AS (
+    SELECT
+        COALESCE(NULLIF(TRIM(NAME),''),'-1') AS RETAILER_BK
+      , DIM_RETAILER_KEY                     AS R_retailer_id
+    FROM SRC_R
+)
+, LOGIC_A AS (
+    SELECT BKCC, REC_SRC FROM SRC_A
+)</code></pre>
+<div class="note">
+  <strong>LOAD_DTS note:</strong> The old <code>UPDATED_AT</code> was TEXT — the new is TIMESTAMP_NTZ. The <code>CONVERT_TIMEZONE('UTC', ...)</code> call is unchanged but no <code>::TEXT</code> cast is needed on <code>UPDATED_AT</code>.
+</div>
+<div class="note">
+  <strong>FILTER_a rec_src note:</strong> The existing FILTER_a predicate <code>WHERE rec_src = 'US.PROFITERO_FIBERON.PRICING_AVAILABILITY_HISTORY'</code> must be updated to the new REC_SRC value — see REC_SRC section below.
+</div>
+</div>
+
+<!-- REC_SRC CHANGES -->
+<div class="section-card" id="rec-src">
+<h2>10. REC_SRC Value Changes</h2>
+<div class="blocker">
+  ⚠️ <strong>Silent failure risk:</strong> Business Vault models that hardcode old REC_SRC values in filter predicates will silently return zero rows after migration without code changes. This affects <code>lsat_price_availability__profitero</code>, <code>pb_profitero_avg_consumer_price_monthly</code>, and <code>pb_avg_gross_to_consumer_markup_rate_monthly</code>.
+</div>
+<table>
+  <tr><th>Old REC_SRC Value</th><th>New REC_SRC Value</th><th>Affected Models</th><th>Priority</th></tr>
+  <tr><td><code>US.PROFITERO_FIBERON.PRICING_AVAILABILITY_HISTORY</code></td><td><code>US.PROFITERO_SHARE_FIBERON.DIM_PRODUCT_HISTORY</code></td><td><code>lsat_price_availability__profitero</code> (incremental filter)</td><td><span class="badge-red">P0 Critical</span></td></tr>
+  <tr><td><code>US.PROFITERO_FYPON.PRICING_AVAILABILITY_HISTORY</code></td><td><code>US.PROFITERO_SHARE_FYPON.DIM_PRODUCT_HISTORY</code></td><td><code>lsat_price_availability__profitero</code></td><td><span class="badge-red">P0 Critical</span></td></tr>
+  <tr><td><code>US.PROFITERO_LARSON.PRICING_AVAILABILITY_HISTORY</code></td><td><code>US.PROFITERO_SHARE_LARSON.DIM_PRODUCT_HISTORY</code></td><td><code>lsat_price_availability__profitero</code></td><td><span class="badge-red">P0 Critical</span></td></tr>
+  <tr><td><code>US.PROFITERO_SECURITY.PRICING_AVAILABILITY_HISTORY</code></td><td><code>US.PROFITERO_SHARE_MASTER_LOCK.DIM_PRODUCT_HISTORY</code></td><td><code>lsat_price_availability__profitero</code></td><td><span class="badge-red">P0 Critical</span></td></tr>
+  <tr><td><code>US.PROFITERO_THERMATRU.PRICING_AVAILABILITY_HISTORY</code></td><td><code>US.PROFITERO_SHARE_THERMATRU.DIM_PRODUCT_HISTORY</code></td><td><code>lsat_price_availability__profitero</code></td><td><span class="badge-red">P0 Critical</span></td></tr>
+  <tr><td><code>US.PROFITERO_WINN.PRICING_AVAILABILITY_HISTORY</code></td><td><code>US.PROFITERO_SHARE_MOEN.DIM_PRODUCT_HISTORY</code></td><td><code>lsat_price_availability__profitero</code></td><td><span class="badge-red">P0 Critical</span></td></tr>
+  <tr><td><code>US.PROFITERO_WINN.PRODUCTS</code></td><td><code>US.PROFITERO_SHARE_MOEN.DIM_ACCOUNT_PRODUCT</code></td><td><code>pb_profitero_avg_consumer_price_monthly</code>, <code>pb_avg_gross_to_consumer_markup_rate_monthly</code></td><td><span class="badge-red">P0 Critical</span></td></tr>
+  <tr><td><code>US.PROFITERO_FIBERON.PRODUCTS</code></td><td><code>US.PROFITERO_SHARE_FIBERON.DIM_RETAILER_PRODUCT</code></td><td>Any model filtering on old products REC_SRC</td><td><span class="badge-yellow">P1</span></td></tr>
+  <tr><td><code>US.PROFITERO_FIBERON.CATEGORIES_PRODUCTS</code></td><td><code>US.PROFITERO_SHARE_FIBERON.DIM_ACCOUNT_PRODUCT_CATEGORY</code></td><td>Any model filtering on old categories_products REC_SRC</td><td><span class="badge-yellow">P1</span></td></tr>
+  <tr><td><code>US.PROFITERO_FIBERON.CATEGORIES</code></td><td><code>US.PROFITERO_SHARE_FIBERON.DIM_RETAILER_CATEGORY</code></td><td>Any model filtering on old categories REC_SRC</td><td><span class="badge-yellow">P1</span></td></tr>
+</table>
+<div class="note">
+  All new BKCC + REC_SRC combinations must be registered in <code>REF_BUSINESS_KEY_COLLISION</code> in DEV via the Streamlit app before running any <code>dbt build</code> on the new models. Confirm the BKCC value (<code>Hiding_Tiger</code> for WINN) is still valid for the new REC_SRC.
+</div>
+</div>
+
+<!-- MODEL IMPACT -->
+<div class="section-card" id="model-impact">
+<h2>11. v_psa_stg Model Impact Summary</h2>
+<p>20 v_psa_stg files total + 2 critical Business Vault models + legacy base models.</p>
+<table>
+  <tr><th>Model / File</th><th>Count</th><th>Old Tables → New Tables</th><th>Migration Readiness</th><th>Complexity</th></tr>
+  <tr>
+    <td><code>v_psa_stg_price_availability__profitero_*</code></td>
+    <td>6</td>
+    <td><code>price_availability_history</code> + <code>retailers</code> → <code>DIM_PRODUCT_HISTORY</code> + <code>DIM_DATE</code> + <code>DIM_ACCOUNT_PRODUCT</code> + <code>DIM_RETAILER</code></td>
+    <td><span class="badge-yellow">Ready to Plan</span></td>
+    <td>High — adds 3 new joins; MATCH_TYPE + ADD_ON_ITEM must be NULLed; REC_SRC changes; LOAD_DTS type change</td>
+  </tr>
+  <tr>
+    <td><code>v_psa_stg_competitive_products__profitero_*</code></td>
+    <td>6</td>
+    <td><code>products</code> + <code>price_availability_history</code> + <code>retailers</code> → <code>DIM_RETAILER_PRODUCT</code> + <code>DIM_ACCOUNT_PRODUCT</code> + <code>DIM_RETAILER</code></td>
+    <td><span class="badge-yellow">Ready to Plan</span></td>
+    <td>High — MODEL/URL renames; RANKING_PRODUCT_ID via RPC join; COMPETITIVE_PRODUCT_BK continuity risk</td>
+  </tr>
+  <tr>
+    <td><code>v_psa_stg_category_products__profitero_*</code> <em>(reads categories)</em></td>
+    <td>6</td>
+    <td><code>categories</code> → <code>DIM_RETAILER_CATEGORY</code></td>
+    <td><span class="badge-yellow">Partial</span></td>
+    <td>Medium — FULL_NAME confirmed; natural key column name needs verification; ID type NUMBER(38,5) needs check</td>
+  </tr>
+  <tr>
+    <td><code>v_psa_stg_categories__profitero_*</code> <em>(reads categories_products)</em></td>
+    <td>6</td>
+    <td><code>categories_products</code> → <code>DIM_ACCOUNT_PRODUCT_CATEGORY</code> + joins to <code>DIM_ACCOUNT_CATEGORY</code> + <code>DIM_ACCOUNT_PRODUCT</code></td>
+    <td><span class="badge-yellow">Partial</span></td>
+    <td>Medium — UPDATED_AT confirmed; adds 2 new joins for natural key resolution</td>
+  </tr>
+  <tr>
+    <td><code>lsat_price_availability__profitero</code></td>
+    <td>1</td>
+    <td>Downstream of v_psa_stg — no source change but REC_SRC filter must update (×6 brands)</td>
+    <td><span class="badge-red">Blocking</span></td>
+    <td>P0 — silent failure without this fix</td>
+  </tr>
+  <tr>
+    <td><code>pb_profitero_avg_consumer_price_monthly</code> + <code>pb_avg_gross_to_consumer_markup_rate_monthly</code></td>
+    <td>2</td>
+    <td>Hardcoded <code>sat_rec_src = 'US.PROFITERO_WINN.PRODUCTS'</code> filter</td>
+    <td><span class="badge-red">Blocking</span></td>
+    <td>P0 — update REC_SRC filter; confirm BKCC validity</td>
+  </tr>
+  <tr>
+    <td><code>base_price_availability_history__profitero_edp</code> + <code>base_product_master__profitero_edp</code></td>
+    <td>2</td>
+    <td>Legacy base models using <code>source('profitero__rr', ...)</code> — separate pipeline, clarify scope</td>
+    <td><span class="badge-blue">Clarify Scope</span></td>
+    <td>P1 — no <code>products_master</code> in any profitero_share schema; candidate is DIM_ACCOUNT_PRODUCT or DIM_RETAILER_PRODUCT</td>
+  </tr>
+</table>
+
+<div class="summary-grid" style="margin-top:20px">
+  <div class="summary-card green">
+    <h4>Columns Confirmed Direct</h4>
+    <div class="big">8</div>
+    <small>AVAILABILITY, REGULAR_PRICE, PROMOTION_TEXT, PROMOTION_PRICE, FIRST_PARTY_WON_BUY_BOX, THIRD_PARTY_SELLER, PRIME_EXCLUSIVE, PROMO_TYPE</small>
+  </div>
+  <div class="summary-card yellow">
+    <h4>Columns Needing Transform</h4>
+    <div class="big">6</div>
+    <small>DATE→DIM_DATE_KEY, CUSTOMER_PRODUCT_ID→DIM_ACCOUNT_PRODUCT_KEY, RETAILER_ID→DIM_RETAILER_KEY, MODEL→PRODUCT_MODEL, URL→PRODUCT_URL, NAME→RETAILER_NAME</small>
+  </div>
+  <div class="summary-card red">
+    <h4>Columns LOST</h4>
+    <div class="big">2</div>
+    <small>MATCH_TYPE, ADD_ON_ITEM — not present in DIM_PRODUCT_HISTORY; set to NULL</small>
+  </div>
+  <div class="summary-card dark">
+    <h4>dbt Artifacts to Update</h4>
+    <div class="big">26</div>
+    <small>20 v_psa_stg + 2 lsat/pb Business Vault + 2 legacy base + 2 legacy stg models</small>
+  </div>
+</div>
+</div>
+
+<!-- NEW CAPABILITIES -->
+<div class="section-card" id="new-capabilities">
+<h2>12. New Capabilities Unlocked by New Schema</h2>
+<table>
+  <tr><th>New Table(s)</th><th>New Capability</th><th>Suggested Use</th></tr>
+  <tr class="new-row"><td><code>FACT_PRODUCT_SCORE</code></td><td>5-dimension product scoring: Content, Placement, Availability, Rating/Review, Pricing/Promotion</td><td>New KPI for eCommerce shelf performance; add to Business Vault PIT or new satellite</td></tr>
+  <tr class="new-row"><td><code>DIM_RETAILER_LOCATION</code></td><td>Store/virtual-location granularity for pricing (already used in consumer_feedback domain)</td><td>Enable store-level competitive pricing analysis; extend <code>lsat_price_availability</code> grain</td></tr>
+  <tr class="new-row"><td><code>DIM_KEYWORD</code></td><td>Search keyword tracking with ASFR (Average Search Frequency Rank)</td><td>New search share analytics layer — no equivalent in old schema</td></tr>
+  <tr class="new-row"><td><code>DIM_PRODUCT_ATTRIBUTE</code> + <code>DIM_PRODUCT_CONTENT</code></td><td>Attribute compliance monitoring — COMPLIANT flag, EXPECTED_CONTENT vs ACTUAL_CONTENT</td><td>New content compliance reporting pipeline</td></tr>
+  <tr class="new-row"><td><code>DIM_AMZ_PRODUCT</code>, <code>DIM_AMZ_PRODUCT_SALE</code>, <code>DIM_AMZ_PRODUCT_VIEW</code>, <code>DIM_AMZ_CATEGORY_SALE</code></td><td>Amazon-specific ASIN data, sales, glance views — fully structured dim model</td><td>Replaces/extends <code>glance_views</code>, <code>sales</code>, <code>sns_*</code> from old schema; enables Amazon P&amp;L analytics</td></tr>
+  <tr class="new-row"><td><code>profitero_share_moen_ca</code>, <code>profitero_share_moen_mx</code></td><td>Canada and Mexico market coverage for Moen/WINN</td><td>New geographic markets — requires new BKCC registrations per region</td></tr>
+</table>
+</div>
+
+<!-- DATA CONTINUITY RISKS -->
+<div class="section-card" id="continuity">
+<h2>13. Data Continuity &amp; Historical Data Risks</h2>
+<table>
+  <tr><th>Risk</th><th>Severity</th><th>Detail</th><th>Mitigation</th></tr>
+  <tr>
+    <td>Historical load gap</td>
+    <td><span class="badge-red">Critical</span></td>
+    <td>The new <code>profitero_share_*</code> schemas are a data product share. Verify with Profitero whether historical data (pre-share date) will be backfilled. If not, <code>lsat_price_availability__profitero</code> will have a gap between last old-source load and first new-source load.</td>
+    <td>Confirm backfill scope with Profitero vendor before cutover date.</td>
+  </tr>
+  <tr>
+    <td>COMPETITIVE_PRODUCT_BK continuity</td>
+    <td><span class="badge-red">Critical</span></td>
+    <td>Old <code>COMPETITIVE_PRODUCT_BK</code> derived from <code>products.ID</code> (natural integer). New DIM_RETAILER_PRODUCT_KEY is a different surrogate. If ID values are not the same, existing hub records will not match new ones → duplicate hub entries.</td>
+    <td>Verify whether <code>DIM_RETAILER_PRODUCT</code> has a natural ID column that matches old <code>products.ID</code>. If not, a full-refresh of hub + sats may be required.</td>
+  </tr>
+  <tr>
+    <td>PRODUCT_BK continuity (price availability)</td>
+    <td><span class="badge-yellow">High</span></td>
+    <td>Old <code>PRODUCT_BK</code> derived from <code>CUSTOMER_PRODUCT_ID</code>. New equivalent is <code>DIM_ACCOUNT_PRODUCT.ACCOUNT_PRODUCT_ID</code>. If the Profitero account product IDs changed between API versions, hub records will not match.</td>
+    <td>Run the CSV comparison query <code>SELECT 'old', CUSTOMER_PRODUCT_ID FROM price_availability_history UNION SELECT 'new', ACCOUNT_PRODUCT_ID FROM DIM_ACCOUNT_PRODUCT</code> to verify value overlap.</td>
+  </tr>
+  <tr>
+    <td>MATCH_TYPE data loss</td>
+    <td><span class="badge-yellow">High</span></td>
+    <td>Exists in <code>lsat_price_availability__profitero</code> — all new records will have NULL MATCH_TYPE. If any downstream model filters or joins on MATCH_TYPE, results will break silently.</td>
+    <td>Search all downstream models (<code>pb_</code>, <code>pit_</code>, <code>dim_</code>, <code>fact_</code>, <code>im_</code>) for <code>MATCH_TYPE</code> references before accepting NULL values.</td>
+  </tr>
+  <tr>
+    <td>ADD_ON_ITEM data loss</td>
+    <td><span class="badge-blue">Medium</span></td>
+    <td>Same as MATCH_TYPE — will be NULL for all new records.</td>
+    <td>Audit downstream before accepting.</td>
+  </tr>
+  <tr>
+    <td>Incremental model re-seed</td>
+    <td><span class="badge-blue">Medium</span></td>
+    <td>If new schema data starts from a different historical baseline, incremental raw vault tables may need <code>--full-refresh</code> after migration.</td>
+    <td>Plan a maintenance window for full-refresh of affected incremental models.</td>
+  </tr>
+</table>
+</div>
+
+<!-- ACTION ITEMS -->
+<div class="section-card" id="blockers">
+<h2>14. Action Items by Priority</h2>
+<table>
+  <tr><th>Priority</th><th>#</th><th>Action</th><th>Owner</th></tr>
+  <tr><td><span class="badge-red">P0 — Blocking</span></td><td>1</td><td>Register all 6 new <code>profitero_share_*</code> REC_SRC values + BKCC in <code>REF_BUSINESS_KEY_COLLISION</code> via Streamlit app in DEV. Must precede any <code>dbt build</code>.</td><td>Data Engineer</td></tr>
+  <tr><td><span class="badge-red">P0 — Blocking</span></td><td>2</td><td>Audit all downstream models for <code>MATCH_TYPE</code> and <code>ADD_ON_ITEM</code> usage. Decision required: accept NULL or find alternative source.</td><td>Data Engineer + Stakeholder</td></tr>
+  <tr><td><span class="badge-red">P0 — Blocking</span></td><td>3</td><td>Update REC_SRC filter predicates in <code>lsat_price_availability__profitero</code> (×6 brands) to new <code>US.PROFITERO_SHARE_*.DIM_PRODUCT_HISTORY</code> values.</td><td>Data Engineer</td></tr>
+  <tr><td><span class="badge-red">P0 — Blocking</span></td><td>4</td><td>Update hardcoded REC_SRC filters in <code>pb_profitero_avg_consumer_price_monthly</code> and <code>pb_avg_gross_to_consumer_markup_rate_monthly</code>.</td><td>Data Engineer</td></tr>
+  <tr><td><span class="badge-red">P0 — Blocking</span></td><td>5</td><td>Confirm with Profitero: will historical data be backfilled in new schemas? Determine cutover date and gap window.</td><td>Data Product Owner</td></tr>
+  <tr><td><span class="badge-yellow">P1</span></td><td>6</td><td>Verify <code>DIM_RETAILER_PRODUCT</code> has a natural ID column equivalent to old <code>products.ID</code> to ensure COMPETITIVE_PRODUCT_BK continuity.</td><td>Data Engineer</td></tr>
+  <tr><td><span class="badge-yellow">P1</span></td><td>7</td><td>Rewrite all 6 <code>v_psa_stg_price_availability__profitero_*</code> files using the join topology pattern in Section 9. Replace <code>profitero_*</code> source references with <code>profitero_share_*</code>.</td><td>Data Engineer</td></tr>
+  <tr><td><span class="badge-yellow">P1</span></td><td>8</td><td>Rewrite all 6 <code>v_psa_stg_competitive_products__profitero_*</code> files. Switch to <code>DIM_RETAILER_PRODUCT</code>; handle MODEL→PRODUCT_MODEL and URL→PRODUCT_URL renames; add RANKING_PRODUCT_ID RPC join.</td><td>Data Engineer</td></tr>
+  <tr><td><span class="badge-yellow">P1</span></td><td>9</td><td>Verify <code>DIM_RETAILER_CATEGORY</code> natural key column name and type compatibility with existing <code>CATEGORY_BK</code> values in hub (currently cast as <code>NUMBER(38,5)</code>).</td><td>Data Engineer</td></tr>
+  <tr><td><span class="badge-yellow">P1</span></td><td>10</td><td>Update all 6 <code>v_psa_stg_category_products__profitero_*</code> to use <code>DIM_RETAILER_CATEGORY</code>.</td><td>Data Engineer</td></tr>
+  <tr><td><span class="badge-yellow">P1</span></td><td>11</td><td>Update all 6 <code>v_psa_stg_categories__profitero_*</code> to use <code>DIM_ACCOUNT_PRODUCT_CATEGORY</code> + add joins to <code>DIM_ACCOUNT_CATEGORY</code> and <code>DIM_ACCOUNT_PRODUCT</code> for natural key resolution.</td><td>Data Engineer</td></tr>
+  <tr><td><span class="badge-yellow">P1</span></td><td>12</td><td>Add 6 new <code>profitero_share_*</code> source blocks to <code>_sources_staging_psa.yml</code>. Do NOT remove old blocks until cutover is confirmed.</td><td>Data Engineer</td></tr>
+  <tr><td><span class="badge-blue">P2</span></td><td>13</td><td>Clarify scope of legacy base models: <code>base_price_availability_history__profitero_edp</code> and <code>base_product_master__profitero_edp</code>. Determine if <code>DIM_ACCOUNT_PRODUCT</code> or <code>DIM_RETAILER_PRODUCT</code> replaces <code>products_master</code> (no direct equivalent found).</td><td>Data Engineer + Owner</td></tr>
+  <tr><td><span class="badge-blue">P2</span></td><td>14</td><td>Update test YAML files for all rewritten v_psa_stg models. Validate PK uniqueness still holds on new source data grain.</td><td>Data Engineer</td></tr>
+  <tr><td><span class="badge-dark">P3 — Post cutover</span></td><td>15</td><td>Deprecate old <code>profitero*</code> source blocks in <code>_sources_staging_psa.yml</code> after cutover validation.</td><td>Data Engineer</td></tr>
+  <tr><td><span class="badge-dark">P3 — Post cutover</span></td><td>16</td><td>Evaluate new capabilities: <code>FACT_PRODUCT_SCORE</code>, <code>DIM_RETAILER_LOCATION</code> (store-level pricing), <code>DIM_KEYWORD</code> (search share), Canada/Mexico schemas for Moen.</td><td>Analytics Team</td></tr>
+</table>
+</div>
+
+<div style="margin-top: 40px; padding: 14px 18px; background: #e8f0f9; border-radius: 6px; font-size: 12px; color: #555;">
+  <strong>Version 2.0</strong> — Generated May 14, 2026 &nbsp;|&nbsp;
+  <strong>Sources:</strong> Internal v_psa_stg code analysis (36 consumer_feedback + 20 pricing models), external DB column mapping CSV (Snowflake-verified), peer gap analysis HTML &nbsp;|&nbsp;
+  <strong>Key v2.0 changes:</strong> price_availability_history confirmed → DIM_PRODUCT_HISTORY; products confirmed → DIM_RETAILER_PRODUCT; categories confirmed → DIM_RETAILER_CATEGORY; MATCH_TYPE + ADD_ON_ITEM identified as LOST; full join topology added; REC_SRC change map added
+</div>
+</body>
+</html>

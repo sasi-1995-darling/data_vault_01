@@ -1,0 +1,14 @@
+version: 2
+
+models:
+  - name: ref_oracle_lookup_values__emtk_ebs
+    description: This is the reference table for Emtek Oracle lookup values (cleaned up version of APPLSYS.FND_LOOKUP_VALUES)
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - oracle_lookup_hk
+    config:
+      tags:
+        - emtek
+        - ebs

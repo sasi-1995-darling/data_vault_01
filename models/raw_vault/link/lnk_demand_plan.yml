@@ -1,0 +1,50 @@
+version: 2
+models:
+- name: lnk_demand_plan
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - DEMAND_PLAN_LHK
+  - dbt_expectations.expect_table_row_count_to_be_between:
+      arguments:
+        min_value: 4
+      config:
+        severity: warn
+  columns:
+  - name: ITEM_HK
+    data_tests:
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'hub_item_v1' )
+          pk_column_name: ITEM_HK
+  - name: PLANT_HK
+    data_tests:
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'hub_plant_v1' )
+          pk_column_name: PLANT_HK
+  - name: DISTRIBUTION_CHANNEL_HK
+    data_tests:
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'hub_distribution_channel' )
+          pk_column_name: DISTRIBUTION_CHANNEL_HK
+  - name: DIVISION_HK
+    data_tests:
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'hub_division' )
+          pk_column_name: DIVISION_HK
+  - name: SALES_ORGANIZATION_HK
+    data_tests:
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'hub_sales_organization' )
+          pk_column_name: SALES_ORGANIZATION_HK
+  - name: UOM_HK
+    data_tests:
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'hub_uom' )
+          pk_column_name: UOM_HK

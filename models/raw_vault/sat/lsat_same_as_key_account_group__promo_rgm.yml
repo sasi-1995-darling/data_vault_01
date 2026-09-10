@@ -1,0 +1,21 @@
+version: 2
+models:
+- name: lsat_same_as_key_account_group__promo_rgm
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - SLNK_KEY_ACCOUNT_GROUP_HK
+        - LOAD_DTS
+  - dbt_expectations.expect_table_row_count_to_be_between:
+      arguments:
+        min_value: 4
+      config:
+        severity: warn
+  columns:
+  - name: SLNK_KEY_ACCOUNT_GROUP_HK
+    data_tests:
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'lnk_same_as_key_account_group' )
+          pk_column_name: SLNK_KEY_ACCOUNT_GROUP_HK

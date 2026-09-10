@@ -1,0 +1,22 @@
+version: 2
+models:
+  - name: v_psa_stg_po_receipt__lrsn_psft
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          config:
+            severity: warn
+          arguments:
+            combination_of_columns:
+              - PO_ITEM_RECEIPT_DK
+              - LOAD_DTS
+    columns:
+      - name: RECEIVER_ID
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: RECV_LN_NBR
+        tests:
+          - not_null:
+              config:
+                severity: warn

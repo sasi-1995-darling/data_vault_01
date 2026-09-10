@@ -1,0 +1,123 @@
+# v_psa_stg Generator Input Schema
+# This defines the expected input when a user invokes the skill
+# Also serves as the contract for YAML configs produced by Stage 1 (Tech Design Creator)
+# and consumed by Stage 2 (Code Generator via yaml_reader.py)
+
+schema_version:
+  description: "Schema version for forward compatibility"
+  type: string
+  required: true
+  value: "1.0"
+
+# Required inputs
+required:
+  source_table:
+    description: "Full PSA source table name (e.g., PSA_PROD.SAP_ECC_PRD.Z_EKPO)"
+    type: string
+    pattern: "^PSA_PROD\\..+\\..+$"
+
+  entity_name:
+    description: "Business entity name for file naming (e.g., po_item, customer, supplier)"
+    type: string
+    pattern: "^[a-z][a-z0-9_]+$"
+
+  source_system:
+    description: "Source system identifier for file naming (e.g., sap_ecc, emtk_ebs, tt_gp)"
+    type: string
+    pattern: "^[a-z][a-z0-9_]+$"
+
+  business_key_columns:
+    description: "Raw source columns that form the business key"
+    type: list[string]
+    min_items: 1
+
+  rec_src:
+    description: "REC_SRC value for BKCC lookup (e.g., USOHNO.SAP.ECCPRD.Z_EKPO)"
+    type: string
+
+# Optional inputs
+optional:
+  domain:
+    description: "Subdirectory under int_staging_views/ (e.g., procurement, item, order)"
+    type: string
+    default: "inferred from entity_name"
+
+  lookup_tables:
+    description: "Secondary tables to join"
+    type: list
+    items:
+      source_table: string
+      join_key_source: string # Column in driver table
+      join_key_lookup: string # Column in lookup table
+      columns_needed: list[string]
+      join_type: "LEFT | INNER" # Default: LEFT
+      dedup_key: string # PARTITION BY column for QUALIFY
+
+  hashdiff_exclude:
+    description: "Additional columns to exclude from HASHDIFF beyond standard exclusions"
+    type: list[string]
+    default: []
+
+  qualify_pattern:
+    description: "Which QUALIFY pattern to apply"
+    type: string
+    enum: ["none", "pattern_a", "pattern_b"]
+    default: "none"
+
+  psa_delete_filter:
+    description: "Whether to filter on psa_delete_ind = 'N'"
+    type: boolean
+    default: false
+
+# Pipeline metadata — set by Stage 1 (Tech Design Creator)
+# Consumed by Stage 2 (Code Generator) to drive flag-based code generation
+_pipeline_metadata:
+  large_volume:
+    description: "Whether source has >300M rows. For v_psa_stg (views), this is metadata only — adds a SQL header comment for downstream consumers. on_schema_change/full_refresh only apply to incremental models (hub/sat/link)."
+    type: boolean
+    default: false
+
+  row_count:
+    description: "Approximate row count from Stage 1 profiling"
+    type: integer
+    required: false
+
+  has_fivetran_deleted:
+    description: "Whether _FIVETRAN_DELETED column exists in source. If true, Stage 2 includes it in HASHDIFF."
+    type: boolean
+    default: false
+
+  has_psa_delete_ind:
+    description: "Whether PSA_DELETE_IND column exists in source. If true, Stage 2 includes it in HASHDIFF."
+    type: boolean
+    default: true
+
+  psa_delete_filter:
+    description: "Whether to add WHERE psa_delete_ind='N' filter in SRC CTE"
+    type: boolean
+    default: false
+
+  bkcc_rec_src:
+    description: "Full REC_SRC value for BKCC WHERE clause (e.g., USOHNO.SAP.ECCPRD.Z_EKPO)"
+    type: string
+    required: false
+
+  null_bk_coalesced:
+    description: "Whether BK columns have NULLs that are handled via COALESCE. If true, Stage 2 skips not_null test on BK."
+    type: boolean
+    default: false
+
+  null_bk_sentinel:
+    description: "Type-appropriate sentinel value for COALESCE. VARCHAR: '-1', NUMBER: -1, DATE: '1900-01-01'. Set by Stage 1 based on column type."
+    type: string
+    required: false
+
+  null_bk_count:
+    description: "Number of NULL BK rows found during Stage 1 profiling"
+    type: integer
+    required: false
+
+  null_bk_pct:
+    description: "Percentage of NULL BK rows (0-100). >10% triggers strong warning about BK choice."
+    type: float
+    required: false

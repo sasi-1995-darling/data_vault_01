@@ -1,0 +1,13 @@
+version: 2
+models:
+- name: ref_item_product_type__winn_sap
+  data_tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - PRODUCT_TYPE_ID
+        - LANGUAGE_KEY
+        - LOAD_DTS
+      config:
+        severity: warn
+  columns: []

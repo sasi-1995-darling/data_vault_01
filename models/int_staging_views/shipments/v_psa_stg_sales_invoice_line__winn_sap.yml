@@ -1,0 +1,23 @@
+version: 2
+models:
+  - name: v_psa_stg_sales_invoice_line__winn_sap
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          config:
+            severity: warn
+          arguments:
+            combination_of_columns:
+              - VBELN
+              - POSNR
+              - LOAD_DTS
+    columns:
+      - name: POSNR
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: VBELN
+        tests:
+          - not_null:
+              config:
+                severity: warn

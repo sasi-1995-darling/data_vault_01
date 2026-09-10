@@ -1,0 +1,14 @@
+version: 2
+models:
+  - name: pit_legal_entity_current
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - LEGAL_ENTITY_HK
+    columns:
+      - name: LEGAL_ENTITY_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn

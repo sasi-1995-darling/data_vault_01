@@ -1,0 +1,42 @@
+version: 2
+models:
+  - name: hub_invoice_line_v1
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - INVOICE_LINE_HK
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          config:
+            severity: warn
+          arguments:
+            min_value: 4
+    columns:
+      - name: INVOICE_LINE_HK
+        tests:
+          - unique:
+              config:
+                severity: warn
+          - not_null:
+              config:
+                severity: warn
+      - name: INVOICE_LINE_BK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: BKCC
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: LOAD_DTS
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: REC_SRC
+        tests:
+          - not_null:
+              config:
+                severity: warn

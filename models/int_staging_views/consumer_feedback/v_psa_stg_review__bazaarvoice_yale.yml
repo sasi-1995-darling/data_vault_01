@@ -1,0 +1,29 @@
+version: 2
+models:
+  - name: v_psa_stg_review__bazaarvoice_yale
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          config:
+            severity: warn
+          arguments:
+            combination_of_columns:
+              - PRODUCT_BK
+              - ID
+              - LOAD_DTS
+              - _FIVETRAN_DELETED
+    columns:
+      - name: PRODUCT_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: PRODUCT_BK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: LOAD_DTS
+        tests:
+          - not_null:
+              config:
+                severity: warn

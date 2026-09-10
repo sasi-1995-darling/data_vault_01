@@ -1,0 +1,25 @@
+version: 2
+models:
+- name: lmsat_account_base_material_promotion__winn_rgm
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - LNK_ACCOUNT_BASE_MATERIAL_PROMOTION_HK
+        - PROMO_ID
+        - PROMO_START_DATE_DT
+        - PROMO_END_DATE_DT
+        - VERSION_SEQ
+        - LOAD_DTS
+  - dbt_expectations.expect_table_row_count_to_be_between:
+      arguments:
+        min_value: 4
+      config:
+        severity: warn
+  columns:
+  - name: LNK_ACCOUNT_BASE_MATERIAL_PROMOTION_HK
+    data_tests:
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'lnk_account_base_material_promotion' )
+          pk_column_name: LNK_ACCOUNT_BASE_MATERIAL_PROMOTION_HK

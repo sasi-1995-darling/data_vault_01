@@ -1,0 +1,89 @@
+---- SRC LAYER ----
+WITH
+SRC_P              as ( SELECT * FROM {{ ref('pit_quality_activity_current') }} as SRC  )
+
+/*
+SRC_P              as ( SELECT * FROM RAW_VAULT.PIT_QUALITY_TASK_CURRENT )
+*/
+---- LOGIC LAYER ----
+
+, LOGIC_P as (
+    SELECT
+        NOTIFICATION_ACTIVITY_BK
+        , NOTIFICATION_BK
+        , ACTIVITY_BK
+        , CATALOG_TYPE
+        , CODE_GROUP
+        , ACTIVITY_CODE
+        , ACTIVITY_TEXT
+        , QUANTITY_FACTOR
+        , FUNCTION_KEYS
+        , ACTIVITY_AMOUNT_1
+        , ACTIVITY_AMOUNT_2
+        , ACTIVITY_CREATION_DATE___YYYYMMDD
+        , ACTIVITY_UPDATE_DATE___YYYYMMDD
+        , PLANNED_START_DATE___YYYYMMDD
+        , PLANNED_FINISH_DATE___YYYYMMDD
+        , BKCC
+        , REC_SRC
+      , IS_DELETED
+    FROM SRC_P
+)
+---- RENAME LAYER ----
+
+, RENAME_P as (
+    SELECT
+        NOTIFICATION_ACTIVITY_BK
+        , NOTIFICATION_BK
+        , ACTIVITY_BK
+        , CATALOG_TYPE
+        , CODE_GROUP
+        , ACTIVITY_CODE
+        , ACTIVITY_TEXT
+        , QUANTITY_FACTOR
+        , FUNCTION_KEYS
+        , ACTIVITY_AMOUNT_1
+        , ACTIVITY_AMOUNT_2
+        , ACTIVITY_CREATION_DATE___YYYYMMDD
+        , ACTIVITY_UPDATE_DATE___YYYYMMDD
+        , PLANNED_START_DATE___YYYYMMDD
+        , PLANNED_FINISH_DATE___YYYYMMDD
+        , BKCC
+        , REC_SRC
+      , IS_DELETED
+    FROM LOGIC_P
+)
+---- FILTER LAYER ----
+
+, FILTER_P as (
+    SELECT *
+    FROM RENAME_P
+)
+
+---- JOIN LAYER ----
+, JOIN_RESULT as (
+    SELECT *
+    FROM FILTER_P
+)
+
+---- FINAL LAYER ----
+SELECT
+        NOTIFICATION_ACTIVITY_BK
+        , NOTIFICATION_BK
+        , ACTIVITY_BK
+        , CATALOG_TYPE
+        , CODE_GROUP
+        , ACTIVITY_CODE
+        , ACTIVITY_TEXT
+        , QUANTITY_FACTOR
+        , FUNCTION_KEYS
+        , ACTIVITY_AMOUNT_1
+        , ACTIVITY_AMOUNT_2
+        , ACTIVITY_CREATION_DATE___YYYYMMDD
+        , ACTIVITY_UPDATE_DATE___YYYYMMDD
+        , PLANNED_START_DATE___YYYYMMDD
+        , PLANNED_FINISH_DATE___YYYYMMDD
+        , BKCC
+        , REC_SRC
+      , IS_DELETED
+FROM JOIN_RESULT

@@ -1,0 +1,22 @@
+version: 2
+models:
+  - name: hub_key_account_group
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - KEY_ACCOUNT_GROUP_HK
+    columns:
+      - name: KEY_ACCOUNT_GROUP_HK
+        tests:
+          - unique:
+              config:
+                severity: warn
+          - not_null:
+              config:
+                severity: warn
+      - name: KEY_ACCOUNT_GROUP_BK
+        tests:
+          - not_null:
+              config:
+                severity: warn

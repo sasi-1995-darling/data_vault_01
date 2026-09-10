@@ -1,0 +1,20 @@
+version: 2
+models:
+- name: lmsat_pos_main_weekly__datavations
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - LNK_COMPETITIVE_PRODUCT_RETAILER_HK
+        - REPORTING_PERIOD
+        - REGION
+        - STATE
+        - LOWES_REGION
+        - HOMEDEPOT_REGION
+        - LOAD_DTS
+  - dbt_expectations.expect_table_row_count_to_be_between:
+      arguments:
+        min_value: 4
+      config:
+        severity: warn
+  

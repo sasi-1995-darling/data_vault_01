@@ -1,0 +1,34 @@
+version: 2
+
+models:
+  - name: link_sales_agency_group
+    description: This is the raw vault link model between sales agency, territory and region
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - sales_agency_groups_hk
+      - dbt_constraints.foreign_key:
+          arguments:
+            fk_column_names:
+              - sales_agency_hk
+            pk_table_name: ref('hub_sales_agency')
+            pk_column_names:
+              - sales_agency_hk
+      - dbt_constraints.foreign_key:
+          arguments:
+            fk_column_names:
+              - sales_region_hk
+            pk_table_name: ref('hub_sales_region')
+            pk_column_names:
+              - sales_region_hk
+      - dbt_constraints.foreign_key:
+          arguments:
+            fk_column_names:
+              - sales_territory_hk
+            pk_table_name: ref('hub_sales_territory')
+            pk_column_names:
+              - sales_territory_hk
+    config:
+      tags:
+        - emtek

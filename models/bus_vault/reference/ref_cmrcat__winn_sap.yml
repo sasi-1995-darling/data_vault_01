@@ -1,0 +1,11 @@
+version: 2
+models:
+  - name: ref_cmrcat__winn_sap
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - VKORG
+              - SPART
+              - BUKRS
+    columns: []

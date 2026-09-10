@@ -1,0 +1,26 @@
+version: 2
+models:
+  - name: ref_business_key_collision
+    data_tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - REC_SRC
+    columns:
+      - name: REC_SRC_DESC
+        data_tests:
+          - not_null
+      - name: BKCC
+        data_tests:
+          - not_null
+      - name: DEACTIVATED_IND
+        data_tests:
+          - not_null
+      - name: DEACTIVATED_DATE
+      - name: LOAD_DATE
+        data_tests:
+          - not_null
+      - name: REC_SRC
+        data_tests:
+          - unique
+          - not_null

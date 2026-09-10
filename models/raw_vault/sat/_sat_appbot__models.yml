@@ -1,0 +1,28 @@
+version: 2
+
+models:
+  - name: sat_application__appbot_api
+    description: This is the hub model for Appbott
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - application_hk
+              - load_dts
+
+  #- name: sat_rating__appbot_api
+  #  description: This is the hub model for Appbott
+  #  tests:
+  #    - dbt_constraints.primary_key:
+  #        column_names:
+  #          - rating_hk
+  #          - load_dts      
+
+  - name: sat_review__appbot_api
+    description: This is the hub model for Appbott
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - review_hk
+              - load_dts

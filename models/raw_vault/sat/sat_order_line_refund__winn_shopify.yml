@@ -1,0 +1,25 @@
+version: 2
+models:
+- name: sat_order_line_refund__winn_shopify
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - ORDER_LINE_HK
+        - ID
+        - LOAD_DTS
+  - dbt_expectations.expect_table_row_count_to_be_between:
+      arguments:
+        min_value: 4
+      config:
+        severity: warn
+  columns:
+  - name: ORDER_LINE_HK
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'hub_order_line' )
+          pk_column_name: ORDER_LINE_HK

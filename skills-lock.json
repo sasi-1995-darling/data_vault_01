@@ -1,0 +1,70 @@
+{
+  "version": 1,
+  "skills": {
+    "adding-dbt-unit-test": {
+      "source": "dbt-labs/dbt-agent-skills",
+      "sourceType": "github",
+      "computedHash": "74a2a01bd1b6b5b8620d8deb44b2f50f0ffe9106b6a0eb1aea24da8fdb54c8ab"
+    },
+    "answering-natural-language-questions-with-dbt": {
+      "source": "dbt-labs/dbt-agent-skills",
+      "sourceType": "github",
+      "computedHash": "15cefed9def8313f8aec0f3b2c1ce575f544922841b1e6483c48bc4814654b3c"
+    },
+    "building-dbt-semantic-layer": {
+      "source": "dbt-labs/dbt-agent-skills",
+      "sourceType": "github",
+      "computedHash": "74dc77546d58d6f565ced91e355ecb1fc148b8b63311e1a9a503c29c38a3b4f8"
+    },
+    "configuring-dbt-mcp-server": {
+      "source": "dbt-labs/dbt-agent-skills",
+      "sourceType": "github",
+      "computedHash": "906621310b13d0094f9cf530abf2b38c36de2f15bcb361c1a073661430a8d6e4"
+    },
+    "creating-mermaid-dbt-dag": {
+      "source": "dbt-labs/dbt-agent-skills",
+      "sourceType": "github",
+      "computedHash": "6e1e39bcd5bdd32ce4a1aa3b37e6c95b3008d6681de34e2fdbb7b33739c56b16"
+    },
+    "fetching-dbt-docs": {
+      "source": "dbt-labs/dbt-agent-skills",
+      "sourceType": "github",
+      "computedHash": "c1724483e3b82a88cdb76d984842f5373d3c46a1f72ed48f596521b25adecf57"
+    },
+    "migrating-dbt-core-to-fusion": {
+      "source": "dbt-labs/dbt-agent-skills",
+      "sourceType": "github",
+      "computedHash": "425b6cfd16a0f7f22a48e9f4adcaee11aaef3caa147fa316782340ce6da465af"
+    },
+    "migrating-dbt-project-across-platforms": {
+      "source": "dbt-labs/dbt-agent-skills",
+      "sourceType": "github",
+      "computedHash": "9fb564d1db292c44bc0fdc2f98c4238e8a529c5d8716776bae23f00b4c7eefda"
+    },
+    "running-dbt-commands": {
+      "source": "dbt-labs/dbt-agent-skills",
+      "sourceType": "github",
+      "computedHash": "c9d7c909fa55e97901431c6b77949790485b61ae1d15ee4fd6d2edfc3447fe7b"
+    },
+    "troubleshooting-dbt-job-errors": {
+      "source": "dbt-labs/dbt-agent-skills",
+      "sourceType": "github",
+      "computedHash": "6c18b079cebf60a7e6ef419133459f59cf2ea05206f3ccdd3e38cc413d3e3fd0"
+    },
+    "using-dbt-for-analytics-engineering": {
+      "source": "dbt-labs/dbt-agent-skills",
+      "sourceType": "github",
+      "computedHash": "7a8ba1a9c6b31785d6e4a985c205685742b0aad91e63603d9db48ebce6f4f1e6"
+    },
+    "using-dbt-index": {
+      "source": "dbt-labs/dbt-agent-skills",
+      "sourceType": "github",
+      "computedHash": "866b50547942863e25cda987788ac6f87a18d0bd5cef6028a8f6fc8ca1b082bc"
+    },
+    "working-with-dbt-mesh": {
+      "source": "dbt-labs/dbt-agent-skills",
+      "sourceType": "github",
+      "computedHash": "d6f3fdfb0dbe031a713580fc6588a32b5b506d907fbbd54f3a30f0a49ba7e23a"
+    }
+  }
+}

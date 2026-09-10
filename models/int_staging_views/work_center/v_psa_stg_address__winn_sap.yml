@@ -1,0 +1,14 @@
+version: 2
+models:
+  - name: v_psa_stg_address__winn_sap
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          config:
+            severity: warn
+          arguments:
+            combination_of_columns:
+              - ADDRNUMBER
+              - DATE_FROM
+              - NATION
+              - LOAD_DTS
+    columns: []

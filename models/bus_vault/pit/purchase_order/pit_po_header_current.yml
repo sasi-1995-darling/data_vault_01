@@ -1,0 +1,46 @@
+version: 2
+models:
+  - name: pit_po_header_current
+    description: This model consolidates purchase order header information from multiple sources, providing a unified view of purchase order details such as document type, processing status, and payment terms. It is used to track and analyze purchase order activities across different systems.
+    columns:
+      - name: pit_rec_src
+        description: The source of the PIT record.
+      - name: snapshotdate
+        description: The date when the snapshot of the data was taken.
+      - name: pit_load_dts
+        description: The timestamp when the PIT record was loaded.
+      - name: po_header_hk
+        description: A unique hash key for the purchase order header.
+      - name: po_header_bk
+        description: The business key for the purchase order header.
+      - name: bkcc
+        description: A business key cross-check value.
+      - name: po_number
+        description: The purchase order number, derived from segment1 or ebeln.
+      - name: po_document_type
+        description: The type of the purchase order document, derived from type_lookup_code or bsart.
+      - name: po_header_del_ind
+        description: Indicator of whether the purchase order header is deleted.
+      - name: po_processing_status
+        description: The processing status of the purchase order, derived from authorization_status or procstat.
+      - name: po_creation_date
+        description: The date when the purchase order was created, derived from creation_date or bedat.
+      - name: po_payment_terms
+        description: The payment terms for the purchase order, derived from terms_id or zterm.
+      - name: incoterms1
+        description: The first set of international commercial terms, derived from fob_lookup_code or inco1.
+      - name: incoterms2
+        description: The second set of international commercial terms.
+      - name: purchasing_org
+        description: The organization responsible for purchasing.
+      - name: buyer_planner_code
+        description: The code for the buyer or planner, derived from agent_id or ekgrp.
+      - name: po_currency
+        description: The currency used in the purchase order, derived from currency_code or waers.
+      - name: release_date
+        description: Release date for TT E21 purchase orders.
+    data_tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - PO_HEADER_HK

@@ -1,0 +1,40 @@
+version: 2
+models:
+  - name: v_psa_stg_goods_movement__winn_sap
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          config:
+            severity: warn
+          arguments:
+            combination_of_columns:
+              - MBLNR
+              - MJAHR
+              - ZEILE
+              - LINE_ID
+              - LOAD_DTS
+    columns:
+      - name: MBLNR
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: MJAHR
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: ZEILE
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: LINE_ID
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: LOAD_DTS
+        tests:
+          - not_null:
+              config:
+                severity: warn

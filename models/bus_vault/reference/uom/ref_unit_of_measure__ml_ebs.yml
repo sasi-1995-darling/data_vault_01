@@ -1,0 +1,10 @@
+version: 2
+models:
+- name: ref_unit_of_measure__ml_ebs
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - UOM_CODE
+        - LOAD_DTS
+  columns: []

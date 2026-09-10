@@ -1,0 +1,16 @@
+version: 2
+models:
+- name: pb_order_confirmation
+  data_tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - SEQ_ID
+      config:
+        severity: warn
+  columns:
+  - name: SEQ_ID
+    data_tests:
+    - not_null:
+        config:
+          severity: warn

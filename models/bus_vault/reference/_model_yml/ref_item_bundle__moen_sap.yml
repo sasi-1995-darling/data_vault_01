@@ -1,0 +1,10 @@
+version: 2
+
+models:
+  - name: ref_item_bundle__moen_sap
+    description: This is business vault reference model for moen bundles
+    tests:
+      - 'dbt_constraints.primary_key:':
+          arguments:
+            column_names:
+              - item_bundle_hk

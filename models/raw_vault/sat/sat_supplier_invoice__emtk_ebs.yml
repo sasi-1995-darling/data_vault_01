@@ -1,0 +1,28 @@
+version: 2
+models:
+- name: sat_supplier_invoice__emtk_ebs
+  data_tests:
+  - dbt_constraints.primary_key:
+      name: pk_sat_supplier_invoice__emtk_ebs
+      arguments:
+        column_names:
+        - SUPPLIER_INVOICE_HK
+        - LOAD_DTS
+      config:
+        severity: warn
+  - dbt_expectations.expect_table_row_count_to_be_between:
+      name: rowcount_sat_supplier_invoice__emtk_ebs
+      arguments:
+        min_value: 4
+      config:
+        severity: warn
+  columns:
+  - name: SUPPLIER_INVOICE_HK
+    data_tests:
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'hub_supplier_invoice' )
+          pk_column_name: SUPPLIER_INVOICE_HK
+  config:
+    tags:
+    - sat

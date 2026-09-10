@@ -1,0 +1,24 @@
+version: 2
+models:
+- name: lsat_channel_item_inventory_vc__amazon
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - CHANNEL_ITEM_INVENTORY_LHK
+        - ASIN
+        - REPORT_END_DATE
+        - VENDORCENTRAL_ACCOUNT
+        - LOAD_DTS
+  - dbt_expectations.expect_table_row_count_to_be_between:
+      arguments:
+        min_value: 4
+      config:
+        severity: warn
+  columns:
+  - name: CHANNEL_ITEM_INVENTORY_LHK
+    data_tests:
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'lnk_channel_item_inventory' )
+          pk_column_name: CHANNEL_ITEM_INVENTORY_LHK

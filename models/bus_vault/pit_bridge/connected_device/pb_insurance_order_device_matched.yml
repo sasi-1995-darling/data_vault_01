@@ -1,0 +1,12 @@
+version: 2
+models:
+- name: pb_insurance_order_device_matched
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+          - ORDER_ID
+          - SKU
+          - ORDER_LINE_ID
+          - ORDER_TAG
+  columns: []

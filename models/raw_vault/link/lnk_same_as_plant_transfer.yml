@@ -1,0 +1,24 @@
+version: 2
+models:
+  - name: lnk_same_as_plant_transfer
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - SLNK_LNK_SAME_AS_PLANT_TRANSFER_HK
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          config:
+            severity: warn
+          arguments:
+            min_value: 4
+    columns:
+      - name: PLANT_HK
+        tests:
+          - dbt_utils.relationships_where:
+              arguments:
+                to: ref( 'hub_plant_v1' )
+                field: PLANT_HK
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'hub_plant_v1' )
+                pk_column_name: PLANT_HK

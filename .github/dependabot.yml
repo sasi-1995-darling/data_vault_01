@@ -1,0 +1,19 @@
+version: 2
+updates:
+  # Keep third-party GitHub Actions current. Actions are pinned to full-length
+  # commit SHAs (supply-chain hardening); Dependabot opens reviewed PRs that
+  # bump the SHA + the trailing version comment as new releases ship, so the
+  # pins do not rot. Local composite actions (./.github/actions/*) share this
+  # repo's trust boundary and are intentionally left as path refs.
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    # Auto-propose only patch/minor SHA-bumps within a major (keeps pins current
+    # without rot). Major-version jumps carry breaking changes / runtime shifts and
+    # are a deliberate upgrade decision a human must validate -- not an auto-PR.
+    # This also preserves the intentional actions/checkout v4/v5 separation: without
+    # it, Dependabot consolidates both pins to the latest major (e.g. v4+v5 -> v7).
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]

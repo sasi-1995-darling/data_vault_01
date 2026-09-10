@@ -1,0 +1,1 @@
+select * from ({{ row_uniqueness('fact_device_event') }}) 

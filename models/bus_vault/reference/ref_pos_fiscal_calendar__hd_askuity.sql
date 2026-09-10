@@ -1,0 +1,26 @@
+{{
+    config(
+        materialized='ephemeral'
+    )
+}}
+
+{%- set yaml_metadata -%}
+
+source_model: stg_pos_fiscal_calendar__hd_askuity
+src_pk: date
+src_extra_columns: 
+    - THD_cal_week
+    - THD_cal_month
+    - THD_cal_quarter
+    - THD_cal_year
+src_ldts: load_dts
+src_source: rec_src
+{%- endset -%}
+
+{% set metadata_dict = fromyaml(yaml_metadata) %}
+
+{{ automate_dv.ref_table(src_pk=metadata_dict["src_pk"],
+                   src_extra_columns=metadata_dict["src_extra_columns"], 
+                   src_ldts=metadata_dict["src_ldts"],
+                   src_source=metadata_dict["src_source"],
+                   source_model=metadata_dict["source_model"]) }}

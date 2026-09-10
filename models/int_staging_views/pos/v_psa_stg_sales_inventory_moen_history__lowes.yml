@@ -1,0 +1,50 @@
+version: 2
+models:
+  - name: v_psa_stg_sales_inventory_moen_history__lowes
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          config:
+            severity: warn
+          arguments:
+            combination_of_columns:
+              - LOCATION_ID
+              - ITEM_NUMBER
+              - END_DATE
+              - SUPPORTING_REGIONAL_DISTRIBUTION_CENTER_ID
+              - LOAD_DTS
+    columns:
+      - name: STORE_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: STORE_BK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: LOCATION_ID
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: ITEM_NUMBER
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: END_DATE
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: SUPPORTING_REGIONAL_DISTRIBUTION_CENTER_ID
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: LOAD_DTS
+        tests:
+          - not_null:
+              config:
+                severity: warn

@@ -1,0 +1,27 @@
+version: 2
+models:
+- name: lnk_plant_capacity
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - LNK_PLANT_CAPACITY_HK
+  columns:
+  - name: PLANT_HK
+    data_tests:
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'hub_plant_v1' )
+          pk_column_name: PLANT_HK
+  - name: UOM_HK
+    data_tests:
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'hub_uom' )
+          pk_column_name: UOM_HK
+  - name: CAPACITY_HK
+    data_tests:
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'hub_capacity' )
+          pk_column_name: CAPACITY_HK

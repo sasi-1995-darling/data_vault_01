@@ -1,0 +1,100 @@
+---- SRC LAYER ----
+WITH
+SRC_PIT            as ( SELECT BKCC, ITEM_BK, ITEM_HK, LEGAL_ENTITY_BK, LEGAL_ENTITY_HK, MATERIAL_DOCUMENT_ITEM, MATERIAL_DOCUMENT_NUMBER, PLANT_BK, PLANT_HK, PO_HEADER_BK, PO_HEADER_HK, PO_LINE_NUMBER, PO_LINE_RECEIPT_IND_HK, PO_RECEIPT_DATE, PO_RECEIPT_PRICE, PO_RECEIPT_QUANTITY, PO_RECEIPT_VALUE, PO_RECEIPT_VALUE_LOCAL, REC_SRC, SUPPLIER_BK, SUPPLIER_HK FROM {{ ref('pit_po_invoice_current') }} as SRC  )
+
+/*
+SRC_PIT            as ( SELECT * FROM BUS_VAULT.PIT_PO_INVOICE_CURRENT )
+*/
+
+---- LOGIC LAYER ----
+, LOGIC_PIT as (
+    SELECT
+        PO_HEADER_BK                                                 as                                       PO_HEADER_ID
+      , PO_LINE_NUMBER
+      , MATERIAL_DOCUMENT_NUMBER
+      , MATERIAL_DOCUMENT_ITEM
+      , SUPPLIER_BK
+      , ITEM_BK
+      , PLANT_BK
+      , LEGAL_ENTITY_BK
+      , PO_RECEIPT_DATE
+      , TO_CHAR(PO_RECEIPT_DATE, 'YYYYMMDD')::INTEGER                as                          PO_RECEIPT_DATE__YYYYMMDD
+      , PO_RECEIPT_QUANTITY
+      , PO_RECEIPT_PRICE
+      , PO_RECEIPT_VALUE_LOCAL
+      , PO_RECEIPT_VALUE
+      , PO_HEADER_HK
+      , SUPPLIER_HK
+      , ITEM_HK
+      , PLANT_HK
+      , LEGAL_ENTITY_HK
+      , PO_LINE_RECEIPT_IND_HK
+      , BKCC
+      , REC_SRC
+    FROM SRC_PIT
+)
+
+---- RENAME LAYER ----
+, RENAME_PIT as (
+    SELECT
+        PO_HEADER_ID
+      , PO_LINE_NUMBER
+      , MATERIAL_DOCUMENT_NUMBER
+      , MATERIAL_DOCUMENT_ITEM
+      , SUPPLIER_BK
+      , ITEM_BK
+      , PLANT_BK
+      , LEGAL_ENTITY_BK
+      , PO_RECEIPT_DATE
+      , PO_RECEIPT_DATE__YYYYMMDD
+      , PO_RECEIPT_QUANTITY
+      , PO_RECEIPT_PRICE
+      , PO_RECEIPT_VALUE_LOCAL
+      , PO_RECEIPT_VALUE
+      , PO_HEADER_HK
+      , SUPPLIER_HK
+      , ITEM_HK
+      , PLANT_HK
+      , LEGAL_ENTITY_HK
+      , PO_LINE_RECEIPT_IND_HK
+      , BKCC
+      , REC_SRC
+    FROM LOGIC_PIT
+)
+
+---- FILTER LAYER ----
+, FILTER_PIT as (
+    SELECT *
+    FROM RENAME_PIT
+)
+
+---- JOIN LAYER ----
+, JOIN_RESULT as (
+    SELECT *
+    FROM FILTER_PIT
+)
+
+---- FINAL LAYER ----
+SELECT
+          PO_HEADER_ID
+        , PO_LINE_NUMBER
+        , MATERIAL_DOCUMENT_NUMBER
+        , MATERIAL_DOCUMENT_ITEM
+        , SUPPLIER_BK
+        , ITEM_BK
+        , PLANT_BK
+        , LEGAL_ENTITY_BK
+        , PO_RECEIPT_DATE__YYYYMMDD
+        , PO_RECEIPT_QUANTITY
+        , PO_RECEIPT_PRICE
+        , PO_RECEIPT_VALUE_LOCAL
+        , PO_RECEIPT_VALUE
+        , PO_HEADER_HK
+        , SUPPLIER_HK
+        , ITEM_HK
+        , PLANT_HK
+        , LEGAL_ENTITY_HK
+        , PO_LINE_RECEIPT_IND_HK
+        , BKCC
+        , REC_SRC
+FROM JOIN_RESULT

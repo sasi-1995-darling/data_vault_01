@@ -1,0 +1,9 @@
+version: 2
+models:
+- name: pit_tasklist_group
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - TASKLIST_GROUP_HK
+  columns: []

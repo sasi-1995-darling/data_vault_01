@@ -1,0 +1,319 @@
+# ============================================================================
+# FBIN Error Catalog — schema v1.2.0
+# ============================================================================
+# Source-of-truth pattern definitions for the DV Failure Triage Agent.
+#
+# This file is the single source of truth for which dbt failures the agent
+# knows how to classify. The loader in
+# `scripts/automation/src/triage/fbin_error_catalog.py` validates every
+# pattern against:
+#
+#   1. `rca_schema.Classification` enum      — `classification` field
+#   2. `rca_schema.SuggestedAction` enum     — `suggested_action` field
+#   3. `redact.REGEX_ELIGIBLE_FIELDS`        — every entry in `signal_sources`
+#   4. SUPPORTED_MATCH_LOGIC_TYPES           — `match_logic.type`
+#   5. Iron Rule (test_failure)              — see "Iron Rule" section below
+#   6. SUPPORTED_PROVENANCE_SOURCE_TYPES     — `provenance.source_type`
+#   7. PROVENANCE_SOURCE_CITATION_REGEX      — `provenance.citation` shape
+#                                              MUST match the regex bound
+#                                              to its declared source_type
+#
+# A pattern that fails any of these checks causes the catalog to refuse to
+# load. There is no fallback, no warning, no partial accept. This is
+# intentional: a malformed catalog must never silently degrade triage.
+#
+# ----------------------------------------------------------------------------
+# REQUIRED FIELDS per pattern
+# ----------------------------------------------------------------------------
+#   pattern_id                       (str)   stable identifier, MUST be unique
+#                                            across catalog; used as FK in
+#                                            TRIAGE_INVOCATIONS.pattern_match_id
+#   classification                   (str)   value from rca_schema.Classification
+#   sub_class                        (str)   FREE-TEXT catalog-side label.
+#                                            INTENTIONALLY not enum-checked —
+#                                            rca_schema.RCARecord has no
+#                                            sub_class field. Catalog extension
+#                                            affordance. Keep snake_case.
+#   signal_sources                   (list)  fields the matcher reads from the
+#                                            REDACTED payload. Each entry MUST
+#                                            be in redact.REGEX_ELIGIBLE_FIELDS.
+#   match_logic.type                 (str)   one of: regex_and_substring
+#   match_logic.requires_all         (list)  list of clauses; each clause has
+#                                            {field, pattern, flags}
+#   confidence_baseline              (float) [0.0, 1.0]; agent may downgrade
+#                                            but never upgrade past this value
+#   suggested_action                 (str)   value from rca_schema.SuggestedAction
+#   root_cause_investigation_required (bool) Iron Rule flag
+#   auto_retry_eligible              (bool)  may the agent retry the run
+#                                            without human review?
+#   provenance                       (block) structured citation — see below
+#   notes                            (str)   free text; surfaces in RCA rationale
+#
+# ----------------------------------------------------------------------------
+# PROVENANCE block (v1.1.0) — defeats provenance laundering
+# ----------------------------------------------------------------------------
+#   provenance.source_type   (str)   one of: lessons_md, gate_d_evidence
+#   provenance.citation      (str)   per-type format:
+#       - lessons_md       → "lesson #<N>"            (e.g. "lesson #120")
+#       - gate_d_evidence  → "run_id=<N>"             (e.g. "run_id=12345")
+#   provenance.notes         (str)   optional free-form context (default "")
+#
+# Two source_types ship in v1.1.0 — the two actually used today. Adding
+# `pr_retrospective` or `synthetic` requires a deliberate schema bump
+# AND a real pattern that needs it. The `synthetic` escape hatch is
+# withheld by design: history shows speculation gets dressed as evidence
+# when escape hatches are pre-shipped (Day 3 ChatGPT-preview-list incident).
+#
+# ----------------------------------------------------------------------------
+# Iron Rule (Mut3a + Mut3b enforcement)
+# ----------------------------------------------------------------------------
+# Upstream: "Never modify a failing test to make it pass without understanding
+# why it's failing." (dbt-agent-skills)
+#
+# Two coupled constraints on every `classification: test_failure` pattern:
+#   Constraint A (Mut3a): root_cause_investigation_required MUST be true
+#   Constraint B (Mut3b): suggested_action MUST NOT be 'modify_test'
+#
+# Constraint B is also enforced by rca_schema.RCARecord._enforce_invariants
+# (Rule 2). Defense in depth: catalog blocks misconfiguration at load time
+# so it never reaches record construction.
+#
+# ----------------------------------------------------------------------------
+# Catalog schema version
+# ----------------------------------------------------------------------------
+# v1.0.0 → v1.1.0 (breaking): `lessons_md_ref` REMOVED, structured
+# `provenance` block REQUIRED.
+#
+# v1.1.0 → v1.2.0 (additive, backwards-compatible): patterns that include
+# `logs` in `signal_sources` MUST also declare an integer `max_bytes`
+# in the range [1, 65536]. Patterns NOT citing `logs` are unaffected.
+# Source: docs/triage-agent/gate-d-logs-field-amendment.md §5 (Mut9d).
+# Defeats two failure modes:
+#   (a) silent buffer-overrun risk when a matcher reads from `logs`
+#       without a self-declared cap
+#   (b) always-false matchers when max_bytes exceeds the redactor's
+#       hybrid-truncation cap (LOGS_MAX_BYTES = 65,536 B)
+#
+# Any new match_logic types, new required fields, new provenance
+# source_types, or removed fields require:
+#   1. A schema version bump (semver)
+#   2. A migration shim in the loader for prior versions (if non-breaking)
+#   3. A PR amendment to gate-d-findings.md §5
+# ============================================================================
+
+catalog_schema_version: v1.2.0
+
+patterns:
+  # --------------------------------------------------------------------------
+  # Pattern 1 — FK orphan detection failure (artifact mode)
+  #
+  # Triggers when a SAT/LSAT/MSAT/LMSAT/ESAT contains rows whose parent HK
+  # does not exist in the parent hub/link — caught by dbt_constraints.foreign_key
+  # at runtime. DATA failure, not a generator bug; the YAML test was
+  # generated correctly (per Lesson 120), it just FAILED on real data.
+  #
+  # Iron Rule: classification=test_failure, so root_cause_investigation_required
+  # is true AND suggested_action is NOT modify_test.
+  # --------------------------------------------------------------------------
+  - pattern_id: fk_orphan_detection_failure_v1
+    classification: test_failure
+    sub_class: fk_orphan_detection
+    signal_sources:
+      - message
+      - truncated_debug_logs
+    match_logic:
+      type: regex_and_substring
+      requires_all:
+        - field: message
+          pattern: "dbt_constraints_foreign_key|foreign_key.*test|relationships_"
+          flags: case_insensitive
+        - field: message
+          pattern: 'got\s+\d+\s+result|fail(ed|ure)|returned\s+\d+\s+row'
+          flags: case_insensitive
+    confidence_baseline: 0.85
+    suggested_action: investigate_source_data
+    root_cause_investigation_required: true
+    auto_retry_eligible: false
+    provenance:
+      source_type: lessons_md
+      citation: "lesson #120"
+      notes: >
+        DV 2.1 referential integrity enforcement — generator-side rule
+        from lessons.md L120 reframed as runtime failure signature.
+    notes: >
+      FK constraint failure indicates orphan rows in a SAT/LSAT/MSAT/LMSAT/ESAT
+      whose parent HK is missing from the parent hub. Per DV 2.1 referential
+      integrity rules, this is never auto-fixable — the source data or the
+      upstream hub load must be investigated. Do NOT modify the FK test.
+
+  # --------------------------------------------------------------------------
+  # Pattern 2 — PR-isolated schema missing upstream object (early-failure mode)
+  #
+  # Triggers when a downstream bus_vault model (pit_/pb_/etc.) references an
+  # upstream raw_vault object that does NOT exist in the PR-isolated schema
+  # `DATAVAULT_QA.DBT_CLOUD_PR_<job_id>_<pr_id>_RAW_VAULT.<TABLE>`. Snowflake
+  # error 002003 (42S02) SQL compilation error: `Object ... does not exist or
+  # not authorized.`
+  #
+  # Root cause: the PR-isolated raw_vault schema was either never built (PR
+  # selector excluded the parents) or was cleared by a sibling PR's cleanup
+  # macro. NOT a code defect in the downstream model.
+  #
+  # Classification: compile_error (Snowflake reports it as a SQL compilation
+  # error at runtime; the agent surfaces it as such). NOT test_failure → Iron
+  # Rule does not apply, but auto_retry_eligible stays false because retrying
+  # without rebuilding the PR raw vault will just fail again.
+  #
+  # Derived from: Gate-D evidence run_id=487333396 (QA env 296453, PR job
+  # 786808, 11min 29s). Second confirming run: run_id=487313189 (same env,
+  # same job, 11min 39s, different missing object). Two distinct missing
+  # objects (LNK_ITEM_INVENTORY and LSAT_ITEM_INVENTORY_VC__AMAZON) prove
+  # the pattern matches the SCHEMA-PATH shape, not a specific object name.
+  # --------------------------------------------------------------------------
+  - pattern_id: pr_isolated_schema_missing_upstream_v1
+    classification: compile_error
+    sub_class: pr_schema_missing_upstream
+    signal_sources:
+      - truncated_debug_logs
+    match_logic:
+      type: regex_and_substring
+      requires_all:
+        - field: truncated_debug_logs
+          pattern: 'Object\s+''[^'']+''\s+does not exist or not authorized'
+          flags: case_insensitive
+        - field: truncated_debug_logs
+          pattern: "DBT_CLOUD_PR_\\d+_\\d+_RAW_VAULT"
+          flags: case_insensitive
+    confidence_baseline: 0.90
+    suggested_action: escalate_to_human
+    root_cause_investigation_required: true
+    auto_retry_eligible: false
+    provenance:
+      source_type: gate_d_evidence
+      citation: "run_id=487333396"
+      notes: >
+        Phase A evidence pull 2026-06-04. Two confirming Gate-D runs:
+        487333396 (LSAT_ITEM_INVENTORY_VC__AMAZON missing) and
+        487313189 (LNK_ITEM_INVENTORY missing). Both QA env 296453,
+        PR job 786808, ~11min duration. Pattern verified to match
+        the SCHEMA-PATH shape, not specific object names.
+        ---
+        Credential lineage: derived 2026-06-04 using DBT_TOKEN
+        subsequently rotated 2026-06-04 under the security incident
+        documented in docs/triage-agent/security-incident-2026-06-04.md.
+        Pattern uses only fields in REGEX_ELIGIBLE_FIELDS validated
+        under Gate-D Round 1 (`truncated_debug_logs`, `message`,
+        `status_message`); no dependence on rotated-credential-derived
+        data outside Gate-D scope. Standing per gitignore-history-clean
+        audit (.vscode/mcp.json was never committed; exposure was
+        bounded to local chat context).
+    notes: >
+      The PR-isolated raw_vault schema is missing one or more upstream
+      objects referenced by a downstream bus_vault model. Common causes:
+      (1) PR selector excluded raw_vault parents from the build,
+      (2) sibling PR's cleanup macro dropped the schema mid-flight,
+      (3) raw_vault build errored earlier in the same job and was not
+      rebuilt. Investigate the upstream raw_vault build status before
+      retrying. Escalate to human because the fix is operational
+      (rebuild raw vault in PR schema), not code.
+
+  # --------------------------------------------------------------------------
+  # Pattern 3 — Manifest parse failure: invalid ModelLanguage
+  # (early-failure mode — FIRST pattern citing signal_sources: [logs]
+  #  post-BLOCK lift / Round-3.5.5 truncate_logs v2)
+  #
+  # Triggers when dbt-core's WritableManifest schema rejects the
+  # dbt-datavault package at static parse time. Root cause: one or more
+  # macros declare `supported_languages` containing 'javascript', which
+  # is no longer a valid `ModelLanguage` enum value in dbt-core 1.5+ /
+  # Fusion static parser. The error appears in the HEAD of the `logs`
+  # field (~315–671 bytes in), followed by ~2.89 MB of manifest dump
+  # serialization that the Round-3.5.5 v2 truncator deliberately
+  # EXCLUDES via Rule 3 (head-window selection over the generic
+  # "Failed with N errors" anchor that previously won and put the
+  # actionable bytes out-of-window).
+  #
+  # NOT a code defect in any individual model — manifest parsing fails
+  # before any model executes. Retry without package upgrade or
+  # dbt-core version pin will reproduce the failure deterministically.
+  #
+  # Classification: compile_error (dbt-core rejects manifest at static
+  # parse — that is the compile boundary). NOT test_failure → Iron
+  # Rule does not apply; auto_retry_eligible stays false because the
+  # failure is deterministic until the package mismatch is resolved.
+  #
+  # Mut9d compliance: signal_sources cites `logs` (eligible since Day
+  # 3.8, Sprint-1 #12); max_bytes=65536 = LOGS_MAX_BYTES (the v2
+  # truncator's hybrid cap). FIRST shipped pattern using the logs
+  # field — establishes the contract for future logs-citing patterns.
+  #
+  # Derived from: 3 Gate-D confirming runs in P0.1 corpus, all QA env
+  # 296453, all compile-phase manifest-parse failures, all OUT-OF-WINDOW
+  # under Day-3.8 hybrid truncation, all recovered in-window via
+  # Round-3.5.5 v2 (landing commit d72e20b5):
+  #   - run 485821754 (anchor 'Encountered an error:' at byte 315)
+  #   - run 485850628 (anchor 'Encountered an error:' at byte 671)
+  #   - run 485851058 (anchor 'Encountered an error:' at byte 333)
+  #
+  # Regex style note (intentional divergence from Pattern 2):
+  # Clause 2 uses LITERAL whitespace (single spaces), not \s+. The
+  # WritableManifest error text is statically emitted by dbt-core's
+  # error formatter and does not vary in spacing. Tight whitespace
+  # acts as a Round-4 drift detector — if dbt-core ever changes the
+  # message format, the pattern stops matching, which is the correct
+  # surveillance signal. This diverges intentionally from Pattern 2's
+  # `\s+` style, which handles Snowflake-emitted dynamic object names
+  # where spacing CAN vary across drivers/versions. Static dbt-core
+  # text vs dynamic Snowflake text → different regex disciplines.
+  # --------------------------------------------------------------------------
+  - pattern_id: manifest_parse_failure_invalid_model_language_v1
+    classification: compile_error
+    sub_class: manifest_parse_invalid_model_language
+    signal_sources:
+      - logs
+    max_bytes: 65536
+    match_logic:
+      type: regex_and_substring
+      requires_all:
+        - field: logs
+          pattern: "Encountered an error:"
+          flags: case_sensitive
+        - field: logs
+          pattern: 'Field "macros" of type Mapping\[str, Macro\] in WritableManifest has invalid value'
+          flags: case_sensitive
+    confidence_baseline: 0.95
+    suggested_action: escalate_to_human
+    root_cause_investigation_required: true
+    auto_retry_eligible: false
+    provenance:
+      source_type: gate_d_evidence
+      citation: "run_id=485821754"
+      notes: >
+        Phase B evidence pull 2026-06-04. ONE end-to-end-redacted
+        fixture committed (run 485821754, anchor 'Encountered an
+        error:' at byte 315 of 2,892,964 raw bytes; truncated to
+        65,536 via Rule 3 head-window). TWO additional incident
+        occurrences observed in the P0.1 corpus dump (runs 485850628
+        and 485851058, anchors at bytes 671 and 333 respectively);
+        these are NOT independently redacted/committed fixtures —
+        they confirm the failure CATEGORY is recurrent, not that
+        their byte sequences were independently matcher-verified.
+        All 3 incidents same QA env 296453, same compile-phase
+        manifest parse, all OUT-OF-WINDOW under Day-3.8 hybrid
+        truncation, all recovered in-window via Round-3.5.5 v2's
+        Rule 3 head-window selection (landing commit d72e20b5).
+        Specific WritableManifest signature isolates manifest_parse
+        from other 'Encountered an error:' modes and from Pattern 2
+        (which reads `truncated_debug_logs`, not `logs`). The
+        truncator-to-matcher contract is locked end-to-end by
+        TestPattern3TruncatorMatcherContract — not by the fixture's
+        frozen metadata fields.
+    notes: >
+      dbt-datavault package incompatibility with dbt-core 1.5+ /
+      Fusion static parser. The 'javascript' ModelLanguage enum value
+      is no longer accepted by WritableManifest schema. Not a code
+      defect in any individual model — manifest parsing fails before
+      model execution begins. Retry will not help; requires
+      dbt-datavault package upgrade or dbt-core version pin. First
+      pattern shipped citing signal_sources: [logs] since the BLOCK
+      lift (Round 3.5.5 — d72e20b5).

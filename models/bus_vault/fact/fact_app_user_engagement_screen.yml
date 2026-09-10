@@ -1,0 +1,5 @@
+version: 2
+models:
+- name: fact_app_user_engagement_screen
+  data_tests: []
+  columns: []

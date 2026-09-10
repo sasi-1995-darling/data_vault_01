@@ -1,0 +1,22 @@
+version: 2
+models:
+  - name: ref_item_type__tt_e21
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - PART_TYPE_ID
+    columns:
+      - name: PART_TYPE_ID
+        tests:
+          - unique:
+              config:
+                severity: warn
+          - not_null:
+              config:
+                severity: warn
+      - name: LOAD_DTS
+        tests:
+          - not_null:
+              config:
+                severity: warn

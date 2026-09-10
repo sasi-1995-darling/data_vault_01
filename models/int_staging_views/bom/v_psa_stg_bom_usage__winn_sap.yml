@@ -1,0 +1,15 @@
+version: 2
+models:
+  - name: v_psa_stg_bom_usage__winn_sap
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          config:
+            severity: warn
+          arguments:
+            combination_of_columns:
+              - MANDT
+              - SPRAS
+              - STLAN
+              - SPTXT
+              - LOAD_DTS
+    columns: []

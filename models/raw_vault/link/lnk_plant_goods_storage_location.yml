@@ -1,0 +1,39 @@
+version: 2
+models:
+- name: lnk_plant_goods_storage_location
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - LNK_PLANT_GOODS_STORAGE_LOCATION_HK
+  columns:
+  - name: GOODS_STORAGE_LOCATION_HK
+    data_tests:
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'hub_storage_location' )
+          pk_column_name: GOODS_STORAGE_LOCATION_HK
+  - name: PLANT_HK
+    data_tests:
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'hub_plant_v1' )
+          pk_column_name: PLANT_HK
+  - name: SALES_ORGANIZATION_HK
+    data_tests:
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'hub_sales_organization' )
+          pk_column_name: SALES_ORGANIZATION_HK
+  - name: DISTRIBUTION_CHANNEL_HK
+    data_tests:
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'hub_distribution_channel' )
+          pk_column_name: DISTRIBUTION_CHANNEL_HK
+  - name: SUPPLIER_HK
+    data_tests:
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'hub_supplier_v2' )
+          pk_column_name: SUPPLIER_HK

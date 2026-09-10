@@ -1,0 +1,13 @@
+version: 2
+models:
+- name: v_psa_stg_applist__appbot_fivetran
+  data_tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - PRODUCT_BK
+        - STORE
+        - LOAD_DTS
+      config:
+        severity: warn
+  columns: []

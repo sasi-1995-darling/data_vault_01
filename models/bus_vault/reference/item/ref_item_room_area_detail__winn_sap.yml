@@ -1,0 +1,13 @@
+version: 2
+models:
+- name: ref_item_room_area_detail__winn_sap
+  data_tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - ROOM_AREA_ID
+        - LANGUAGE_KEY
+        - LOAD_DTS
+      config:
+        severity: warn
+  columns: []

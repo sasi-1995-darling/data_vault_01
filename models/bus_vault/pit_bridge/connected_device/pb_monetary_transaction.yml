@@ -1,0 +1,11 @@
+version: 2
+models:
+- name: pb_monetary_transaction
+  data_tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - SEQ_ID
+      config:
+        severity: warn
+  columns: []

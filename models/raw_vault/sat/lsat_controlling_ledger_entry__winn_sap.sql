@@ -1,0 +1,417 @@
+---- SRC LAYER ----
+WITH
+SRC_SWINN          as ( SELECT * FROM {{ ref('v_psa_stg_controlling_ledger_entry__winn_sap') }} as SRC 
+                         {% if is_incremental() %}
+                         WHERE SRC.LOAD_DTS > (SELECT DATEADD('HOUR', '-1', MAX(LOAD_DTS)) FROM {{this}})
+                         {% endif %}  )
+
+/*
+SRC_SWINN          as ( SELECT * FROM STAGING.V_PSA_STG_CONTROLLING_LEDGER_ENTRY__WINN_SAP )
+*/
+---- LOGIC LAYER ----
+
+, LOGIC_SWINN as (
+    SELECT
+        CONTROLLING_LEDGER_ENTRY_HK
+      , MANDT
+      , KOKRS
+      , BELNR
+      , BUZEI
+      , GLREQUEST
+      , PERIO
+      , WTGBTR
+      , WOGBTR
+      , WKGBTR
+      , WKFBTR
+      , PAGBTR
+      , PAFBTR
+      , MEGBTR
+      , MEFBTR
+      , MBGBTR
+      , MBFBTR
+      , LEDNR
+      , OBJNR
+      , GJAHR
+      , WRTTP
+      , VERSN
+      , KSTAR
+      , HRKFT
+      , VRGNG
+      , PAROB
+      , PAROB1
+      , USPOB
+      , VBUND
+      , PARGB
+      , BEKNZ
+      , TWAER
+      , OWAER
+      , MEINH
+      , MEINB
+      , MVFLG
+      , SGTXT
+      , REFBZ
+      , ZLENR
+      , BW_REFBZ
+      , GKONT
+      , GKOAR
+      , WERKS
+      , MATNR
+      , RBEST
+      , EBELN
+      , EBELP
+      , ZEKKN
+      , ERLKZ
+      , PERNR
+      , BTRKL
+      , OBJNR_N1
+      , OBJNR_N2
+      , OBJNR_N3
+      , PAOBJNR
+      , BELTP
+      , BUKRS
+      , GSBER
+      , FKBER
+      , SCOPE
+      , LOGSYSO
+      , PKSTAR
+      , PBUKRS
+      , PFKBER
+      , PSCOPE
+      , LOGSYSP
+      , DABRZ
+      , BWSTRAT
+      , OBJNR_HK
+      , TIMESTMP
+      , QMNUM
+      , GEBER
+      , PGEBER
+      , GRANT_NBR
+      , PGRANT_NBR
+      , REFBZ_FI
+      , SEGMENT
+      , PSEGMENT
+      , BUDGET_PD
+      , PBUDGET_PD
+      , PRODPER
+      , ZZALTKT
+      , GLDELFLAG
+      , GLCHANGETIME
+      , GLCHANGETIME_DTTM
+      , GLSOURCESYSTEM
+      , PSA_DELETE_IND
+      , LOAD_DTS
+      , REC_SRC
+      , BKCC
+      , HASHDIFF
+    FROM SRC_SWINN
+)
+---- RENAME LAYER ----
+
+, RENAME_SWINN as (
+    SELECT
+        CONTROLLING_LEDGER_ENTRY_HK
+      , MANDT
+      , KOKRS
+      , BELNR
+      , BUZEI
+      , GLREQUEST
+      , PERIO
+      , WTGBTR
+      , WOGBTR
+      , WKGBTR
+      , WKFBTR
+      , PAGBTR
+      , PAFBTR
+      , MEGBTR
+      , MEFBTR
+      , MBGBTR
+      , MBFBTR
+      , LEDNR
+      , OBJNR
+      , GJAHR
+      , WRTTP
+      , VERSN
+      , KSTAR
+      , HRKFT
+      , VRGNG
+      , PAROB
+      , PAROB1
+      , USPOB
+      , VBUND
+      , PARGB
+      , BEKNZ
+      , TWAER
+      , OWAER
+      , MEINH
+      , MEINB
+      , MVFLG
+      , SGTXT
+      , REFBZ
+      , ZLENR
+      , BW_REFBZ
+      , GKONT
+      , GKOAR
+      , WERKS
+      , MATNR
+      , RBEST
+      , EBELN
+      , EBELP
+      , ZEKKN
+      , ERLKZ
+      , PERNR
+      , BTRKL
+      , OBJNR_N1
+      , OBJNR_N2
+      , OBJNR_N3
+      , PAOBJNR
+      , BELTP
+      , BUKRS
+      , GSBER
+      , FKBER
+      , SCOPE
+      , LOGSYSO
+      , PKSTAR
+      , PBUKRS
+      , PFKBER
+      , PSCOPE
+      , LOGSYSP
+      , DABRZ
+      , BWSTRAT
+      , OBJNR_HK
+      , TIMESTMP
+      , QMNUM
+      , GEBER
+      , PGEBER
+      , GRANT_NBR
+      , PGRANT_NBR
+      , REFBZ_FI
+      , SEGMENT
+      , PSEGMENT
+      , BUDGET_PD
+      , PBUDGET_PD
+      , PRODPER
+      , ZZALTKT
+      , GLDELFLAG
+      , GLCHANGETIME
+      , GLCHANGETIME_DTTM
+      , GLSOURCESYSTEM
+      , PSA_DELETE_IND
+      , LOAD_DTS
+      , REC_SRC
+      , BKCC
+      , HASHDIFF
+    FROM LOGIC_SWINN
+)
+---- FILTER LAYER ----
+
+, FILTER_SWINN as (
+    SELECT *
+    FROM RENAME_SWINN
+)
+
+---- JOIN LAYER ----
+, JOIN_RESULT as (
+    SELECT *
+    FROM FILTER_SWINN
+)
+
+---- FINAL LAYER ----
+SELECT
+          CONTROLLING_LEDGER_ENTRY_HK
+        , MANDT
+        , KOKRS
+        , BELNR
+        , BUZEI
+        , GLREQUEST
+        , PERIO
+        , WTGBTR
+        , WOGBTR
+        , WKGBTR
+        , WKFBTR
+        , PAGBTR
+        , PAFBTR
+        , MEGBTR
+        , MEFBTR
+        , MBGBTR
+        , MBFBTR
+        , LEDNR
+        , OBJNR
+        , GJAHR
+        , WRTTP
+        , VERSN
+        , KSTAR
+        , HRKFT
+        , VRGNG
+        , PAROB
+        , PAROB1
+        , USPOB
+        , VBUND
+        , PARGB
+        , BEKNZ
+        , TWAER
+        , OWAER
+        , MEINH
+        , MEINB
+        , MVFLG
+        , SGTXT
+        , REFBZ
+        , ZLENR
+        , BW_REFBZ
+        , GKONT
+        , GKOAR
+        , WERKS
+        , MATNR
+        , RBEST
+        , EBELN
+        , EBELP
+        , ZEKKN
+        , ERLKZ
+        , PERNR
+        , BTRKL
+        , OBJNR_N1
+        , OBJNR_N2
+        , OBJNR_N3
+        , PAOBJNR
+        , BELTP
+        , BUKRS
+        , GSBER
+        , FKBER
+        , SCOPE
+        , LOGSYSO
+        , PKSTAR
+        , PBUKRS
+        , PFKBER
+        , PSCOPE
+        , LOGSYSP
+        , DABRZ
+        , BWSTRAT
+        , OBJNR_HK
+        , TIMESTMP
+        , QMNUM
+        , GEBER
+        , PGEBER
+        , GRANT_NBR
+        , PGRANT_NBR
+        , REFBZ_FI
+        , SEGMENT
+        , PSEGMENT
+        , BUDGET_PD
+        , PBUDGET_PD
+        , PRODPER
+        , ZZALTKT
+        , GLDELFLAG
+        , GLCHANGETIME
+        , GLCHANGETIME_DTTM
+        , GLSOURCESYSTEM
+        , PSA_DELETE_IND
+        , LOAD_DTS
+        , REC_SRC
+        , BKCC
+        , HASHDIFF
+FROM JOIN_RESULT
+{% if is_incremental() %}
+WHERE NOT EXISTS (
+    SELECT 1 
+    FROM {{ this }} existing
+    WHERE existing.CONTROLLING_LEDGER_ENTRY_HK = JOIN_RESULT.CONTROLLING_LEDGER_ENTRY_HK
+    AND existing.HASHDIFF = JOIN_RESULT.HASHDIFF
+)
+{% endif %} 
+{% if not is_incremental() %}
+/*the following qualify is to restrict multiple loads of touched records during the initial build. Ex: multiple row per hk, hashdiff */
+qualify 1= row_number()over(partition by CONTROLLING_LEDGER_ENTRY_HK, HASHDIFF order by LOAD_DTS)
+union all
+    SELECT        
+    MD5_BINARY(GR.VALUE) AS CONTROLLING_LEDGER_ENTRY_HK
+, CAST(NULL AS STRING) AS MANDT
+, CAST(NULL AS STRING) AS KOKRS
+, CAST(NULL AS STRING) AS BELNR
+, CAST(NULL AS STRING) AS BUZEI
+, CAST(NULL AS NUMBER) AS GLREQUEST
+, CAST(NULL AS STRING) AS PERIO
+, CAST(NULL AS NUMBER) AS WTGBTR
+, CAST(NULL AS NUMBER) AS WOGBTR
+, CAST(NULL AS NUMBER) AS WKGBTR
+, CAST(NULL AS NUMBER) AS WKFBTR
+, CAST(NULL AS NUMBER) AS PAGBTR
+, CAST(NULL AS NUMBER) AS PAFBTR
+, CAST(NULL AS NUMBER) AS MEGBTR
+, CAST(NULL AS NUMBER) AS MEFBTR
+, CAST(NULL AS NUMBER) AS MBGBTR
+, CAST(NULL AS NUMBER) AS MBFBTR
+, CAST(NULL AS STRING) AS LEDNR
+, CAST(NULL AS STRING) AS OBJNR
+, CAST(NULL AS STRING) AS GJAHR
+, CAST(NULL AS STRING) AS WRTTP
+, CAST(NULL AS STRING) AS VERSN
+, CAST(NULL AS STRING) AS KSTAR
+, CAST(NULL AS STRING) AS HRKFT
+, CAST(NULL AS STRING) AS VRGNG
+, CAST(NULL AS STRING) AS PAROB
+, CAST(NULL AS STRING) AS PAROB1
+, CAST(NULL AS STRING) AS USPOB
+, CAST(NULL AS STRING) AS VBUND
+, CAST(NULL AS STRING) AS PARGB
+, CAST(NULL AS STRING) AS BEKNZ
+, CAST(NULL AS STRING) AS TWAER
+, CAST(NULL AS STRING) AS OWAER
+, CAST(NULL AS STRING) AS MEINH
+, CAST(NULL AS STRING) AS MEINB
+, CAST(NULL AS STRING) AS MVFLG
+, CAST(NULL AS STRING) AS SGTXT
+, CAST(NULL AS STRING) AS REFBZ
+, CAST(NULL AS STRING) AS ZLENR
+, CAST(NULL AS STRING) AS BW_REFBZ
+, CAST(NULL AS STRING) AS GKONT
+, CAST(NULL AS STRING) AS GKOAR
+, CAST(NULL AS STRING) AS WERKS
+, CAST(NULL AS STRING) AS MATNR
+, CAST(NULL AS STRING) AS RBEST
+, CAST(NULL AS STRING) AS EBELN
+, CAST(NULL AS STRING) AS EBELP
+, CAST(NULL AS STRING) AS ZEKKN
+, CAST(NULL AS STRING) AS ERLKZ
+, CAST(NULL AS STRING) AS PERNR
+, CAST(NULL AS STRING) AS BTRKL
+, CAST(NULL AS STRING) AS OBJNR_N1
+, CAST(NULL AS STRING) AS OBJNR_N2
+, CAST(NULL AS STRING) AS OBJNR_N3
+, CAST(NULL AS STRING) AS PAOBJNR
+, CAST(NULL AS STRING) AS BELTP
+, CAST(NULL AS STRING) AS BUKRS
+, CAST(NULL AS STRING) AS GSBER
+, CAST(NULL AS STRING) AS FKBER
+, CAST(NULL AS STRING) AS SCOPE
+, CAST(NULL AS STRING) AS LOGSYSO
+, CAST(NULL AS STRING) AS PKSTAR
+, CAST(NULL AS STRING) AS PBUKRS
+, CAST(NULL AS STRING) AS PFKBER
+, CAST(NULL AS STRING) AS PSCOPE
+, CAST(NULL AS STRING) AS LOGSYSP
+, CAST(NULL AS STRING) AS DABRZ
+, CAST(NULL AS STRING) AS BWSTRAT
+, CAST(NULL AS STRING) AS OBJNR_HK
+, CAST(NULL AS NUMBER) AS TIMESTMP
+, CAST(NULL AS STRING) AS QMNUM
+, CAST(NULL AS STRING) AS GEBER
+, CAST(NULL AS STRING) AS PGEBER
+, CAST(NULL AS STRING) AS GRANT_NBR
+, CAST(NULL AS STRING) AS PGRANT_NBR
+, CAST(NULL AS STRING) AS REFBZ_FI
+, CAST(NULL AS STRING) AS SEGMENT
+, CAST(NULL AS STRING) AS PSEGMENT
+, CAST(NULL AS STRING) AS BUDGET_PD
+, CAST(NULL AS STRING) AS PBUDGET_PD
+, CAST(NULL AS STRING) AS PRODPER
+, CAST(NULL AS STRING) AS ZZALTKT
+, CAST(NULL AS STRING) AS GLDELFLAG
+, CAST(NULL AS NUMBER) AS GLCHANGETIME
+, CAST(NULL AS TIMESTAMP) AS GLCHANGETIME_DTTM
+, CAST(NULL AS STRING) AS GLSOURCESYSTEM
+, CAST(NULL AS STRING) AS PSA_DELETE_IND
+, CONVERT_TIMEZONE('UTC','1900-01-01')  as  LOAD_DTS
+,'USAZET.SNOWFLAKE.FBIN.DERIVED' AS REC_SRC
+, DECODE(GR.VALUE, 0, 'GHOST RECORD-SYSTEM', -1, 'GHOST RECORD-nullkey-required', -2, 'GHOST RECORD-nullkey-optional')  AS BKCC
+, ''::BINARY as HASHDIFF FROM
+        TABLE(strtok_split_to_table('0|-1|-2', '|')) AS GR
+{% endif %}

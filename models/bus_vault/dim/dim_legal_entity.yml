@@ -1,0 +1,15 @@
+version: 2
+models:
+  - name: dim_legal_entity
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          config:
+            severity: warn
+          arguments:
+            combination_of_columns:
+              - LEGAL_ENTITY_HK
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - LEGAL_ENTITY_HK
+    columns: []

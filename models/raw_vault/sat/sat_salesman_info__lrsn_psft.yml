@@ -1,0 +1,38 @@
+version: 2
+models:
+  - name: sat_salesman_info__lrsn_psft
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - SALES_REP_HK
+              - LOAD_DTS
+    columns:
+      - name: SALES_REP_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+          - dbt_utils.relationships_where:
+              arguments:
+                to: ref( 'hub_sales_rep' )
+                field: SALES_REP_HK
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'hub_sales_rep' )
+                pk_column_name: SALES_REP_HK
+      - name: LOAD_DTS
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: REC_SRC
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: HASHDIFF
+        tests:
+          - not_null:
+              config:
+                severity: warn

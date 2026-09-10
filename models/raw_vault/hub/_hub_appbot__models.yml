@@ -1,0 +1,36 @@
+version: 2
+
+models:
+  - name: hub_application__appbot_api
+    description: This is the hub model for Appbott
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - application_hk
+
+  #- name: hub_rating__appbot_api
+  #  description: This is the hub model for Appbott
+  #  tests:
+  #    - dbt_constraints.primary_key:
+  #        column_names:
+  #         - rating_hk
+  #  columns:
+  #    - name: app_id
+ #       tests:
+ #         - relationships:
+ #             field: id
+ #             to: ref('hub_application__appbot_api')
+    #columns:
+    #  - name: country
+    #    tests:
+    #      - dbt_utils.not_accepted_values:
+    #         values: ['All']             
+
+  - name: hub_review__appbot_api
+    description: This is the hub model for Appbott
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - review_hk

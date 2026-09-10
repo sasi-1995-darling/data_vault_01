@@ -1,0 +1,27 @@
+version: 2
+
+models:
+  - name: link_invoice_invoice_line
+    description: This is the raw vault link model between invoice and invoice line
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - invoice_invoice_line_hk
+      - dbt_constraints.foreign_key:
+          arguments:
+            fk_column_names:
+              - invoice_hk
+            pk_table_name: ref('hub_invoice')
+            pk_column_names:
+              - invoice_hk
+      - dbt_constraints.foreign_key:
+          arguments:
+            fk_column_names:
+              - invoice_line_hk
+            pk_table_name: ref('hub_invoice_line')
+            pk_column_names:
+              - invoice_line_hk
+    config:
+      tags:
+        - emtek

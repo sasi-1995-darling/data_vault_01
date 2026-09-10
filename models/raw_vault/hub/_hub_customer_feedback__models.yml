@@ -1,0 +1,10 @@
+version: 2
+
+models:
+  - name: hub_brand
+    description: This is the hub brand for customer feedback
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - brand_hk

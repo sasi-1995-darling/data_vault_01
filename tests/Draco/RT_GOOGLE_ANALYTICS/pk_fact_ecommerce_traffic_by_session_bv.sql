@@ -1,0 +1,1 @@
+select * from ({{ primary_key_check('fact_ecommerce_traffic_by_session',['ecommerce_account_hk','ecommerce_property_hk','session_channel_group','session_date__yyyymmdd']) }})

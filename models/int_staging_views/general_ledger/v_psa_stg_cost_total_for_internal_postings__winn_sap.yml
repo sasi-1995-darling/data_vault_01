@@ -1,0 +1,95 @@
+version: 2
+models:
+  - name: v_psa_stg_cost_total_for_internal_postings__winn_sap
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          config:
+            severity: warn
+          arguments:
+            combination_of_columns:
+              - MANDT
+              - LEDNR
+              - OBJNR
+              - GJAHR
+              - WRTTP
+              - VERSN
+              - KSTAR
+              - HRKFT
+              - VRGNG
+              - PAROB
+              - USPOB
+              - BEKNZ
+              - TWAER
+              - PERBL
+              - LOAD_DTS
+    columns:
+      - name: MANDT
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: LEDNR
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: OBJNR
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: GJAHR
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: WRTTP
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: VERSN
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: KSTAR
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: HRKFT
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: VRGNG
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: PAROB
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: USPOB
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: BEKNZ
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: TWAER
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: PERBL
+        tests:
+          - not_null:
+              config:
+                severity: warn

@@ -1,0 +1,17 @@
+version: 2
+models:
+  - name: ref_hub_state_grp
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - STATE_GRP_BK
+    columns:
+      - name: STATE_GRP_BK
+        tests:
+          - unique:
+              config:
+                severity: warn
+          - not_null:
+              config:
+                severity: warn

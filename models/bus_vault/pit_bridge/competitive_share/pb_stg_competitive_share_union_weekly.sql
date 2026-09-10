@@ -1,0 +1,233 @@
+{{ config(materialized='ephemeral') }}
+---- SRC LAYER ----
+WITH
+SRC_CSP            as ( SELECT ASIN, ASIN_KEY, BKCC, BRAND_BK, BRAND_ID, BRAND_KEY, BUSINESS_UNIT, CATEGORY_NAME, CATEGORY_TYPE, DATE, HOMEDEPOT_REGION, LOWES_REGION, MAX_BULK_PRICE, MAX_BULK_UNIT_THRESHOLD, MIN_BULK_PRICE, MIN_BULK_UNIT_THRESHOLD, MODEL, PLATFORM, PRODUCT_NAME, REC_SRC, REGION, SOURCE, STATE, SUM_FIRST_PARTY_SALES, SUM_FIRST_PARTY_UNITS, SUM_THIRD_PARTY_SALES, SUM_THIRD_PARTY_UNITS, SUM_TOTAL_SALES, SUM_TOTAL_UNITS, UNITS_ON_HAND_MEDIAN, UNITS_REPLENISHED, UPC, VALUE_ON_HAND, VALUE_REPLENISHED FROM {{ ref('pb_stg_competitive_share__profitero_wkly_agg') }} as SRC  ),
+SRC_CSD            as ( SELECT ASIN, ASIN_KEY, BKCC, BRAND_BK, BRAND_ID, BRAND_KEY, CATEGORY_NAME, CATEGORY_TYPE, DATE, HOMEDEPOT_REGION, LOCATIONS_WITH_INVENTORY, LOWES_REGION, MAX_BULK_PRICE, MAX_BULK_UNIT_THRESHOLD, MIN_BULK_PRICE, MIN_BULK_UNIT_THRESHOLD, MODEL, PLATFORM, PRODUCT_NAME, REC_SRC, REGION, RETAILER, SOURCE, STATE, SUM_FIRST_PARTY_SALES, SUM_FIRST_PARTY_UNITS, SUM_THIRD_PARTY_SALES, SUM_THIRD_PARTY_UNITS, SUM_TOTAL_SALES, SUM_TOTAL_UNITS, UNITS_ON_HAND_MEDIAN, UNITS_REPLENISHED, UPC, VALUE_ON_HAND, VALUE_REPLENISHED FROM {{ ref('pb_stg_competitive_share__datavations') }} as SRC  )
+
+/*
+SRC_CSP            as ( SELECT * FROM bus_vault.PB_STG_COMPETITIVE_SHARE__PROFITERO_WKLY_AGG )
+SRC_CSD            as ( SELECT * FROM bus_vault.PB_STG_COMPETITIVE_SHARE__DATAVATIONS )
+*/
+---- LOGIC LAYER ----
+
+, LOGIC_CSP as (
+    SELECT
+        DATE
+      , ASIN
+      , ASIN_KEY
+      , PLATFORM
+      , SUM_FIRST_PARTY_SALES
+      , SUM_THIRD_PARTY_SALES
+      , SUM_TOTAL_SALES
+      , SUM_FIRST_PARTY_UNITS
+      , SUM_THIRD_PARTY_UNITS
+      , SUM_TOTAL_UNITS
+      , CATEGORY_NAME
+      , CATEGORY_TYPE
+      , PRODUCT_NAME
+      , UPC
+      , MODEL
+      , BRAND_ID
+      , BRAND_BK
+      , BRAND_KEY
+      , MAX_BULK_PRICE
+      , MAX_BULK_UNIT_THRESHOLD
+      , MIN_BULK_PRICE
+      , MIN_BULK_UNIT_THRESHOLD
+      , UNITS_ON_HAND_MEDIAN
+      , UNITS_REPLENISHED
+      , VALUE_ON_HAND
+      , VALUE_REPLENISHED
+      , REGION
+      , STATE
+      , HOMEDEPOT_REGION
+      , LOWES_REGION
+      , 'Amazon'                                                     as                                           RETAILER
+      , BUSINESS_UNIT
+      , NULL                                                         as                                             STORES
+      , SOURCE
+      , BKCC
+      , REC_SRC
+    FROM SRC_CSP
+)
+
+, LOGIC_CSD as (
+    SELECT
+        DATE
+      , ASIN
+      , ASIN_KEY
+      , PLATFORM
+      , SUM_FIRST_PARTY_SALES
+      , SUM_THIRD_PARTY_SALES
+      , SUM_TOTAL_SALES
+      , SUM_FIRST_PARTY_UNITS
+      , SUM_THIRD_PARTY_UNITS
+      , SUM_TOTAL_UNITS
+      , CATEGORY_NAME
+      , CATEGORY_TYPE
+      , PRODUCT_NAME
+      , UPC
+      , MODEL
+      , BRAND_ID
+      , BRAND_BK
+      , BRAND_KEY
+      , MAX_BULK_PRICE
+      , MAX_BULK_UNIT_THRESHOLD
+      , MIN_BULK_PRICE
+      , MIN_BULK_UNIT_THRESHOLD
+      , UNITS_ON_HAND_MEDIAN
+      , UNITS_REPLENISHED
+      , VALUE_ON_HAND
+      , VALUE_REPLENISHED
+      , REGION
+      , STATE
+      , HOMEDEPOT_REGION
+      , LOWES_REGION
+      , RETAILER
+      , 'WATER'                                                      as                                      BUSINESS_UNIT
+      , LOCATIONS_WITH_INVENTORY                                     as                                             STORES
+      , SOURCE
+      , BKCC
+      , REC_SRC
+    FROM SRC_CSD
+)
+---- RENAME LAYER ----
+
+, RENAME_CSP as (
+    SELECT
+        DATE
+      , ASIN
+      , ASIN_KEY
+      , PLATFORM
+      , SUM_FIRST_PARTY_SALES
+      , SUM_THIRD_PARTY_SALES
+      , SUM_TOTAL_SALES
+      , SUM_FIRST_PARTY_UNITS
+      , SUM_THIRD_PARTY_UNITS
+      , SUM_TOTAL_UNITS
+      , CATEGORY_NAME
+      , CATEGORY_TYPE
+      , PRODUCT_NAME
+      , UPC
+      , MODEL
+      , BRAND_ID
+      , BRAND_BK
+      , BRAND_KEY
+      , MAX_BULK_PRICE
+      , MAX_BULK_UNIT_THRESHOLD
+      , MIN_BULK_PRICE
+      , MIN_BULK_UNIT_THRESHOLD
+      , UNITS_ON_HAND_MEDIAN
+      , UNITS_REPLENISHED
+      , VALUE_ON_HAND
+      , VALUE_REPLENISHED
+      , REGION
+      , STATE
+      , HOMEDEPOT_REGION
+      , LOWES_REGION
+      , RETAILER
+      , BUSINESS_UNIT
+      , STORES
+      , SOURCE
+      , BKCC
+      , REC_SRC
+    FROM LOGIC_CSP
+)
+
+, RENAME_CSD as (
+    SELECT
+        DATE
+      , ASIN
+      , ASIN_KEY
+      , PLATFORM
+      , SUM_FIRST_PARTY_SALES
+      , SUM_THIRD_PARTY_SALES
+      , SUM_TOTAL_SALES
+      , SUM_FIRST_PARTY_UNITS
+      , SUM_THIRD_PARTY_UNITS
+      , SUM_TOTAL_UNITS
+      , CATEGORY_NAME
+      , CATEGORY_TYPE
+      , PRODUCT_NAME
+      , UPC
+      , MODEL
+      , BRAND_ID
+      , BRAND_BK
+      , BRAND_KEY
+      , MAX_BULK_PRICE
+      , MAX_BULK_UNIT_THRESHOLD
+      , MIN_BULK_PRICE
+      , MIN_BULK_UNIT_THRESHOLD
+      , UNITS_ON_HAND_MEDIAN
+      , UNITS_REPLENISHED
+      , VALUE_ON_HAND
+      , VALUE_REPLENISHED
+      , REGION
+      , STATE
+      , HOMEDEPOT_REGION
+      , LOWES_REGION
+      , RETAILER
+      , BUSINESS_UNIT
+      , STORES
+      , SOURCE
+      , BKCC
+      , REC_SRC
+    FROM LOGIC_CSD
+)
+---- FILTER LAYER ----
+
+, FILTER_CSP as (
+    SELECT *
+    FROM RENAME_CSP
+)
+
+, FILTER_CSD as (
+    SELECT *
+    FROM RENAME_CSD
+)
+---- JOIN LAYER ----
+, JOIN_RESULT as (
+    SELECT * FROM FILTER_CSP
+    UNION ALL
+    SELECT * FROM FILTER_CSD
+)
+
+---- FINAL LAYER ----
+SELECT
+          DATE
+        , ASIN
+        , ASIN_KEY
+        , PLATFORM
+        , SUM_FIRST_PARTY_SALES
+        , SUM_THIRD_PARTY_SALES
+        , SUM_TOTAL_SALES
+        , SUM_FIRST_PARTY_UNITS
+        , SUM_THIRD_PARTY_UNITS
+        , SUM_TOTAL_UNITS
+        , CATEGORY_NAME
+        , CATEGORY_TYPE
+        , PRODUCT_NAME
+        , UPC
+        , MODEL
+        , BRAND_ID
+        , BRAND_BK
+        , BRAND_KEY
+        , MAX_BULK_PRICE
+        , MAX_BULK_UNIT_THRESHOLD
+        , MIN_BULK_PRICE
+        , MIN_BULK_UNIT_THRESHOLD
+        , UNITS_ON_HAND_MEDIAN
+        , UNITS_REPLENISHED
+        , VALUE_ON_HAND
+        , VALUE_REPLENISHED
+        , REGION
+        , STATE
+        , HOMEDEPOT_REGION
+        , LOWES_REGION
+        , RETAILER
+        , BUSINESS_UNIT
+        , STORES
+        , SOURCE
+        , BKCC
+        , REC_SRC
+FROM JOIN_RESULT

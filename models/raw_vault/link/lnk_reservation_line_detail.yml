@@ -1,0 +1,135 @@
+version: 2
+models:
+  - name: lnk_reservation_line_detail
+    data_tests:
+        - dbt_constraints.primary_key:
+            arguments:
+              column_names:
+              - LNK_DEPENDENCY_RESERVATION_HK
+    columns:
+      - name: RESERVATION_LINE_HK
+        tests:
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'hub_reservation_line' )
+                pk_column_name: RESERVATION_LINE_HK
+      - name: RESERVATION_HK
+        tests:
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'hub_reservation' )
+                pk_column_name: RESERVATION_HK
+      - name: PLANT_HK
+        data_tests:
+        - dbt_constraints.foreign_key:
+            arguments:
+              pk_table_name: ref( 'hub_plant_v1' )
+              pk_column_name: PLANT_HK
+      - name: ITEM_HK
+        data_tests:
+        - dbt_constraints.foreign_key:
+            arguments:
+              pk_table_name: ref( 'hub_item_v1' )
+              pk_column_name: ITEM_HK
+      - name: PLANNED_ORDER_HK
+        data_tests:
+        - dbt_constraints.foreign_key:
+            arguments:
+              pk_table_name: ref( 'hub_planned_order' )
+              pk_column_name: PLANNED_ORDER_HK
+      - name: PURCHASE_REQUISITION_HK
+        data_tests:
+        - dbt_constraints.foreign_key:
+            arguments:
+              pk_table_name: ref( 'hub_purchase_requisition' )
+              pk_column_name: PURCHASE_REQUISITION_HK
+      - name: PURCHASE_REQUISITION_ITEM_HK
+        data_tests:
+        - dbt_constraints.foreign_key:
+            arguments:
+              pk_table_name: ref( 'hub_purchase_requisition_item' )
+              pk_column_name: PURCHASE_REQUISITION_ITEM_HK
+      - name: PO_HEADER_HK
+        data_tests:
+        - dbt_constraints.foreign_key:
+            arguments:
+              pk_table_name: ref( 'hub_po_header' )
+              pk_column_name: PO_HEADER_HK
+      - name: PO_ITEM_HK
+        data_tests:
+        - dbt_constraints.foreign_key:
+            arguments:
+              pk_table_name: ref( 'hub_po_item' )
+              pk_column_name: PO_ITEM_HK
+      - name: PO_LINE_HK
+        data_tests:
+        - dbt_constraints.foreign_key:
+            arguments:
+              pk_table_name: ref( 'hub_po_line_v1' )
+              pk_column_name: PO_LINE_HK
+      - name: ROUTING_HK
+        data_tests:
+        - dbt_constraints.foreign_key:
+            arguments:
+              pk_table_name: ref( 'hub_routing' )
+              pk_column_name: ROUTING_HK
+      - name: CHANGE_MASTER_HK
+        data_tests:
+        - dbt_constraints.foreign_key:
+            arguments:
+              pk_table_name: ref( 'hub_change_master' )
+              pk_column_name: CHANGE_MASTER_HK
+      - name: GOODS_STORAGE_LOCATION_HK
+        data_tests:
+        - dbt_constraints.foreign_key:
+            arguments:
+              pk_table_name: ref( 'hub_storage_location' )
+              pk_column_name: GOODS_STORAGE_LOCATION_HK
+      - name: PRODUCTION_ORDER_HK
+        data_tests:
+        - dbt_constraints.foreign_key:
+            arguments:
+              pk_table_name: ref( 'hub_production_order' )
+              pk_column_name: PRODUCTION_ORDER_HK
+      - name: STORAGE_BIN_HK
+        data_tests:
+        - dbt_constraints.foreign_key:
+            arguments:
+              pk_table_name: ref( 'hub_storage_bin' )
+              pk_column_name: STORAGE_BIN_HK
+      - name: BOM_HK
+        data_tests:
+        - dbt_constraints.foreign_key:
+            arguments:
+              pk_table_name: ref( 'hub_bom' )
+              pk_column_name: BOM_HK
+      - name: UOM_HK
+        data_tests:
+        - dbt_constraints.foreign_key:
+            arguments:
+              pk_table_name: ref( 'hub_uom' )
+              pk_column_name: UOM_HK
+      - name: ITEM_ASSEMBLY_HK
+        data_tests:
+        - dbt_constraints.foreign_key:
+            arguments:
+              pk_table_name: ref( 'hub_item_v1' )
+              pk_column_name: ITEM_HK
+      - name: ORDER_HEADER_HK
+        data_tests:
+        - dbt_constraints.foreign_key:
+            arguments:
+              pk_table_name: ref( 'hub_order_header' )
+              pk_column_name: ORDER_HEADER_HK
+      - name: ORDER_LINE_HK
+        data_tests:
+        - dbt_constraints.foreign_key:
+            arguments:
+              pk_table_name: ref( 'hub_order_line' )
+              pk_column_name: ORDER_LINE_HK
+      - name: GL_ACCOUNT_NUMBER_HK
+        data_tests:
+        - dbt_constraints.foreign_key:
+            arguments:
+              pk_table_name: ref( 'hub_gl_account_number' )
+              pk_column_name: GL_ACCOUNT_NUMBER_HK

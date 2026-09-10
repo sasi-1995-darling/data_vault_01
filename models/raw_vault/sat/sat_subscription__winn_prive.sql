@@ -1,0 +1,224 @@
+---- SRC LAYER ----
+WITH
+SRC_OD             as ( SELECT * FROM {{ ref('v_psa_stg_subscription__winn_prive') }} as SRC 
+                         {% if is_incremental() %}
+                         WHERE SRC.LOAD_DTS > (SELECT DATEADD('HOUR', -1, MAX(LOAD_DTS)) FROM {{this}})
+                         {% endif %}  )
+
+/*
+SRC_OD             as ( SELECT * FROM staging.v_psa_stg_subscription__winn_prive )
+*/
+---- LOGIC LAYER ----
+
+, LOGIC_OD as (
+    SELECT
+        SUBSCRIPTION_HK
+      , LOAD_DTS
+      , ID
+      , _FIVETRAN_DELETED
+      , SUBSCRIBER_ID
+      , _FIVETRAN_SYNCED
+      , PAYMENT_METHOD_TYPE
+      , BILLING_LAST_NAME
+      , CREATED_AT
+      , EXTERNAL_ID
+      , PAYMENT_METHOD_EXPIRY_MONTH
+      , DELIVERY_CADENCE_COUNT
+      , CURRENCY_CODE
+      , BILLING_PROVINCE
+      , PAYMENT_METHOD_BRAND
+      , UPDATED_AT
+      , BILLING_CADENCE_UNIT
+      , BILLING_ADDRESS_1
+      , PAYMENT_METHOD_EXPIRY_YEAR
+      , FRIENDLY_ID
+      , BILLING_FIRST_NAME
+      , NEXT_BILLING_DATE
+      , BILLING_COUNTRY
+      , IS_PREPAID
+      , PAYMENT_METHOD_NAME
+      , DELIVERY_CADENCE_UNIT
+      , BILLING_CITY
+      , NEXT_DELIVERY_DATE
+      , PAYMENT_METHOD_LAST_4_DIGIT
+      , BILLING_CADENCE_COUNT
+      , PAYMENT_METHOD_EXTERNAL_ID
+      , PURCHASE_DATE
+      , STATUS
+      , DELIVERY_PRICE
+      , BILLING_ZIP
+      , CANCEL_REASON
+      , CANCEL_DATE
+      , PSA_LOAD_DTS
+      , PSA_RECORD_SOURCE
+      , PSA_DELETE_IND
+      , REC_SRC
+      , BKCC
+      , HASHDIFF
+    FROM SRC_OD
+)
+---- RENAME LAYER ----
+
+, RENAME_OD as (
+    SELECT
+        SUBSCRIPTION_HK
+      , LOAD_DTS
+      , ID
+      , _FIVETRAN_DELETED
+      , SUBSCRIBER_ID
+      , _FIVETRAN_SYNCED
+      , PAYMENT_METHOD_TYPE
+      , BILLING_LAST_NAME
+      , CREATED_AT
+      , EXTERNAL_ID
+      , PAYMENT_METHOD_EXPIRY_MONTH
+      , DELIVERY_CADENCE_COUNT
+      , CURRENCY_CODE
+      , BILLING_PROVINCE
+      , PAYMENT_METHOD_BRAND
+      , UPDATED_AT
+      , BILLING_CADENCE_UNIT
+      , BILLING_ADDRESS_1
+      , PAYMENT_METHOD_EXPIRY_YEAR
+      , FRIENDLY_ID
+      , BILLING_FIRST_NAME
+      , NEXT_BILLING_DATE
+      , BILLING_COUNTRY
+      , IS_PREPAID
+      , PAYMENT_METHOD_NAME
+      , DELIVERY_CADENCE_UNIT
+      , BILLING_CITY
+      , NEXT_DELIVERY_DATE
+      , PAYMENT_METHOD_LAST_4_DIGIT
+      , BILLING_CADENCE_COUNT
+      , PAYMENT_METHOD_EXTERNAL_ID
+      , PURCHASE_DATE
+      , STATUS
+      , DELIVERY_PRICE
+      , BILLING_ZIP
+      , CANCEL_REASON
+      , CANCEL_DATE
+      , PSA_LOAD_DTS
+      , PSA_RECORD_SOURCE
+      , PSA_DELETE_IND
+      , REC_SRC
+      , BKCC
+      , HASHDIFF
+    FROM LOGIC_OD
+)
+---- FILTER LAYER ----
+
+, FILTER_OD as (
+    SELECT *
+    FROM RENAME_OD
+)
+---- JOIN LAYER ----
+, JOIN_RESULT as (
+    SELECT * FROM FILTER_OD
+)
+
+---- FINAL LAYER ----
+SELECT
+          SUBSCRIPTION_HK
+        , LOAD_DTS
+        , ID
+        , _FIVETRAN_DELETED
+        , SUBSCRIBER_ID
+        , _FIVETRAN_SYNCED
+        , PAYMENT_METHOD_TYPE
+        , BILLING_LAST_NAME
+        , CREATED_AT
+        , EXTERNAL_ID
+        , PAYMENT_METHOD_EXPIRY_MONTH
+        , DELIVERY_CADENCE_COUNT
+        , CURRENCY_CODE
+        , BILLING_PROVINCE
+        , PAYMENT_METHOD_BRAND
+        , UPDATED_AT
+        , BILLING_CADENCE_UNIT
+        , BILLING_ADDRESS_1
+        , PAYMENT_METHOD_EXPIRY_YEAR
+        , FRIENDLY_ID
+        , BILLING_FIRST_NAME
+        , NEXT_BILLING_DATE
+        , BILLING_COUNTRY
+        , IS_PREPAID
+        , PAYMENT_METHOD_NAME
+        , DELIVERY_CADENCE_UNIT
+        , BILLING_CITY
+        , NEXT_DELIVERY_DATE
+        , PAYMENT_METHOD_LAST_4_DIGIT
+        , BILLING_CADENCE_COUNT
+        , PAYMENT_METHOD_EXTERNAL_ID
+        , PURCHASE_DATE
+        , STATUS
+        , DELIVERY_PRICE
+        , BILLING_ZIP
+        , CANCEL_REASON
+        , CANCEL_DATE
+        , PSA_LOAD_DTS
+        , PSA_RECORD_SOURCE
+        , PSA_DELETE_IND
+        , REC_SRC
+        , BKCC
+        , HASHDIFF
+FROM JOIN_RESULT
+{% if is_incremental() %}
+WHERE NOT EXISTS (
+    SELECT 1 
+    FROM {{ this }} existing
+    WHERE existing.SUBSCRIPTION_HK = JOIN_RESULT.SUBSCRIPTION_HK
+    AND existing.HASHDIFF = JOIN_RESULT.HASHDIFF
+)
+{% endif %} 
+qualify 1= row_number()over(partition by SUBSCRIPTION_HK, HASHDIFF order by LOAD_DTS DESC)
+{% if not is_incremental() %}
+union all
+SELECT
+MD5_BINARY(GR.VALUE) AS SUBSCRIPTION_HK
+,CONVERT_TIMEZONE('UTC','1900-01-01'::TIMESTAMP)  AS LOAD_DTS
+,null as ID
+,null as _FIVETRAN_DELETED
+,null as SUBSCRIBER_ID
+,null as _FIVETRAN_SYNCED
+,null as PAYMENT_METHOD_TYPE
+,null as BILLING_LAST_NAME
+,null as CREATED_AT
+,null as EXTERNAL_ID
+,null as PAYMENT_METHOD_EXPIRY_MONTH
+,null as DELIVERY_CADENCE_COUNT
+,null as CURRENCY_CODE
+,null as BILLING_PROVINCE
+,null as PAYMENT_METHOD_BRAND
+,null as UPDATED_AT
+,null as BILLING_CADENCE_UNIT
+,null as BILLING_ADDRESS_1
+,null as PAYMENT_METHOD_EXPIRY_YEAR
+,null as FRIENDLY_ID
+,null as BILLING_FIRST_NAME
+,null as NEXT_BILLING_DATE
+,null as BILLING_COUNTRY
+,null as IS_PREPAID
+,null as PAYMENT_METHOD_NAME
+,null as DELIVERY_CADENCE_UNIT
+,null as BILLING_CITY
+,null as NEXT_DELIVERY_DATE
+,null as PAYMENT_METHOD_LAST_4_DIGIT
+,null as BILLING_CADENCE_COUNT
+,null as PAYMENT_METHOD_EXTERNAL_ID
+,null as PURCHASE_DATE
+,null as STATUS
+,null as DELIVERY_PRICE
+,null as BILLING_ZIP
+,null as CANCEL_REASON
+,null as CANCEL_DATE
+,null as PSA_LOAD_DTS
+,null as PSA_RECORD_SOURCE
+,null as PSA_DELETE_IND
+,'USAZET.SNOWFLAKE.FBIN.DERIVED' AS REC_SRC
+, DECODE(GR.VALUE, 0, 'GHOST RECORD-SYSTEM', -1, 'GHOST RECORD-nullkey-required', -2, 'GHOST RECORD-nullkey-optional')  AS BKCC
+, ''::BINARY as HASHDIFF
+FROM
+TABLE(strtok_split_to_table('0|-1|-2', '|')) AS GR
+
+{% endif %}

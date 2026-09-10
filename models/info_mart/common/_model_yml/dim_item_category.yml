@@ -1,0 +1,13 @@
+version: 2
+
+models:
+  - name: dim_item_category
+    description: Common dimension for items categories and category groups
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - dim_item_category_pk
+    config:
+      tags:
+        - emtek

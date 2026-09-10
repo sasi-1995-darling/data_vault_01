@@ -1,0 +1,16 @@
+version: 2
+models:
+- name: msat_flow_daily_agg__flodetect
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - DEVICE_HK
+        - LOAD_DTS
+        - CREATED_AT
+  - dbt_expectations.expect_table_row_count_to_be_between:
+      arguments:
+        min_value: 4
+      config:
+        severity: warn
+  columns: []

@@ -1,0 +1,22 @@
+version: 2
+models:
+  - name: sat_key_account_group__winn_sap
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - KEY_ACCOUNT_GROUP_HK
+              - SPRAS
+              - LOAD_DTS
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          config:
+            severity: warn
+          arguments:
+            min_value: 4
+    columns:
+      - name: KEY_ACCOUNT_GROUP_HK
+        tests:
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'hub_key_account_group' )
+                pk_column_name: KEY_ACCOUNT_GROUP_HK

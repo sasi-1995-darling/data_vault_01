@@ -1,0 +1,5 @@
+version: 2
+models:
+- name: v_psa_stg_question_rules__simplesat
+  data_tests: []
+  columns: []

@@ -1,0 +1,10 @@
+version: 2
+models:
+- name: dim_distribution_channel
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - DISTRIBUTION_CHANNEL_KEY
+        - LANGUAGE_CODE_SAP
+  columns: []

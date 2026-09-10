@@ -1,0 +1,27 @@
+version: 2
+models:
+- name: msat_po_item_schedule_lines__emtk_ebs
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - PO_ITEM_HK
+        - LINE_LOCATION_ID
+        - LOAD_DTS
+      config:
+        severity: warn
+  - dbt_expectations.expect_table_row_count_to_be_between:
+      arguments:
+        min_value: 4
+      config:
+        severity: warn
+  columns:
+  - name: PO_ITEM_HK
+    data_tests:
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'hub_po_item' )
+          pk_column_name: PO_ITEM_HK
+  config:
+    tags:
+    - msat

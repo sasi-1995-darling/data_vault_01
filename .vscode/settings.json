@@ -1,0 +1,115 @@
+{
+  // ========================================
+  // dbt Fusion Configuration (team standard)
+  // ========================================
+  "dbt.dbtIntegration": "fusion",
+  "dbt.enableNewLineagePanel": true,
+  "dbt.lineage.showNonSelectEdges": true,
+  "dbt.lineage.showSelectEdges": true,
+
+  // dbt Cloud authentication (reads from ~/.dbt/dbt_cloud.yml)
+  "dbt.cloudInstance": "kl673.us1.dbt.com",
+  "dbt.cloudProjectId": "343806",
+  "dbt.cloudAccountId": "173296",
+
+  // Defer to production for faster development
+  "dbt.deferConfigPerProject": {
+    "": {
+      "deferToProduction": true,
+      "favorState": true
+    }
+  },
+
+  // ========================================
+  // File Associations (team standard)
+  // ========================================
+  "files.associations": {
+    "*.sql": "jinja-sql",
+    "*.yml": "yaml"
+  },
+
+  // ========================================
+  // Editor Settings for SQL/Jinja (team standard)
+  // ========================================
+  "[jinja-sql]": {
+    "editor.defaultFormatter": "henriblancke.vscode-dbt-formatter",
+    "editor.formatOnSave": false
+  },
+  "[sql]": {
+    "editor.defaultFormatter": "henriblancke.vscode-dbt-formatter"
+  },
+  "[yaml]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    // Disable format-on-save (mirrors [jinja-sql] above): Prettier re-normalizes
+    // YAML on save (e.g. collapses double-space-before-comment), churning surgical
+    // .github/workflow diffs. Format manually (Shift+Alt+F) when desired.
+    "editor.formatOnSave": false,
+    "editor.tabSize": 2
+  },
+  "[github-actions-workflow]": {
+    // .github/workflows/* are language `github-actions-workflow`, NOT `yaml`, so the
+    // [yaml] guard above does not cover them. Disable format-on-save here too — else
+    // the global editor.formatOnSave:true + redhat.vscode-yaml formatter churns
+    // surgical workflow diffs (collapses `SHA  # v3`, trims blank lines).
+    "editor.formatOnSave": false
+  },
+
+  // ========================================
+  // SQLFluff (relative path — works for all devs with .venv)
+  // ========================================
+  "sqlfluff.executablePath": ".venv/bin/sqlfluff",
+  "sqlfluff.linter.run": "onSave",
+  "sqlfluff.format.enabled": true,
+
+  // ========================================
+  // Copilot Agent / Subagent Configuration
+  // (CRITICAL — required for coordinator pattern)
+  // ========================================
+  "chat.customAgentInSubagent.enabled": true,
+  "chat.agent.enabled": true,
+  "chat.useAgentSkills": true,
+  "chat.agentSkillsLocations": [".github/skills"],
+  "chat.useCustomAgentHooks": true,
+  "github.copilot.chat.agentDebugLog.fileLogging.enabled": true,
+  "github.copilot.chat.agent.modelDetails.enabled": true,
+  "chat.useCustomizationsInParentRepositories": true,
+  "chat.subagents.allowInvocationsFromSubagents": true,
+
+  // ========================================
+  // SECURITY — Credential file IDE-attachment defense
+  // ========================================
+  // Rationale: `.gitignore` prevents commit of credential files but does
+  // NOT prevent the VS Code "attach file to context" UI from sending them
+  // to chat. Hide credential-bearing files from the IDE explorer/picker
+  // surfaces so they cannot be accidentally attached. This is structural
+  // defense in depth — agent-side rules (e.g. .claude/rules/04-security.md)
+  // cannot defend against IDE-initiated context attachment.
+  //
+  // Cross-reference: docs/triage-agent/security-incident-2026-06-04.md
+  // (mcp.json cleartext-secret exposure — see post-mortem)
+  //
+  // Scope is intentionally narrow — only files that contain or commonly
+  // contain live credentials. Adding to this list = security decision,
+  // not a UX decision. Review carefully before adding.
+  "files.exclude": {
+    "**/.DS_Store": true,
+    ".vscode/mcp.json": true,
+    ".vscode/mcp.json.preinput.bak": true,
+    ".vscode/mcp.json.migrated": true,
+    ".env": true,
+    ".env.*": true,
+    "**/.dbt/profiles.yml": true,
+    "**/*.pem": true,
+    "**/*.key": true,
+    "**/id_rsa": true,
+    "**/id_ed25519": true
+  },
+  "search.exclude": {
+    ".vscode/mcp.json": true,
+    ".vscode/mcp.json.preinput.bak": true,
+    ".vscode/mcp.json.migrated": true,
+    ".env": true,
+    ".env.*": true,
+    "**/.dbt/profiles.yml": true
+  }
+}

@@ -1,0 +1,13 @@
+version: 2
+models:
+  - name: rpt_po_item_receipt
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - PO_HEADER_ID
+              - PO_LINE_NUMBER
+              - ZEROIFNULL(TRANSACTION_ID)
+              - ZEROIFNULL(MATERIAL_DOCUMENT_NUMBER)
+              - ZEROIFNULL(MATERIAL_DOCUMENT_ITEM)
+    columns: []

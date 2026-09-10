@@ -1,0 +1,64 @@
+---- SRC LAYER ----
+WITH
+SRC_PB             as ( SELECT SNAPSHOTDATE AS DATE, BKCC, HAS_NON_DELETED_PAIRED_DEVICE, IS_ACTIVE_FLO_PROTECT_LOC, LOCATION_ID, REC_SRC, SWD_DEVICE_CNT, SWS_DEVICE_CNT FROM {{ ref('pb_daily_location_counts') }} as SRC  )
+
+/*
+SRC_PB             as ( SELECT * FROM BUS_VAULT.PB_DAILY_LOCATION_COUNTS )
+*/
+---- LOGIC LAYER ----
+
+, LOGIC_PB as (
+    SELECT
+        BKCC
+      , REC_SRC
+      --, CURRENT_DATE - 1                                             as DATE
+      , TO_NUMBER(TO_CHAR(DATE, 'YYYYMMDD')) as DATE_KEY_YYYYMMDD
+      , COUNT(DISTINCT LOCATION_ID)                                  as                                  LOCATIONS_TO_DATE
+      , COUNT( CASE WHEN HAS_NON_DELETED_PAIRED_DEVICE = 1 AND SWS_DEVICE_CNT > 0 AND SWD_DEVICE_CNT = 0 THEN 1 END ) as                                 SWS_ONLY_LOCATIONS
+      , COUNT( CASE WHEN HAS_NON_DELETED_PAIRED_DEVICE = 1 AND SWD_DEVICE_CNT > 0 AND SWS_DEVICE_CNT = 0 THEN 1 END ) as                                 SWD_ONLY_LOCATIONS
+      , COUNT( CASE WHEN HAS_NON_DELETED_PAIRED_DEVICE = 1 AND SWS_DEVICE_CNT > 0 AND SWD_DEVICE_CNT > 0 THEN 1 END ) as                              SWS_AND_SWD_LOCATIONS
+      , COUNT( CASE WHEN HAS_NON_DELETED_PAIRED_DEVICE = 1 AND IS_ACTIVE_FLO_PROTECT_LOC = 1 THEN 1 END ) as                              FLO_PROTECT_LOCATIONS
+    FROM SRC_PB
+    GROUP BY
+    BKCC, 
+    REC_SRC,
+    DATE
+)
+---- RENAME LAYER ----
+
+, RENAME_PB as (
+    SELECT
+        BKCC
+      , REC_SRC
+      , DATE_KEY_YYYYMMDD
+      , LOCATIONS_TO_DATE
+      , SWS_ONLY_LOCATIONS
+      , SWD_ONLY_LOCATIONS
+      , SWS_AND_SWD_LOCATIONS
+      , FLO_PROTECT_LOCATIONS
+    FROM LOGIC_PB
+)
+---- FILTER LAYER ----
+
+, FILTER_PB as (
+    SELECT *
+    FROM RENAME_PB
+)
+
+---- JOIN LAYER ----
+, JOIN_RESULT as (
+    SELECT *
+    FROM FILTER_PB
+)
+
+---- FINAL LAYER ----
+SELECT
+          BKCC
+        , REC_SRC
+        , DATE_KEY_YYYYMMDD
+        , LOCATIONS_TO_DATE
+        , SWS_ONLY_LOCATIONS
+        , SWD_ONLY_LOCATIONS
+        , SWS_AND_SWD_LOCATIONS
+        , FLO_PROTECT_LOCATIONS
+FROM JOIN_RESULT

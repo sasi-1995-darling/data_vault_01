@@ -1,0 +1,22 @@
+version: 2
+
+models:
+  - name: sat_supplier_detail__emtk_ebs
+    description: This is the raw vault satellite model for supplier detail
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - supplier_hk
+              - load_dts
+      - dbt_constraints.foreign_key:
+          arguments:
+            fk_column_names:
+              - supplier_hk
+            pk_table_name: ref('hub_supplier')
+            pk_column_names:
+              - supplier_hk
+    config:
+      tags:
+        - emtek
+        - ebs

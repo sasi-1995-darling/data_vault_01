@@ -1,0 +1,5 @@
+version: 2
+models:
+- name: dim_device_account_location_subscription
+  data_tests: []
+  columns: []

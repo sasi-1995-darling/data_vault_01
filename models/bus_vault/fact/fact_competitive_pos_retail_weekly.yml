@@ -1,0 +1,11 @@
+version: 2
+models:
+  - name: fact_competitive_pos_retail_weekly
+    description: >
+      Fact view of weekly retail POS measures for competitive products (Datavations source).
+      Grain: COMPETITIVE_PRODUCT_HK + RETAILER_HK + REPORTING_PERIOD + REGION + STATE
+             + HOMEDEPOT_REGION + LOWES_REGION.
+      Foreign keys join to dim_competitive_product_retail (product + retailer attributes).
+      Degenerate dimensions: REPORTING_PERIOD, REGION, STATE, HOMEDEPOT_REGION, LOWES_REGION.
+      UPC, RETAILER, and SECTOR are excluded — resolved via dim_competitive_product_retail.
+    columns: []

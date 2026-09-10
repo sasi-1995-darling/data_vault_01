@@ -1,0 +1,10 @@
+version: 2
+models:
+  - name: pit_quality_causes_current
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - QUALITY_CAUSES_HK
+              - NOTIFICATION_ISSUE_CAUSE_BK
+    columns: []

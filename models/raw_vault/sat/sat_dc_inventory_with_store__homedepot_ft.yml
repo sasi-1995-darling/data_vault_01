@@ -1,0 +1,63 @@
+version: 2
+models:
+- name: sat_dc_inventory_with_store__homedepot_ft
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - HOME_DEPOT_ACCOUNT
+        - DAY_1
+        - MANUF_PART_NUMBER
+        - SKU_NBR
+        - STORE_HK
+        - LOAD_DTS
+  - dbt_expectations.expect_table_row_count_to_be_between:
+      arguments:
+        min_value: 4
+      config:
+        severity: warn
+  columns:
+  - name: HOME_DEPOT_ACCOUNT
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+  - name: DAY_1
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+  - name: MANUF_PART_NUMBER
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+  - name: SKU_NBR
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+  - name: STORE_HK
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'hub_store' )
+          pk_column_name: STORE_HK
+  - name: LOAD_DTS
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+  - name: D_DC_NAME
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+  - name: D_DH_DC_NBR
+    data_tests:
+    - not_null:
+        config:
+          severity: warn

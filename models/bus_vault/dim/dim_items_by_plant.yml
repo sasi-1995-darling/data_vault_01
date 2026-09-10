@@ -1,0 +1,9 @@
+version: 2
+models:
+- name: dim_items_by_plant
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - PLANT_ITEM_KEY
+  columns: []

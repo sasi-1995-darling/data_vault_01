@@ -1,0 +1,22 @@
+version: 2
+models:
+  - name: lsat_response__centercode
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - FORM_PROJECT_HK
+              - RESPONSE_ORDINAL
+              - FIELD_ORDINAL
+              - PSA_LOAD_DTS
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          config:
+            severity: warn
+          arguments:
+            min_value: 4
+    columns:
+      - name: FORM_PROJECT_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn

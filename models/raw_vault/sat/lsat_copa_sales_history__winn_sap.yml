@@ -1,0 +1,21 @@
+version: 2
+models:
+- name: lsat_copa_sales_history__winn_sap
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - LNK_COPA_SALES_HK
+        - LOAD_DTS
+  - dbt_expectations.expect_table_row_count_to_be_between:
+      arguments:
+        min_value: 4
+      config:
+        severity: warn
+  columns:
+  - name: LNK_COPA_SALES_HK
+    data_tests:
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'lnk_copa_sales' )
+          pk_column_name: LNK_COPA_SALES_HK

@@ -1,0 +1,13 @@
+version: 2
+models:
+- name: v_psa_stg_legacy_hofrus_sales__hofr_ecl
+  data_tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - INVOICE_BK
+        - UNIQUE_KEY
+        - LOAD_DTS
+      config:
+        severity: warn
+  columns: []

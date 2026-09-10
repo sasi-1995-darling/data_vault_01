@@ -1,0 +1,77 @@
+version: 2
+
+models:
+  - name: base_pos_calendar__hd_askuity
+    description: This is the home depot base staging model for Calendar
+    tests:
+      - 'dbt_constraints.primary_key:':
+          arguments:
+            column_names:
+              - date
+    columns:
+      - name: thd_cal_day
+        tests:
+          - not_null
+      - name: thd_cal_week
+        tests:
+          - not_null
+      - name: thd_cal_quarter
+        tests:
+          - not_null
+      - name: thd_cal_year
+        tests:
+          - not_null
+  - name: base_pos_inventory__hd_askuity
+    description: This is the home depot base staging model for Inventory
+    tests:
+      - 'dbt_constraints.primary_key:':
+          arguments:
+            column_names:
+              - day
+              - sku_nbr
+              - d_store_nbr
+              - merch_vendor
+              - manuf_part_number
+              - home_depot_account
+    columns:
+      - name: day
+        tests:
+          - not_null
+      - name: sku_nbr
+        tests:
+          - not_null
+      - name: home_depot_account
+        tests:
+          - not_null
+
+  - name: base_pos_location__hd_askuity
+    description: This is the home depot base staging model for store locations
+    tests:
+      - 'dbt_constraints.primary_key:':
+          arguments:
+            column_names:
+              - location_id
+  - name: base_pos_pos__hd_askuity
+    description: This is the home depot base staging model for POS
+    tests:
+      - 'dbt_constraints.primary_key:':
+          arguments:
+            column_names:
+              - day
+              - sku_nbr
+              - d_store_nbr
+              - merch_vendor
+              - manuf_part_number
+              - fulfillment_channel
+              - home_depot_account
+              - sku_status
+    columns:
+      - name: day
+        tests:
+          - not_null
+      - name: sku_nbr
+        tests:
+          - not_null
+      - name: home_depot_account
+        tests:
+          - not_null

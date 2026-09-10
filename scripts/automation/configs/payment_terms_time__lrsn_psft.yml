@@ -1,0 +1,224 @@
+schema_version: '1.0'
+filename: v_psa_stg_payment_terms_time__lrsn_psft
+_pipeline_metadata:
+  bkcc_rec_src: USSDBR.ORCL.PSFTPRD.PS_PYMT_TRMS_TIME
+  has_fivetran_deleted: true
+  has_psa_delete_ind: true
+  psa_delete_filter: false
+  null_bk_coalesced: false
+  large_volume: false
+  row_count: 86
+  volume_tier: normal
+  load_dts_derivation: CONVERT_TIMEZONE('UTC', _FIVETRAN_SYNCED)
+  grain_valid: true
+models:
+- layer: STG
+  derived_name: v_psa_stg_payment_terms_time__lrsn_psft
+  short_name: payment_terms_time__lrsn_psft
+  sources:
+  - source_schema: lrsn_psft_sysadm
+    source_table: ps_pymt_trms_time
+    alias: SRC
+  columns:
+  - source_table: SRC
+    source_column: PYMNT_TERMS_CD
+    staging_column_name: PYMNT_TERMS_CD
+    datatype: VARCHAR
+    hashdiff: ''
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: PYMNT_TERMS_CD
+    datatype: VARCHAR
+    staging_column_name: PAYMENT_TERM_BK
+    hashdiff: ''
+    unique: 'COMPOSITE: PAY_TRMS_TIME_ID, SETID, LOAD_DTS'
+    not_null: 'yes'
+    manual_logic: ''
+  - source_table: SRC
+    source_column: (DERIVED)
+    staging_column_name: LOAD_DTS
+    datatype: TIMESTAMP
+    hashdiff: ''
+    not_null: ''
+    unique: ''
+    manual_logic: CONVERT_TIMEZONE('UTC', _FIVETRAN_SYNCED)
+  - source_table: SRC
+    source_column: SETID
+    staging_column_name: SETID
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: PAY_TRMS_TIME_ID
+    staging_column_name: PAY_TRMS_TIME_ID
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: DESCR
+    staging_column_name: DESCR
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: DESCRSHORT
+    staging_column_name: DESCRSHORT
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: TMG_BASIS_OPTION
+    staging_column_name: TMG_BASIS_OPTION
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: TMG_REL_MONTH_VAL
+    staging_column_name: TMG_REL_MONTH_VAL
+    datatype: NUMBER
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: TMG_MONTH_DUE_CD
+    staging_column_name: TMG_MONTH_DUE_CD
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: TMG_DAY_DUE_CD
+    staging_column_name: TMG_DAY_DUE_CD
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: DUE_DT
+    staging_column_name: DUE_DT
+    datatype: DATE
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: TMG_DAY_INCR_VAL
+    staging_column_name: TMG_DAY_INCR_VAL
+    datatype: NUMBER
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: TMG_MONTH_INCR_VAL
+    staging_column_name: TMG_MONTH_INCR_VAL
+    datatype: NUMBER
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: TMG_YEAR_INCR_VAL
+    staging_column_name: TMG_YEAR_INCR_VAL
+    datatype: NUMBER
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: _FIVETRAN_ID
+    staging_column_name: _FIVETRAN_ID
+    datatype: TEXT
+    hashdiff: ''
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: _FIVETRAN_DELETED
+    staging_column_name: _FIVETRAN_DELETED
+    datatype: BOOLEAN
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: _FIVETRAN_SYNCED
+    staging_column_name: _FIVETRAN_SYNCED
+    datatype: TIMESTAMP_TZ
+    hashdiff: ''
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: PSA_LOAD_DTS
+    staging_column_name: PSA_LOAD_DTS
+    datatype: TIMESTAMP_LTZ
+    hashdiff: ''
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: PSA_RECORD_SOURCE
+    staging_column_name: PSA_RECORD_SOURCE
+    datatype: TEXT
+    hashdiff: ''
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC
+    source_column: PSA_DELETE_IND
+    staging_column_name: PSA_DELETE_IND
+    datatype: TEXT
+    hashdiff: 'yes'
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC_BKCC
+    source_column: BKCC
+    staging_column_name: BKCC
+    datatype: TEXT
+    hashdiff: ''
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: SRC_BKCC
+    source_column: REC_SRC
+    staging_column_name: REC_SRC
+    datatype: TEXT
+    hashdiff: ''
+    not_null: ''
+    unique: ''
+    manual_logic: ''
+  - source_table: ''
+    source_column: (DERIVED)
+    staging_column_name: PAYMENT_TERM_HK
+    datatype: BINARY
+    hashdiff: ''
+    not_null: ''
+    unique: ''
+    manual_logic: 'HASH: PYMNT_TERMS_CD, BKCC'
+  - source_table: ''
+    source_column: (DERIVED)
+    staging_column_name: HASHDIFF
+    datatype: BINARY
+    hashdiff: ''
+    not_null: ''
+    unique: ''
+    manual_logic: 'HASH: SETID, PAY_TRMS_TIME_ID, DESCR, DESCRSHORT, TMG_BASIS_OPTION,
+      TMG_REL_MONTH_VAL, TMG_MONTH_DUE_CD, TMG_DAY_DUE_CD, DUE_DT, TMG_DAY_INCR_VAL,
+      TMG_MONTH_INCR_VAL, TMG_YEAR_INCR_VAL, _FIVETRAN_DELETED, PSA_DELETE_IND'

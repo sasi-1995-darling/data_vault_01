@@ -1,0 +1,5 @@
+version: 2
+models:
+- name: rep_product_review_v2
+  data_tests: []
+  columns: []

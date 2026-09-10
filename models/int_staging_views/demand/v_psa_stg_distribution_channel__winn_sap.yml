@@ -1,0 +1,13 @@
+version: 2
+models:
+  - name: v_psa_stg_distribution_channel__winn_sap
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          config:
+            severity: warn
+          arguments:
+            combination_of_columns:
+              - VTWEG
+              - SPRAS
+              - LOAD_DTS
+    columns: []

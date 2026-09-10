@@ -1,0 +1,10 @@
+duplicate_victim,duplicate_survivor,source_system,source_table,field_name
+3585735,3777946,emtk_ebs,mtl_system_items_b,inventory_item_id
+3550823,3550827,emtk_ebs,mtl_system_items_b,inventory_item_id
+3945536,3592543,emtk_ebs,mtl_system_items_b,inventory_item_id
+3945537,3592544,emtk_ebs,mtl_system_items_b,inventory_item_id
+6567,64855,emtk_ebs,hz_cust_site_uses_all,site_use_id
+12317,649761,emtk_ebs,hz_cust_site_uses_all,site_use_id
+13658,736824,emtk_ebs,hz_cust_site_uses_all,site_use_id
+46241,21038,emtk_ebs,hz_cust_site_uses_all,site_use_id
+27447,564281,emtk_ebs,hz_cust_site_uses_all,site_use_id

@@ -1,0 +1,20 @@
+version: 2
+models:
+- name: v_psa_stg_copa_sales__winn_sap
+  data_tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - COPA_HEADER_BK
+        - COPA_LINE_BK
+        - CURRENCY_TYPE_BK
+        - MANDT
+        - VRGAR
+        - VERSI
+        - PERIO
+        - PAOBJNR
+        - PASUBNR
+        - LOAD_DTS
+      config:
+        severity: warn
+  columns: []

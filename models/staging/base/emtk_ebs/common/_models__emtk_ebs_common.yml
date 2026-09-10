@@ -1,0 +1,75 @@
+version: 2
+
+models:
+  - name: base_contact__emtk_ebs_common
+    description: This is the base staging model from Emtek for hub_contact
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - contact_point_id
+
+  - name: base_item_base__emtk_ebs_common
+    description: This is the base staging model from Emtek for hub_item and sat_item_base
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - org_id
+              - segment1
+
+  - name: base_item_language__emtk_ebs_common
+    description: This is the base staging model from Emtek for sat_item_language
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - org_id
+              - segment1
+
+  - name: base_item_category_map__emtk_ebs_common
+    description: This is the base staging model from Emtek for multi-active msat_item_category__emtk_ebs
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - org_id
+              - segment1
+              - category_id
+              - category_set_id
+
+  - name: base_item_category_ref__emtk_ebs_common
+    description: This is the base staging model from Emtek for ref_item_category
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - category_id
+
+  - name: base_item_category_group_ref__emtk_ebs_common
+    description: This is the base staging model from Emtek for ref_item_category_group
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - category_set_id
+
+  - name: base_item_cost__emtk_ebs_common
+    description: This is the base staging model from Emtek for sat_item_cost
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - org_id
+              - segment1
+
+  - name: base_oracle_lookup_values__emtk_ebs_common
+    description: This is the base staging model from Emtek for sat_item_cost
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - lookup_type
+              - lookup_code
+              - view_application_id
+              - meaning

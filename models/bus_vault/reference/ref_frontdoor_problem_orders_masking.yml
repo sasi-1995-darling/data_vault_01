@@ -1,0 +1,14 @@
+version: 2
+models:
+  - name: ref_frontdoor_problem_orders_masking
+    description: "Reference table identifying FrontDoor orders requiring LASTMODIFIED masking."
+    data_tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_name: MOEN_ORDER_NK
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          arguments:
+            min_value: 1
+    columns:
+      - name: MOEN_ORDER_NK
+        description: "Moen order identifier to mask in the FrontDoor report view."

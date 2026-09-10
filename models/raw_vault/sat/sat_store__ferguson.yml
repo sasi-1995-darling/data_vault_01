@@ -1,0 +1,21 @@
+version: 2
+models:
+  - name: sat_store__ferguson
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - STORE_HK
+              - LOAD_DTS
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          config:
+            severity: warn
+          arguments:
+            min_value: 4
+    columns:
+      - name: STORE_HK
+        tests:
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'hub_store' )
+                pk_column_name: STORE_HK

@@ -1,0 +1,9 @@
+version: 2
+models:
+- name: ref_ledger_text
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - LANGUAGE_KEY
+        - LEDGER

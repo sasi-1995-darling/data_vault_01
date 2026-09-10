@@ -1,0 +1,407 @@
+---- SRC LAYER ----
+WITH
+SRC_FPR            as ( SELECT ITEM_HK, LEGAL_ENTITY_HK, MATERIAL_DOCUMENT_ITEM, MATERIAL_DOCUMENT_NUMBER, PLANT_HK, PO_HEADER_HK, PO_HEADER_ID, PO_LINE_NUMBER, PO_LINE_RECEIPT_IND_HK, PO_RECEIPT_DATE__YYYYMMDD, PO_RECEIPT_PRICE, PO_RECEIPT_QUANTITY, PO_RECEIPT_VALUE, PO_RECEIPT_VALUE_LOCAL, SUPPLIER_HK, TRANSACTION_ID FROM {{ ref('fact_po_receipt') }} as SRC  ),
+SRC_DPH            as ( SELECT BUYER_PLANNER_CODE, INCOTERMS_1, INCOTERMS_2, PO_CURRENCY, PO_DOCUMENT_TYPE, PO_HEADER_DEL_IND, PO_HEADER_HK, PO_NUMBER, PO_PAYMENT_TERMS, PO_PROCESSING_STATUS, PURCHASING_ORG, REC_SRC FROM {{ ref('dim_po_header') }} as SRC  ),
+SRC_PLRI           as ( SELECT DEBIT_CREDIT_IND, LOCAL_CURRENCY, MOVEMENT_TYPE, PO_LINE_RECEIPT_IND_HK, PO_RECEIPT_TYPE, PO_RECEIPT_UOM FROM {{ ref('dim_po_line_receipt_ind') }} as SRC  ),
+SRC_FPI_PLRI       as ( SELECT ACCOUNT_ASSIGNMENT, CLOSED_STATUS, GOODS_RECEIPT_COMPLETE_IND, GOODS_RECEIPT_IND, INVOICE_RECEIPT_IND, ORDER_UOM, PO_LINE_DEL_IND, PO_LINE_RECEIPT_IND_HK, PURCHASE_ORDER_PRICE_UOM FROM {{ ref('dim_po_line_receipt_ind') }} as SRC  ),
+SRC_DS             as ( SELECT SUPPLIER_BK, SUPPLIER_HK, SUPPLIER_NAME_1 FROM {{ ref('dim_supplier_v2') }} as SRC  ),
+SRC_FPI            as ( SELECT CONVERSION_PRICE_UOM_TO_ORDER_UOM_D, CONVERSION_PRICE_UOM_TO_ORDER_UOM_N, GOODS_RECEIPT_PROCESSING_DAYS, GROSS_VALUE, NET_PRICE, NET_VALUE, ORDER_QUANTITY, PO_CREATION_DATE__YYYYMMDD, PO_HEADER_ID, PO_LINE_NUMBER, PO_LINE_RECEIPT_IND_HK, PRICE_UNIT, TOTAL_PLANNED_LEAD_DAYS FROM {{ ref('fact_po_item') }} as SRC  ),
+SRC_DFY            as ( SELECT DATE, DATE_BK, FISCAL_445_CAL_MONTH FROM {{ ref('dim_date_fiscal_445') }} as SRC  ),
+SRC_FPI_DFY        as ( SELECT DATE, DATE_BK, FISCAL_445_CAL_MONTH FROM {{ ref('dim_date_fiscal_445') }} as SRC  ),
+SRC_DI             as ( SELECT BASE_MATERIAL, ITEM_CATEGORY, ITEM_ID, ITEM_NUMBER FROM {{ ref('dim_item_fbin') }} as SRC  ),
+SRC_DLE            as ( SELECT LEGAL_ENTITY_CODE, LEGAL_ENTITY_HK, LEGAL_ENTITY_NAME, LEGAL_ENTITY_REGION FROM {{ ref('dim_legal_entity') }} as SRC  )
+
+/*
+SRC_FPR            as ( SELECT * FROM BUS_VAULT.FACT_PO_RECEIPT )
+SRC_DPH            as ( SELECT * FROM BUS_VAULT.DIM_PO_HEADER )
+SRC_PLRI           as ( SELECT * FROM BUS_VAULT.DIM_PO_LINE_RECEIPT_IND )
+SRC_FPI_PLRI       as ( SELECT * FROM BUS_VAULT.DIM_PO_LINE_RECEIPT_IND )
+SRC_DS             as ( SELECT * FROM BUS_VAULT.DIM_SUPPLIER_V2 )
+SRC_FPI            as ( SELECT * FROM BUS_VAULT.FACT_PO_ITEM )
+SRC_DFY            as ( SELECT * FROM BUS_VAULT.DIM_DATE_FISCAL_445 )
+SRC_FPI_DFY        as ( SELECT * FROM BUS_VAULT.DIM_DATE_FISCAL_445 )
+SRC_DI             as ( SELECT * FROM BUS_VAULT.DIM_ITEM_FBIN )
+SRC_DLE            as ( SELECT * FROM BUS_VAULT.DIM_LEGAL_ENTITY )
+*/
+---- LOGIC LAYER ----
+
+, LOGIC_FPR as (
+    SELECT
+        PO_HEADER_ID
+      , PO_LINE_NUMBER
+      , TRANSACTION_ID
+      , MATERIAL_DOCUMENT_NUMBER
+      , MATERIAL_DOCUMENT_ITEM
+      , PO_RECEIPT_QUANTITY
+      , PO_RECEIPT_PRICE
+      , PO_RECEIPT_VALUE_LOCAL
+      , PO_RECEIPT_VALUE
+      , PLANT_HK
+      , ITEM_HK
+      , LEGAL_ENTITY_HK
+      , PO_HEADER_HK
+      , PO_LINE_RECEIPT_IND_HK
+      , PO_RECEIPT_DATE__YYYYMMDD
+      , SUPPLIER_HK
+    FROM SRC_FPR
+)
+
+, LOGIC_DPH as (
+    SELECT
+        PO_NUMBER
+      , PO_DOCUMENT_TYPE
+      , PO_HEADER_DEL_IND
+      , PO_PROCESSING_STATUS
+      , PO_PAYMENT_TERMS
+      , INCOTERMS_1
+      , INCOTERMS_2
+      , PURCHASING_ORG
+      , BUYER_PLANNER_CODE
+      , PO_CURRENCY
+      , REC_SRC
+      , PO_HEADER_HK                                                 as                                   DPH_PO_HEADER_HK
+    FROM SRC_DPH
+)
+
+, LOGIC_PLRI as (
+    SELECT
+        PO_RECEIPT_TYPE
+      , PO_RECEIPT_UOM
+      , MOVEMENT_TYPE
+      , DEBIT_CREDIT_IND
+      , LOCAL_CURRENCY
+      , PO_LINE_RECEIPT_IND_HK                                       as                        PLRI_PO_LINE_RECEIPT_IND_HK
+    FROM SRC_PLRI
+)
+
+, LOGIC_FPI_PLRI as (
+    SELECT
+        PO_LINE_DEL_IND
+      , GOODS_RECEIPT_IND
+      , GOODS_RECEIPT_COMPLETE_IND
+      , CLOSED_STATUS
+      , INVOICE_RECEIPT_IND
+      , ACCOUNT_ASSIGNMENT
+      , ORDER_UOM
+      , PURCHASE_ORDER_PRICE_UOM
+      , PO_LINE_RECEIPT_IND_HK                                       as                    FPI_PLRI_PO_LINE_RECEIPT_IND_HK
+    FROM SRC_FPI_PLRI
+)
+
+, LOGIC_DS as (
+    SELECT
+        SUPPLIER_BK                                                  as                                        SUPPLIER_ID
+      , SUPPLIER_NAME_1                                              as                                      SUPPLIER_NAME
+      , SUPPLIER_HK                                                  as                                     DS_SUPPLIER_HK
+    FROM SRC_DS
+)
+
+, LOGIC_FPI as (
+    SELECT
+        ORDER_QUANTITY
+      , NET_PRICE
+      , PRICE_UNIT
+      , NET_VALUE
+      , GROSS_VALUE
+      , TOTAL_PLANNED_LEAD_DAYS
+      , GOODS_RECEIPT_PROCESSING_DAYS
+      , CONVERSION_PRICE_UOM_TO_ORDER_UOM_N
+      , CONVERSION_PRICE_UOM_TO_ORDER_UOM_D
+      , PO_HEADER_ID                                                 as                                   FPI_PO_HEADER_ID
+      , PO_LINE_NUMBER                                               as                                 FPI_PO_LINE_NUMBER
+      , PO_LINE_RECEIPT_IND_HK                                       as                         FPI_PO_LINE_RECEIPT_IND_HK
+      , PO_CREATION_DATE__YYYYMMDD
+    FROM SRC_FPI
+)
+
+, LOGIC_DFY as (
+    SELECT
+        DATE                                                         as                                    PO_RECEIPT_DATE
+      , FISCAL_445_CAL_MONTH                                         as                            PO_RECEIPT_FISCAL_MONTH
+      , DATE_BK
+    FROM SRC_DFY
+)
+
+, LOGIC_FPI_DFY as (
+    SELECT
+        DATE                                                         as                                   PO_CREATION_DATE
+      , FISCAL_445_CAL_MONTH                                         as                           PO_CREATION_FISCAL_MONTH
+      , DATE_BK                                                      as                                    FPI_DFY_DATE_BK
+    FROM SRC_FPI_DFY
+)
+
+, LOGIC_DI as (
+    SELECT
+        ITEM_NUMBER
+      , BASE_MATERIAL
+      , ITEM_CATEGORY
+      , ITEM_ID
+    FROM SRC_DI
+)
+
+, LOGIC_DLE as (
+    SELECT
+        LEGAL_ENTITY_CODE
+      , LEGAL_ENTITY_NAME
+      , LEGAL_ENTITY_REGION
+      , LEGAL_ENTITY_HK                                              as                                DLE_LEGAL_ENTITY_HK
+    FROM SRC_DLE
+)
+---- RENAME LAYER ----
+
+, RENAME_FPR as (
+    SELECT
+        PO_HEADER_ID
+      , PO_LINE_NUMBER
+      , TRANSACTION_ID
+      , MATERIAL_DOCUMENT_NUMBER
+      , MATERIAL_DOCUMENT_ITEM
+      , PO_RECEIPT_QUANTITY
+      , PO_RECEIPT_PRICE
+      , PO_RECEIPT_VALUE_LOCAL
+      , PO_RECEIPT_VALUE
+      , PLANT_HK
+      , ITEM_HK
+      , LEGAL_ENTITY_HK
+      , PO_HEADER_HK
+      , PO_LINE_RECEIPT_IND_HK
+      , PO_RECEIPT_DATE__YYYYMMDD
+      , SUPPLIER_HK
+    FROM LOGIC_FPR
+)
+
+, RENAME_FPI_DFY as (
+    SELECT
+        PO_CREATION_DATE
+      , PO_CREATION_FISCAL_MONTH
+      , FPI_DFY_DATE_BK
+    FROM LOGIC_FPI_DFY
+)
+
+, RENAME_DFY as (
+    SELECT
+        PO_RECEIPT_DATE
+      , PO_RECEIPT_FISCAL_MONTH
+      , DATE_BK
+    FROM LOGIC_DFY
+)
+
+, RENAME_FPI as (
+    SELECT
+        ORDER_QUANTITY
+      , NET_PRICE
+      , PRICE_UNIT
+      , NET_VALUE
+      , GROSS_VALUE
+      , TOTAL_PLANNED_LEAD_DAYS
+      , GOODS_RECEIPT_PROCESSING_DAYS
+      , CONVERSION_PRICE_UOM_TO_ORDER_UOM_N
+      , CONVERSION_PRICE_UOM_TO_ORDER_UOM_D
+      , FPI_PO_HEADER_ID
+      , FPI_PO_LINE_NUMBER
+      , FPI_PO_LINE_RECEIPT_IND_HK
+      , PO_CREATION_DATE__YYYYMMDD
+    FROM LOGIC_FPI
+)
+
+, RENAME_FPI_PLRI as (
+    SELECT
+        PO_LINE_DEL_IND
+      , GOODS_RECEIPT_IND
+      , GOODS_RECEIPT_COMPLETE_IND
+      , CLOSED_STATUS
+      , INVOICE_RECEIPT_IND
+      , ACCOUNT_ASSIGNMENT
+      , ORDER_UOM
+      , PURCHASE_ORDER_PRICE_UOM
+      , FPI_PLRI_PO_LINE_RECEIPT_IND_HK
+    FROM LOGIC_FPI_PLRI
+)
+
+, RENAME_PLRI as (
+    SELECT
+        PO_RECEIPT_TYPE
+      , PO_RECEIPT_UOM
+      , MOVEMENT_TYPE
+      , DEBIT_CREDIT_IND
+      , LOCAL_CURRENCY
+      , PLRI_PO_LINE_RECEIPT_IND_HK
+    FROM LOGIC_PLRI
+)
+
+, RENAME_DI as (
+    SELECT
+        ITEM_NUMBER
+      , BASE_MATERIAL
+      , ITEM_CATEGORY
+      , ITEM_ID
+    FROM LOGIC_DI
+)
+
+, RENAME_DLE as (
+    SELECT
+        LEGAL_ENTITY_CODE
+      , LEGAL_ENTITY_NAME
+      , LEGAL_ENTITY_REGION
+      , DLE_LEGAL_ENTITY_HK
+    FROM LOGIC_DLE
+)
+
+, RENAME_DPH as (
+    SELECT
+        PO_NUMBER
+      , PO_DOCUMENT_TYPE
+      , PO_HEADER_DEL_IND
+      , PO_PROCESSING_STATUS
+      , PO_PAYMENT_TERMS
+      , INCOTERMS_1
+      , INCOTERMS_2
+      , PURCHASING_ORG
+      , BUYER_PLANNER_CODE
+      , PO_CURRENCY
+      , REC_SRC
+      , DPH_PO_HEADER_HK
+    FROM LOGIC_DPH
+)
+
+, RENAME_DS as (
+    SELECT
+        SUPPLIER_ID
+      , SUPPLIER_NAME
+      , DS_SUPPLIER_HK
+    FROM LOGIC_DS
+)
+---- FILTER LAYER ----
+
+, FILTER_FPR as (
+    SELECT *
+    FROM RENAME_FPR
+)
+
+, FILTER_DPH as (
+    SELECT *
+    FROM RENAME_DPH
+)
+
+, FILTER_PLRI as (
+    SELECT *
+    FROM RENAME_PLRI
+)
+
+, FILTER_FPI_PLRI as (
+    SELECT *
+    FROM RENAME_FPI_PLRI
+)
+
+, FILTER_DS as (
+    SELECT *
+    FROM RENAME_DS
+)
+
+, FILTER_FPI as (
+    SELECT *
+    FROM RENAME_FPI
+)
+
+, FILTER_DFY as (
+    SELECT *
+    FROM RENAME_DFY
+)
+
+, FILTER_FPI_DFY as (
+    SELECT *
+    FROM RENAME_FPI_DFY
+)
+
+, FILTER_DI as (
+    SELECT *
+    FROM RENAME_DI
+)
+
+, FILTER_DLE as (
+    SELECT *
+    FROM RENAME_DLE
+)
+
+---- JOIN LAYER ----
+, JOIN_RESULT as (
+    SELECT *
+    FROM FILTER_FPR
+    INNER JOIN FILTER_DPH
+        ON FILTER_FPR.PO_HEADER_HK = DPH_PO_HEADER_HK
+    INNER JOIN FILTER_PLRI
+        ON FILTER_FPR.PO_LINE_RECEIPT_IND_HK = PLRI_PO_LINE_RECEIPT_IND_HK
+    LEFT JOIN FILTER_DS
+        ON FILTER_FPR.SUPPLIER_HK = DS_SUPPLIER_HK
+    INNER JOIN FILTER_FPI
+        ON FILTER_FPR.PO_LINE_NUMBER = FILTER_FPI.FPI_PO_LINE_NUMBER AND FILTER_FPR.PO_HEADER_ID = FPI_PO_HEADER_ID
+    LEFT JOIN FILTER_DFY
+        ON FILTER_FPR.PO_RECEIPT_DATE__YYYYMMDD = FILTER_DFY.DATE_BK
+    LEFT JOIN FILTER_DI
+        ON FILTER_FPR.ITEM_HK = FILTER_DI.ITEM_ID
+    INNER JOIN FILTER_DLE
+        ON FILTER_FPR.LEGAL_ENTITY_HK = FILTER_DLE.DLE_LEGAL_ENTITY_HK
+    INNER JOIN FILTER_FPI_PLRI
+        ON FILTER_FPI.FPI_PO_LINE_RECEIPT_IND_HK = FPI_PLRI_PO_LINE_RECEIPT_IND_HK
+    LEFT JOIN FILTER_FPI_DFY
+        ON FILTER_FPI.PO_CREATION_DATE__YYYYMMDD = FPI_DFY_DATE_BK
+)
+
+---- FINAL LAYER ----
+SELECT
+          PO_HEADER_ID
+        , PO_LINE_NUMBER
+        , TRANSACTION_ID
+        , MATERIAL_DOCUMENT_NUMBER
+        , MATERIAL_DOCUMENT_ITEM
+        , PO_CREATION_DATE
+        , PO_CREATION_FISCAL_MONTH
+        , PO_RECEIPT_DATE
+        , PO_RECEIPT_FISCAL_MONTH
+        , PO_RECEIPT_QUANTITY
+        , PO_RECEIPT_PRICE
+        , PO_RECEIPT_VALUE_LOCAL
+        , PO_RECEIPT_VALUE
+        , ORDER_QUANTITY
+        , NET_PRICE
+        , PRICE_UNIT
+        , NET_VALUE
+        , GROSS_VALUE
+        , TOTAL_PLANNED_LEAD_DAYS
+        , GOODS_RECEIPT_PROCESSING_DAYS
+        , CONVERSION_PRICE_UOM_TO_ORDER_UOM_N
+        , CONVERSION_PRICE_UOM_TO_ORDER_UOM_D
+        , PO_LINE_DEL_IND
+        , GOODS_RECEIPT_IND
+        , GOODS_RECEIPT_COMPLETE_IND
+        , CLOSED_STATUS
+        , INVOICE_RECEIPT_IND
+        , ACCOUNT_ASSIGNMENT
+        , ORDER_UOM
+        , PURCHASE_ORDER_PRICE_UOM
+        , PO_RECEIPT_TYPE
+        , PO_RECEIPT_UOM
+        , MOVEMENT_TYPE
+        , DEBIT_CREDIT_IND
+        , LOCAL_CURRENCY
+        , ITEM_NUMBER
+        , BASE_MATERIAL
+        , ITEM_CATEGORY
+        , PLANT_HK
+        , LEGAL_ENTITY_CODE
+        , LEGAL_ENTITY_NAME
+        , LEGAL_ENTITY_REGION
+        , PO_NUMBER
+        , PO_DOCUMENT_TYPE
+        , PO_HEADER_DEL_IND
+        , PO_PROCESSING_STATUS
+        , PO_PAYMENT_TERMS
+        , INCOTERMS_1
+        , INCOTERMS_2
+        , PURCHASING_ORG
+        , BUYER_PLANNER_CODE
+        , PO_CURRENCY
+        , REC_SRC
+        , SUPPLIER_ID
+        , SUPPLIER_NAME
+FROM JOIN_RESULT

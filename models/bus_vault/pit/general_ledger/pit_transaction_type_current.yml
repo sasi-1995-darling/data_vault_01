@@ -1,0 +1,9 @@
+version: 2
+models:
+- name: pit_transaction_type_current
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - COST_TRANSACTION_TYPE_HK
+  columns: []

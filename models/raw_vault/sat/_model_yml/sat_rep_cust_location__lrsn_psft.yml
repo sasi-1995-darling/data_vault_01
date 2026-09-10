@@ -1,0 +1,18 @@
+version: 2
+
+models:
+  - name: sat_rep_cust_location__lrsn_psft
+    description: This is the raw vault satellite model for Larson customer location
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - location_hk
+              - load_dts
+      - dbt_constraints.foreign_key:
+          arguments:
+            fk_column_names:
+              - location_hk
+            pk_table_name: ref('hub_locations')
+            pk_column_names:
+              - location_hk

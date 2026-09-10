@@ -1,0 +1,49 @@
+version: 2
+models:
+  - name: v_psa_stg_zip_county__snfl_usps
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          config:
+            severity: warn
+          arguments:
+            combination_of_columns:
+              - ZIP
+              - COUNTY
+              - LOAD_DTS
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - ZIP
+              - COUNTY
+              - LOAD_DTS
+    columns:
+      - name: ZIP_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: ZIP_BK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: ZIP
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: LOAD_DTS
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: REC_SRC
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: HASHDIFF
+        tests:
+          - not_null:
+              config:
+                severity: warn

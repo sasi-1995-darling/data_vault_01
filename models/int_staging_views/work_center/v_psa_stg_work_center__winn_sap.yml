@@ -1,0 +1,14 @@
+version: 2
+models:
+- name: v_psa_stg_work_center__winn_sap
+  data_tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - ARBPL
+        - OBJTY
+        - OBJID
+        - LOAD_DTS
+        config:
+          severity: warn
+  columns: []

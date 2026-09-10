@@ -1,0 +1,14 @@
+version: 2
+models:
+- name: im_fact_device_event
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - PAIRED_DEVICE_BK
+        - DEVICE_LOCATION_BK
+        - BKCC
+        - REC_SRC
+        - EVENT
+        - CREATED_AT
+  columns: []

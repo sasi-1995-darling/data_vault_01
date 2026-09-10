@@ -1,0 +1,25 @@
+version: 2
+
+models:
+  - name: stg_brand__ref_appbot
+    description: This is the Appbot brand mapping for hub_brand
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - brand_bk
+    columns:
+      - name: rec_src
+        tests:
+          - not_null
+  - name: stg_brand__ref_file
+    description: This is the Confluence brand data for both hub and sat
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - brand_bk
+    columns:
+      - name: rec_src
+        tests:
+          - not_null

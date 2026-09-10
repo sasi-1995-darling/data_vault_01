@@ -1,0 +1,235 @@
+---- SRC LAYER ----
+WITH
+SRC_DvPOS          as ( SELECT * FROM {{ ref('v_psa_stg_pos_main_weekly__datavations') }} as SRC 
+{% if is_incremental() %}
+      where src.load_dts > (select dateadd('HOUR',-1,max(load_dts)) from {{ this }})
+    {% endif %} )
+
+/*
+SRC_DvPOS          as ( SELECT * FROM STAGING.v_psa_stg_pos_main_weekly__datavations )
+*/
+---- LOGIC LAYER ----
+
+, LOGIC_DvPOS as (
+    SELECT
+        LNK_COMPETITIVE_PRODUCT_RETAILER_HK
+      , BRAND
+      , DEPARTMENT
+      , CATEGORY
+      , REPORTING_PERIOD
+      , STATE
+      , LOWES_REGION
+      , HOMEDEPOT_REGION
+      , ITEM_ID
+      , REGION
+      , LOAD_DTS
+      , AVG_SELLING_PRICE
+      , UNITS_ON_HAND
+      , INVENTORY_CREATED_AT
+      , INVENTORY_MODIFIED_AT
+      , ITEM_NAME
+      , LOCATION_TYPE
+      , LOCATIONS_WITH_INVENTORY
+      , MAX_BULK_PRICE
+      , MAX_BULK_UNIT_THRESHOLD
+      , MAX_PRICE
+      , MIN_BULK_PRICE
+      , MIN_BULK_UNIT_THRESHOLD
+      , MIN_PRICE
+      , PARENT_CATEGORY
+      , PRICE_CREATED_AT
+      , PRICE_MODIFIED_AT
+      , REPORTING_PERIOD_MONTH
+      , RETAILER
+      , RETAILER_CATEGORIES
+      , RETAILER_FRIENDLY
+      , SECTOR
+      , STORE_ITEM_ID
+      , UNITS_ON_HAND_MEDIAN
+      , UNITS_REPLENISHED
+      , UNITS_SOLD
+      , UPC
+      , VALUE_ON_HAND
+      , VALUE_REPLENISHED
+      , VALUE_SOLD
+      , PSA_LOAD_DTS
+      , PSA_DELETE_IND
+      , REC_SRC
+      , BKCC
+      , HASHDIFF
+    FROM SRC_DvPOS
+)
+---- RENAME LAYER ----
+
+, RENAME_DvPOS as (
+    SELECT
+        LNK_COMPETITIVE_PRODUCT_RETAILER_HK
+      , BRAND
+      , DEPARTMENT
+      , CATEGORY
+      , REPORTING_PERIOD
+      , STATE
+      , LOWES_REGION
+      , HOMEDEPOT_REGION
+      , ITEM_ID
+      , REGION
+      , LOAD_DTS
+      , AVG_SELLING_PRICE
+      , UNITS_ON_HAND
+      , INVENTORY_CREATED_AT
+      , INVENTORY_MODIFIED_AT
+      , ITEM_NAME
+      , LOCATION_TYPE
+      , LOCATIONS_WITH_INVENTORY
+      , MAX_BULK_PRICE
+      , MAX_BULK_UNIT_THRESHOLD
+      , MAX_PRICE
+      , MIN_BULK_PRICE
+      , MIN_BULK_UNIT_THRESHOLD
+      , MIN_PRICE
+      , PARENT_CATEGORY
+      , PRICE_CREATED_AT
+      , PRICE_MODIFIED_AT
+      , REPORTING_PERIOD_MONTH
+      , RETAILER
+      , RETAILER_CATEGORIES
+      , RETAILER_FRIENDLY
+      , SECTOR
+      , STORE_ITEM_ID
+      , UNITS_ON_HAND_MEDIAN
+      , UNITS_REPLENISHED
+      , UNITS_SOLD
+      , UPC
+      , VALUE_ON_HAND
+      , VALUE_REPLENISHED
+      , VALUE_SOLD
+      , PSA_LOAD_DTS
+      , PSA_DELETE_IND
+      , REC_SRC
+      , BKCC
+      , HASHDIFF
+    FROM LOGIC_DvPOS
+)
+---- FILTER LAYER ----
+
+, FILTER_DvPOS as (
+    SELECT *
+    FROM RENAME_DvPOS
+)
+---- JOIN LAYER ----
+, JOIN_RESULT as (
+    SELECT * FROM FILTER_DvPOS
+)
+
+---- FINAL LAYER ----
+SELECT
+          LNK_COMPETITIVE_PRODUCT_RETAILER_HK
+        , BRAND
+        , DEPARTMENT
+        , CATEGORY
+        , REPORTING_PERIOD
+        , STATE
+        , LOWES_REGION
+        , HOMEDEPOT_REGION
+        , ITEM_ID
+        , REGION
+        , LOAD_DTS
+        , AVG_SELLING_PRICE
+        , UNITS_ON_HAND
+        , INVENTORY_CREATED_AT
+        , INVENTORY_MODIFIED_AT
+        , ITEM_NAME
+        , LOCATION_TYPE
+        , LOCATIONS_WITH_INVENTORY
+        , MAX_BULK_PRICE
+        , MAX_BULK_UNIT_THRESHOLD
+        , MAX_PRICE
+        , MIN_BULK_PRICE
+        , MIN_BULK_UNIT_THRESHOLD
+        , MIN_PRICE
+        , PARENT_CATEGORY
+        , PRICE_CREATED_AT
+        , PRICE_MODIFIED_AT
+        , REPORTING_PERIOD_MONTH
+        , RETAILER
+        , RETAILER_CATEGORIES
+        , RETAILER_FRIENDLY
+        , SECTOR
+        , STORE_ITEM_ID
+        , UNITS_ON_HAND_MEDIAN
+        , UNITS_REPLENISHED
+        , UNITS_SOLD
+        , UPC
+        , VALUE_ON_HAND
+        , VALUE_REPLENISHED
+        , VALUE_SOLD
+        , PSA_LOAD_DTS
+        , PSA_DELETE_IND
+        , REC_SRC
+        , BKCC
+        , HASHDIFF
+FROM JOIN_RESULT
+{% if is_incremental() %}
+WHERE NOT EXISTS (
+    SELECT 1 
+    FROM {{ this }} existing
+    WHERE existing.LNK_COMPETITIVE_PRODUCT_RETAILER_HK = JOIN_RESULT.LNK_COMPETITIVE_PRODUCT_RETAILER_HK
+    AND existing.REPORTING_PERIOD = JOIN_RESULT.REPORTING_PERIOD
+    AND existing.REGION = JOIN_RESULT.REGION
+    AND existing.STATE = JOIN_RESULT.STATE
+    AND existing.LOWES_REGION = JOIN_RESULT.LOWES_REGION
+    AND existing.HOMEDEPOT_REGION = JOIN_RESULT.HOMEDEPOT_REGION
+    AND existing.HASHDIFF = JOIN_RESULT.HASHDIFF	
+)
+{% endif %}
+{% if not is_incremental() %}
+qualify 1 = row_number() over (partition by LNK_COMPETITIVE_PRODUCT_RETAILER_HK, REPORTING_PERIOD, REGION, STATE, LOWES_REGION, HOMEDEPOT_REGION, HASHDIFF order by LOAD_DTS ) 
+union all
+SELECT MD5_BINARY(GR.VALUE::varchar) AS LNK_COMPETITIVE_PRODUCT_RETAILER_HK
+	, GR.VALUE::varchar as BRAND
+	, GR.VALUE::varchar as DEPARTMENT
+	, GR.VALUE::varchar as CATEGORY
+	, GR.VALUE::varchar as REPORTING_PERIOD
+	, GR.VALUE::varchar as STATE
+	, GR.VALUE::varchar as LOWES_REGION
+	, GR.VALUE::varchar as HOMEDEPOT_REGION
+	, GR.VALUE::varchar as ITEM_ID
+	, GR.VALUE::varchar as REGION
+	, '1900-01-01'::TIMESTAMP_NTZ as LOAD_DTS
+, null as AVG_SELLING_PRICE
+, null as UNITS_ON_HAND
+, null as INVENTORY_CREATED_AT
+, null as INVENTORY_MODIFIED_AT
+, null as ITEM_NAME
+, null as LOCATION_TYPE
+, null as LOCATIONS_WITH_INVENTORY
+, null as MAX_BULK_PRICE
+, null as MAX_BULK_UNIT_THRESHOLD
+, null as MAX_PRICE
+, null as MIN_BULK_PRICE
+, null as MIN_BULK_UNIT_THRESHOLD
+, null as MIN_PRICE
+, null as PARENT_CATEGORY
+, null as PRICE_CREATED_AT
+, null as PRICE_MODIFIED_AT
+, null as REPORTING_PERIOD_MONTH
+, null as RETAILER
+, null as RETAILER_CATEGORIES
+, null as RETAILER_FRIENDLY
+, null as SECTOR
+, null as STORE_ITEM_ID
+, null as UNITS_ON_HAND_MEDIAN
+, null as UNITS_REPLENISHED
+, null as UNITS_SOLD
+, null as UPC
+, null as VALUE_ON_HAND
+, null as VALUE_REPLENISHED
+, null as VALUE_SOLD
+, '1900-01-01'::TIMESTAMP_NTZ as PSA_LOAD_DTS
+, 'N' as PSA_DELETE_IND
+, 'USAZET.SNOWFLAKE.FBIN.DERIVED' AS REC_SRC
+, DECODE(GR.VALUE::varchar, 0, 'GHOST RECORD-SYSTEM', -1, 'GHOST RECORD-nullkey-required', -2, 'GHOST RECORD-nullkey-optional')  AS  BKCC
+        , ''::BINARY as HASHDIFF
+        FROM
+        TABLE(strtok_split_to_table('0|-1|-2', '|')) AS GR
+{% endif %}

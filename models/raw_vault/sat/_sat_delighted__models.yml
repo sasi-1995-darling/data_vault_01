@@ -1,0 +1,27 @@
+version: 2
+
+models:
+  - name: sat_product__delighted_edp
+    description: This is the sat model for Flo
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - product_name
+              - load_dts
+  - name: sat_review__delighted_edp
+    description: This is the sat model for Flo
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - id
+              - load_dts
+  - name: sat_sentiment__delighted_edp
+    description: This is the sat model for Flo
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - sentiment_hk
+              - load_dts

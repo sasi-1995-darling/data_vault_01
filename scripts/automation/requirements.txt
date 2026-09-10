@@ -1,0 +1,31 @@
+openpyxl>=3.1.0
+pyyaml>=6.0
+ruamel.yaml>=0.18,<1.0
+rich>=13.0
+# Pinned exactly: tokenization edge cases (dollar-quoting, dialect literals)
+# vary across minor versions and would silently break triage/redact.py
+# literal stripping. LITERAL_STRIP_METHOD embeds this version in every
+# preview payload for traceability — bump deliberately, re-snapshot tests.
+sqlparse==0.5.4
+# Required by scripts/automation/src/triage/rca_schema.py — pinned to
+# the major version validated by the Day 1 invariant test suite.
+pydantic>=2.10,<3.0
+# Required by scripts/automation/src/triage/writer.py (Component 5):
+# - xxhash: error_signature_hash via xxh64 (DDL VARCHAR(16), per
+#   v2-plan §4.7 + triage_invocations.sql column comment). Stdlib
+#   blake2b(digest_size=8) was considered as a no-dep alternative
+#   producing 16-hex output, but the spec is explicit (xxhash64) and
+#   the algorithm name is recorded in the DDL comment for read-side
+#   verifiability.
+# - python-ulid: invocation_id (DDL VARCHAR(26), fixed-width ULID).
+#   Stdlib uuid4 was considered but the DDL pins ULID specifically
+#   (k-sortable, 26-char Crockford base32 — gives chronological
+#   grouping under index without a separate created_at sort).
+xxhash>=3.4,<4
+python-ulid>=2.5,<4
+# Required by scripts/automation/src/triage/dbt_cloud_client.py (Component 8):
+# MCP SDK used to drive the dbt-mcp stdio subprocess (uvx --from
+# dbt-mcp==1.19.2 dbt-mcp) for list_jobs_runs / get_job_run_error.
+# Lower bound matches the version validated in dev (.venv has 1.27.0);
+# capped under 2.0 to surface SDK-major bumps as a deliberate review.
+mcp>=1.27,<2

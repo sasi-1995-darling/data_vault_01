@@ -1,0 +1,66 @@
+version: 2
+models:
+- name: sat_product_cost_estimate_component__moen_sap
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - MANDT
+        - BZOBJ
+        - KALNR
+        - KALKA
+        - KADKY
+        - TVERS
+        - BWVAR
+        - KKZMA
+        - PATNR
+        - KEART
+        - LOSFX
+        - KKZST
+        - KKZMM
+        - LOAD_DTS
+  - dbt_expectations.expect_table_row_count_to_be_between:
+      arguments:
+        min_value: 4
+      config:
+        severity: warn
+  columns:
+  - name: LOAD_DTS
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+  - name: ITEM_BK
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+  - name: ITEM_HK
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'hub_item_v1' )
+          pk_column_name: ITEM_HK
+  - name: PLANT_BK
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+  - name: PLANT_HK
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'hub_plant_v1' )
+          pk_column_name: PLANT_HK
+  - name: PRODUCT_COST_ESTIMATE_HK
+    data_tests:
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'hub_product_cost_estimate' )
+          pk_column_name: PRODUCT_COST_ESTIMATE_HK

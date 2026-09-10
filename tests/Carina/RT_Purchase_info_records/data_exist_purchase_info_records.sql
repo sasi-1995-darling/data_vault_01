@@ -1,0 +1,1 @@
+select * from ({{ data_exist('fact_purchase_info_record','USOHNO.SAP.ECCPRD.Z_EINE')}})

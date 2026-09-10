@@ -1,0 +1,46 @@
+version: 2
+models:
+  - name: ref_lowes_stocked_stores_by_item_sat
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - LOWES_SKU_BK
+              - WEEK_ID
+              - LOWES_BUSINESS_UNIT_DESC
+              - LOAD_DTS
+    columns:
+      - name: LOWES_SKU_BK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'ref_lowes_stocked_stores_by_item_hub' )
+                pk_column_name: LOWES_SKU_BK
+      - name: WEEK_ID
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: LOWES_BUSINESS_UNIT_DESC
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: LOAD_DTS
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: REC_SRC
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: HASHDIFF
+        tests:
+          - not_null:
+              config:
+                severity: warn

@@ -1,0 +1,22 @@
+version: 2
+models:
+  - name: v_psa_stg_customer_products__thermatru_profitero
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          config:
+            severity: warn
+          arguments:
+            combination_of_columns:
+              - PRODUCT_BK
+              - LOAD_DTS
+    columns:
+      - name: PRODUCT_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: PRODUCT_BK
+        tests:
+          - not_null:
+              config:
+                severity: warn

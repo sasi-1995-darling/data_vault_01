@@ -1,0 +1,12 @@
+version: 2
+models:
+  - name: v_psa_stg_mrp_lines__winn_sap
+    columns:
+    - name: MRP_LINES_LHK
+      data_tests:
+      - unique:
+          config:
+            severity: error
+      - not_null:
+          config:
+            severity: warn

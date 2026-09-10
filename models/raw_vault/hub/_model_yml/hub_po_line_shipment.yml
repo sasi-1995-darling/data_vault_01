@@ -1,0 +1,13 @@
+version: 2
+
+models:
+  - name: hub_po_line_shipment
+    description: This is the raw vault hub model for po lines
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - po_line_shipment_hk
+    config:
+      tags:
+        - emtek

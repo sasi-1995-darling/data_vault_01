@@ -1,0 +1,45 @@
+version: 2
+models:
+- name: hub_controlling_area
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - CONTROLLING_AREA_HK
+  - dbt_expectations.expect_table_row_count_to_be_between:
+      arguments:
+        min_value: 4
+      config:
+        severity: warn
+  columns:
+      - name: CONTROLLING_AREA_HK
+        tests:
+          - unique:
+              config:
+                severity: warn
+          - not_null:
+              config:
+                severity: warn
+      - name: CONTROLLING_AREA_BK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: BKCC
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: LOAD_DTS
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: REC_SRC
+        tests:
+          - not_null:
+              config:
+                severity: warn
+
+
+

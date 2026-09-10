@@ -1,0 +1,30 @@
+version: 2
+models:
+- name: pb_amazon_device_email
+  description: >
+    Identifies Flo device owners whose devices were sold through Amazon
+    by tracing the SAP sales order chain (KNA1 sold-to-party LIKE '%AMAZON%')
+    through delivery, serial, equipment, and location assignment to resolve
+    the MAC_ID, then mapping to the user email via pit_flo_device.
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - SEQ_ID
+  - dbt_expectations.expect_table_row_count_to_be_between:
+       arguments:
+         min_value: 4
+  columns:
+  - name: SEQ_ID
+    description: Surrogate sequence identifier
+  - name: SNAPSHOTDATE
+    description: Date the PB was last built
+  - name: PB_LOAD_DTS
+    description: UTC timestamp of the PB build
+  - name: EMAIL
+    description: >
+      Distinct email address of a Flo device owner whose device was sold
+      through an Amazon sales channel (derived from SAP KNA1.NAME1 LIKE '%AMAZON%')
+    data_tests:
+    - not_null
+    - unique

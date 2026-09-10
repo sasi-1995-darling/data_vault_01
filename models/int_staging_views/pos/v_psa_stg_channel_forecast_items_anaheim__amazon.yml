@@ -1,0 +1,15 @@
+version: 2
+models:
+- name: v_psa_stg_channel_forecast_items_anaheim__amazon
+  data_tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - ASIN
+        - MARKETPLACE_ID
+        - START_DATE
+        - FORECAST_GENERATION_DATE
+        - LOAD_DTS
+      config:
+        severity: warn
+  columns: []

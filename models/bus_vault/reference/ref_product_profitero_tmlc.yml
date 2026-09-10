@@ -1,0 +1,5 @@
+version: 2
+models:
+- name: ref_product_profitero_tmlc
+  tests: []
+  columns: []

@@ -1,0 +1,28 @@
+version: 2
+models:
+  - name: v_psa_stg_quality_activities
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          config:
+            severity: warn
+          arguments:
+            combination_of_columns:
+              - QMNUM
+              - MANUM
+              - LOAD_DTS
+    columns:
+      - name: QUALITY_ACTIVITY_BK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: QMNUM
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: MANUM
+        tests:
+          - not_null:
+              config:
+                severity: warn

@@ -1,0 +1,148 @@
+version: 2
+
+models:
+  - name: pit_date_fiscal_445
+    description: >
+      A Point-in-Time (PIT) table for fiscal 445 calendar dates.
+      This model provides various time period flags and comparisons for business analytics.
+      The 445 calendar is a common retail calendar system where each quarter consists of  two 4-week months and one 5-week month (hence "4-4-5").
+    columns:
+      - name: date_bk
+        description: The primary business key for the date
+        tests:
+          - not_null
+          - unique
+
+      - name: DATE
+        description: The calendar date
+        tests:
+          - not_null
+
+      - name: fiscal_445_cal_day
+        description: The day number within the fiscal calendar
+
+      - name: fiscal_445_cal_week
+        description: The week number within the fiscal calendar
+        tests:
+          - not_null
+
+      - name: fiscal_445_cal_month
+        description: The month number within the fiscal calendar (1-12)
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+      - name: fiscal_445_cal_quarter
+        description: The quarter number within the fiscal calendar (1-4)
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [1, 2, 3, 4]
+      - name: fiscal_445_cal_year
+        description: The fiscal year
+        tests:
+          - not_null
+
+      - name: fiscal_445_cal_quarter_yyyyqq
+        description: Fiscal quarter in YYYYQQ format (e.g., 2023Q1)
+        tests:
+          - not_null
+
+      - name: fiscal_445_cal_month_yyyymm
+        description: Fiscal month in YYYYMM format (e.g., 202301)
+        tests:
+          - not_null
+
+      - name: fiscal_445_cal_week_yyyyww
+        description: Fiscal week in YYYYWW format (e.g., 202301)
+        tests:
+          - not_null
+
+      - name: fiscal_445_working_day_flag
+        description: Flag indicating if the date is a working day (1) or not (0)
+
+      - name: is_completed_fiscal_month,
+        description: Flag indicating if the month is completed (true) or not (false)
+
+      - name: is_completed_fiscal_week
+        description: Flag indicating if the week is completed (true) or not (false)
+
+      - name: fiscal_last_week_flag
+        description: >
+          Flag indicating time period:
+          1 = Last completed week
+          2 = Two weeks ago
+          3 = Same week last year
+          0 = Other periods
+
+      - name: fiscal_last_4_weeks_flag
+        description: >
+          Flag indicating 4-week period:
+          1 = Last 4 completed weeks
+          2 = Previous 4 weeks (5-8 weeks ago)
+          3 = Same 4 weeks last year
+          0 = Other periods
+
+      - name: fiscal_last_13_weeks_flag
+        description: >
+          Flag indicating 13-week period:
+          1 = Last 13 completed weeks
+          2 = Previous 13 weeks (14-26 weeks ago)
+          3 = Same 13 weeks last year
+          0 = Other periods
+
+      - name: fiscal_last_month_flag
+        description: >
+          Flag indicating month period:
+          1 = Last completed month
+          2 = Two months ago
+          3 = Same month last year
+          0 = Other periods
+
+      - name: fiscal_last_3_months_flag
+        description: >
+          Flag indicating 3-month period:
+          1 = Last 3 completed months
+          2 = Previous 3 months (4-6 months ago)
+          3 = Same 3 months last year
+          0 = Other periods
+
+      - name: month_name
+        description: Full name of the month (e.g., January)
+
+      - name: month_name_abbr
+        description: Abbreviated month name (e.g., JAN)
+
+      - name: epoch_day
+        description: Sequential day number from the earliest date in the dataset
+
+      - name: epoch_week
+        description: Sequential week number from the earliest date in the dataset
+
+      - name: epoch_month
+        description: Sequential month number from the earliest date in the dataset
+
+      - name: weeks_in_month
+        description: Number of weeks in the 445 fiscal month (4 or 5)
+
+      - name: month_number_leading_zero
+        description: Month number with leading zero (e.g., 01, 02, etc.)
+
+      - name: fiscal_day_of_year
+        description: Zero-based day number within the fiscal year (0 to 364/365)
+
+      - name: fiscal_YTD_flag
+        description: >
+          Year-to-date flag:
+          1 = Current fiscal year up to last completed week
+          3 = Prior fiscal year up to the same point in time
+          0 = Other periods
+
+      - name: fiscal_rolling_52_week_flag
+        description: >
+          52-week rolling flag:
+          1 = Last 52 weeks
+          3 = Equivalent 52 weeks from last year
+          0 = Other periods

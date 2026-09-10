@@ -1,0 +1,14 @@
+version: 2
+models:
+- name: pb_supplier_payment_terms
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - SUPPLIER_PAYMENT_TERM_HK
+  columns:
+  - name: SUPPLIER_HK
+    data_tests:
+    - not_null:
+        config:
+          severity: warn

@@ -1,0 +1,310 @@
+---- SRC LAYER ----
+WITH
+SRC_QMSM           as ( SELECT * FROM {{ ref('v_psa_stg_quality_notifications_task') }} as SRC 
+                         {% if is_incremental() %}
+                         WHERE SRC.LOAD_DTS > (SELECT DATEADD('HOUR', '-1', MAX(LOAD_DTS)) FROM {{this}})
+                         {% endif %}  )
+
+/*
+SRC_QMSM           as ( SELECT * FROM STAGING.V_PSA_STG_QUALITY_NOTIFICATIONS_TASK )
+*/
+---- LOGIC LAYER ----
+
+, LOGIC_QMSM as (
+    SELECT
+        QUALITY_TASKS_HK
+      , MANDT
+      , QMNUM
+      , MANUM
+      , GLREQUEST
+      , MNKAT
+      , MNGRP
+      , MNCOD
+      , MNVER
+      , FOLGEACT
+      , FOLACTPROT
+      , MATXT
+      , ERNAM
+      , ERDAT
+      , AENAM
+      , AEDAT
+      , PSTER
+      , PETER
+      , OBJNR
+      , INDTX
+      , KZMLA
+      , PSTUR
+      , PETUR
+      , ERLNAM
+      , ERLDAT
+      , ERLZEIT
+      , WDVDAT
+      , FENUM
+      , URNUM
+      , ERZEIT
+      , AEZEIT
+      , PARVW
+      , PARNR
+      , MMENGE
+      , MMGEIN
+      , BAUTL
+      , KZLOESCH
+      , QSMNUM
+      , AUTKZ
+      , HANDLE
+      , TSEGFL
+      , TSEGTP
+      , TZONSO
+      , TZONSM
+      , TZONID
+      , KZACTIONBOX
+      , FUNKTION
+      , SAPSMOSS_NOTE
+      , SAPSMOSS_REPORT
+      , SAPSMOSS_MTSTMP
+      , ABC_TEMPL
+      , EFFECTPERC
+      , EFFECTTEXT
+      , ZZTASK_DATE
+      , ZZOPTION
+      , ZZLIFNR
+      , GLDELFLAG
+      , GLCHANGETIME
+      , GLSOURCESYSTEM
+      , PSA_DELETE_IND
+      , LOAD_DTS
+      , REC_SRC
+      , BKCC
+      , HASHDIFF
+    FROM SRC_QMSM
+)
+---- RENAME LAYER ----
+
+, RENAME_QMSM as (
+    SELECT
+        QUALITY_TASKS_HK
+      , MANDT
+      , QMNUM
+      , MANUM
+      , GLREQUEST
+      , MNKAT
+      , MNGRP
+      , MNCOD
+      , MNVER
+      , FOLGEACT
+      , FOLACTPROT
+      , MATXT
+      , ERNAM
+      , ERDAT
+      , AENAM
+      , AEDAT
+      , PSTER
+      , PETER
+      , OBJNR
+      , INDTX
+      , KZMLA
+      , PSTUR
+      , PETUR
+      , ERLNAM
+      , ERLDAT
+      , ERLZEIT
+      , WDVDAT
+      , FENUM
+      , URNUM
+      , ERZEIT
+      , AEZEIT
+      , PARVW
+      , PARNR
+      , MMENGE
+      , MMGEIN
+      , BAUTL
+      , KZLOESCH
+      , QSMNUM
+      , AUTKZ
+      , HANDLE
+      , TSEGFL
+      , TSEGTP
+      , TZONSO
+      , TZONSM
+      , TZONID
+      , KZACTIONBOX
+      , FUNKTION
+      , SAPSMOSS_NOTE
+      , SAPSMOSS_REPORT
+      , SAPSMOSS_MTSTMP
+      , ABC_TEMPL
+      , EFFECTPERC
+      , EFFECTTEXT
+      , ZZTASK_DATE
+      , ZZOPTION
+      , ZZLIFNR
+      , GLDELFLAG
+      , GLCHANGETIME
+      , GLSOURCESYSTEM
+      , PSA_DELETE_IND
+      , LOAD_DTS
+      , REC_SRC
+      , BKCC
+      , HASHDIFF
+    FROM LOGIC_QMSM
+)
+---- FILTER LAYER ----
+
+, FILTER_QMSM as (
+    SELECT *
+    FROM RENAME_QMSM
+)
+
+---- JOIN LAYER ----
+, JOIN_RESULT as (
+    SELECT *
+    FROM FILTER_QMSM
+)
+
+---- FINAL LAYER ----
+SELECT
+          QUALITY_TASKS_HK
+        , MANDT
+        , QMNUM
+        , MANUM
+        , GLREQUEST
+        , MNKAT
+        , MNGRP
+        , MNCOD
+        , MNVER
+        , FOLGEACT
+        , FOLACTPROT
+        , MATXT
+        , ERNAM
+        , ERDAT
+        , AENAM
+        , AEDAT
+        , PSTER
+        , PETER
+        , OBJNR
+        , INDTX
+        , KZMLA
+        , PSTUR
+        , PETUR
+        , ERLNAM
+        , ERLDAT
+        , ERLZEIT
+        , WDVDAT
+        , FENUM
+        , URNUM
+        , ERZEIT
+        , AEZEIT
+        , PARVW
+        , PARNR
+        , MMENGE
+        , MMGEIN
+        , BAUTL
+        , KZLOESCH
+        , QSMNUM
+        , AUTKZ
+        , HANDLE
+        , TSEGFL
+        , TSEGTP
+        , TZONSO
+        , TZONSM
+        , TZONID
+        , KZACTIONBOX
+        , FUNKTION
+        , SAPSMOSS_NOTE
+        , SAPSMOSS_REPORT
+        , SAPSMOSS_MTSTMP
+        , ABC_TEMPL
+        , EFFECTPERC
+        , EFFECTTEXT
+        , ZZTASK_DATE
+        , ZZOPTION
+        , ZZLIFNR
+        , GLDELFLAG
+        , GLCHANGETIME
+        , GLSOURCESYSTEM
+        , PSA_DELETE_IND
+        , LOAD_DTS
+        , REC_SRC
+        , BKCC
+        , HASHDIFF
+FROM JOIN_RESULT
+{% if is_incremental() %}
+WHERE NOT EXISTS (
+    SELECT 1 
+    FROM {{ this }} existing
+    WHERE existing.QUALITY_TASKS_HK = JOIN_RESULT.QUALITY_TASKS_HK
+    AND existing.HASHDIFF = JOIN_RESULT.HASHDIFF
+)
+{% endif %} 
+{% if not is_incremental() %}
+/*the following qualify is to restrict multiple loads of touched records during the initial build. Ex: multiple row per hk, hashdiff */
+qualify 1= row_number()over(partition by QUALITY_TASKS_HK, HASHDIFF order by LOAD_DTS)
+union all
+
+SELECT MD5_BINARY(GR.VALUE)  QUALITY_TASKS_HK
+, CAST(NULL AS STRING) AS MANDT
+, CAST(NULL AS STRING) AS QMNUM
+, CAST(NULL AS STRING) AS MANUM
+, CAST(NULL AS NUMBER) AS GLREQUEST
+, CAST(NULL AS STRING) AS MNKAT
+, CAST(NULL AS STRING) AS MNGRP
+, CAST(NULL AS STRING) AS MNCOD
+, CAST(NULL AS STRING) AS MNVER
+, CAST(NULL AS STRING) AS FOLGEACT
+, CAST(NULL AS STRING) AS FOLACTPROT
+, CAST(NULL AS STRING) AS MATXT
+, CAST(NULL AS STRING) AS ERNAM
+, CAST(NULL AS STRING) AS ERDAT
+, CAST(NULL AS STRING) AS AENAM
+, CAST(NULL AS STRING) AS AEDAT
+, CAST(NULL AS STRING) AS PSTER
+, CAST(NULL AS STRING) AS PETER
+, CAST(NULL AS STRING) AS OBJNR
+, CAST(NULL AS STRING) AS INDTX
+, CAST(NULL AS STRING) AS KZMLA
+, CAST(NULL AS STRING) AS PSTUR
+, CAST(NULL AS STRING) AS PETUR
+, CAST(NULL AS STRING) AS ERLNAM
+, CAST(NULL AS STRING) AS ERLDAT
+, CAST(NULL AS STRING) AS ERLZEIT
+, CAST(NULL AS STRING) AS WDVDAT
+, CAST(NULL AS STRING) AS FENUM
+, CAST(NULL AS STRING) AS URNUM
+, CAST(NULL AS STRING) AS ERZEIT
+, CAST(NULL AS STRING) AS AEZEIT
+, CAST(NULL AS STRING) AS PARVW
+, CAST(NULL AS STRING) AS PARNR
+, CAST(NULL AS NUMBER) AS MMENGE
+, CAST(NULL AS STRING) AS MMGEIN
+, CAST(NULL AS STRING) AS BAUTL
+, CAST(NULL AS STRING) AS KZLOESCH
+, CAST(NULL AS STRING) AS QSMNUM
+, CAST(NULL AS STRING) AS AUTKZ
+, CAST(NULL AS STRING) AS HANDLE
+, CAST(NULL AS STRING) AS TSEGFL
+, CAST(NULL AS STRING) AS TSEGTP
+, CAST(NULL AS STRING) AS TZONSO
+, CAST(NULL AS STRING) AS TZONSM
+, CAST(NULL AS STRING) AS TZONID
+, CAST(NULL AS STRING) AS KZACTIONBOX
+, CAST(NULL AS STRING) AS FUNKTION
+, CAST(NULL AS STRING) AS SAPSMOSS_NOTE
+, CAST(NULL AS STRING) AS SAPSMOSS_REPORT
+, CAST(NULL AS STRING) AS SAPSMOSS_MTSTMP
+, CAST(NULL AS STRING) AS ABC_TEMPL
+, CAST(NULL AS STRING) AS EFFECTPERC
+, CAST(NULL AS STRING) AS EFFECTTEXT
+, CAST(NULL AS STRING) AS ZZTASK_DATE
+, CAST(NULL AS STRING) AS ZZOPTION
+, CAST(NULL AS STRING) AS ZZLIFNR
+, CAST(NULL AS STRING) AS GLDELFLAG
+, CAST(NULL AS NUMBER) AS GLCHANGETIME
+, CAST(NULL AS STRING) AS GLSOURCESYSTEM
+, CAST(NULL AS STRING) AS PSA_DELETE_IND
+, CONVERT_TIMEZONE('UTC','1900-01-01') as LOAD_DTS
+, 'USAZET.SNOWFLAKE.FBIN.DERIVED' AS REC_SRC
+, DECODE(GR.VALUE, 0, 'GHOST RECORD-SYSTEM', -1, 'GHOST RECORD-nullkey-required', -2, 'GHOST RECORD-nullkey-optional')  AS BKCC
+, CAST(NULL AS BINARY) AS HASHDIFF
+FROM
+TABLE(strtok_split_to_table('0|-1|-2', '|')) AS GR
+{% endif %}

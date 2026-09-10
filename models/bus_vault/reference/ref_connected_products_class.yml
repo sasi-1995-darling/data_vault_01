@@ -1,0 +1,10 @@
+version: 2
+models:
+  - name: ref_connected_products_class
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - SENTIMENT_SRC
+              - SRC_ID
+    columns: []

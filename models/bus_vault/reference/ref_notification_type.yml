@@ -1,0 +1,10 @@
+version: 2
+models:
+  - name: ref_notification_type
+    tests: []
+    columns:
+      - name: QMART
+        tests:
+          - not_null:
+              config:
+                severity: warn

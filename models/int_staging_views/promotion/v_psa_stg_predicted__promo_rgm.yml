@@ -1,0 +1,18 @@
+version: 2
+models:
+- name: v_psa_stg_predicted__promo_rgm
+  data_tests:
+  - dbt_utils.unique_combination_of_columns:
+      name: grain_v_psa_stg_predicted__promo_rgm
+      arguments:
+        combination_of_columns:
+        - DIM_PROMOTION_KEY_BK
+        - LOAD_DTS
+      config:
+        severity: warn
+  columns:
+  - name: DIM_PROMOTION_KEY_BK
+    data_tests:
+    - not_null:
+        config:
+          severity: warn

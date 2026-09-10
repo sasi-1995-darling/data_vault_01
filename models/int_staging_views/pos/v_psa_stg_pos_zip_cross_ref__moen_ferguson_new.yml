@@ -1,0 +1,35 @@
+version: 2
+models:
+  - name: v_psa_stg_pos_zip_cross_ref__moen_ferguson_new
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          config:
+            severity: warn
+          arguments:
+            combination_of_columns:
+              - ZIP
+              - SAP_CUSTOMER
+              - _LINE
+              - _FILE
+              - LOAD_DTS
+    columns:
+      - name: _FILE
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: ZIP
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: SAP_CUSTOMER
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: LOAD_DTS
+        tests:
+          - not_null:
+              config:
+                severity: warn

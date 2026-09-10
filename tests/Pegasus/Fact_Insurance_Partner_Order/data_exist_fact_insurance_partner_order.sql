@@ -1,0 +1,1 @@
+select * from ({{ data_exist('fact_insurance_partner_order','US.SHOPIFY_MOEN.PRODUCT_VARIANT')}})

@@ -1,0 +1,35 @@
+version: 2
+models:
+  - name: lnk_plant_item_purchasing_org
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - PLANT_ITEM_PURCHASING_ORG_LHK
+    columns:
+      - name: PURCHASING_ORG_HK
+        tests:
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'hub_purchasing_org' )
+                pk_column_name: PURCHASING_ORG_HK
+      - name: PLANT_HK
+        tests:
+          - dbt_utils.relationships_where:
+              arguments:
+                to: ref( 'hub_plant_v1')
+                field: PLANT_HK
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'hub_plant_v1' )
+                pk_column_name: PLANT_HK
+      - name: ITEM_HK
+        tests:
+          - dbt_utils.relationships_where:
+              arguments:
+                to: ref( 'hub_item_v1' )
+                field: ITEM_HK
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'hub_item_v1' )
+                pk_column_name: ITEM_HK

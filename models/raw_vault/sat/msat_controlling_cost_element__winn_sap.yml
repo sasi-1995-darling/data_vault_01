@@ -1,0 +1,22 @@
+version: 2
+models:
+  - name: msat_controlling_cost_element__winn_sap
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - CONTROLLING_AREA_COST_ELEMENT_HK
+              - COST_ELEMENT_HK
+              - LOAD_DTS
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          config:
+            severity: warn
+          arguments:
+            min_value: 4
+    columns:
+      - name: COST_ELEMENT_HK
+        tests:
+          - dbt_utils.relationships_where:
+              arguments:
+                to: ref( 'hub_cost_element' )
+                field: COST_ELEMENT_HK

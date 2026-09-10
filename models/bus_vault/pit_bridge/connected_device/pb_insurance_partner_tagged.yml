@@ -1,0 +1,12 @@
+version: 2
+models:
+- name: pb_insurance_partner_tagged
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+          - ORDER_ID
+          - SKU
+          - ORDER_LINE_ID
+          - ORIG_ORDER_TAG
+  columns: []

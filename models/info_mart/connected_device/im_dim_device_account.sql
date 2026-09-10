@@ -1,0 +1,69 @@
+{{ config(alias='dim_device_account') }}
+---- SRC LAYER ----
+WITH
+SRC_DDA            as ( SELECT ACCOUNT_ID, ACCOUNT_NAME, ACCOUNT_TYPE, ACCOUNT_TYPE_V2, BKCC, DEVICE_ACCOUNT_BK, FIVETRAN_DELETED, FIVETRAN_SYNCED, GROUP_ID, OWNER_USER_ID, REC_SRC FROM {{ ref('dim_device_account') }} as SRC  )
+
+/*
+SRC_DDA            as ( SELECT * FROM BUS_VAULT.DIM_DEVICE_ACCOUNT )
+*/
+---- LOGIC LAYER ----
+
+, LOGIC_DDA as (
+    SELECT
+        DEVICE_ACCOUNT_BK
+      , BKCC
+      , REC_SRC
+      , ACCOUNT_ID
+      , FIVETRAN_SYNCED
+      , OWNER_USER_ID
+      , FIVETRAN_DELETED
+      , GROUP_ID
+      , ACCOUNT_TYPE
+      , ACCOUNT_TYPE_V2
+      , ACCOUNT_NAME
+    FROM SRC_DDA
+)
+---- RENAME LAYER ----
+
+, RENAME_DDA as (
+    SELECT
+        DEVICE_ACCOUNT_BK
+      , BKCC
+      , REC_SRC
+      , ACCOUNT_ID
+      , FIVETRAN_SYNCED
+      , OWNER_USER_ID
+      , FIVETRAN_DELETED
+      , GROUP_ID
+      , ACCOUNT_TYPE
+      , ACCOUNT_TYPE_V2
+      , ACCOUNT_NAME
+    FROM LOGIC_DDA
+)
+---- FILTER LAYER ----
+
+, FILTER_DDA as (
+    SELECT *
+    FROM RENAME_DDA
+)
+
+---- JOIN LAYER ----
+, JOIN_RESULT as (
+    SELECT *
+    FROM FILTER_DDA
+)
+
+---- FINAL LAYER ----
+SELECT
+          DEVICE_ACCOUNT_BK
+        , BKCC
+        , REC_SRC
+        , ACCOUNT_ID
+        , FIVETRAN_SYNCED
+        , OWNER_USER_ID
+        , FIVETRAN_DELETED
+        , GROUP_ID
+        , ACCOUNT_TYPE
+        , ACCOUNT_TYPE_V2
+        , ACCOUNT_NAME
+FROM JOIN_RESULT

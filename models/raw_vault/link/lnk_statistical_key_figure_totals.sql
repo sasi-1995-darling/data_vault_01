@@ -1,0 +1,96 @@
+---- SRC LAYER ----
+WITH
+SRC_skft          as ( SELECT * FROM {{ ref('v_psa_stg_statistical_key_figure_totals__winn_sap') }} as SRC 
+                        QUALIFY (ROW_NUMBER() OVER(PARTITION BY STATISTICAL_KEY_FIGURE_TOTALS_HK ORDER BY LOAD_DTS ))=1 )
+
+
+/*
+SRC_skft           as ( SELECT * FROM None.v_psa_stg_statistical_key_figure_totals__winn_sap)
+*/
+---- LOGIC LAYER ----
+
+, LOGIC_skft as (
+    SELECT
+        STATISTICAL_KEY_FIGURE_TOTALS_HK
+      , OBJECT_NUMBER_HK
+      , FISCAL_PERIOD_HK
+      , COST_VALUE_TYPE_HK
+      , LEDGER_HK
+      , COST_VERSION_HK
+      , TRACKING_FACTOR_HK
+      , COST_TRANSACTION_TYPE_HK
+      , LOAD_DTS
+      , BKCC
+      , REC_SRC
+    FROM SRC_skft
+)
+---- RENAME LAYER ----
+
+, RENAME_skft as (
+    SELECT
+        STATISTICAL_KEY_FIGURE_TOTALS_HK
+      , OBJECT_NUMBER_HK
+      , FISCAL_PERIOD_HK
+      , COST_VALUE_TYPE_HK
+      , LEDGER_HK
+      , COST_VERSION_HK
+      , TRACKING_FACTOR_HK
+      , COST_TRANSACTION_TYPE_HK
+      , LOAD_DTS
+      , BKCC
+      , REC_SRC
+    FROM LOGIC_skft
+)
+---- FILTER LAYER ----
+
+, FILTER_skft as (
+    SELECT *
+    FROM RENAME_skft
+)
+
+---- JOIN LAYER ----
+, JOIN_RESULT as (
+    SELECT *
+    FROM FILTER_skft
+)
+
+---- FINAL LAYER ----
+SELECT
+          STATISTICAL_KEY_FIGURE_TOTALS_HK
+        , OBJECT_NUMBER_HK
+        , FISCAL_PERIOD_HK
+        , COST_VALUE_TYPE_HK
+        , LEDGER_HK
+        , COST_VERSION_HK
+        , TRACKING_FACTOR_HK
+        , COST_TRANSACTION_TYPE_HK
+        , LOAD_DTS
+        , BKCC
+        , REC_SRC
+FROM JOIN_RESULT
+{% if is_incremental() %}
+WHERE NOT EXISTS (
+    SELECT 1 
+    FROM {{ this }} existing
+    WHERE existing.STATISTICAL_KEY_FIGURE_TOTALS_HK = JOIN_RESULT.STATISTICAL_KEY_FIGURE_TOTALS_HK
+)
+{% endif %}
+
+{% if not is_incremental() %}
+union all
+SELECT 
+
+MD5_BINARY(GR.VALUE) AS STATISTICAL_KEY_FIGURE_TOTALS_HK
+, MD5_BINARY(GR.VALUE) AS OBJECT_NUMBER_HK
+, MD5_BINARY(GR.VALUE) AS FISCAL_PERIOD_HK
+, MD5_BINARY(GR.VALUE) AS COST_VALUE_TYPE_HK
+, MD5_BINARY(GR.VALUE) AS LEDGER_HK
+, MD5_BINARY(GR.VALUE) AS COST_VERSION_HK
+, MD5_BINARY(GR.VALUE) AS TRACKING_FACTOR_HK
+, MD5_BINARY(GR.VALUE) AS COST_TRANSACTION_TYPE_HK
+, CONVERT_TIMEZONE('UTC','1900-01-01'::TIMESTAMP)  AS LOAD_DTS
+, DECODE(GR.VALUE::varchar, 0, 'GHOST RECORD-SYSTEM', -1, 'GHOST RECORD-nullkey-required', -2, 'GHOST RECORD-nullkey-optional')  AS BKCC
+, 'USAZET.SNOWFLAKE.FBIN.DERIVED' AS REC_SRC
+FROM
+TABLE(strtok_split_to_table('0|-1|-2', '|')) AS GR
+{% endif %}

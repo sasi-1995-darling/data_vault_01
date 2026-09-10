@@ -1,0 +1,16 @@
+version: 2
+models:
+  - name: sat_sales__moen_ferguson_new_gross_dollars_history
+    tests:
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          config:
+            severity: warn
+          arguments:
+            min_value: 4
+    columns:
+      - name: STORE_HK
+        tests:
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'hub_store' )
+                pk_column_name: STORE_HK

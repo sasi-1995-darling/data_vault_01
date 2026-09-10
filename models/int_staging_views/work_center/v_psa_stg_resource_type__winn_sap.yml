@@ -1,0 +1,41 @@
+version: 2
+models:
+- name: v_psa_stg_resource_type__winn_sap
+  data_tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - DOMNAME
+        - DDLANGUAGE
+        - AS4LOCAL
+        - VALPOS
+        - AS4VERS
+        - LOAD_DTS
+      config:
+        severity: warn
+  columns:
+  - name: DOMNAME
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+  - name: DDLANGUAGE
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+  - name: AS4LOCAL
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+  - name: VALPOS
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+  - name: AS4VERS
+    data_tests:
+    - not_null:
+        config:
+          severity: warn

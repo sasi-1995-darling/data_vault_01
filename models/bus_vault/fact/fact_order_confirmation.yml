@@ -1,0 +1,9 @@
+version: 2
+models:
+- name: fact_order_confirmation
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - PRODUCTION_ORDER_CONFIRMATION_LHK
+  columns: []

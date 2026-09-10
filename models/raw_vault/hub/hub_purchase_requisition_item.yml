@@ -1,0 +1,14 @@
+version: 2
+models:
+- name: hub_purchase_requisition_item
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - PURCHASE_REQUISITION_ITEM_HK
+  - dbt_expectations.expect_table_row_count_to_be_between:
+      arguments:
+        min_value: 4
+      config:
+        severity: warn
+  columns: []

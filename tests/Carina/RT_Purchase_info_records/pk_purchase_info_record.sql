@@ -1,0 +1,1 @@
+ select * from ({{ primary_key_check('fact_purchase_info_record',['PURCHASING_INFO_RECORD_ORG_HK']) }}) 

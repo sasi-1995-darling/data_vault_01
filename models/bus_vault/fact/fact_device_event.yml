@@ -1,0 +1,5 @@
+version: 2
+models:
+- name: fact_device_event
+  data_tests: []
+  columns: []

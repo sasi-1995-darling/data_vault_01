@@ -1,0 +1,15 @@
+version: 2
+models:
+  - name: v_psa_pos_sellthrough_stages__win
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          config:
+            severity: warn
+          arguments:
+            combination_of_columns:
+              - PHASE
+              - CATEGORY
+              - PRODUCT_LINE
+              - BASE_MATERIAL
+              - PSA_LOAD_DTS
+    columns: []

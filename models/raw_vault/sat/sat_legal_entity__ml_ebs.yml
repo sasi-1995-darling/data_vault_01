@@ -1,0 +1,29 @@
+version: 2
+models:
+  - name: sat_legal_entity__ml_ebs
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - LEGAL_ENTITY_HK
+              - LOAD_DTS
+    columns:
+      - name: LEGAL_ENTITY_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'hub_legal_entity' )
+                pk_column_name: LEGAL_ENTITY_HK
+      - name: LOAD_DTS
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: ORGANIZATION_ID
+        tests:
+          - not_null:
+              config:
+                severity: warn

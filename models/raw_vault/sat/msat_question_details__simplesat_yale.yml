@@ -1,0 +1,20 @@
+version: 2
+models:
+- name: msat_question_details__simplesat_yale
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - QUESTION_HK
+        - LOAD_DTS
+  - dbt_expectations.expect_table_row_count_to_be_between:
+      arguments:
+        min_value: 4
+      config:
+        severity: warn
+  columns:
+  - name: QUESTION_HK
+    data_tests:
+    - not_null:
+        config:
+          severity: warn

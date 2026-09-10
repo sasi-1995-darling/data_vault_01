@@ -1,0 +1,19 @@
+version: 2
+models:
+- name: lnk_handling_unit
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - LNK_HANDLING_UNIT_CONTENT_HK
+  - dbt_expectations.expect_table_row_count_to_be_between:
+      arguments:
+        min_value: 4
+      config:
+        severity: warn
+  columns:
+  - name: LNK_HANDLING_UNIT_CONTENT_HK
+    data_tests:
+    - not_null:
+        config:
+          severity: warn

@@ -1,0 +1,23 @@
+version: 2
+models:
+  - name: v_psa_stg_profit_center_line_item__winn_sap
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          config:
+            severity: warn
+          arguments:
+            combination_of_columns:
+              - RCLNT
+              - GL_SIRID
+              - LOAD_DTS
+    columns:
+      - name: RCLNT
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: GL_SIRID
+        tests:
+          - not_null:
+              config:
+                severity: warn

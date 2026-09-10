@@ -1,0 +1,5 @@
+version: 2
+models:
+- name: rep_daily_cumulative_product_rating_v2
+  tests: []
+  columns: []

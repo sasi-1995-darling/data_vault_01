@@ -1,0 +1,29 @@
+version: 2
+models:
+  - name: v_psa_stg_frontdoor_problem_orders_masking
+    description: "Staging view for FrontDoor problem order masking reference data; deduplicates by MOEN_ORDER_NK with latest PSA_LOAD_DTS winning."
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          config:
+            severity: warn
+          arguments:
+            combination_of_columns:
+              - MOEN_ORDER_NK
+              - LOAD_DTS
+    columns:
+      - name: MOEN_ORDER_NK
+        description: "Moen order identifier requiring LASTMODIFIED masking in the FrontDoor report view."
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: LOAD_DTS
+        description: "UTC-normalized PSA load timestamp used with MOEN_ORDER_NK as the staging grain."
+      - name: BKCC
+        description: "Business key control column."
+      - name: REC_SRC
+        description: "Record source identifier."
+      - name: PSA_RECORD_SOURCE
+        description: "PSA record source for the FrontDoor masking reference row."
+      - name: PSA_DELETE_IND
+        description: "PSA delete indicator for filtering inactive FrontDoor masking reference rows downstream."

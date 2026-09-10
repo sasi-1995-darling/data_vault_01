@@ -1,0 +1,18 @@
+version: 2
+models:
+- name: v_psa_stg_po_item_mt__lrsn_psft
+  data_tests:
+  - dbt_utils.unique_combination_of_columns:
+      name: grain_v_psa_stg_po_item_mt__lrsn_psft
+      arguments:
+        combination_of_columns:
+        - PO_ITEM_BK
+        - LOAD_DTS
+      config:
+        severity: warn
+  columns:
+  - name: PO_ITEM_BK
+    data_tests:
+    - not_null:
+        config:
+          severity: warn

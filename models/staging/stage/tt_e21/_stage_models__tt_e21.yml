@@ -1,0 +1,105 @@
+version: 2
+
+models:
+  - name: stg_partgrp__tt_e21
+    description: This is the staging model from Thermatru for sat_product_master
+    columns:
+      - name: part_grp
+        tests:
+          - not_null
+      - name: part_grp_desc
+        tests:
+          - not_null
+  - name: stg_partmstr__tt_e21
+    description: This is the staging model from Thermatru for sat_product_master
+    columns:
+      - name: part_code
+        tests:
+          - not_null
+  - name: stg_partsgrp2__tt_e21
+    description: This is the staging model from Thermatru for sat_product_master
+    columns:
+      - name: part_subgrp2
+        tests:
+          - not_null
+      - name: part_sgrp2_desc
+        tests:
+          - not_null
+  - name: stg_partsgrp3__tt_e21
+    description: This is the staging model from Thermatru for sat_product_master
+    columns:
+      - name: part_subgrp3
+        tests:
+          - not_null
+      - name: part_sgrp3_desc
+        tests:
+          - not_null
+  - name: stg_partsgrp__tt_e21
+    description: This is the staging model from Thermatru for sat_product_master
+    columns:
+      - name: part_subgrp
+        tests:
+          - not_null
+      - name: part_sgrp_desc
+        tests:
+          - not_null
+  - name: stg_invoice_header__tt_e21
+    description: This is the base staging model from Thermatru for sat_shipment_header
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - invoice_numb
+    columns:
+      - name: order_date
+        tests:
+          - not_null
+      - name: cost_ctr
+        tests:
+          - not_null
+  - name: stg_invoice_line__tt_e21
+    description: This is the base staging model from Thermatru for lsat_shipment_invoice_line
+    columns:
+      - name: invoice_numb
+        tests:
+          - not_null
+      - name: cost_ctr
+        tests:
+          - not_null
+  - name: stg_customer__tt_e21
+    description: This is the base staging model from Thermatru for customer master
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - cp_code
+    columns:
+      - name: cp_name
+        tests:
+          - not_null
+  - name: stg_customer_account__tt_e21
+    description: This is the base staging model from Thermatru for account hub
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - cust_code
+    columns:
+      - name: cust_code
+        tests:
+          - not_null
+  - name: stg_link_customer_account__tt_e21
+    description: This is the base staging model from Thermatru for customer account link
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - cust_code
+              - cp_code
+    columns:
+      - name: cust_code
+        tests:
+          - not_null
+      - name: cp_code
+        tests:
+          - not_null

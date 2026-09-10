@@ -1,0 +1,58 @@
+{%- set source_model = "stg_po_line__emtk_ebs_po" -%}
+{%- set src_pk = "po_line_hk" -%}
+{%- set src_hashdiff = "po_line_hdiff" -%}
+{%- set src_payload = [ 
+  'po_line_id',
+  'brand',
+  'last_update_date',
+  'last_updated_by',
+  'po_header_id',
+  'line_type_id',
+  'line_num',
+  'last_update_login',
+  'creation_date',
+  'created_by',
+  'item_id',
+  'category_id',
+  'item_description',
+  'unit_meas_lookup_code',
+  'quantity_committed',
+  'list_price_per_unit',
+  'unit_price',
+  'quantity',
+  'note_to_vendor',
+  'qty_rcv_tolerance',
+  'over_tolerance_error_flag',
+  'cancel_flag',
+  'cancelled_by',
+  'cancel_date',
+  'vendor_product_num',
+  'capital_expense_flag',
+  'negotiated_by_preparer_flag',
+  'attribute1',
+  'price_type_lookup_code',
+  'closed_code',
+  'request_id',
+  'program_application_id',
+  'program_id',
+  'program_update_date',
+  'closed_date',
+  'closed_by',
+  'po_line_org_id',
+  'retroactive_date',
+  'contract_id',
+  'order_type_lookup_code',
+  'purchase_basis',
+  'base_unit_price',
+  'manual_price_change_flag',
+  'clm_total_amount_ordered',
+  'po_header_org_id',
+  'po_header_segment1'] -%}
+  
+{%- set src_ldts = "load_dts" -%}
+{%- set src_source = "rec_src" -%}
+
+{{ automate_dv.sat(src_pk=src_pk, src_hashdiff=src_hashdiff,
+                   src_payload=src_payload, src_eff=none,
+                   src_ldts=src_ldts, src_source=src_source,
+                   source_model=source_model) }}

@@ -1,0 +1,18 @@
+version: 2
+models:
+- name: v_psa_stg_supplier_invoice__winn_sap
+  data_tests:
+  - dbt_utils.unique_combination_of_columns:
+      name: grain_v_psa_stg_supplier_invoice__winn_sap
+      arguments:
+        combination_of_columns:
+        - INVOICE_ID_BK
+        - LOAD_DTS
+      config:
+        severity: warn
+  columns:
+  - name: INVOICE_ID_BK
+    data_tests:
+    - not_null:
+        config:
+          severity: warn

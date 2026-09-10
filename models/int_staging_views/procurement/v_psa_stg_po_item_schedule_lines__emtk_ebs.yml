@@ -1,0 +1,17 @@
+version: 2
+models:
+- name: v_psa_stg_po_item_schedule_lines__emtk_ebs
+  data_tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - LINE_LOCATION_ID
+        - LOAD_DTS
+      config:
+        severity: warn
+  columns:
+  - name: PO_HEADER_BK
+    data_tests:
+    - not_null:
+        config:
+          severity: warn

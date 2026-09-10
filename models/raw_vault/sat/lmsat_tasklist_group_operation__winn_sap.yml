@@ -1,0 +1,22 @@
+version: 2
+models:
+- name: lmsat_tasklist_group_operation__winn_sap
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - LNK_TASKLIST_OPERATION_HK
+        - PLNFL
+        - ZAEHL
+        - PLNAL
+        - LOAD_DTS
+  columns:
+      - name: LNK_TASKLIST_OPERATION_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'lnk_tasklist_group_operation' )
+                pk_column_name: LNK_TASKLIST_OPERATION_HK

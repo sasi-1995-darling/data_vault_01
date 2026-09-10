@@ -1,0 +1,27 @@
+version: 2
+
+models:
+  - name: link_supplier_contact
+    description: This is the raw vault link model between contact and supplier
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - suplier_contact_hk
+      - dbt_constraints.foreign_key:
+          arguments:
+            fk_column_names:
+              - supplier_hk
+            pk_table_name: ref('hub_supplier')
+            pk_column_names:
+              - supplier_hk
+      - dbt_constraints.foreign_key:
+          arguments:
+            fk_column_names:
+              - contact_hk
+            pk_table_name: ref('hub_contact')
+            pk_column_names:
+              - contact_hk
+    config:
+      tags:
+        - emtek

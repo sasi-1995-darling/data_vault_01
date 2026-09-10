@@ -1,0 +1,28 @@
+version: 2
+
+models:
+  - name: base_pos_moen_hofr__ferguson_extract
+    description: This is the base staging model from Ferguson POS M3A
+    tests:
+      - 'dbt_constraints.primary_key:':
+          arguments:
+            column_names:
+              - _file
+              - _line
+              - rec_src
+    columns:
+      - name: fei_product_code
+        tests:
+          - not_null
+      - name: date
+        tests:
+          - not_null
+  - name: base_pos_product_code_sap_xref__ferguson_extract
+    description: This is the base cross reference model from Ferguson POS for MOEN & HOFR
+    tests:
+      - 'dbt_constraints.primary_key:':
+          arguments:
+            column_names:
+              - _file
+              - _line
+              - rec_src

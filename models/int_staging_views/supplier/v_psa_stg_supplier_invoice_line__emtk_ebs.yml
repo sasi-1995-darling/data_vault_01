@@ -1,0 +1,24 @@
+version: 2
+models:
+- name: v_psa_stg_supplier_invoice_line__emtk_ebs
+  data_tests:
+  - dbt_utils.unique_combination_of_columns:
+      name: grain_v_psa_stg_supplier_invoice_line__emtk_ebs
+      arguments:
+        combination_of_columns:
+        - INVOICE_ID_BK
+        - LINE_NUMBER
+        - LOAD_DTS
+      config:
+        severity: warn
+  columns:
+  - name: INVOICE_ID_BK
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+  - name: INVOICE_LINE_BK
+    data_tests:
+    - not_null:
+        config:
+          severity: warn

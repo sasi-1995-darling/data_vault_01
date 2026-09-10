@@ -1,0 +1,38 @@
+version: 2
+models:
+- name: lnk_sales_order_vendor_details
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - LNK_SALES_ORDER_VENDOR_DETAILS_HK
+  - dbt_expectations.expect_table_row_count_to_be_between:
+      arguments:
+        min_value: 4
+      config:
+        severity: warn
+  columns:
+  - name: ITEM_HK
+    data_tests:
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'hub_item_v1' )
+          pk_column_name: ITEM_HK
+  - name: ORDER_LINE_HK
+    data_tests:
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'hub_order_line' )
+          pk_column_name: ORDER_LINE_HK
+  - name: VENDOR_ORDER_HK
+    data_tests:
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'hub_vendor_order' )
+          pk_column_name: VENDOR_ORDER_HK
+  - name: VENDOR_ORDER_ITEM_HK
+    data_tests:
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'hub_vendor_order_item' )
+          pk_column_name: VENDOR_ORDER_ITEM_HK

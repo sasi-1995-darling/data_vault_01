@@ -1,0 +1,27 @@
+version: 2
+models:
+- name: v_psa_stg_user_engagement_ios_screen_flo
+  data_tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - ID
+        - LOAD_DTS
+      config:
+        severity: warn
+  columns:
+  - name: CONSUMER_HK
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+  - name: CONSUMER_BK
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+  - name: LOAD_DTS
+    data_tests:
+    - not_null:
+        config:
+          severity: warn

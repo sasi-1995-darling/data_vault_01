@@ -1,0 +1,44 @@
+version: 2
+models:
+  - name: v_psa_stg_sns_sales__profitero_security
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          config:
+            severity: warn
+          arguments:
+            combination_of_columns:
+              - ASIN_HK
+              - SNS_CATEGORY_HK
+              - DATE
+              - LOAD_DTS
+    columns:
+      - name: ASIN_BK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: SNS_CATEGORY_BK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: DATE
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: SNS_CATEGORY_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: ASIN_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: ASIN_SNS_CATEGORY_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn

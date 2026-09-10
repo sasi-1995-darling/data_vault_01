@@ -1,0 +1,10 @@
+version: 2
+models:
+  - name: hub_external_claims
+    tests:
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          config:
+            severity: warn
+          arguments:
+            min_value: 4
+    columns: []

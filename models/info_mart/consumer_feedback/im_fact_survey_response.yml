@@ -1,0 +1,14 @@
+version: 2
+models:
+  - name: im_fact_survey_response
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - FORM_BK
+              - PROJECT_BK
+              - RESPONSE_ORDINAL
+              - FIELD_ORDINAL
+              - BKCC
+              - REC_SRC
+    columns: []

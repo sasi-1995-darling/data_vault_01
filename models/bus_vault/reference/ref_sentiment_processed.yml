@@ -1,0 +1,5 @@
+version: 2
+models:
+- name: ref_sentiment_processed
+  tests: []
+  columns: []

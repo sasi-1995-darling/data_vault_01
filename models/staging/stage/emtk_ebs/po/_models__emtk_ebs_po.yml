@@ -1,0 +1,85 @@
+version: 2
+
+models:
+  - name: stg_plant_location__emtk_ebs_po
+    description: This is the hash staging model from Emtek for hub_plant_location and sat_plant_location_detail
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - plant_location_hk
+
+  - name: stg_po_action__emtk_ebs_po
+    description: This is the hash staging model from Emtek for msat_po_action (multi-active satellite)
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - purchase_order_hk
+              - action_code
+              - action_date
+              - sequence_num
+
+  - name: stg_po_line__emtk_ebs_po
+    description: This is the hash staging model from Emtek for lnk_po_line, hub_po_line, and sat_po_line_detail
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - po_line_hk
+
+  - name: stg_po_line_item_plant_location__emtk_ebs_po
+    description: This is the hash staging model from Emtek for link_po_line_item_plant_location
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - po_line_item_plant_location_hk
+
+  - name: stg_po_line_shipment__emtk_ebs_po
+    description: This is the hash staging model from Emtek for lnk_po_line_shipment, hub_po_line_shipment, and sat_po_line_shipment_detail
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - po_line_shipment_hk
+
+  - name: stg_po_line_transaction__emtk_ebs_po
+    description: This is the hash staging model from Emtek for tlnk_po_line_transaction
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - po_line_transaction_link_hk
+
+  - name: stg_purchase_order__emtk_ebs_po
+    description: This is the hash staging model from Emtek for lnk_po_supplier, hub_purchase_order, and sat_po_detail
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - purchase_order_hk
+
+  - name: stg_supplier__emtk_ebs_po
+    description: This is the hash staging model from Emtek for hub_supplier and sat_supplier_detail
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - supplier_hk
+
+  - name: stg_supplier_site__emtk_ebs_po
+    description: This is the hash staging model from Emtek for hub_supplier_site and sat_supplier_site_detail
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - supplier_site_hk
+
+  - name: stg_supplier_contact__emtk_ebs_po
+    description: This is the hash staging model from Emtek for lnk_supplier_contact
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - suplier_contact_hk

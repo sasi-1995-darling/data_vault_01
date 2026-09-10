@@ -1,0 +1,29 @@
+# .code_review_ignore — Excludes files from Category G (Naming Convention) checks only
+# All other checks (HK, HASHDIFF, CTE, tests, etc.) still run on these files.
+#
+# IMPORTANT: This file is for NAMING exceptions only. Full path exclusions
+# (models that skip ALL checks) are in code_review_config.py EXCLUDED_PATHS.
+#
+# Exclusions are PATH-SCOPED, not prefix-scoped. Do NOT add broad prefix
+# patterns like "models/**/stg_*" — that would suppress naming checks on
+# active bus_vault PIT staging helpers (66 models) that must be reviewed.
+#
+# Format: One relative path per line (from repo root). Glob patterns supported.
+# Lines starting with # are comments. Blank lines are ignored.
+
+# --- One-off bus_vault models with non-standard names ---
+# shipment.sql: Legacy flat_logic model predating naming conventions. No standard
+# prefix applies (not a dim_, fact_, pit_, or pb_). Retained for downstream deps.
+models/bus_vault/flat_logic/shipment.sql
+
+# ferguson_items_active_customer.sql: Customer-specific flat_logic model. Name is
+# descriptive but doesn't follow any layer prefix convention.
+models/bus_vault/flat_logic/ferguson_items_active_customer.sql
+
+# date_spine.sql: dbt_utils date spine utility materialized as a dim. Name follows
+# the dbt convention (date_spine) rather than FBIN naming (dim_date_spine).
+models/bus_vault/dim/date_spine.sql
+
+# t_*.sql: Temporary/transitional flat_logic models (2 files). The "t_" prefix is
+# non-standard but these are internal intermediates, not exposed to consumers.
+models/bus_vault/flat_logic/t_*.sql

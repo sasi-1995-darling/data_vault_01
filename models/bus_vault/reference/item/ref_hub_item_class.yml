@@ -1,0 +1,17 @@
+version: 2
+models:
+  - name: ref_hub_item_class
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - ITEM_CLASS_BK
+    columns:
+      - name: ITEM_CLASS_BK
+        tests:
+          - unique:
+              config:
+                severity: warn
+          - not_null:
+              config:
+                severity: warn

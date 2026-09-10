@@ -1,0 +1,28 @@
+version: 2
+models:
+  - name: dim_gl_header
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          config:
+            severity: warn
+          arguments:
+            combination_of_columns:
+              - COMPANY_CODE_BK
+              - ACCOUNTING_DOC_NUM_BK
+              - FISCAL_YEAR_BK
+    columns:
+      - name: COMPANY_CODE_BK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: ACCOUNTING_DOC_NUM_BK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: FISCAL_YEAR_BK
+        tests:
+          - not_null:
+              config:
+                severity: warn

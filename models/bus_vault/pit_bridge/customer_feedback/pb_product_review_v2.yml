@@ -1,0 +1,11 @@
+version: 2
+models:
+- name: pb_product_review_v2
+  data_tests:
+  - dbt_utils.unique_combination_of_columns:
+      arguments:
+        combination_of_columns:
+        - SEQ_ID
+      config:
+        severity: warn
+  columns: []

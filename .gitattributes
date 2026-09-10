@@ -1,0 +1,2 @@
+# Union merge: append-only files where both sides' additions should be kept
+scripts/automation/lessons.md merge=union

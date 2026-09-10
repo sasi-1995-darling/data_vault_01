@@ -1,0 +1,5 @@
+version: 2
+models:
+- name: fact_cost_activity_type_total
+  tests: []
+  columns: []

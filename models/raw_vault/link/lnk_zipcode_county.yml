@@ -1,0 +1,9 @@
+version: 2
+models:
+  - name: lnk_zipcode_county
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - LNK_ZIP_COUNTY_HK
+    columns: []

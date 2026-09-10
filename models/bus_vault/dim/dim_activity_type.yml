@@ -1,0 +1,8 @@
+version: 2
+models:
+- name: dim_activity_type
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - GL_ACTIVITY_TYPE_HK

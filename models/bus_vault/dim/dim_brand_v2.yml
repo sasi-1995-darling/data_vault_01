@@ -1,0 +1,9 @@
+version: 2
+models:
+  - name: dim_brand_v2
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - BRAND_BK
+    columns: []

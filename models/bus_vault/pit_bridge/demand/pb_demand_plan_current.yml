@@ -1,0 +1,13 @@
+version: 2
+models:
+- name: pb_demand_plan_current
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - DEMAND_PLAN_LHK
+        - ACQUISITION_DATE__YYYYMMDD
+        - CAL_WEEK
+        - PLANNING_PERIOD
+        - LOAD_DTS
+  columns: []

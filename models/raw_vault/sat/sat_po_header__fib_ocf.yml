@@ -1,0 +1,29 @@
+version: 2
+models:
+- name: sat_po_header__fib_ocf
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - PO_HEADER_HK
+        - LOAD_DTS
+  - dbt_expectations.expect_table_row_count_to_be_between:
+      arguments:
+        min_value: 4
+      config:
+        severity: warn
+  columns:
+  - name: PO_HEADER_HK
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+    - dbt_constraints.foreign_key:
+        arguments:
+          pk_table_name: ref( 'hub_po_header' )
+          pk_column_name: PO_HEADER_HK
+  - name: PO_HEADER_ID
+    data_tests:
+    - not_null:
+        config:
+          severity: warn

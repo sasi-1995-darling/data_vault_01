@@ -1,0 +1,31 @@
+version: 2
+
+models:
+  - name: link_consumer_product_review
+    description: This is the raw vault link model between delighted product, consumer, and review
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - link_consumer_product_review_hk
+      - dbt_constraints.foreign_key:
+          arguments:
+            fk_column_names:
+              - consumer_hk
+            pk_table_name: ref('hub_consumer')
+            pk_column_names:
+              - consumer_hk
+      - dbt_constraints.foreign_key:
+          arguments:
+            fk_column_names:
+              - product_hk
+            pk_table_name: ref('hub_product')
+            pk_column_names:
+              - product_hk
+      - dbt_constraints.foreign_key:
+          arguments:
+            fk_column_names:
+              - review_hk
+            pk_table_name: ref('hub_review')
+            pk_column_names:
+              - review_hk

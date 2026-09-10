@@ -1,0 +1,23 @@
+version: 2
+models:
+  - name: pb_critical_alert_device_event
+    description: >
+      PIT Bridge: one row per critical alert event with associated shutoff (within 10 min),
+      first valve reopen after shutoff, and customer feedback.
+      Replaces manual SQL query against DL tables + DW.MASTER.DEVICE_AGG_VIEW.
+    config:
+      materialized: table
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          name: unique_pb_critical_alert_device_event_incident_id
+          arguments:
+            combination_of_columns:
+              - INCIDENT_ID
+          config:
+            severity: error
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          name: row_count_pb_critical_alert_device_event
+          config:
+            severity: warn
+          arguments:
+            min_value: 4

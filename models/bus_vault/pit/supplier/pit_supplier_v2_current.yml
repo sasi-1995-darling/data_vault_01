@@ -1,0 +1,19 @@
+version: 2
+models:
+  - name: pit_supplier_v2_current
+    tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - SUPPLIER_HK
+    columns:
+      - name: SUPPLIER_HK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: SUPPLIER_BK
+        tests:
+          - not_null:
+              config:
+                severity: warn

@@ -1,0 +1,39 @@
+version: 2
+models:
+- name: sat_user_engagement_track__ios_flo
+  data_tests:
+  - dbt_constraints.primary_key:
+      arguments:
+        column_names:
+        - CONSUMER_HK
+        - HASHDIFF
+        - LOAD_DTS
+  - dbt_expectations.expect_table_row_count_to_be_between:
+      arguments:
+        min_value: 4
+      config:
+        severity: warn
+  columns:
+  - name: CONSUMER_HK
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+          
+  - name: ANONYMOUS_ID
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+
+  - name: EVENT
+    data_tests:
+    - not_null:
+        config:
+          severity: warn
+            
+  - name: CONTEXT_TRAITS_ANONYMOUS_ID
+    data_tests:
+    - not_null:
+        config:
+          severity: warn

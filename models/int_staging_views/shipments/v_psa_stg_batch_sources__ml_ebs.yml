@@ -1,0 +1,23 @@
+version: 2
+models:
+  - name: v_psa_stg_batch_sources__ml_ebs
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          config:
+            severity: warn
+          arguments:
+            combination_of_columns:
+              - ORG_ID
+              - BATCH_SOURCE_ID
+              - LOAD_DTS
+    columns:
+      - name: BATCH_SOURCE_BK
+        tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: LOAD_DTS
+        tests:
+          - not_null:
+              config:
+                severity: warn

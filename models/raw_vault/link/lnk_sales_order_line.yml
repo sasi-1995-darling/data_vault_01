@@ -1,0 +1,86 @@
+version: 2
+models:
+  - name: lnk_sales_order_line
+    data_tests:
+      - dbt_constraints.primary_key:
+          arguments:
+            column_names:
+              - SO_ITEM_LHK
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          arguments:
+            min_value: 4
+          config:
+            severity: warn
+    columns:
+      - name: ORDER_HEADER_HK
+        data_tests:
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'hub_order_header' )
+                pk_column_name: ORDER_HEADER_HK
+      - name: ORDER_LINE_HK
+        data_tests:
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'hub_order_line' )
+                pk_column_name: ORDER_LINE_HK
+      - name: ITEM_HK
+        data_tests:
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'hub_item_v1' )
+                pk_column_name: ITEM_HK
+      - name: CUSTOMER_SOLDTO_HK
+        data_tests:
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'hub_customer_v1' )
+                pk_column_name: CUSTOMER_HK
+      - name: CUSTOMER_BILLTO_HK
+        data_tests:
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'hub_customer_v1' )
+                pk_column_name: CUSTOMER_HK
+      - name: CUSTOMER_SHIPTO_HK
+        data_tests:
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'hub_customer_v1' )
+                pk_column_name: CUSTOMER_HK
+      - name: CUSTOMER_PAYER_HK
+        data_tests:
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'hub_customer_v1' )
+                pk_column_name: CUSTOMER_HK
+      - name: CUSTOMER_INSURANCEPARTNER_HK
+        data_tests:
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'hub_customer_v1' )
+                pk_column_name: CUSTOMER_HK
+      - name: PLANT_HK
+        data_tests:
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'hub_plant_v1' )
+                pk_column_name: PLANT_HK
+      - name: DIVISION_HK
+        data_tests:
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'hub_division' )
+                pk_column_name: DIVISION_HK
+      - name: SALES_ORGANIZATION_HK
+        data_tests:
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'hub_sales_organization' )
+                pk_column_name: SALES_ORGANIZATION_HK
+      - name: DISTRIBUTION_CHANNEL_HK
+        data_tests:
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref( 'hub_distribution_channel' )
+                pk_column_name: DISTRIBUTION_CHANNEL_HK
